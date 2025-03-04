@@ -1,0 +1,600 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap");
+
+:root {
+  --color-scheme: light;
+  color-scheme: var(--color-scheme);
+
+  --LIGHT--brand-neutral-text: #111827; /* gray 900 */
+  --DARK--brand-neutral-text: #e5e7eb; /* gray 100 */
+
+  --LIGHT--brand-neutral-text-2: #6b7280; /* gray 500 */
+  --DARK--brand-neutral-text-2: #9ca3af; /* gray 400 */
+
+  --LIGHT--brand-neutral-text-button: #1f2937; /* gray 800 */
+  --DARK--brand-neutral-text-button: #e5e7eb; /* gray 200 */
+
+  --LIGHT--brand-bg-page: #fcfcfd; /* gray 50/50 */
+  --DARK--brand-bg-page: #222222; /* custom */
+
+  --LIGHT--brand-bg-page-inverted-5: #1118270d; /* gray 900 10% */
+  --DARK--brand-bg-page-inverted-5: #e5e7eb0d; /* gray 100 10% */
+
+  --LIGHT--brand-bg-card: var(--LIGHT--brand-bg-page);
+  --DARK--brand-bg-card: #242424; /* barely darker than the page */
+
+  --LIGHT--brand-bg-overlay: #f3f4f6; /* gray 100 */
+  --DARK--brand-bg-overlay: #353535; /* gray 900 */
+
+  --LIGHT--brand-bg-overlay-2: #e5e7eb; /* gray 200 */
+  --DARK--brand-bg-overlay-2: #3b3b3b; /* gray 800 */
+
+  --LIGHT--brand-bg-overlay-3: #d1d5db; /* gray 300 */
+  --DARK--brand-bg-overlay-3: #4d4d4d; /* gray 700 */
+
+  --LIGHT--brand-bg-io: #fefeff; /* gray 50/50 manually lightened */
+  --DARK--brand-bg-io: #2c2c2c; /* gray 800 manually lightened */
+
+  --LIGHT--brand-neutral-border: #d1d5db; /* gray 300 */
+  --DARK--brand-neutral-border: #444444; /* gray 700 */
+
+  --LIGHT--brand-error-border: #ef4444; /* red 500 */
+  --DARK--brand-error-border: #f87171; /* red 400 */
+
+  --LIGHT--brand-success-border: #22c55e; /* green 500 */
+  --DARK--brand-success-border: #4ade80; /* green 400 */
+
+  --LIGHT--brand-warning-border: #a16207; /* yellow 700 */
+  --DARK--brand-warning-border: #facc15; /* yellow 400 */
+
+  --LIGHT--brand-primary: #0056bb; /* custom */
+  --DARK--brand-primary: #7dd3fc; /* sky 300 */
+
+  --LIGHT--brand-primary-heavy: #003c83; /* custom */
+  --DARK--brand-primary-heavy: #bae6fd; /* sky 200 */
+
+  --LIGHT--brand-primary-btn-bg: #0074fc; /* custom */
+  --LIGHT--brand-primary-btn-bg-hover: var(--LIGHT--brand-primary);
+  --DARK--brand-primary-btn-bg: #0284c7; /* sky 600 */
+  --DARK--brand-primary-btn-bg-hover: #0ea5e9; /* sky 500 */
+
+  --LIGHT--brand-error: #b91c1c; /* red 700 */
+  --DARK--brand-error: #fca5a5; /* red 300 */
+
+  --LIGHT--brand-error-heavy: #7f1d1d; /* red 900 */
+  --DARK--brand-error-heavy: #fecaca; /* red 200 */
+
+  --LIGHT--brand-error-btn-bg: #dc2626; /* red 600 */
+  --LIGHT--brand-error-btn-bg-hover: var(--LIGHT--brand-error);
+  --DARK--brand-error-btn-bg: #dc2626; /* red 600 */
+  --DARK--brand-error-btn-bg-hover: #ef4444; /* red 500 */
+
+  --LIGHT--brand-warning: #a16207; /* yellow 700 */
+  --DARK--brand-warning: #f59e0b; /* yellow 300 */
+
+  --LIGHT--brand-warning-heavy: #713f12; /* yellow 900 */
+  --DARK--brand-warning-heavy: #fde68a; /* yellow 200 */
+
+  --LIGHT--brand-warning-btn-bg: #ca8a04; /* yellow 600 */
+  --LIGHT--brand-warning-btn-bg-hover: var(--LIGHT--brand-warning);
+  --DARK--brand-warning-btn-bg: #ca8a04; /* yellow 600 */
+  --DARK--brand-warning-btn-bg-hover: #eab308; /* yellow 500 */
+
+  --LIGHT--brand-success: #15803d; /* green 700 */
+  --DARK--brand-success: #86efac; /* green 300 */
+
+  --LIGHT--brand-success-heavy: #14532d; /* green 900 */
+  --DARK--brand-success-heavy: #bbf7d0; /* green 200 */
+
+  --LIGHT--brand-success-btn-bg: #16a34a; /* green 600 */
+  --LIGHT--brand-success-btn-bg-hover: var(--LIGHT--brand-success);
+  --DARK--brand-success-btn-bg: #16a34a; /* green 600 */
+  --DARK--brand-success-btn-bg-hover: #22c55e; /* green 500 */
+
+  --brand-neutral-text: var(--LIGHT--brand-neutral-text);
+  --text-color: var(--brand-neutral-text);
+
+  --brand-neutral-text-2: var(--LIGHT--brand-neutral-text-2);
+  --brand-neutral-text-button: var(--LIGHT--brand-neutral-text-button);
+
+  --brand-bg-page: var(--LIGHT--brand-bg-page);
+  --background-color: var(--brand-bg-page);
+
+  --brand-bg-page-inverted-5: var(--LIGHT--brand-bg-page-inverted-5);
+
+  --brand-bg-card: var(--LIGHT--brand-bg-card);
+  --brand-bg-overlay: var(--LIGHT--brand-bg-overlay);
+  --brand-bg-overlay-2: var(--LIGHT--brand-bg-overlay-2);
+  --brand-bg-overlay-3: var(--LIGHT--brand-bg-overlay-3);
+  --brand-bg-io: var(--LIGHT--brand-bg-io);
+
+  --brand-neutral-border: var(--LIGHT--brand-neutral-border);
+  --brand-error-border: var(--LIGHT--brand-error-border);
+  --brand-success-border: var(--LIGHT--brand-success-border);
+  --brand-warning-border: var(--LIGHT--brand-warning-border);
+
+  --brand-primary: var(--LIGHT--brand-primary);
+  --primary-color: var(--brand-primary);
+  --brand-primary-heavy: var(--LIGHT--brand-primary-heavy);
+  --brand-primary-btn-bg: var(--LIGHT--brand-primary-btn-bg);
+  --brand-primary-btn-bg-hover: var(--LIGHT--brand-primary-btn-bg-hover);
+
+  --brand-error: var(--LIGHT--brand-error);
+  --brand-error-heavy: var(--LIGHT--brand-error-heavy);
+  --brand-error-btn-bg: var(--LIGHT--brand-error-btn-bg);
+  --brand-error-btn-bg-hover: var(--LIGHT--brand-error-btn-bg-hover);
+
+  --brand-warning: var(--LIGHT--brand-warning);
+  --brand-warning-heavy: var(--LIGHT--brand-warning-heavy);
+  --brand-warning-btn-bg: var(--LIGHT--brand-warning-btn-bg);
+  --brand-warning-btn-bg-hover: var(--LIGHT--brand-warning-btn-bg-hover);
+
+  --brand-success: var(--LIGHT--brand-success);
+  --brand-success-heavy: var(--LIGHT--brand-success-heavy);
+  --brand-success-btn-bg: var(--LIGHT--brand-success-btn-bg);
+  --brand-success-btn-bg-hover: var(--LIGHT--brand-success-btn-bg-hover);
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply text-base;
+    @apply font-normal;
+    @apply !bg-brand-page;
+    @apply !text-brand-neutral;
+  }
+  h1 {
+    @apply text-5xl;
+    @apply font-medium;
+  }
+  h2 {
+    @apply text-3xl;
+    @apply font-medium;
+  }
+  h3 {
+    @apply text-2xl;
+    @apply font-medium;
+  }
+  h4 {
+    @apply text-xl;
+    @apply font-medium;
+  }
+  h5 {
+    @apply text-lg;
+    @apply font-semibold;
+  }
+  h6 {
+    @apply text-sm;
+    @apply font-semibold;
+  }
+
+  .hljs {
+    background-color: var(--brand-bg-overlay) !important;
+  }
+
+  .card {
+    @apply rounded-brand;
+    @apply shadow-sm;
+    @apply p-4;
+    @apply border;
+    @apply border-brand-neutral;
+    @apply bg-brand-card;
+  }
+
+  .modal-height {
+    max-height: calc(100vh - 4rem - 2px); /* Fallback */
+    max-height: calc(100dvh - 4rem - 2px); /* Modern browsers */
+    max-height: calc(-webkit-fill-available - 4rem - 2px); /* iOS Safari */
+  }
+
+  .table-fixed-height {
+    height: 80vh;
+    height: 80dvh;
+  }
+
+  .table-dynamic-height {
+    max-height: 80vh;
+    max-height: 80dvh;
+  }
+
+  /* Prevent modal body from scrolling when it's just a table */
+  .modal-body .table-fixed-height {
+    height: 77vh;
+    height: 77dvh;
+  }
+
+  .modal-body .table-dynamic-height {
+    max-height: 77vh;
+    max-height: 77dvh;
+  }
+
+  @media (max-width: 640px) {
+    .modal-height {
+      max-height: calc(100vh - 3rem - 2px); /* Fallback for mobile */
+      max-height: calc(100dvh - 3rem - 2px); /* Modern browsers for mobile */
+      max-height: calc(
+        -webkit-fill-available - 3rem - 2px
+      ); /* iOS Safari for mobile */
+    }
+  }
+
+  input[type="date"] {
+    color-scheme: var(--color-scheme);
+  }
+
+  .red-tag {
+    @apply bg-red-200 text-red-950;
+  }
+  .orange-tag {
+    @apply bg-orange-200 text-orange-950;
+  }
+  .green-tag {
+    @apply bg-green-200 text-green-950;
+  }
+  .blue-tag {
+    @apply bg-blue-200 text-blue-950;
+  }
+  .purple-tag {
+    @apply bg-purple-200 text-purple-950;
+  }
+  .pink-tag {
+    @apply bg-pink-200 text-pink-950;
+  }
+  .brown-tag {
+    background-color: rgb(219, 203, 187);
+    color: rgb(44, 27, 10);
+  }
+  .slate-tag {
+    @apply bg-slate-200 text-slate-950;
+  }
+  .yellow-tag {
+    @apply bg-yellow-200 text-yellow-950;
+  }
+
+  .tooltip {
+    @apply !bg-gray-700 !text-white/95 rounded-brand !p-2 !text-sm;
+  }
+
+  .theme-dark .red-tag {
+    background-color: hsla(0, 66%, 35%, 0.5);
+    color: rgba(255, 255, 255, 0.82);
+  }
+  .theme-dark .orange-tag {
+    background-color: #854c1d;
+    color: rgba(255, 255, 255, 0.82);
+  }
+  .theme-dark .green-tag {
+    background-color: hsla(142, 66%, 29%, 0.5);
+    color: rgba(255, 255, 255, 0.82);
+  }
+  .theme-dark .blue-tag {
+    background-color: hsla(210, 66%, 35%, 0.5);
+    color: rgba(255, 255, 255, 0.82);
+  }
+  .theme-dark .purple-tag {
+    background-color: #492f64;
+    color: rgba(255, 255, 255, 0.82);
+  }
+  .theme-dark .pink-tag {
+    background-color: hsla(336, 66%, 35%, 0.5);
+    color: rgba(255, 255, 255, 0.82);
+  }
+  .theme-dark .brown-tag {
+    background-color: rgb(96, 59, 44);
+    color: rgba(255, 255, 255, 0.82);
+  }
+  .theme-dark .slate-tag {
+    background-color: hsla(214, 15%, 37%, 0.5);
+    color: rgba(255, 255, 255, 0.82);
+  }
+  .theme-dark .yellow-tag {
+    background-color: #89632a;
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .theme-dark .tooltip {
+    @apply !bg-gray-200 !text-black/90 rounded-brand !p-2 !text-sm;
+  }
+
+  .c-row > .c-container:not(.c-manual-width),
+  .c-row > .c-full-width:not(.c-manual-width),
+  .c-row > .c-input-box:not(.c-manual-width) {
+    flex: 1;
+  }
+
+  .c-full-width,
+  .c-input-box {
+    align-self: stretch;
+  }
+}
+
+/*
+GRUVBOX DARK MEDIUM
+*/
+
+.theme-dark pre code.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 1em;
+}
+.theme-dark code.hljs {
+  padding: 3px 5px;
+}
+/*!
+  Theme: Gruvbox dark, medium
+  Author: Dawid Kurek (dawikur@gmail.com), morhetz (https://github.com/morhetz/gruvbox)
+  License: ~ MIT (or more permissive) [via base16-schemes-source]
+  Maintainer: @highlightjs/core-team
+  Version: 2021.09.0
+*/
+/*
+  WARNING: DO NOT EDIT THIS FILE DIRECTLY.
+
+  This theme file was auto-generated from the Base16 scheme gruvbox-dark-medium
+  by the Highlight.js Base16 template builder.
+
+  - https://github.com/highlightjs/base16-highlightjs
+*/
+/*
+base00  #282828  Default Background
+base01  #3c3836  Lighter Background (Used for status bars, line number and folding marks)
+base02  #504945  Selection Background
+base03  #665c54  Comments, Invisibles, Line Highlighting
+base04  #bdae93  Dark Foreground (Used for status bars)
+base05  #d5c4a1  Default Foreground, Caret, Delimiters, Operators
+base06  #ebdbb2  Light Foreground (Not often used)
+base07  #fbf1c7  Light Background (Not often used)
+base08  #fb4934  Variables, XML Tags, Markup Link Text, Markup Lists, Diff Deleted
+base09  #fe8019  Integers, Boolean, Constants, XML Attributes, Markup Link Url
+base0A  #fabd2f  Classes, Markup Bold, Search Text Background
+base0B  #b8bb26  Strings, Inherited Class, Markup Code, Diff Inserted
+base0C  #8ec07c  Support, Regular Expressions, Escape Characters, Markup Quotes
+base0D  #83a598  Functions, Methods, Attribute IDs, Headings
+base0E  #d3869b  Keywords, Storage, Selector, Markup Italic, Diff Changed
+base0F  #d65d0e  Deprecated, Opening/Closing Embedded Language Tags, e.g. <?php ?>
+*/
+.theme-dark pre code.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 1em;
+}
+.theme-dark code.hljs {
+  padding: 3px 5px;
+}
+.theme-dark .hljs {
+  color: #d5c4a1;
+  background: #282828;
+}
+.theme-dark .hljs::selection,
+.theme-dark .hljs ::selection {
+  background-color: #504945;
+  color: #d5c4a1;
+}
+/* purposely do not highlight these things */
+.theme-dark .hljs-formula,
+.theme-dark .hljs-params,
+.theme-dark .hljs-property {
+}
+/* base03 - #665c54 -  Comments, Invisibles, Line Highlighting */
+.theme-dark .hljs-comment {
+  color: #847970;
+}
+/* base04 - #bdae93 -  Dark Foreground (Used for status bars) */
+.theme-dark .hljs-tag {
+  color: #bdae93;
+}
+/* base05 - #d5c4a1 -  Default Foreground, Caret, Delimiters, Operators */
+.theme-dark .hljs-subst,
+.theme-dark .hljs-punctuation,
+.theme-dark .hljs-operator {
+  color: #d5c4a1;
+}
+.theme-dark .hljs-operator {
+  opacity: 0.7;
+}
+/* base08 - Variables, XML Tags, Markup Link Text, Markup Lists, Diff Deleted */
+.theme-dark .hljs-bullet,
+.theme-dark .hljs-variable,
+.theme-dark .hljs-template-variable,
+.theme-dark .hljs-selector-tag,
+.theme-dark .hljs-name,
+.theme-dark .hljs-deletion {
+  color: #fb4934;
+}
+/* base09 - Integers, Boolean, Constants, XML Attributes, Markup Link Url */
+.theme-dark .hljs-symbol,
+.theme-dark .hljs-number,
+.theme-dark .hljs-link,
+.theme-dark .hljs-attr,
+.theme-dark .hljs-variable.constant_,
+.theme-dark .hljs-literal {
+  color: #fe8019;
+}
+/* base0A - Classes, Markup Bold, Search Text Background */
+.theme-dark .hljs-title,
+.theme-dark .hljs-class .hljs-title,
+.theme-dark .hljs-title.class_ {
+  color: #fabd2f;
+}
+.theme-dark .hljs-strong {
+  font-weight: bold;
+  color: #fabd2f;
+}
+/* base0B - Strings, Inherited Class, Markup Code, Diff Inserted */
+.theme-dark .hljs-code,
+.theme-dark .hljs-addition,
+.theme-dark .hljs-title.class_.inherited__,
+.theme-dark .hljs-string {
+  color: #b8bb26;
+}
+/* base0C - Support, Regular Expressions, Escape Characters, Markup Quotes */
+/* guessing */
+.theme-dark .hljs-built_in,
+.theme-dark .hljs-doctag,
+.theme-dark .hljs-quote,
+.theme-dark .hljs-keyword.hljs-atrule,
+.theme-dark .hljs-regexp {
+  color: #8ec07c;
+}
+/* base0D - Functions, Methods, Attribute IDs, Headings */
+.theme-dark .hljs-function .hljs-title,
+.theme-dark .hljs-attribute,
+.theme-dark .ruby .hljs-property,
+.theme-dark .hljs-title.function_,
+.theme-dark .hljs-section {
+  color: #83a598;
+}
+/* base0E - Keywords, Storage, Selector, Markup Italic, Diff Changed */
+/* .theme-dark .hljs-selector-id, */
+/* .theme-dark .hljs-selector-class, */
+/* .theme-dark .hljs-selector-attr, */
+/* .theme-dark .hljs-selector-pseudo, */
+.theme-dark .hljs-type,
+.theme-dark .hljs-template-tag,
+.theme-dark .diff .hljs-meta,
+.theme-dark .hljs-keyword {
+  color: #d3869b;
+}
+.theme-dark .hljs-emphasis {
+  color: #d3869b;
+  font-style: italic;
+}
+/* base0F - Deprecated, Opening/Closing Embedded Language Tags, e.g. <?php ?> */
+/*
+  prevent top level .keyword and .string scopes
+  from leaking into meta by accident
+*/
+.theme-dark .hljs-meta,
+.theme-dark .hljs-meta .hljs-keyword,
+.theme-dark .hljs-meta .hljs-string {
+  color: #d65d0e;
+}
+/* for v10 compatible themes */
+.theme-dark .hljs-meta .hljs-keyword,
+.theme-dark .hljs-meta-keyword {
+  font-weight: bold;
+}
+
+/*
+GITHUB (LIGHT)
+*/
+
+pre code.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 1em;
+}
+code.hljs {
+  padding: 3px 5px;
+}
+/*!
+  Theme: GitHub
+  Description: Light theme as seen on github.com
+  Author: github.com
+  Maintainer: @Hirse
+  Updated: 2021-05-15
+
+  Outdated base version: https://github.com/primer/github-syntax-light
+  Current colors taken from GitHub's CSS
+*/
+.theme-light .hljs {
+  color: #24292e;
+  background: #ffffff;
+}
+.theme-light .hljs-doctag,
+.theme-light .hljs-keyword,
+.theme-light .hljs-meta .hljs-keyword,
+.theme-light .hljs-template-tag,
+.theme-light .hljs-template-variable,
+.theme-light .hljs-type,
+.theme-light .hljs-variable.language_ {
+  /* prettylights-syntax-keyword */
+  color: #d73a49;
+}
+.theme-light .hljs-title,
+.theme-light .hljs-title.class_,
+.theme-light .hljs-title.class_.inherited__,
+.theme-light .hljs-title.function_ {
+  /* prettylights-syntax-entity */
+  color: #6f42c1;
+}
+.theme-light .hljs-attr,
+.theme-light .hljs-attribute,
+.theme-light .hljs-literal,
+.theme-light .hljs-meta,
+.theme-light .hljs-number,
+.theme-light .hljs-operator,
+.theme-light .hljs-variable,
+.theme-light .hljs-selector-attr,
+.theme-light .hljs-selector-class,
+.theme-light .hljs-selector-id {
+  /* prettylights-syntax-constant */
+  color: #005cc5;
+}
+.theme-light .hljs-regexp,
+.theme-light .hljs-string,
+.theme-light .hljs-meta .hljs-string {
+  /* prettylights-syntax-string */
+  color: #032f62;
+}
+.theme-light .hljs-built_in,
+.theme-light .hljs-symbol {
+  /* prettylights-syntax-variable */
+  color: #e36209;
+}
+.theme-light .hljs-comment,
+.theme-light .hljs-code,
+.theme-light .hljs-formula {
+  /* prettylights-syntax-comment */
+  color: #6a737d;
+}
+.theme-light .hljs-name,
+.theme-light .hljs-quote,
+.theme-light .hljs-selector-tag,
+.theme-light .hljs-selector-pseudo {
+  /* prettylights-syntax-entity-tag */
+  color: #22863a;
+}
+.theme-light .hljs-subst {
+  /* prettylights-syntax-storage-modifier-import */
+  color: #24292e;
+}
+.theme-light .hljs-section {
+  /* prettylights-syntax-markup-heading */
+  color: #005cc5;
+  font-weight: bold;
+}
+.theme-light .hljs-bullet {
+  /* prettylights-syntax-markup-list */
+  color: #735c0f;
+}
+.theme-light .hljs-emphasis {
+  /* prettylights-syntax-markup-italic */
+  color: #24292e;
+  font-style: italic;
+}
+.theme-light .hljs-strong {
+  /* prettylights-syntax-markup-bold */
+  color: #24292e;
+  font-weight: bold;
+}
+.theme-light .hljs-addition {
+  /* prettylights-syntax-markup-inserted */
+  color: #22863a;
+  background-color: #f0fff4;
+}
+.theme-light .hljs-deletion {
+  /* prettylights-syntax-markup-deleted */
+  color: #b31d28;
+  background-color: #ffeef0;
+}
+.theme-light .hljs-char.escape_,
+.theme-light .hljs-link,
+.theme-light .hljs-params,
+.theme-light .hljs-property,
+.theme-light .hljs-punctuation,
+.theme-light .hljs-tag {
+  /* purposely ignored */
+}

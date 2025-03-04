@@ -1,0 +1,19 @@
+# Ignore packages
+node_modules
+
+# Ignore build directories
+build
+dist
+.venv
+venv
+
+# Ignore artifacts
+__pycache__
+.DS_Store
+
+
+# Ignore local configs
+.env
+.vscode
+
+tsconfig.vitest-temp.json

@@ -1,0 +1,23 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx --tsconfig ./tsconfig.json --env-file ../../.env --watch src/index.ts",
+    "start": "NODE_ENV=production node --import=extensionless/register dist/index.js",
+    "lint": "pnpm run type-check",
+    "type-check": "tsc --noEmit"
+  },
+  "license": "AGPL-3.0-or-later",
+  "devDependencies": {
+    "tsx": "4.16.0",
+    "typescript": "5.5.3"
+  },
+  "dependencies": {
+    "server-core": "workspace:*",
+    "fastify": "5.2.0",
+    "extensionless": "1.9.9"
+  }
+}

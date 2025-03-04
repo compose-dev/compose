@@ -1,0 +1,7 @@
+BEGIN;
+
+    ALTER TABLE "externalAppUser" ALTER COLUMN "createdByUserId" DROP NOT NULL;
+
+    ALTER TABLE "externalAppUser" ADD COLUMN "createdBySdk" BOOLEAN NOT NULL DEFAULT FALSE;
+
+COMMIT;

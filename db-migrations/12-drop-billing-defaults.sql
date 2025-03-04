@@ -1,0 +1,7 @@
+BEGIN;
+
+    ALTER TABLE "company" ALTER COLUMN "plan" DROP DEFAULT;
+    ALTER TABLE "company" ALTER COLUMN "billingId" DROP DEFAULT;
+    ALTER TABLE "company" ALTER COLUMN "flags" DROP DEFAULT;
+
+COMMIT;

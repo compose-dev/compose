@@ -1,0 +1,40 @@
+{
+  "name": "@composehq/create",
+  "version": "0.2.1",
+  "keywords": [
+    "Compose",
+    "Internal Tools"
+  ],
+  "description": "Create Compose-powered internal tools with one command",
+  "main": "dist/index.js",
+  "author": "Atul Jalan <atul@composehq.com>",
+  "license": "Apache-2.0",
+  "bin": {
+    "@composehq/create": "./dist/index.js"
+  },
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "IS_COMPOSE_DEV=true tsx src/index.ts",
+    "build": "rm -rf dist && tsc && tsc-alias && cp -r templates dist",
+    "publish-package": "pnpm build && pnpm publish --access public"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "commander": "^13.1.0",
+    "ora": "^8.1.1",
+    "prompts": "^2.4.2"
+  },
+  "devDependencies": {
+    "@types/prompts": "^2.4.9",
+    "tsc-alias": "^1.8.10",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

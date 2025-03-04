@@ -1,0 +1,11 @@
+.env
+scripts
+node_modules
+README.md
+.gitignore
+.vscode
+db_migrations
+compose_node_sdk
+server-test
+dist
+.git

@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "compose-sdk"
+version = "0.25.9"
+description = ""
+authors = ["Atul Jalan <atul@composehq.com>"]
+maintainers = ["Atul Jalan <atul@composehq.com>"]
+readme = "README.md"
+package-mode = true
+keywords = ["internal tool", "internal app", "ui builder", "tool", "app", "ui"]
+license = "AGPL-3.0-or-later"
+
+[[tool.poetry.packages]]
+include = "compose_sdk/"
+
+[tool.poetry.dependencies]
+python = ">=3.9"
+websockets = "^12.0"
+pandas = "^2.0"
+typing-extensions = "^4.12.2"
+orjson = "^3.10.15"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.2"
+pytest-asyncio = "^0.24.0"
+pytest-benchmark = "^5.1.0"
+mypy = "^1.14.0"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+asyncio_default_fixture_loop_scope = "class"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

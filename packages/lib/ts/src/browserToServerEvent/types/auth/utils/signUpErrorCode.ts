@@ -1,0 +1,8 @@
+export enum SignUpErrorCode {
+  INVALID_ACCESS_TOKEN = "0a",
+  UNKNOWN_ERROR = "0b",
+  EMAIL_MISMATCH = "0c",
+  USER_ALREADY_EXISTS = "0d",
+  USER_ONLY_ACCOUNT_NOT_SUPPORTED = "0e",
+  BILLING_ERROR = "0f",
+}

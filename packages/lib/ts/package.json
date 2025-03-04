@@ -1,0 +1,33 @@
+{
+  "name": "@compose/ts",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "license": "AGPL-3.0-or-later",
+  "scripts": {
+    "build": "rm -rf dist; tsc",
+    "watch": "tsc --watch",
+    "lint": "pnpm run type-check",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@composehq/ts-public": "workspace:*",
+    "luxon": "^3.5.0"
+  },
+  "devDependencies": {
+    "pkgroll": "^2.1.1",
+    "typescript": "5.5.3",
+    "vitest": "^2.0.5"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

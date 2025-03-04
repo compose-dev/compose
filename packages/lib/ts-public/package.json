@@ -1,0 +1,41 @@
+{
+  "name": "@composehq/ts-public",
+  "version": "0.25.9",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "rm -rf dist; tsc && tsc-alias",
+    "watch": "tsc --watch",
+    "lint": "pnpm run type-check",
+    "type-check": "tsc --noEmit",
+    "bump-minor": "pnpm version minor --no-git-tag-version",
+    "publish-package": "pnpm build && pnpm publish --access public",
+    "test": "vitest run --config ./vitest.config.ts",
+    "bench": "vitest bench --run"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@types/uuid": "10.0.0",
+    "uuid": "10.0.0"
+  },
+  "peerDependencies": {
+    "@types/node": ">=16.0.0"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.3.0",
+    "@types/node": ">=16.0.0",
+    "tsc-alias": "^1.8.10",
+    "typescript": "5.7.3",
+    "vitest": "^3.0.5"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "AGPL-3.0-or-later"
+}

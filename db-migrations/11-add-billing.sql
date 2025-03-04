@@ -1,0 +1,14 @@
+BEGIN;
+
+    ALTER TABLE "company" ADD COLUMN IF NOT EXISTS "plan" TEXT NOT NULL DEFAULT 'hobby';
+    ALTER TABLE "company" ADD COLUMN IF NOT EXISTS "billingId" TEXT NOT NULL DEFAULT '';
+    ALTER TABLE "company" ADD COLUMN IF NOT EXISTS "flags" JSONB NOT NULL DEFAULT '{}';
+
+    CREATE TABLE IF NOT EXISTS "errorLog" (
+        "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "data" JSONB NOT NULL,
+        "status" TEXT NOT NULL
+    );
+
+COMMIT;

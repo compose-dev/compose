@@ -1,0 +1,15 @@
+\i 1-init.sql
+\i 2-sessions.sql
+\i 3-add-theme-to-environment.sql
+\i 4-remove-is-online-from-environment.sql
+\i 5-deployment.sql
+\i 6-external-app-user.sql
+\i 7-add-environment-decryptable-key.sql
+\i 8-add-company-id-to-external-app-user.sql
+\i 9-add-parent-app-permission-to-external-users.sql
+\i 10-add-email-code.sql
+\i 11-add-billing.sql
+\i 12-drop-billing-defaults.sql
+\i 13-compute-engine-deploy.sql
+\i 14-add-user-permission.sql
+\i 15-add-environment-data.sql
