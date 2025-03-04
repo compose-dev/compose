@@ -19,7 +19,7 @@
 Compose is a dramatically faster way for developers to build custom internal tools.
 
 Compose provides:
-- SDKs for TypeScript and Python that plug into your backend and provide high-level building blocks like tables and forms to quickly build custom tools that integrate with your existing logic and services.
+- SDKs for TypeScript and Python that plug into your backend and provide high-level building blocks like tables, forms, charts, and more to quickly build custom tools that integrate with your existing logic and services.
 - A hosted web app (composehq.com or self-hosted) that handles auth, permissions, audit logs, and generates exceptionally great UIs for your team.
 
 The examples below show how you can build a dashboard to view and create users in ~20 lines of code.
@@ -90,7 +90,7 @@ c.App(
 
 ### Compose Cloud (recommended)
 
-Compose offers a generous free tier that includes unlimited usage for solo-developers, and only requires a credit card once you invite your team. You can sign up at [app.composehq.com](https://app.composehq.com/auth/signup).
+Compose offers a generous free tier that includes unlimited usage for solo-developers, no credit card required. You can sign up at [app.composehq.com](https://app.composehq.com/auth/signup).
 
 ### Self-hosted
 
