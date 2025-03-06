@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-    Developer-first platform for building custom internal tools.
+    Open-source platform for building custom internal tools
     <br />
     <a href="https://composehq.com">Website</a>
     ·
@@ -19,7 +19,7 @@
 Compose is a dramatically faster way for developers to build custom internal tools.
 
 Compose provides:
-- SDKs for TypeScript and Python that plug into your backend and provide high-level building blocks like tables, forms, charts, and more to quickly build custom tools that integrate with your existing logic and services.
+- Backend SDKs for TypeScript and Python that provide high-level building blocks like tables, forms, charts, and more that integrate seamlessly with your existing services and logic.
 - A hosted web app (composehq.com or self-hosted) that handles auth, permissions, audit logs, and generates exceptionally great UIs for your team.
 
 The examples below show how you can build a dashboard to view and create users in ~20 lines of code.
@@ -36,7 +36,6 @@ import { Compose } from "@composehq/sdk";
 new Compose.App({
     name: "Users Dashboard",
     handler: ({ page, ui }) => {
-        
         // Display a table of users
         const users = await database.selectUsers();
         page.add(() => ui.table("users", users))

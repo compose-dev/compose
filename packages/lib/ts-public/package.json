@@ -1,6 +1,6 @@
 {
   "name": "@composehq/ts-public",
-  "version": "0.25.9",
+  "version": "0.25.10",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -37,5 +37,10 @@
   "publishConfig": {
     "access": "public"
   },
-  "license": "AGPL-3.0-or-later"
+  "license": "AGPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/compose-dev/compose.git",
+    "directory": "packages/lib/ts-public"
+  }
 }

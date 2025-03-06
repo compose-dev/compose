@@ -1,5 +1,33 @@
-# Compose Node SDK Internal Types
+<p align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://composehq.com/light-logo-with-text.svg" width="480">
+  <source media="(prefers-color-scheme: light)" srcset="https://composehq.com/dark-logo-with-text.svg" width="480">
+  <img alt="Compose logo" src="https://composehq.com/dark-logo-with-text.svg" width="480">
+</picture>
+</p>
 
-Compose is a framework for building robust internal apps in just a couple minutes. Create useful apps without writing a single line of frontend code, API endpoints, authentication, validation, or other boilerplate. Just write your backend logic, while Compose abstracts the rest away.
+<p align="center">
+    Open-source platform for building custom internal tools
+    <br />
+    <a href="https://composehq.com">Website</a>
+    ·
+    <a href="https://docs.composehq.com">Documentation</a>
+  </p>
 
-Learn more at [composehq.com](https://composehq.com).
+## What is Compose
+
+Compose is a dramatically faster way for developers to build custom internal tools.
+
+Compose provides:
+- Backend SDKs for TypeScript and Python that provide high-level building blocks like tables, forms, charts, and more that integrate seamlessly with your existing services and logic.
+- A hosted web app (composehq.com or self-hosted) that handles auth, permissions, audit logs, and generates exceptionally great UIs for your team.
+
+The examples below show how you can build a dashboard to view and create users in ~20 lines of code.
+
+See the [docs](https://docs.composehq.com) to learn more.
+
+## About this package
+
+This package contains code that is shared by various Compose services including the client, server, and TypeScript SDK.
+
+Learn more by reading the [docs](https://docs.composehq.com)

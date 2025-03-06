@@ -1,6 +1,6 @@
 {
   "name": "@composehq/sdk",
-  "version": "0.25.10",
+  "version": "0.25.11",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -33,5 +33,10 @@
     "typescript": "5.5.3",
     "vitest": "^2.0.5"
   },
-  "license": "AGPL-3.0-or-later"
+  "license": "AGPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/compose-dev/compose.git",
+    "directory": "packages/sdk/node"
+  }
 }

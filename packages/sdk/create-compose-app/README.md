@@ -28,4 +28,17 @@ See the [docs](https://docs.composehq.com) to learn more.
 
 ## About this package
 
-This is the official TypeScript/JavaScript SDK for Compose. Learn more by reading the [docs](https://docs.composehq.com)
+This package contains the official Compose CLI tool for bootstrapping a fresh project with a basic Compose starter app. You can get started by running any of the following commands:
+
+```
+# TypeScript
+npx @composehq/create@latest --lang=typescript
+
+# JavaScript
+npx @composehq/create@latest --lang=javascript
+
+# Python
+npx @composehq/create@latest --lang=python
+```
+
+Learn more by reading the [docs](https://docs.composehq.com)

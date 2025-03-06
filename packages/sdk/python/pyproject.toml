@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "compose-sdk"
-version = "0.25.9"
+version = "0.25.10"
 description = ""
 authors = ["Atul Jalan <atul@composehq.com>"]
 maintainers = ["Atul Jalan <atul@composehq.com>"]
@@ -8,6 +8,8 @@ readme = "README.md"
 package-mode = true
 keywords = ["internal tool", "internal app", "ui builder", "tool", "app", "ui"]
 license = "AGPL-3.0-or-later"
+repository = "https://github.com/compose-dev/compose"
+homepage = "https://github.com/compose-dev/compose/tree/main/packages/sdk/python"
 
 [[tool.poetry.packages]]
 include = "compose_sdk/"
