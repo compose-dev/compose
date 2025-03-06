@@ -58,7 +58,6 @@ function TableComponent() {
           </Modal.Body>
         </Modal.Root>
       )}
-      <h5 className="mb-2">Users Dashboard</h5>
       <Table.Root
         data={data}
         columns={[

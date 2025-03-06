@@ -1,25 +1,29 @@
-import { Modal } from "~/components/modal";
-import { TextInput, EmailInput } from "~/components/input";
-import Button from "~/components/button";
-import { useEffect, useMemo, useState } from "react";
-import { toast } from "~/utils/toast";
 import { u } from "@compose/ts";
+import { useEffect, useMemo, useState } from "react";
+import Button from "~/components/button";
+import { ComboboxSingle } from "~/components/combobox";
+import { EmailInput, TextAreaInput } from "~/components/input";
+import { IOComponent } from "~/components/io-component";
+import { toast } from "~/utils/toast";
 
-export default function ModalFormApp() {
+const REQUIRED = {
+  email: true,
+  role: true,
+  notes: true,
+};
+
+function ModalFormApp() {
   const { addToast } = toast.useStore();
-  const [name, setName] = useState<string | null>(null);
+
   const [email, setEmail] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
+  const [notes, setNotes] = useState<string | null>(null);
 
-  const [didFillName, setDidFillName] = useState(false);
   const [didFillEmail, setDidFillEmail] = useState(false);
+  const [didFillRole, setDidFillRole] = useState(false);
+  const [didFillNotes, setDidFillNotes] = useState(false);
 
-  const [submissionError, setSubmissionError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!didFillName && name !== null) {
-      setDidFillName(true);
-    }
-  }, [didFillName, name]);
+  const [didSubmit, setDidSubmit] = useState(false);
 
   useEffect(() => {
     if (!didFillEmail && email !== null) {
@@ -27,72 +31,124 @@ export default function ModalFormApp() {
     }
   }, [didFillEmail, email]);
 
-  const nameError = useMemo(() => {
-    if (!name) {
-      return "Name is required.";
+  useEffect(() => {
+    if (!didFillRole && role !== null) {
+      setDidFillRole(true);
     }
-    return null;
-  }, [name]);
+  }, [didFillRole, role]);
+
+  useEffect(() => {
+    if (!didFillNotes && notes !== null) {
+      setDidFillNotes(true);
+    }
+  }, [didFillNotes, notes]);
 
   const emailError = useMemo(() => {
-    if (!email) {
+    if (!email && REQUIRED.email) {
       return "Email is required.";
     }
 
-    if (!u.string.isValidEmail(email)) {
-      return "Email is invalid.";
+    if (email && !u.string.isValidEmail(email)) {
+      return "Invalid email.";
     }
 
     return null;
   }, [email]);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (nameError || emailError) {
-      setSubmissionError("Form is invalid.");
-      return;
+  const roleError = useMemo(() => {
+    if (role === null && REQUIRED.role) {
+      return "Role is required.";
     }
 
-    addToast({
-      message: "User created!",
-      appearance: "success",
-    });
+    return null;
+  }, [role]);
 
-    setName(null);
-    setEmail(null);
-    setDidFillName(false);
-    setDidFillEmail(false);
-    setSubmissionError(null);
-  }
+  const notesError = useMemo(() => {
+    if (notes === null && REQUIRED.notes) {
+      return "Notes are required.";
+    }
+
+    return null;
+  }, [notes]);
+
+  const formError = useMemo(() => {
+    if (emailError || roleError || notesError) {
+      return "Form is invalid.";
+    }
+
+    return null;
+  }, [emailError, roleError, notesError]);
 
   return (
-    <Modal.Root isOpen={true} width="lg" onClose={() => {}}>
-      <Modal.Header className="flex items-center justify-between">
-        <Modal.Title>User Creation Tool</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-          <TextInput
-            label="Name"
-            value={name}
-            setValue={setName}
-            errorMessage={nameError}
-            hasError={(didFillName || !!submissionError) && !!nameError}
-          />
-          <EmailInput
-            label="Email"
-            value={email}
-            setValue={setEmail}
-            errorMessage={emailError}
-            hasError={(didFillEmail || !!submissionError) && !!emailError}
-          />
+    <div className="p-4 flex flex-col gap-4 items-center justify-center">
+      <div className="flex flex-col space-y-4 w-full items-center justify-center">
+        <form
+          className="flex flex-col space-y-4 max-w-md w-full"
+          onSubmit={(e) => {
+            e.preventDefault();
+            setDidSubmit(true);
+            if (!formError) {
+              setEmail(null);
+              setRole(null);
+              setNotes(null);
+              setDidFillEmail(false);
+              setDidFillRole(false);
+              setDidFillNotes(false);
+              setDidSubmit(false);
+              addToast({
+                message: "Form submitted successfully",
+                appearance: "success",
+              });
+            }
+          }}
+        >
+          <h3>Create User</h3>
+          <div className="max-w-md w-full">
+            <EmailInput
+              label="Email"
+              value={email}
+              setValue={setEmail}
+              errorMessage={emailError}
+              hasError={emailError !== null && (didSubmit || didFillEmail)}
+            />
+          </div>
+          <div className="w-full max-w-md">
+            <ComboboxSingle
+              label="Role"
+              value={role}
+              setValue={(internalValue) => setRole(internalValue)}
+              options={[
+                { label: "Admin", value: "Admin" },
+                { label: "User", value: "User" },
+                { label: "Guest", value: "Guest" },
+              ]}
+              hasError={roleError !== null && (didSubmit || didFillRole)}
+              errorMessage={roleError}
+              disabled={false}
+              id="role"
+            />
+          </div>
+          <div className="max-w-md w-full">
+            <TextAreaInput
+              label="Notes"
+              value={notes}
+              setValue={setNotes}
+              errorMessage={notesError}
+              hasError={notesError !== null && (didSubmit || didFillNotes)}
+            />
+          </div>
           <div>
             <Button type="submit" variant="primary" onClick={() => {}}>
               Submit
             </Button>
           </div>
+          {didSubmit && formError && (
+            <IOComponent.Error>{formError}</IOComponent.Error>
+          )}
         </form>
-      </Modal.Body>
-    </Modal.Root>
+      </div>
+    </div>
   );
 }
+
+export default ModalFormApp;

@@ -10,7 +10,7 @@ function BrowserWrapper({
   return (
     <div className={`rounded-lg h-full ${className}`}>
       <div className="w-full bg-brand-overlay p-2 relative flex justify-center items-center">
-        <div className="absolute h-full left-2 flex items-center">
+        <div className="absolute h-full left-2 items-center hidden xs:flex">
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 rounded-full bg-brand-overlay-3" />
             <div className="w-3 h-3 rounded-full bg-brand-overlay-3" />
@@ -21,7 +21,7 @@ function BrowserWrapper({
           <Icon name="lock" color="brand-neutral-2" size="xs" />
           <p>composehq.com</p>
         </div>
-        <div className="absolute h-full right-2 flex items-center">
+        <div className="absolute h-full right-2 items-center hidden xs:flex">
           <div className="flex items-center gap-0.5">
             <Icon name="lightning" color="brand-neutral-3" size="sm" />
             <p className="text-[10px] leading-3 tracking-wider text-brand-neutral-3">

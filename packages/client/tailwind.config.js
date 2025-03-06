@@ -17,6 +17,9 @@ export default {
         "monospace",
       ],
     },
+    screens: {
+      xs: "300px",
+    },
     extend: {
       borderColor: {
         "brand-neutral": "var(--brand-neutral-border)",

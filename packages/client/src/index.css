@@ -134,6 +134,55 @@
   --brand-success-btn-bg-hover: var(--LIGHT--brand-success-btn-bg-hover);
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-scheme: dark;
+
+    --brand-neutral-text: var(--DARK--brand-neutral-text);
+    --text-color: var(--brand-neutral-text);
+
+    --brand-neutral-text-2: var(--DARK--brand-neutral-text-2);
+    --brand-neutral-text-button: var(--DARK--brand-neutral-text-button);
+
+    --brand-bg-page: var(--DARK--brand-bg-page);
+    --background-color: var(--brand-bg-page);
+
+    --brand-bg-page-inverted-5: var(--DARK--brand-bg-page-inverted-5);
+
+    --brand-bg-card: var(--DARK--brand-bg-card);
+    --brand-bg-overlay: var(--DARK--brand-bg-overlay);
+    --brand-bg-overlay-2: var(--DARK--brand-bg-overlay-2);
+    --brand-bg-overlay-3: var(--DARK--brand-bg-overlay-3);
+    --brand-bg-io: var(--DARK--brand-bg-io);
+
+    --brand-neutral-border: var(--DARK--brand-neutral-border);
+    --brand-error-border: var(--DARK--brand-error-border);
+    --brand-success-border: var(--DARK--brand-success-border);
+    --brand-warning-border: var(--DARK--brand-warning-border);
+
+    --brand-primary: var(--DARK--brand-primary);
+    --primary-color: var(--brand-primary);
+    --brand-primary-heavy: var(--DARK--brand-primary-heavy);
+    --brand-primary-btn-bg: var(--DARK--brand-primary-btn-bg);
+    --brand-primary-btn-bg-hover: var(--DARK--brand-primary-btn-bg-hover);
+
+    --brand-error: var(--DARK--brand-error);
+    --brand-error-heavy: var(--DARK--brand-error-heavy);
+    --brand-error-btn-bg: var(--DARK--brand-error-btn-bg);
+    --brand-error-btn-bg-hover: var(--DARK--brand-error-btn-bg-hover);
+
+    --brand-warning: var(--DARK--brand-warning);
+    --brand-warning-heavy: var(--DARK--brand-warning-heavy);
+    --brand-warning-btn-bg: var(--DARK--brand-warning-btn-bg);
+    --brand-warning-btn-bg-hover: var(--DARK--brand-warning-btn-bg-hover);
+
+    --brand-success: var(--DARK--brand-success);
+    --brand-success-heavy: var(--DARK--brand-success-heavy);
+    --brand-success-btn-bg: var(--DARK--brand-success-btn-bg);
+    --brand-success-btn-bg-hover: var(--DARK--brand-success-btn-bg-hover);
+  }
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
