@@ -17,10 +17,10 @@ export default {
         "monospace",
       ],
     },
-    screens: {
-      xs: "300px",
-    },
     extend: {
+      screens: {
+        xs: "300px",
+      },
       borderColor: {
         "brand-neutral": "var(--brand-neutral-border)",
         "brand-error": "var(--brand-error-border)",
