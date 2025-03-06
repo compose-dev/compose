@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "compose-sdk"
-version = "0.25.10"
-description = ""
+version = "0.25.11"
+description = "The open-source SDK for building custom internal tools."
 authors = ["Atul Jalan <atul@composehq.com>"]
 maintainers = ["Atul Jalan <atul@composehq.com>"]
 readme = "README.md"

@@ -1,11 +1,11 @@
 {
   "name": "@composehq/create",
-  "version": "0.2.2",
+  "description": "Bootstrap a project with a Compose starter app in one command",
+  "version": "0.2.3",
   "keywords": [
     "Compose",
     "Internal Tools"
   ],
-  "description": "Create Compose-powered internal tools with one command",
   "main": "dist/index.js",
   "author": "Atul Jalan <atul@composehq.com>",
   "license": "Apache-2.0",
