@@ -89,6 +89,7 @@ describe("AppRunner", () => {
 
     const appDefinition = new AppDefinition({
       name: "Test App",
+      route: "test-app",
       handler: ({ page, ui, state }) => {
         appState = state.hello;
       },
@@ -122,6 +123,7 @@ describe("AppRunner", () => {
 
     const appDefinition = new AppDefinition({
       name: "Test App",
+      route: "test-app",
       handler: ({ page, ui, state }) => {
         appStates.push(state.count);
         state.count = state.count + 1;

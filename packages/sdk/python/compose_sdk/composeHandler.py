@@ -33,14 +33,7 @@ def ensure_unique_routes(apps: List[AppDefinition]) -> None:
 
     for app in apps:
         if app.route in routes:
-            if not app.is_auto_generated_route:
-                raise ValueError(f"Duplicate route: {app.route}")
-            else:
-                # If an auto-generated route conflicts with an existing route,
-                # we'll just append a random string to the end of the auto-generated
-                # route to make it unique.
-                new_route_name = f"{app.route}7"
-                app.set_route(new_route_name, True)
+            raise ValueError(f"Duplicate route: {app.route}")
 
         routes.add(app.route)
 

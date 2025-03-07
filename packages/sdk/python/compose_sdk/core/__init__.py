@@ -65,6 +65,7 @@ from .static_tree import StaticTree
 from .table_state import TableState
 from .ui.types.chart import *
 from .debug import Debug
+from .string import prettify_key
 
 __all__ = [
     "EventType",
@@ -134,4 +135,5 @@ __all__ = [
     "TableState",
     "Stale",
     "Debug",
+    "prettify_key",
 ]

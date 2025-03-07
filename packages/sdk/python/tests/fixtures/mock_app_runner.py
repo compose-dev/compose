@@ -30,7 +30,7 @@ def app_runner_generator() -> (
         )
 
         _app_definition = app_definition or AppDefinition(
-            name="test app", handler=handler
+            route="test-app", handler=handler
         )
 
         runner = AppRunner(

@@ -1,10 +1,10 @@
-import { UI } from "@composehq/ts-public";
+import { UI, u as uPub } from "@composehq/ts-public";
 import { appStore } from "~/utils/appStore";
 import Table from "~/components/table";
 import { useCallback, useMemo } from "react";
 import { IOComponent } from "~/components/io-component";
 import { useWSContext } from "~/utils/wsContext";
-import { BrowserToServerEvent, u } from "@compose/ts";
+import { BrowserToServerEvent } from "@compose/ts";
 import { classNames } from "~/utils/classNames";
 
 function guessColumns(
@@ -30,8 +30,8 @@ function guessColumns(
 
       const label =
         typeof column === "string"
-          ? u.string.prettifyKey(key)
-          : (column.label ?? u.string.prettifyKey(originalKey));
+          ? uPub.string.prettifyKey(key)
+          : (column.label ?? uPub.string.prettifyKey(originalKey));
 
       const format =
         typeof column === "string"
@@ -65,7 +65,7 @@ function guessColumns(
 
   return keys.map((key) => ({
     id: key,
-    label: u.string.prettifyKey(key),
+    label: uPub.string.prettifyKey(key),
     accessorKey: key,
     format: Table.guessColumnFormat(data, key),
     tagColors: {},

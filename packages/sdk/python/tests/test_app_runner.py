@@ -14,7 +14,7 @@ from compose_sdk.core.json import JSON
 
 @pytest.mark.asyncio
 async def test_app_runner_initialization(
-    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]]
+    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]],
 ):
     runner, _, _ = app_runner_generator(handler=lambda: None)  # type: ignore
 
@@ -211,7 +211,7 @@ async def test_app_runner_is_initialized_with_correct_state(app_runner_generator
     runner, _, scheduler = app_runner_generator(
         handler=handler,
         app_definition=AppDefinition(
-            name="test app", handler=handler, initial_state={"test": "test"}
+            "test-app", handler=handler, initial_state={"test": "test"}
         ),
     )
 
@@ -241,7 +241,7 @@ async def test_app_runner_state_is_re_initialized_across_executions(
         state["count"] += 1
 
     appDefinition = AppDefinition(
-        name="test app", handler=handler, initial_state={"count": 0}
+        "test-app", handler=handler, initial_state={"count": 0}
     )
 
     runnerOne, api, scheduler = app_runner_generator(

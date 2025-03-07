@@ -11,6 +11,7 @@ function mockRunner(
 ) {
   const appDefinition = new AppDefinition({
     name: "Test App",
+    route: "test-app",
     handler: handlerFunction,
   });
 

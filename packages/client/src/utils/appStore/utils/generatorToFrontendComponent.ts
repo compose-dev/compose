@@ -1,4 +1,4 @@
-import { UI } from "@composehq/ts-public";
+import { UI, u as uPub } from "@composehq/ts-public";
 import {
   getComponentLocalErrorMessage,
   initialInputInteractionOutput,
@@ -8,7 +8,6 @@ import {
   type FrontendComponentModel,
   type FrontendComponentOutput,
 } from "../types";
-import { u } from "@compose/ts";
 
 /**
  * The SDK accepts both dict type options and primitive type options (e.g.
@@ -45,7 +44,7 @@ function guessLabel(id: string, label: string | null): string {
     return label;
   }
 
-  return u.string.prettifyKey(id, false);
+  return uPub.string.prettifyKey(id, false);
 }
 
 function generatorToFrontendModel(

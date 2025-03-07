@@ -83,7 +83,7 @@ def app_definition_factory(scheduler: Scheduler) -> AppDefinitionFactory:
             else:
                 return handler(**kwargs)
 
-        return AppDefinition(name="test app", handler=handler_wrapper)
+        return AppDefinition("test-app", handler_wrapper)
 
     return create_app_definition
 
