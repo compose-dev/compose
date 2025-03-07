@@ -18,7 +18,7 @@ const build = await createServer([
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       host: process.env.POSTGRES_HOSTNAME,
-      port: parseInt(process.env.POSTGRES_CONTAINER_PORT || "5432"),
+      port: parseInt(process.env.POSTGRES_PORT || "5432"),
     },
   ],
 
@@ -37,12 +37,11 @@ const healthCheck = build.healthCheck;
 
 let interval: NodeJS.Timeout | null = null;
 
-const BUILD_VERSION = process.env.BUILD_VERSION;
+const BUILD_VERSION = process.env.BUILD_VERSION || "unknown";
 
 const port = Number(process.env.PORT) || 8080;
 
-const IS_PRODUCTION =
-  process.env.SERVICE_NAME === "compute-engine-instance-group";
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
 const host = IS_PRODUCTION ? "0.0.0.0" : "localhost";
 
@@ -99,7 +98,7 @@ server.listen({ port, host }, async (err, address) => {
   }
 
   if (IS_PRODUCTION) {
-    const activeDeploy = await db.deploy.insert(server.pg, BUILD_VERSION || "");
+    const activeDeploy = await db.deploy.insert(server.pg, BUILD_VERSION);
 
     const checkForNewDeploy = async () => {
       const latestDeploy = await db.deploy.selectMostRecent(server.pg);

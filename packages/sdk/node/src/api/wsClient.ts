@@ -13,13 +13,13 @@ import { WS_CLIENT, type ListenerEvent } from "./constants";
 const PING_TIMEOUT_MS = 45000; // 45 seconds
 
 class WSClient {
-  private isDevelopment: boolean;
   private apiKey: string;
   private packageName: string;
   private packageVersion: string;
   private onMessageCallback: (event: ListenerEvent) => void;
 
   private reconnectionInterval: number;
+  private WS_URL: string;
   private shuttingDown: boolean = false;
 
   private ws: NodeWebSocket | null = null;
@@ -34,15 +34,20 @@ class WSClient {
     apiKey: string,
     packageName: string,
     packageVersion: string,
-    onMessageCallback: (event: ListenerEvent) => void
+    onMessageCallback: (event: ListenerEvent) => void,
+    host: string | undefined
   ) {
-    this.isDevelopment = isDevelopment;
     this.apiKey = apiKey;
     this.packageName = packageName;
     this.packageVersion = packageVersion;
     this.onMessageCallback = onMessageCallback;
 
     this.reconnectionInterval = WS_CLIENT.RECONNECTION_INTERVAL.BASE_IN_SECONDS;
+    this.WS_URL = isDevelopment
+      ? WS_CLIENT.URL.DEV
+      : host
+        ? WS_CLIENT.URL.CUSTOM(host)
+        : WS_CLIENT.URL.PROD;
 
     this.connect = this.connect.bind(this);
     this.shutdown = this.shutdown.bind(this);
@@ -78,9 +83,7 @@ class WSClient {
   }
 
   private makeConnectionRequest() {
-    const WS_URL = this.isDevelopment ? WS_CLIENT.URL.DEV : WS_CLIENT.URL.PROD;
-
-    this.ws = new NodeWebSocket(WS_URL, {
+    this.ws = new NodeWebSocket(this.WS_URL, {
       rejectUnauthorized: true,
       headers: {
         [WS_CLIENT.CONNECTION_HEADERS.API_KEY]: this.apiKey,

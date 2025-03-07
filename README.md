@@ -93,26 +93,5 @@ Compose offers a generous free tier that includes unlimited usage for solo-devel
 
 ### Self-hosted
 
-You can self-host Compose on your own servers for greater control over your data and infrastructure. This guide will walk you through the entire process of running Compose on your own servers.
-
-#### Requirements
-
-Compose requires the following resources to run:
-- A postgres database
-- A virtual machine that can run the Compose docker image
-- Google OAuth2 credentials to enable sign-in with Google
-
-#### Step 1: Clone the repo
-
-Clone the Compose repo.
-
-```bash
-git clone https://github.com/composehq/compose.git
-```
-
-#### Step 1: Environment variables
-
-- Create a copy of `.env.example` in the root of the repo.
-- Rename the copied file to `.env`.
-- Fill in the values for the environment variables.
+You can self-host Compose on your own servers for greater control over your data and infrastructure. Read the [self-hosting guide](https://github.com/compose-dev/compose/blob/main/SELF_HOSTING.md) for instructions on how to set it up.
 

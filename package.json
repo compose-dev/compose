@@ -2,7 +2,15 @@
   "name": "compose-monorepo",
   "version": "1.0.0",
   "main": "N/A",
-  "scripts": {},
+  "scripts": {
+    "build:compose-app": "pnpm run build:lib:ts-public; pnpm run build:lib:ts; pnpm run build:client; pnpm run build:server-core; cp -R packages/client/dist packages/server-core/dist/client; pnpm run build:server",
+    "build:client": "pnpm --filter client run build",
+    "build:server": "pnpm --filter server run build",
+    "build:server-core": "pnpm --filter server-core run build",
+    "build:lib:ts-public": "pnpm --filter @composehq/ts-public run build",
+    "build:lib:ts": "pnpm --filter @compose/ts run build",
+    "start:server": "pnpm --filter server run start"
+  },
   "author": "Atul Jalan <atul@composehq.com>",
   "license": "AGPL-3.0-or-later",
   "devDependencies": {

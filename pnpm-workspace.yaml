@@ -1,0 +1,8 @@
+packages:
+  - "packages/client"
+  - "packages/server"
+  - "packages/server-core"
+  - "packages/lib/ts-public"
+  - "packages/lib/ts"
+  - "packages/sdk/create-compose-app"
+  - "packages/sdk/node"

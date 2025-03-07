@@ -37,6 +37,7 @@ class APIHandler:
         package_version: str,
         *,
         debug: bool = False,
+        host: Union[str, None] = None,
     ) -> None:
         self.scheduler = scheduler
 
@@ -45,6 +46,16 @@ class APIHandler:
         self.package_name = package_name
         self.package_version = package_version
         self.debug = debug
+
+        self.WS_URL = (
+            WS_CLIENT["URL"]["DEV"]
+            if self.isDevelopment
+            else (
+                WS_CLIENT["URL"]["PROD"]
+                if host is None
+                else f"wss://{host}/{WS_CLIENT['WS_URL_PATH']}"
+            )
+        )
 
         self.reconnection_interval = WS_CLIENT["RECONNECTION_INTERVAL"][
             "BASE_IN_SECONDS"
@@ -100,10 +111,6 @@ class APIHandler:
         await self.send_raw(binary)
 
     async def __makeConnectionRequest(self, on_connect_data: dict) -> None:
-        WS_URL = (
-            WS_CLIENT["URL"]["DEV"] if self.isDevelopment else WS_CLIENT["URL"]["PROD"]
-        )
-
         headers = {
             WS_CLIENT["CONNECTION_HEADERS"]["API_KEY"]: self.apiKey,
             WS_CLIENT["CONNECTION_HEADERS"]["PACKAGE_NAME"]: self.package_name,
@@ -118,7 +125,7 @@ class APIHandler:
 
         try:
             async with websockets.connect(
-                uri=WS_URL,
+                uri=self.WS_URL,
                 extra_headers=headers,
                 ssl=ssl_context,
                 max_size=10485760,  # 10 MB

@@ -33,6 +33,7 @@ class Api {
     packageVersion: string,
     options: {
       debug?: boolean;
+      host?: string;
     } = {}
   ) {
     this.isDevelopment = isDevelopment;
@@ -54,7 +55,8 @@ class Api {
       this.apiKey,
       this.packageName,
       this.packageVersion,
-      this.onMessage
+      this.onMessage,
+      options.host
     );
   }
 

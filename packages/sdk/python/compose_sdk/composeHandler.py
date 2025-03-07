@@ -87,6 +87,7 @@ class ComposeClient:
         theme: Union[Theme, None] = None,
         debug: bool = False,
         DANGEROUS_ENABLE_DEV_MODE: bool = False,
+        host: Union[str, None] = None,
     ):
         if api_key is None:  # type: ignore
             raise ValueError("Missing 'api_key' field in Compose.Client constructor")
@@ -132,6 +133,7 @@ class ComposeClient:
             package_name,
             package_version,
             debug=self.debug,
+            host=host,
         )
         self.app_runners: Dict[str, AppRunner] = {}
 

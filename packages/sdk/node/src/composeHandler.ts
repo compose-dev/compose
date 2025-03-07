@@ -42,6 +42,15 @@ type ComposeOptions = {
    * performance issues.
    */
   debug?: boolean;
+
+  /**
+   * If self-hosting, use this field to specify the host of the Compose
+   * server to connect to, e.g. `example.com`.
+   *
+   * Do not include the protocol (e.g. `https://`) or path (e.g. `/api/v1`) in
+   * this value.
+   */
+  host?: string;
 };
 
 /**
@@ -189,6 +198,7 @@ class ComposeClient {
       PACKAGE_VERSION,
       {
         debug: this.debug,
+        host: options.host,
       }
     );
     this.appRunners = new Map();

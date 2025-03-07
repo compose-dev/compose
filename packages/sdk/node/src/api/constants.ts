@@ -4,6 +4,8 @@ export const WS_CLIENT = {
   URL: {
     DEV: `ws://localhost:8080/${WSUtils.Routes.SDK_TO_SERVER_PATH}`,
     PROD: `wss://app.composehq.com/${WSUtils.Routes.SDK_TO_SERVER_PATH}`,
+    CUSTOM: (host: string) =>
+      `wss://${host}/${WSUtils.Routes.SDK_TO_SERVER_PATH}`,
   },
   RECONNECTION_INTERVAL: {
     BASE_IN_SECONDS: 5,

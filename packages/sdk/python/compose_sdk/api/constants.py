@@ -5,6 +5,7 @@ WS_CLIENT = {
         "DEV": f"ws://localhost:8080/{WS_URL_PATH}",
         "PROD": f"wss://app.composehq.com/{WS_URL_PATH}",
     },
+    "WS_URL_PATH": WS_URL_PATH,
     "RECONNECTION_INTERVAL": {
         "BASE_IN_SECONDS": 5,
         "BACKOFF_MULTIPLIER": 1.7,
