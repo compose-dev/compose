@@ -88,7 +88,7 @@ def users_dashboard(page: c.Page, ui: c.UI):
 client = c.Client(
     api_key="API_KEY_HERE",
     apps=[
-        c.App("Users Dashboard", users_dashboard)
+        c.App(route="users-dashboard", handler=users_dashboard)
     ],
 )
 
@@ -100,7 +100,6 @@ const DOCS_URL =
   "https://docs.composehq.com/get-started/concepts#app-structure";
 
 const usersDashboard = new Compose.App({
-  name: "Users Dashboard",
   route: "users-dashboard",
   handler: ({ page, ui }) => {
     const users = [

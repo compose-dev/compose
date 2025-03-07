@@ -4,7 +4,6 @@ const DOCS_URL =
   "https://docs.composehq.com/get-started/concepts#app-structure";
 
 const usersDashboard = new Compose.App({
-  name: "Users Dashboard",
   route: "users-dashboard",
   handler: ({ page, ui }) => {
     const users = [

@@ -27,7 +27,7 @@ def users_dashboard(page: c.Page, ui: c.UI):
 
 client = c.Client(
     api_key="API_KEY_HERE",
-    apps=[c.App("Users Dashboard", users_dashboard, route="users-dashboard")],
+    apps=[c.App(route="users-dashboard", handler=users_dashboard)],
 )
 
 client.connect()
