@@ -13,6 +13,7 @@ const DOC_TYPE = {
   "guides-form": "guides-form",
   "guides-styling-layout": "guides-styling-layout",
   "guides-styling-positioning": "guides-styling-positioning",
+  "components-navigation": "components-navigation",
   "components-layout-stack": "components-layout-stack",
   "components-layout-row": "components-layout-row",
   "components-layout-card": "components-layout-card",

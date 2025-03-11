@@ -80,17 +80,17 @@ async function getSettings() {
   };
 }
 
-async function initializeApp(
-  body: BrowserToServerEvent.InitializeApp.RequestBody
+async function initializeEnvironmentAndAuthorizeApp(
+  body: BrowserToServerEvent.InitializeEnvironmentAndAuthorizeApp.RequestBody
 ) {
   return await request<
-    BrowserToServerEvent.InitializeApp.SuccessResponseBody,
-    BrowserToServerEvent.InitializeApp.ErrorResponseBody
+    BrowserToServerEvent.InitializeEnvironmentAndAuthorizeApp.SuccessResponseBody,
+    BrowserToServerEvent.InitializeEnvironmentAndAuthorizeApp.ErrorResponseBody
   >({
-    route: `/${BrowserToServerEvent.InitializeApp.route}`,
+    route: `/${BrowserToServerEvent.InitializeEnvironmentAndAuthorizeApp.route}`,
     forwardLog: log,
     body,
-    method: BrowserToServerEvent.InitializeApp.method,
+    method: BrowserToServerEvent.InitializeEnvironmentAndAuthorizeApp.method,
   });
 }
 
@@ -421,7 +421,7 @@ async function logError(body: BrowserToServerEvent.LogError.RequestBody) {
 export {
   initialize,
   fetchEnvironmentWithDetails,
-  initializeApp,
+  initializeEnvironmentAndAuthorizeApp,
   googleOAuth2Callback,
   checkAuth,
   logout,

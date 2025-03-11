@@ -6,6 +6,7 @@ from .api import ApiHandler
 from .scheduler import Scheduler
 from .app import AppDefinition, AppRunner, PageParams
 from .core import EventType, Debug
+from .navigation import Navigation, NavigationConfiguration
 
 # get package version
 try:
@@ -22,7 +23,7 @@ class Theme(TypedDict):
     primary_color: str
 
 
-def ensure_unique_routes(apps: List[AppDefinition]) -> None:
+def get_unique_routes(apps: List[AppDefinition]) -> Set[str]:
     """
     Ensures that all routes are unique. Edits the apps in place and does not
     return anything.
@@ -36,6 +37,8 @@ def ensure_unique_routes(apps: List[AppDefinition]) -> None:
             raise ValueError(f"Duplicate route: {app.route}")
 
         routes.add(app.route)
+
+    return routes
 
 
 def ensure_valid_parent_app_route(apps: List[AppDefinition]) -> None:
@@ -57,6 +60,34 @@ def ensure_valid_parent_app_route(apps: List[AppDefinition]) -> None:
                 raise ValueError(
                     f"Parent app not found: {app.parent_app_route} for app: {app.route}"
                 )
+
+
+def ensure_valid_navs(
+    navs: List[NavigationConfiguration], app_routes: Set[str]
+) -> None:
+    for nav in navs:
+        for item in nav["items"]:
+            if item not in app_routes:
+                raise ValueError(
+                    f"Failed to initialize Compose: could not find matching app route for nav item: {item}"
+                )
+
+        if len(nav["items"]) > 250:
+            raise ValueError(
+                "Failed to initialize Compose: navigation bar cannot have more than 250 items"
+            )
+
+        if len(nav["items"]) == 0:
+            raise ValueError(
+                "Failed to initialize Compose: navigation bar has no items"
+            )
+
+    if len(navs) > 100:
+        raise ValueError(
+            "Failed to initialize Compose: cannot have more than 100 navigation bars"
+        )
+
+    return True
 
 
 def get_apps_by_route(apps: List[AppDefinition]) -> Dict[str, AppDefinition]:
@@ -112,10 +143,13 @@ class ComposeClient:
         self.is_development = DANGEROUS_ENABLE_DEV_MODE
         self.debug = debug
 
-        ensure_unique_routes(apps)
+        unique_routes = get_unique_routes(apps)
         ensure_valid_parent_app_route(apps)
 
         self.app_definitions = get_apps_by_route(apps)
+
+        self.nav_summaries = self.summarize_navs()
+        ensure_valid_navs(self.nav_summaries, unique_routes)
 
         self.scheduler = Scheduler()
 
@@ -147,6 +181,7 @@ class ComposeClient:
         self.api.connect(
             {
                 "type": EventType.SdkToServer.INITIALIZE,
+                "navs": self.nav_summaries,
                 "apps": self.summarize_apps(),
                 "theme": camelCaseTheme(self.theme) if self.theme is not None else None,
                 "packageVersion": package_version,
@@ -159,6 +194,18 @@ class ComposeClient:
             app_definition.summarize()
             for app_definition in self.app_definitions.values()
         ]
+
+    def summarize_navs(self) -> List[NavigationConfiguration]:
+        nav_ids: List[str] = []
+        navs: List[NavigationConfiguration] = []
+
+        for app_definition in self.app_definitions.values():
+            nav = app_definition.navigation()
+            if nav is not None and nav.configuration["id"] not in nav_ids:
+                navs.append(nav.configuration)
+                nav_ids.append(nav.configuration["id"])
+
+        return navs
 
     async def handle_browser_event(self, event: Dict) -> None:
         if event["type"] == EventType.ServerToSdk.START_EXECUTION:

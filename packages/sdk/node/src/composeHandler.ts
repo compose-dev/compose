@@ -9,11 +9,11 @@ import * as app from "./app";
 import { PACKAGE_VERSION } from "./packageVersion";
 import { debug } from "./utils";
 
-type ComposeOptions = {
+type ComposeOptions<TApps extends readonly app.Definition[]> = {
   /**
    * A list of apps to serve.
    */
-  apps: app.Definition<any>[];
+  apps: TApps;
 
   /**
    * A valid Compose API key.
@@ -59,7 +59,7 @@ type ComposeOptions = {
  *
  * @param apps - The apps to ensure uniqueness for.
  */
-function ensureUniqueRoutes(apps: app.Definition[]) {
+function getUniqueRoutes(apps: readonly app.Definition[]) {
   const routes = new Set<string>();
 
   for (const app of apps) {
@@ -69,6 +69,8 @@ function ensureUniqueRoutes(apps: app.Definition[]) {
 
     routes.add(app.route);
   }
+
+  return routes;
 }
 
 /**
@@ -76,7 +78,7 @@ function ensureUniqueRoutes(apps: app.Definition[]) {
  *
  * @param apps - The apps to ensure valid parentAppRoutes for.
  */
-function ensureValidParentAppRoute(apps: app.Definition[]) {
+function ensureValidParentAppRoute(apps: readonly app.Definition[]) {
   for (const app of apps) {
     if (app.parentAppRoute !== undefined) {
       const parentApp = apps.find(
@@ -85,18 +87,56 @@ function ensureValidParentAppRoute(apps: app.Definition[]) {
 
       if (parentApp === undefined) {
         throw new Error(
-          `Parent app not found: ${app.parentAppRoute} for app: ${app.route}`
+          `Failed to initialize Compose: parent app not found: ${app.parentAppRoute} for app: ${app.route}`
         );
       }
 
       if (parentApp.route === app.route) {
-        throw new Error(`App cannot have itself as a parent: ${app.route}`);
+        throw new Error(
+          `Failed to initialize Compose: app cannot have itself as a parent: ${app.route}`
+        );
       }
     }
   }
 }
 
-function getAppsByRoute(apps: app.Definition<any>[]) {
+function ensureValidNavs(
+  navs: u.navigation.UserProvidedInterface[],
+  appRoutes: Set<string>
+) {
+  for (const nav of navs) {
+    for (const item of nav.items) {
+      if (!appRoutes.has(item)) {
+        throw new Error(
+          `Failed to initialize Compose: could not find matching app route for nav item: ${item}`
+        );
+      }
+    }
+
+    // Arbitrary limit to prevent abuse.
+    if (nav.items.length > 250) {
+      throw new Error(
+        "Failed to initialize Compose: navigation bar cannot have more than 250 items"
+      );
+    }
+
+    if (nav.items.length === 0) {
+      throw new Error(
+        "Failed to initialize Compose: navigation bar has no items"
+      );
+    }
+  }
+
+  if (navs.length > 100) {
+    throw new Error(
+      "Failed to initialize Compose: cannot have more than 100 navigation bars"
+    );
+  }
+
+  return true;
+}
+
+function getAppsByRoute(apps: readonly app.Definition[]) {
   const appsByRoute: Record<string, app.Definition> = {};
 
   for (const app of apps) {
@@ -112,7 +152,7 @@ function getAppsByRoute(apps: app.Definition<any>[]) {
  * @param config - The configuration to check.
  * @returns True if the SDK is in development mode, false otherwise.
  */
-function isDevelopmentMode(options: ComposeOptions) {
+function isDevelopmentMode(options: ComposeOptions<readonly app.Definition[]>) {
   if (
     // @ts-expect-error We intentionally hide this flag from TypeScript!
     options.DANGEROUS_ENABLE_DEV_MODE !== undefined
@@ -124,8 +164,8 @@ function isDevelopmentMode(options: ComposeOptions) {
   return false;
 }
 
-class ComposeClient {
-  private appDefinitions: Record<string, app.Definition>;
+class ComposeClient<TApps extends readonly app.Definition[]> {
+  appDefinitions: Record<string, TApps[number]>;
   private isDevelopment: boolean;
   private apiKey: string;
   private theme: SdkToServerEvent.Initialize.Data["theme"];
@@ -134,6 +174,8 @@ class ComposeClient {
   private api: api.Handler;
 
   private appRunners: Map<string, app.Runner>;
+
+  private navSummaries: u.navigation.UserProvidedInterface[];
 
   /**
    * Initialize a new Compose client. The client is responsible for
@@ -160,7 +202,7 @@ class ComposeClient {
    * @param {ComposeOptions["theme"]} options.theme (optional) A custom color palette to use for the apps.
    * @param {ComposeOptions["debug"]} options.debug (optional) Whether to enable debug logging.
    */
-  constructor(options: ComposeOptions) {
+  constructor(options: ComposeOptions<TApps>) {
     if (options.apiKey === undefined) {
       throw new Error("Missing 'apiKey' field in Compose.Client constructor");
     }
@@ -179,7 +221,8 @@ class ComposeClient {
     this.apiKey = options.apiKey;
     this.isDevelopment = isDevelopmentMode(options);
 
-    ensureUniqueRoutes(options.apps);
+    // Will throw an error if there are duplicate routes.
+    const appRoutes = getUniqueRoutes(options.apps);
     ensureValidParentAppRoute(options.apps);
 
     this.appDefinitions = getAppsByRoute(options.apps);
@@ -195,6 +238,11 @@ class ComposeClient {
     );
     this.appRunners = new Map();
 
+    this.summarizeNavs = this.summarizeNavs.bind(this);
+
+    this.navSummaries = this.summarizeNavs();
+    ensureValidNavs(this.navSummaries, appRoutes);
+
     this.connect = this.connect.bind(this);
     this.summarizeApps = this.summarizeApps.bind(this);
     this.handleBrowserEvent = this.handleBrowserEvent.bind(this);
@@ -209,6 +257,7 @@ class ComposeClient {
     this.api.send({
       type: SdkToServerEvent.TYPE.INITIALIZE,
       apps: this.summarizeApps(),
+      navs: this.navSummaries,
       theme: this.theme,
       packageName: u.sdkPackage.NAME.NODE,
       packageVersion: PACKAGE_VERSION,
@@ -223,6 +272,23 @@ class ComposeClient {
     return Object.values(this.appDefinitions).map((appDefinition) =>
       appDefinition.summarize()
     );
+  }
+
+  private summarizeNavs() {
+    const navIds: string[] = [];
+    const navs: u.navigation.UserProvidedInterface[] = [];
+
+    for (const appDefinition of Object.values(this.appDefinitions)) {
+      if (
+        appDefinition.navigation &&
+        !navIds.includes(appDefinition.navigation.configuration.id)
+      ) {
+        navs.push(appDefinition.navigation.configuration);
+        navIds.push(appDefinition.navigation.configuration.id);
+      }
+    }
+
+    return navs;
   }
 
   private handleBrowserEvent(event: api.ListenerEvent) {

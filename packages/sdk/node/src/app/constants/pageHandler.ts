@@ -95,9 +95,7 @@ interface PageHandler {
   /**
    * Rerender the UI to reflect the latest data.
    *
-   * @important For changes to be detected, you must reassign variables that
-   * are passed to UI components entirely instead of modifying nested
-   * properties.
+   * @important All updates to data should be done immutably. For example, instead of mutating a single field in a table row, you should create a copy of the table data, mutate the copy, and reassign the original table data to the copy. Compose detects UI changes by comparing cached UI components with the latest version. Immutable updates ensure that updated data doesn't also update the cached UI component.
    */
   update: () => void;
 }

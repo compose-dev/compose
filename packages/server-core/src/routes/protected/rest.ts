@@ -266,78 +266,94 @@ async function routes(server: FastifyInstance, wsGateway: WSGateway) {
   );
 
   server.post<{
-    Body: BrowserToServerEvent.InitializeApp.RequestBody;
-    Reply: BrowserToServerEvent.InitializeApp.ResponseBody;
-  }>(`/${BrowserToServerEvent.InitializeApp.route}`, async (req, reply) => {
-    const body = req.body as BrowserToServerEvent.InitializeApp.RequestBody;
-    const appRoute = body.appRoute;
-    const environmentId = body.environmentId;
+    Body: BrowserToServerEvent.InitializeEnvironmentAndAuthorizeApp.RequestBody;
+    Reply: BrowserToServerEvent.InitializeEnvironmentAndAuthorizeApp.ResponseBody;
+  }>(
+    `/${BrowserToServerEvent.InitializeEnvironmentAndAuthorizeApp.route}`,
+    async (req, reply) => {
+      const body =
+        req.body as BrowserToServerEvent.InitializeEnvironmentAndAuthorizeApp.RequestBody;
+      const appRoute = body.appRoute;
+      const environmentId = body.environmentId;
 
-    const user = req.user;
+      const user = req.user;
 
-    if (!user) {
-      return reply.status(401).send({ message: "Unauthorized" });
-    }
+      if (!user) {
+        return reply.status(401).send({ message: "Unauthorized" });
+      }
 
-    const validationResponse = await server.session.validateAppUser(
-      appRoute,
-      environmentId,
-      user.companyId,
-      user.email,
-      user.isExternal
-    );
-
-    if (!validationResponse.isValid) {
-      return reply
-        .status(validationResponse.code)
-        .send({ message: validationResponse.message });
-    }
-
-    const environment = validationResponse.environment;
-
-    const app = environment.apps.filter((app) => app.route === appRoute);
-
-    if (app.length === 0) {
-      return reply.status(400).send({ message: "App not found." });
-    }
-
-    if (app.length > 1) {
-      return reply
-        .status(400)
-        .send({ message: "Found multiple apps with the same route." });
-    }
-
-    server.analytics.capture(
-      server.analytics.event.APP_INITIALIZED,
-      user.isExternal ? server.analytics.anonymousUserId : user.id,
-      environment.companyId,
-      {
+      const validationResponse = await server.session.validateAppUser(
         appRoute,
         environmentId,
-        environmentType: environment.type,
-        userEmail: user.email,
-        externalUser: user.isExternal,
+        user.companyId,
+        user.email,
+        user.isExternal
+      );
+
+      if (!validationResponse.isValid) {
+        return reply
+          .status(validationResponse.code)
+          .send({ message: validationResponse.message });
       }
-    );
 
-    // ONLY DO THIS ONCE THE USER HAS BEEN AUTHORIZED TO ACCESS THE APP!
-    wsGateway.authorizeBrowser(body.sessionId, appRoute, environmentId);
+      const environment = validationResponse.environment;
+      const companyPromise = db.company.selectById(
+        server.pg,
+        environment.companyId
+      );
 
-    return reply.status(200).send({
-      environment: {
-        name: environment.name,
-        type: environment.type,
-        theme: environment.theme,
-        apps: environment.apps,
-        sdkPackageName: environment.data.packageName,
-        sdkPackageVersion: environment.data.packageVersion,
-      },
-      app: app[0],
-      user: {
-        isExternal: user.isExternal,
-      },
-    });
-  });
+      const app = environment.apps.filter((app) => app.route === appRoute);
+
+      if (app.length === 0) {
+        return reply.status(400).send({ message: "App not found." });
+      }
+
+      if (app.length > 1) {
+        return reply
+          .status(400)
+          .send({ message: "Found multiple apps with the same route." });
+      }
+
+      server.analytics.capture(
+        server.analytics.event.APP_INITIALIZED,
+        user.isExternal ? server.analytics.anonymousUserId : user.id,
+        environment.companyId,
+        {
+          appRoute,
+          environmentId,
+          environmentType: environment.type,
+          userEmail: user.email,
+          externalUser: user.isExternal,
+        }
+      );
+
+      // ONLY DO THIS ONCE THE USER HAS BEEN AUTHORIZED TO ACCESS THE APP!
+      wsGateway.authorizeBrowser(body.sessionId, appRoute, environmentId);
+
+      const company = await companyPromise;
+
+      if (!company) {
+        return reply.status(400).send({ message: "Company not found" });
+      }
+
+      return reply.status(200).send({
+        environment: {
+          name: environment.name,
+          type: environment.type,
+          theme: environment.theme,
+          apps: environment.apps,
+          sdkPackageName: environment.data.packageName,
+          sdkPackageVersion: environment.data.packageVersion,
+          navs: environment.data.navs || [],
+        },
+        app: app[0],
+        user: {
+          isExternal: user.isExternal,
+        },
+        companyName: company.name,
+      });
+    }
+  );
 
   server.post(
     `/${BrowserToServerEvent.CreateEnvironment.route}`,

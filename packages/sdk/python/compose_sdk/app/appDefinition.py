@@ -2,6 +2,7 @@ from typing import Callable, Union, Any, Dict, overload
 
 from .route import format_route, is_valid_route
 from ..core import prettify_key
+from ..navigation import Navigation
 
 
 class AppDefinition:
@@ -29,6 +30,7 @@ class AppDefinition:
         - hide this app in the Compose dashboard so that the dashboard isn't cluttered with sub-pages for a multi-page app. This app will still be available programmatically (e.g. via the `page.link` function) and via the URL. This feature can be overriden by directly setting the `hidden` property to `False`.
     - `description`: A short description of the app to display on the home page.
     - `hidden`: Whether the app should be hidden from the home page.
+    - `navigation`: Display a navigation pane that links to other apps.
 
     Read the full documentation: https://docs.composehq.com/get-started/concepts
     """
@@ -44,6 +46,7 @@ class AppDefinition:
         description: Union[str, None] = None,
         hidden: Union[bool, None] = None,
         initial_state: Union[Dict[str, Any], None] = None,
+        navigation: Union[Navigation, None] = None,
     ) -> None: ...
 
     # This overload is kept for backwards compatibility, but all new code should use the first overload instead!
@@ -58,6 +61,7 @@ class AppDefinition:
         description: Union[str, None] = None,
         hidden: Union[bool, None] = None,
         initial_state: Union[Dict[str, Any], None] = None,
+        navigation: Union[Navigation, None] = None,
     ) -> None: ...
 
     def __init__(  # type: ignore[unused-ignore]
@@ -70,6 +74,7 @@ class AppDefinition:
         description: Union[str, None] = None,
         hidden: Union[bool, None] = None,
         initial_state: Union[Dict[str, Any], None] = None,
+        navigation: Union[Navigation, None] = None,
     ):
         using_kwargs_route = route is not None
 
@@ -124,6 +129,7 @@ class AppDefinition:
         self.hidden = hidden
         self.parent_app_route = parent_app_route
         self.initial_state = initial_state or {}
+        self._navigation = navigation
 
         if parent_app_route:
             self.parent_app_route = format_route(parent_app_route)
@@ -138,9 +144,12 @@ class AppDefinition:
         optional_properties = {
             "parentAppRoute": self.parent_app_route,
             "hidden": self.hidden,
+            "navId": (
+                self._navigation.configuration["id"] if self._navigation else None
+            ),
         }
 
-        required_properties: Dict[str, Union[str, bool, None]] = {
+        required_properties: Dict[str, Union[str, bool, Navigation, None]] = {
             "name": self.name,
             "route": self.route,
             "description": self.description,
@@ -151,3 +160,6 @@ class AppDefinition:
                 required_properties[key] = value
 
         return required_properties
+
+    def navigation(self) -> Union[Navigation, None]:
+        return self._navigation

@@ -15,6 +15,7 @@ type EnvironmentTheme = SdkToServerEvent.Initialize.Data["theme"];
 interface Data {
   packageName?: uPublic.sdkPackage.Name;
   packageVersion?: string;
+  navs?: uPublic.navigation.FormattedInterface[];
 }
 
 interface EnvironmentBase {

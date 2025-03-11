@@ -93,6 +93,10 @@ function Docs() {
     );
   }
 
+  if (type === DOC_TYPE["components-navigation"]) {
+    return <Components.Navigation />;
+  }
+
   if (type === DOC_TYPE["get-started-fundamentals-state"]) {
     return (
       <BrowserWrapper>

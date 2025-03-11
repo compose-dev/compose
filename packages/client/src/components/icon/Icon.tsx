@@ -23,6 +23,7 @@ import {
   IconBrandTypescript,
   IconBrandJavascript,
   IconBrandPython,
+  IconLayoutSidebarRight,
 } from "@tabler/icons-react";
 
 const ICON_NAME = {
@@ -69,6 +70,7 @@ const ICON_NAME = {
   typescript: "typescript",
   javascript: "javascript",
   python: "python",
+  "sidebar-right": "sidebar-right",
 } as const;
 
 const SIZE = {
@@ -131,6 +133,16 @@ function Icon({
   color?: IconColor;
   size?: Size;
 }) {
+  if (name === ICON_NAME["sidebar-right"]) {
+    return (
+      <IconLayoutSidebarRight
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
   if (name === ICON_NAME.at) {
     return (
       <svg
@@ -161,8 +173,8 @@ function Icon({
   if (name === ICON_NAME.bolt) {
     return (
       <svg
-        width="12.8"
-        height="16"
+        width={(12.8 * SIZE_MULTIPLIER[size]).toString()}
+        height={(16 * SIZE_MULTIPLIER[size]).toString()}
         viewBox="0 0 16 20"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"

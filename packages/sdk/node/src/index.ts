@@ -1,9 +1,9 @@
 import { UI } from "@composehq/ts-public";
 import { AppHandlerOptions } from "./app";
 
-type State<TState = Record<string, any>> = AppHandlerOptions<TState>["state"];
-type UI = AppHandlerOptions<any>["ui"];
-type Page = AppHandlerOptions<any>["page"];
+type State = AppHandlerOptions["state"];
+type UI = AppHandlerOptions["ui"];
+type Page = AppHandlerOptions["page"];
 
 type TableColumn<TData extends UI.Table.DataRow[] = UI.Table.DataRow[]> =
   UI.Table.ColumnGenerator<TData>;

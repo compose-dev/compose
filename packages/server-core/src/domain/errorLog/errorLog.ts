@@ -15,4 +15,21 @@ function logStringError(server: FastifyInstance, error: string) {
   });
 }
 
-export { logStringError as log };
+function tryFunction<T>(
+  callback: () => T,
+  server: FastifyInstance,
+  errorMessage?: string
+): T | undefined {
+  try {
+    return callback();
+  } catch (error) {
+    logStringError(
+      server,
+      `${errorMessage || "Error"}: ${
+        error instanceof Error ? error.toString() : JSON.stringify(error)
+      }`
+    );
+  }
+}
+
+export { logStringError as log, tryFunction };

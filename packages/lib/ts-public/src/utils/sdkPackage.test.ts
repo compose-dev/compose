@@ -24,7 +24,7 @@ describe("meetsMinimumPackageVersion", () => {
     expect(result).toEqual({
       success: false,
       error:
-        "Unsupported package version. Minimum supported version is 1.1.0. Please update your package to the latest version to get the latest features and bug fixes!",
+        "Unsupported package version. Minimum supported version is 1.1.0. Please upgrade your package to continue using Compose. See docs for help: https://docs.composehq.com/guides/upgrade-sdk",
     });
   });
 
@@ -41,7 +41,7 @@ describe("meetsMinimumPackageVersion", () => {
     expect(result).toEqual({
       success: false,
       error:
-        "Unsupported package version. Minimum supported version is 1.0.0. Please update your package to the latest version to get the latest features and bug fixes!",
+        "Unsupported package version. Minimum supported version is 1.0.0. Please upgrade your package to continue using Compose. See docs for help: https://docs.composehq.com/guides/upgrade-sdk",
     });
   });
 
@@ -50,7 +50,7 @@ describe("meetsMinimumPackageVersion", () => {
     expect(meetsMinimumVersion("1.0.9", "1.0.10")).toEqual({
       success: false,
       error:
-        "Unsupported package version. Minimum supported version is 1.0.10. Please update your package to the latest version to get the latest features and bug fixes!",
+        "Unsupported package version. Minimum supported version is 1.0.10. Please upgrade your package to continue using Compose. See docs for help: https://docs.composehq.com/guides/upgrade-sdk",
     });
   });
 
@@ -59,7 +59,7 @@ describe("meetsMinimumPackageVersion", () => {
     expect(meetsMinimumVersion("1.9.9", "2.0.0")).toEqual({
       success: false,
       error:
-        "Unsupported package version. Minimum supported version is 2.0.0. Please update your package to the latest version to get the latest features and bug fixes!",
+        "Unsupported package version. Minimum supported version is 2.0.0. Please upgrade your package to continue using Compose. See docs for help: https://docs.composehq.com/guides/upgrade-sdk",
     });
   });
 
@@ -68,7 +68,7 @@ describe("meetsMinimumPackageVersion", () => {
     expect(meetsMinimumVersion("1.1.9", "1.2.0")).toEqual({
       success: false,
       error:
-        "Unsupported package version. Minimum supported version is 1.2.0. Please update your package to the latest version to get the latest features and bug fixes!",
+        "Unsupported package version. Minimum supported version is 1.2.0. Please upgrade your package to continue using Compose. See docs for help: https://docs.composehq.com/guides/upgrade-sdk",
     });
   });
 

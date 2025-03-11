@@ -8,6 +8,7 @@ import {
   RawData as NodeWebSocketRawData,
 } from "ws";
 
+import { d } from "../../domain";
 import { db } from "../../models";
 import { apiKeyService } from "../../services/apiKey";
 
@@ -292,6 +293,22 @@ class WSSdk {
       });
     }
 
+    const navs = d.errorLog.tryFunction(
+      () => {
+        if (data.navs) {
+          return data.navs.map((nav) => ({
+            ...nav,
+            items: nav.items.map((item) => ({
+              label: apps.find((app) => app.route === item)?.name || item,
+              route: item,
+            })),
+          }));
+        }
+      },
+      this.server,
+      "Error parsing navs"
+    );
+
     await db.environment.updateConfiguration(
       this.server.pg,
       client.environment.id,
@@ -300,6 +317,7 @@ class WSSdk {
       {
         packageName: client.packageName,
         packageVersion: client.packageVersion,
+        navs,
       }
     );
 

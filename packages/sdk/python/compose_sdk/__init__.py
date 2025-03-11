@@ -2,6 +2,7 @@
 
 from .composeHandler import ComposeClient as Client
 from .app import AppDefinition as App, Page, State
+from .navigation import Navigation
 from .core.generator import Component as UI
 from .core.file import File
 from .core.ui import (
@@ -24,6 +25,7 @@ __all__ = [
     # Classes
     "Client",
     "App",
+    "Navigation",
     # Core Types
     "UI",
     "Page",

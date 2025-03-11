@@ -34,20 +34,6 @@ function downloadFile(blob: Blob, fileName: string) {
   URL.revokeObjectURL(url);
 }
 
-function isDocumenationApp(environmentId: string, appRoute: string | null) {
-  if (isDev) {
-    return (
-      appRoute === "documentation" &&
-      environmentId === "3eb3d4f4-9fe8-46b1-8a86-26c1f32733fc"
-    );
-  } else {
-    return (
-      appRoute === "documentation" &&
-      environmentId === "76c437ce-2db1-4146-8712-d4417cb8e570"
-    );
-  }
-}
-
 function useAppRunner() {
   const { addToast } = toast.useStore();
   const navigate = useNavigate({ from: "/app/$environmentId/$appRoute" });
@@ -85,6 +71,7 @@ function useAppRunner() {
     useShallow((state) => state.renderToRootComponent)
   );
   const pageLoading = appStore.use((state) => state.loading);
+  const setNavs = appStore.useNavigation((state) => state.setNavs);
 
   const [loadingAuthorization, setLoadingAuthorization] = useState(true);
 
@@ -143,7 +130,7 @@ function useAppRunner() {
 
   const initializeApp = useCallback(
     async (envId: string, route: string) => {
-      const response = await api.routes.initializeApp({
+      const response = await api.routes.initializeEnvironmentAndAuthorizeApp({
         environmentId: envId,
         appRoute: route,
         sessionId,
@@ -171,15 +158,17 @@ function useAppRunner() {
 
       const theme = response.data.environment.theme;
 
-      const isDocumentationApp = isDocumenationApp(envId, route);
-      if (!isDocumentationApp) {
-        updateManualTheme(theme);
-      }
-
+      updateManualTheme(theme);
       setEnvironmentApps(response.data.environment.apps);
       isAuthorized.current = true;
       setLoadingAuthorization(false);
       setIsExternalUser(response.data.user.isExternal);
+      setNavs(
+        response.data.environment.navs,
+        response.data.environment.apps,
+        envId,
+        response.data.companyName
+      );
 
       updateEnvironmentPackage(
         envId,
@@ -195,6 +184,7 @@ function useAppRunner() {
       updateManualTheme,
       updateEnvironmentPackage,
       sessionId,
+      setNavs,
     ]
   );
 
@@ -717,24 +707,6 @@ function useAppRunner() {
     updateEnvironmentPackage,
   ]);
 
-  const isDocumentation = useMemo(() => {
-    const route = appRoute || currentRoute;
-    return isDocumenationApp(environmentId, route);
-  }, [environmentId, appRoute, currentRoute]);
-
-  useEffect(() => {
-    if (isDocumentation) {
-      const isDark = queryParams.isDark === "TRUE";
-      const isLight = queryParams.isLight === "TRUE";
-
-      if (isDark) {
-        updatePreference("dark", false);
-      } else if (isLight) {
-        updatePreference("light", false);
-      }
-    }
-  }, [isDocumentation, updatePreference, queryParams]);
-
   return {
     loadingAuthorization,
     error,
@@ -751,7 +723,6 @@ function useAppRunner() {
     isExternalUser,
     browserSessionId: sessionId,
     pageLoading,
-    isDocumentation,
   };
 }
 

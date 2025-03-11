@@ -1,7 +1,7 @@
 {
   "name": "@composehq/create",
   "description": "Bootstrap a project with a Compose starter app in one command",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "keywords": [
     "Compose",
     "Internal Tools"

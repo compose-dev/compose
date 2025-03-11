@@ -8,7 +8,7 @@ const WS_URL_PATH = "api/v1/browser/ws";
 
 function getWSUrl() {
   if (isDev) {
-    return `ws://localhost:8080/${WS_URL_PATH}`;
+    return `ws://${window.location.hostname}:8080/${WS_URL_PATH}`;
   }
 
   return `wss://${window.location.host}/${WS_URL_PATH}`;

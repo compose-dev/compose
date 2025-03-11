@@ -16,7 +16,7 @@ function LoadingOverlay({ loading }: { loading: appStore.Type["loading"] }) {
     <>
       <div
         className={classNames(
-          "fixed bottom-0 w-full flex justify-center pointer-events-none z-40",
+          "fixed bottom-0 left-0 w-screen flex justify-center pointer-events-none z-40",
           {
             hidden: initialLoad,
             // These two animations also toggle the display between hidden

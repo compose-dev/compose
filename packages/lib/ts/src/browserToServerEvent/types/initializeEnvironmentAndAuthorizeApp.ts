@@ -19,7 +19,9 @@ export interface SuccessResponseBody {
     apps: Environment.DB["apps"];
     sdkPackageName: uPublic.sdkPackage.Name | undefined;
     sdkPackageVersion: string | undefined;
+    navs: uPublic.navigation.FormattedInterface[];
   };
+  companyName: string;
 }
 
 export interface ErrorResponseBody {
@@ -28,5 +30,5 @@ export interface ErrorResponseBody {
 
 export type ResponseBody = SuccessResponseBody | ErrorResponseBody;
 
-export const route = "api/v1/initialize-app";
+export const route = "api/v1/initialize-environment-and-authorize-app";
 export const method = "POST";

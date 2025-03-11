@@ -45,7 +45,7 @@ function meetsMinimumPackageVersion(
   if (compareVersions(packageVersion, minVersion) < 0) {
     return {
       success: false,
-      error: `Unsupported package version. Minimum supported version is ${minVersion}. Please update your package to the latest version to get the latest features and bug fixes!`,
+      error: `Unsupported package version. Minimum supported version is ${minVersion}. Please upgrade your package to continue using Compose. See docs for help: https://docs.composehq.com/guides/upgrade-sdk`,
     };
   }
 

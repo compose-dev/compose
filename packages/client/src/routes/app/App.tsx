@@ -24,6 +24,7 @@ const routeApi = getRouteApi("/app/$environmentId/$appRoute");
 function App() {
   const navigate = useNavigate({ from: "/app/$environmentId/$appRoute" });
   const router = useRouter();
+  const { appRoute } = routeApi.useParams();
 
   const {
     loadingAuthorization,
@@ -41,8 +42,21 @@ function App() {
     isExternalUser,
     browserSessionId,
     pageLoading,
-    isDocumentation,
   } = useAppRunner();
+
+  const hasNav = appStore.useNavigation((state) => {
+    if (state.environmentId !== environmentId) {
+      return false;
+    }
+
+    const navId = state.appRouteToNavId[appRoute];
+
+    if (!navId) {
+      return false;
+    }
+
+    return state.navs.find((nav) => nav.id === navId) !== undefined;
+  });
 
   const handleBeforeUnload = useCallback(() => {
     // Check that there's actually an app running before sending this message!
@@ -151,7 +165,7 @@ function App() {
   }
 
   return (
-    <div className="w-full h-full overflow-x-hidden">
+    <div className="w-full h-full">
       {error !== null && (
         <Modal.Root
           isOpen={true}
@@ -217,9 +231,7 @@ function App() {
         className="w-full flex justify-center"
         style={{
           paddingTop: config.paddingTop ?? config.paddingY,
-          paddingBottom: isDocumentation
-            ? `max(0rem, ${config.paddingBottom ?? config.paddingY})`
-            : `max(4rem, ${config.paddingBottom ?? config.paddingY})`,
+          paddingBottom: `max(4rem, ${config.paddingBottom ?? config.paddingY})`,
           paddingLeft: config.paddingLeft ?? config.paddingX,
           paddingRight: config.paddingRight ?? config.paddingX,
         }}
@@ -243,45 +255,64 @@ function App() {
           )}
         </div>
       </div>
-      {!isDocumentation && (
-        <div className="fixed bottom-4 right-4">
-          <div className="rounded-brand shadow-lg flex items-center bg-brand-page border border-brand-neutral dark:bg-brand-overlay">
-            <div
-              className="p-2 cursor-pointer flex items-center gap-2"
-              onClick={() => {
-                window.open("https://composehq.com", "_blank");
-              }}
-            >
-              {isExternalUser && (
-                <p className="font-medium text-sm">Made with</p>
-              )}
-              <img
-                src="/light-logo-with-text.svg"
-                className="w-24 hidden dark:block"
-                alt="Logo"
-              />
-              <img
-                src="/dark-logo-with-text.svg"
-                className="w-24 block dark:hidden"
-                alt="Logo"
-              />
+      <div
+        className={classNames("fixed bottom-4 right-4", {
+          "lg:bottom-2 lg:right-2": hasNav,
+        })}
+      >
+        <div
+          className={classNames(
+            "rounded-brand flex items-center bg-brand-page border border-brand-neutral dark:bg-brand-overlay relative",
+            {
+              "lg:rounded-tr-none lg:rounded-bl-none lg:rounded-br-none lg:!bg-brand-overlay lg:dark:!bg-brand-io lg:!border-b-0 lg:!border-r-0":
+                hasNav,
+            }
+          )}
+        >
+          {hasNav && (
+            // Fix curves on the bottom left and right of floating menu to make it blend correctly with the page
+            <div className="hidden lg:block">
+              <div className="absolute left-[-4px] bottom-0 w-1 h-px bg-brand-overlay" />
+              <div className="absolute left-[-1px] bottom-0 w-px h-1 bg-brand-overlay" />
+              <div className="absolute left-[-4px] bottom-0 border-r border-b rounded-br-brand border-brand-neutral w-1 h-1 bg-transparent" />
+              <div className="absolute right-0 top-[-1px] w-1 h-px bg-brand-overlay" />
+              <div className="absolute right-0 top-[-4px] w-px h-1 bg-brand-overlay" />
+              <div className="absolute right-0 top-[-4px] border-r border-b rounded-br-brand border-brand-neutral w-1 h-1 bg-transparent" />
             </div>
-            <div className="px-2 border-x border-brand-neutral">
-              <ConnectionStatusIndicator connectionStatus={connectionStatus} />
-            </div>
-            <DropdownMenu
-              menuClassName="w-40"
-              label={
-                <div className="p-2">
-                  <Icon name="dots" color="brand-neutral-2" />
-                </div>
-              }
-              labelVariant="ghost"
-              options={dropdownMenuOptions}
+          )}
+          <div
+            className="p-2 cursor-pointer flex items-center gap-2"
+            onClick={() => {
+              window.open("https://composehq.com", "_blank");
+            }}
+          >
+            {isExternalUser && <p className="font-medium text-sm">Made with</p>}
+            <img
+              src="/light-logo-with-text.svg"
+              className="w-24 hidden dark:block"
+              alt="Logo"
+            />
+            <img
+              src="/dark-logo-with-text.svg"
+              className="w-24 block dark:hidden"
+              alt="Logo"
             />
           </div>
+          <div className="px-2 border-x border-brand-neutral">
+            <ConnectionStatusIndicator connectionStatus={connectionStatus} />
+          </div>
+          <DropdownMenu
+            menuClassName="w-40"
+            label={
+              <div className="p-2">
+                <Icon name="dots" color="brand-neutral-2" />
+              </div>
+            }
+            labelVariant="ghost"
+            options={dropdownMenuOptions}
+          />
         </div>
-      )}
+      </div>
       <LoadingOverlay loading={pageLoading} />
     </div>
   );

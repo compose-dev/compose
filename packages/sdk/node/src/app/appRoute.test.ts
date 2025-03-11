@@ -33,7 +33,7 @@ describe("AppDefinition route handling", () => {
           handler: dummyHandler,
           route: "",
         });
-      }).toThrow("Route argument is required");
+      }).toThrow("Failed to initialize Compose: route argument is required");
     });
 
     it("should accept route with only numbers", () => {
@@ -93,7 +93,7 @@ describe("AppDefinition route handling", () => {
           handler: dummyHandler,
           route: "test@route",
         });
-      }).toThrow("Invalid route");
+      }).toThrow("Failed to initialize Compose. Received invalid route");
 
       expect(() => {
         new AppDefinition({
@@ -101,7 +101,7 @@ describe("AppDefinition route handling", () => {
           handler: dummyHandler,
           route: "test$route",
         });
-      }).toThrow("Invalid route");
+      }).toThrow("Failed to initialize Compose. Received invalid route");
     });
 
     it("should handle route with spaces", () => {
@@ -121,7 +121,7 @@ describe("AppDefinition route handling", () => {
           handler: dummyHandler,
           route: "-test-route",
         });
-      }).toThrow("Invalid route");
+      }).toThrow("Failed to initialize Compose. Received invalid route");
     });
 
     it("should throw error for route ending with hyphen", () => {
@@ -131,7 +131,7 @@ describe("AppDefinition route handling", () => {
           handler: dummyHandler,
           route: "test-route-",
         });
-      }).toThrow("Invalid route");
+      }).toThrow("Failed to initialize Compose. Received invalid route");
     });
 
     it("should throw error for route with nested paths", () => {
@@ -141,7 +141,7 @@ describe("AppDefinition route handling", () => {
           handler: dummyHandler,
           route: "test/route",
         });
-      }).toThrow("Invalid route");
+      }).toThrow("Failed to initialize Compose. Received invalid route");
     });
   });
 });

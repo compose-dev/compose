@@ -26,6 +26,7 @@ import {
   type Lang as InteractiveOnboardingLang,
   type Step as InteractiveOnboardingStep,
 } from "./routes/interactiveOnboarding";
+import AppWrapper from "./routes/app/AppWrapper";
 
 interface Redirect {
   redirect: string | null;
@@ -247,9 +248,15 @@ const billingDetailsRoute = createRoute({
   },
 });
 
-const appRoute = createRoute({
+const appWrapperRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "app/$environmentId/$appRoute",
+  path: "app",
+  component: AppWrapper,
+});
+
+const appRoute = createRoute({
+  getParentRoute: () => appWrapperRoute,
+  path: "$environmentId/$appRoute",
   component: App,
   validateSearch: (search: Record<string, unknown>): Page.Params => {
     return search as Page.Params;
@@ -267,7 +274,7 @@ const routeTree = rootRoute.addChildren([
   docsRoute,
   interactiveOnboardingRoute,
   homeRoute.addChildren([homeIndexRoute, settingsRoute, billingDetailsRoute]),
-  appRoute,
+  appWrapperRoute.addChildren([appRoute]),
 ]);
 
 const router = createRouter({
