@@ -12,12 +12,14 @@ const PLAN_TO_LABEL = {
 
 const FLAG_KEYS = {
   FRIENDS_AND_FAMILY_FREE: "FRIENDS_AND_FAMILY_FREE",
+  AFFILIATE_CODE: "AFFILIATE_CODE",
 } as const;
 
 type FlagKey = (typeof FLAG_KEYS)[keyof typeof FLAG_KEYS];
 
-const DEFAULT_FLAGS: Record<FlagKey, string | boolean | number> = {
+const DEFAULT_FLAGS: Record<FlagKey, string | boolean | number | undefined> = {
   FRIENDS_AND_FAMILY_FREE: false,
+  AFFILIATE_CODE: undefined,
 };
 
 interface CompanyDB {
@@ -27,7 +29,7 @@ interface CompanyDB {
   updatedAt: Date;
   plan: Plan;
   billingId: string;
-  flags: Record<FlagKey, string | boolean | number>;
+  flags: Record<FlagKey, string | boolean | number | undefined>;
 }
 
 const FAKE_COMPANY_ID = "00000000-0000-0000-0000-000000000000";

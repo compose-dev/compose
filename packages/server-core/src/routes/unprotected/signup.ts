@@ -5,6 +5,7 @@ import { d } from "../../domain";
 import { db } from "../../models";
 import { apiKeyService } from "../../services/apiKey";
 import { GoogleOAuth } from "../../services/auth-google-oauth2/googleOauth";
+import { parseCookieHeader } from "../../utils/cookie";
 
 function getPersonalEnvironmentName(firstName: string): string {
   const possessiveForm = firstName.endsWith("s")
@@ -20,6 +21,9 @@ async function routes(server: FastifyInstance) {
     async (req, reply) => {
       const accessToken = req.headers["x-compose-goog-oauth2-access-token"];
       const body = req.body as BrowserToServerEvent.CompleteSignUp.RequestBody;
+
+      const cookies = parseCookieHeader(req.headers.cookie);
+      const affiliate: string | undefined = cookies["compose-affiliate-code"];
 
       const verificationResponse =
         await GoogleOAuth.verifyAccessToken(accessToken);
@@ -65,7 +69,10 @@ async function routes(server: FastifyInstance) {
         body.orgName,
         m.Company.PLANS.HOBBY,
         "",
-        m.Company.DEFAULT_FLAGS
+        {
+          ...m.Company.DEFAULT_FLAGS,
+          [m.Company.FLAG_KEYS.AFFILIATE_CODE]: affiliate,
+        }
       );
 
       try {
