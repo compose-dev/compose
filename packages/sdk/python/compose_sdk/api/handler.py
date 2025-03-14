@@ -6,6 +6,7 @@ import websockets
 import queue
 import urllib.parse
 import math
+import asyncio
 
 from ..scheduler import Scheduler
 from ..core import EventType, Debug
@@ -67,6 +68,8 @@ class APIHandler:
         self.is_connected = False
         self.push = None
 
+        self.shutting_down = False
+
         self.send_queue = queue.Queue()
 
     def add_listener(self, id: str, listener: callable) -> None:
@@ -83,6 +86,10 @@ class APIHandler:
 
     def connect(self, on_connect_data: dict) -> None:
         self.scheduler.run_until_complete(self.__makeConnectionRequest(on_connect_data))
+
+    def shutdown(self) -> None:
+        self.shutting_down = True
+        self.scheduler.stop()
 
     async def send_raw(self, data: bytes) -> None:
         if self.is_connected == True:
@@ -130,6 +137,8 @@ class APIHandler:
                 ssl=ssl_context,
                 max_size=10485760,  # 10 MB
             ) as ws:
+                self.ws = ws
+
                 try:
                     print("🌐 Connected to Compose server.")
 
@@ -150,6 +159,9 @@ class APIHandler:
                         self.__flush_send_queue()
                         await self.__on_message(message)
 
+                except asyncio.CancelledError:
+                    raise DisconnectionError("Server shutting down")
+
                 except websockets.ConnectionClosed as e:
                     if e.code == WS_CLIENT["SERVER_UPDATE_CODE"]:
                         raise ServerUpdateError("Server update")
@@ -162,8 +174,12 @@ class APIHandler:
                     )
                 finally:
                     self.is_connected = False
+                    self.ws = None
 
         except Exception as e:
+            if self.shutting_down:
+                return
+
             is_server_update = isinstance(e, ServerUpdateError)
 
             if is_server_update:

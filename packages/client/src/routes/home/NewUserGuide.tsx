@@ -70,7 +70,7 @@ export default function NewUserGuide({
         <p>
           There's a lot more that Compose is capable of. Explore the docs, use
           the{" "}
-          <InlineLink url="https://app.composehq.com/app/76c437ce-2db1-4146-8712-d4417cb8e570/compose-cheat-sheet">
+          <InlineLink url="https://app.composehq.com/app/025ac441-ea1d-42f3-9c39-9db492a8146a/compose-cheat-sheet">
             cheat sheet
           </InlineLink>
           , and{" "}

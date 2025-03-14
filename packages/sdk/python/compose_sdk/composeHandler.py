@@ -172,6 +172,9 @@ class ComposeClient:
         self.scheduler.initialize(False)
         self.__connect_ws()
 
+    def shutdown(self) -> None:
+        self.api.shutdown()
+
     def __connect_ws(self) -> None:
         self.api.add_listener(
             "browser-listener",

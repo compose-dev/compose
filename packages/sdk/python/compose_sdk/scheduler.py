@@ -11,6 +11,7 @@ class Scheduler:
     def __init__(self):
         self.loop = None
         self.thread = None
+        self.long_running_task = None
 
         self.task_queue = Queue[Union[Coroutine[Any, Any, Any], None]]()
 
@@ -43,7 +44,8 @@ class Scheduler:
         if self.thread is not None:
             self.task_queue.put(coroutine)
         elif self.loop is not None:
-            self.loop.run_until_complete(coroutine)
+            self.long_running_task = self.loop.create_task(coroutine)
+            self.loop.run_forever()
 
     def create_task(self, coroutine: Coroutine[Any, Any, Any]):
         if self.loop is not None:
@@ -62,12 +64,19 @@ class Scheduler:
             raise RuntimeError("Async Scheduler is not initialized")
 
     def stop(self):
+        # Shutdown non-blocking implementation
         if self.thread is not None:
             self.task_queue.put(None)
             self.thread.join()
 
             self.loop = None
             self.thread = None
+
+        # Shutdown blocking implementation
+        if self.long_running_task is not None:
+            self.loop.call_soon_threadsafe(self.long_running_task.cancel)
+            self.loop.call_soon_threadsafe(self.loop.stop)
+            self.long_running_task = None
 
     def sleep(self, seconds: float):
         if self.loop is not None:
