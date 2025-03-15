@@ -5,8 +5,17 @@ const LANG = {
 } as const;
 type Lang = (typeof LANG)[keyof typeof LANG];
 
+const PROJECT_TYPE = {
+  existingProject: "existing-project",
+  newProject: "new-project",
+} as const;
+
+type ProjectType = (typeof PROJECT_TYPE)[keyof typeof PROJECT_TYPE];
+
 const STEP = {
   langSelect: "lang-select",
+  projectTypeSelect: "project-type-select",
+  existingProjectDownload: "existing-project-download",
   npxDownload: "npx-download",
   manualDownload: "manual-download",
   apiKeyNpx: "api-key-npx",
@@ -62,71 +71,119 @@ pip install py-mon
 
 const APP_CODE_PYTHON = `import compose_sdk as c
 
-DOCS_URL = "https://docs.composehq.com/get-started/concepts#app-structure"
+nav = c.Navigation(
+    ["view-users", "create-user"],
+    logo_url="https://composehq.com/dark-logo-with-text.svg",  # replace with your own logo
+)
 
-def users_dashboard(page: c.Page, ui: c.UI):
-    users = [
-        {"id": 1, "name": "Lisa Su", "is_approved": True},
-        {"id": 2, "name": "Jensen Huang", "is_approved": False},
-        {"id": 3, "name": "Brian Chesky", "is_approved": True},
-    ]
+# fake list of users
+db_users = [
+    {"name": "John Doe", "email": "john@doe.com"},
+    {"name": "Jane Smith", "email": "jane@smith.com"},
+]
+
+
+def view_users_handler(page: c.Page, ui: c.UI):
+    users = [*db_users]  # fake database call
+    page.add(lambda: ui.table("users-table", users))
+
+
+def create_user_handler(page: c.Page, ui: c.UI):
+    def on_submit(form):
+        db_users.append({"name": form["name"], "email": form["email"]})
+        page.toast("User created successfully", appearance="success")
+        page.link("view-users")
 
     page.add(
-        lambda: ui.distributed_row(
-            [
-                ui.header("Users Dashboard"),
-                ui.button(
-                    "See what's possible",
-                    on_click=lambda: page.link(DOCS_URL, new_tab=True),
-                ),
-            ]
+        lambda: ui.form(
+            "create-user-form",
+            [ui.text_input("name"), ui.email_input("email")],
+            on_submit=on_submit,
         )
     )
-    page.add(lambda: ui.text("Open your source code to view this app's code..."))
-    page.add(lambda: ui.table("table-id", users))
+
 
 client = c.Client(
     api_key="API_KEY_HERE",
     apps=[
-        c.App(route="users-dashboard", handler=users_dashboard)
+        c.App(route="view-users", navigation=nav, handler=view_users_handler),
+        c.App(route="create-user", navigation=nav, handler=create_user_handler),
     ],
 )
 
 client.connect()`;
 
-const APP_CODE_TS = `import { Compose } from "@composehq/sdk"
+const APP_CODE_TS = `import { Compose } from "@composehq/sdk";
 
-const DOCS_URL =
-  "https://docs.composehq.com/get-started/concepts#app-structure";
+const nav = new Compose.Navigation(["view-users", "create-user"], {
+  logoUrl: "https://composehq.com/dark-logo-with-text.svg", // replace with your own logo
+});
 
-const usersDashboard = new Compose.App({
-  route: "users-dashboard",
-  handler: ({ page, ui }) => {
-    const users = [
-      { id: 1, name: "Lisa Su", isApproved: true },
-      { id: 2, name: "Jensen Huang", isApproved: false },
-      { id: 3, name: "Brian Chesky", isApproved: true },
-    ];
+// fake list of users
+const dbUsers = [
+  { name: "John Doe", email: "john@doe.com" },
+  { name: "Jane Smith", email: "jane@smith.com" },
+];
 
+const viewUsersApp = new Compose.App({
+  route: "view-users",
+  navigation: nav,
+  handler: async ({ page, ui }) => {
+    const users = [...dbUsers]; // fake database call
+    page.add(() => ui.table("users-table", users));
+  },
+});
+
+const createUserApp = new Compose.App({
+  route: "create-user",
+  navigation: nav,
+  handler: async ({ page, ui }) => {
     page.add(() =>
-      ui.distributedRow([
-        ui.header("Users Dashboard"),
-        ui.button("See what's possible", {
-          onClick: () => page.link(DOCS_URL, { newTab: true }),
-        }),
-      ])
+      ui.form(
+        "create-user-form",
+        [ui.textInput("name"), ui.emailInput("email")],
+        {
+          onSubmit: async (form) => {
+            dbUsers.push({ name: form.name, email: form.email });
+            page.toast("User created successfully", { appearance: "success" });
+            page.link("view-users");
+          },
+        }
+      )
     );
-    page.add(() => ui.text("Open your source code to view this app's code..."));
-    page.add(() => ui.table("table-id", users));
   },
 });
 
 const client = new Compose.Client({
-    apiKey: "API_KEY_HERE",
-    apps: [usersDashboard]
+  apiKey: "API_KEY_HERE",
+  apps: [viewUsersApp, createUserApp],
 });
 
 client.connect();`;
+
+const EXPRESS_INTEGRATION_TS = `import express from "express";
+import { composeClient } from "./compose";
+
+const app = express();
+
+app.listen(3000, () => {
+    console.log("Server is running on port 3000");
+    // Connect to your team's Compose web dashboard.
+    composeClient.connect();
+});`;
+
+const FLASK_INTEGRATION_PY = `# Example Flask server
+from flask import Flask
+from compose import compose_client
+
+# Connect to your team's Compose web dashboard.
+compose_client.connect_async()
+
+app = Flask(__name__)
+
+@app.route("/")
+def hello_world():
+    return "<p>Hello, World!</p>"`;
 
 export {
   MANUAL_INSTALL_TS,
@@ -134,8 +191,12 @@ export {
   MANUAL_INSTALL_PYTHON,
   APP_CODE_PYTHON,
   APP_CODE_TS,
+  EXPRESS_INTEGRATION_TS,
+  FLASK_INTEGRATION_PY,
   LANG,
   type Lang,
   STEP,
   type Step,
+  PROJECT_TYPE,
+  type ProjectType,
 };

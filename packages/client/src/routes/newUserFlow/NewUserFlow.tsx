@@ -163,6 +163,7 @@ function NewUserFlow() {
             search: {
               step: "lang-select",
               lang: null,
+              projectType: null,
             },
           });
         } else {

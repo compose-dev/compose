@@ -5,8 +5,14 @@ import { DashedWrapper } from "~/components/dashed-wrapper";
 import { Favicon } from "~/components/favicon";
 import { fetcher } from "~/utils/fetcher";
 import { theme } from "~/utils/theme";
-import { Lang } from "./constants";
-import { FooterActions, LanguageSelect, ManualInstall } from "./components";
+import { Lang, PROJECT_TYPE } from "./constants";
+import {
+  FooterActions,
+  LanguageSelect,
+  ManualInstall,
+  ProjectTypeSelect,
+  ExistingProjectInstall,
+} from "./components";
 import { motion } from "motion/react";
 import Icon from "~/components/icon";
 import Button from "~/components/button";
@@ -14,6 +20,7 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { ConnectionStatus, useWSContext, WSProvider } from "~/utils/wsContext";
 import { ServerToBrowserEvent } from "@compose/ts";
 import { Spinner } from "~/components/spinner";
+import { classNames } from "~/utils/classNames";
 
 function CodeInline({ children }: { children: React.ReactNode }) {
   return (
@@ -108,7 +115,7 @@ function InteractiveOnboarding() {
   } = useWSContext();
 
   const navigate = useNavigate({ from: "/start" });
-  const { lang, step } = useSearch({ from: "/start" });
+  const { lang, step, projectType } = useSearch({ from: "/start" });
 
   const { data, refetch } = fetcher.use(api.routes.getUserDevEnvironment, {
     initialData: { environments: [] },
@@ -184,37 +191,53 @@ function InteractiveOnboarding() {
   const header =
     step === "lang-select"
       ? "Onboarding"
-      : step === "npx-download"
-        ? "Install the SDK"
-        : step === "manual-download"
-          ? "Manual install"
-          : step === "sdk-installed-npx" || step === "sdk-installed-manual"
-            ? "Run your app"
-            : step === "api-key-npx" || step === "api-key-manual"
-              ? "Get an API key"
-              : "Onboarding";
+      : step === "existing-project-download"
+        ? "Download the SDK"
+        : step === "npx-download"
+          ? "Install the SDK"
+          : step === "manual-download"
+            ? "Manual install"
+            : step === "sdk-installed-npx" || step === "sdk-installed-manual"
+              ? "Run your app"
+              : step === "api-key-npx" || step === "api-key-manual"
+                ? "Get an API key"
+                : "Onboarding";
 
   return (
     <DashedWrapper footer={<FooterActions />}>
-      <div className="flex items-center justify-center flex-col gap-8 max-w-xl text-brand-neutral">
+      <div
+        className={classNames(
+          "flex items-center justify-center flex-col gap-8 text-brand-neutral",
+          {
+            "max-w-2xl":
+              step === "existing-project-download" ||
+              step === "manual-download",
+            "max-w-xl":
+              step !== "existing-project-download" &&
+              step !== "manual-download",
+          }
+        )}
+      >
         <Favicon className="w-10 h-10" />{" "}
         <h3 className="font-medium text-2xl text-center">{header}</h3>
+        {/* STEP 1: Platform Selection */}
         {step === "lang-select" && (
           <StepContainer>
             <LanguageSelect
-              lang={lang}
               setLang={(lang) => {
                 navigate({
                   search: {
                     lang,
-                    step: "npx-download",
+                    step: "project-type-select",
+                    projectType,
                   },
                 });
               }}
             />
           </StepContainer>
         )}
-        {step === "npx-download" && (
+        {/* STEP 2: Project Type Selection */}
+        {step === "project-type-select" && (
           <StepContainer>
             <BackButton
               onClick={() => {
@@ -222,7 +245,66 @@ function InteractiveOnboarding() {
                   search: {
                     lang: null,
                     step: "lang-select",
+                    projectType: null,
                   },
+                });
+              }}
+            />
+            <ProjectTypeSelect
+              setProjectType={(projectType) => {
+                navigate({
+                  search: {
+                    lang,
+                    step:
+                      projectType === PROJECT_TYPE.existingProject
+                        ? "existing-project-download"
+                        : "npx-download",
+                    projectType,
+                  },
+                });
+              }}
+            />
+          </StepContainer>
+        )}
+        {/* STEP 3.A: Existing Project Download */}
+        {step === "existing-project-download" && (
+          <StepContainer>
+            <BackButton
+              onClick={() =>
+                navigate({
+                  search: (prev) => ({
+                    ...prev,
+                    step: "project-type-select",
+                    projectType: null,
+                  }),
+                })
+              }
+            />
+            <ExistingProjectInstall
+              lang={lang}
+              apiKey={apiKey}
+              onSuccess={() => {
+                navigate({
+                  search: (prev) => ({
+                    ...prev,
+                    step: apiKey ? "sdk-installed-npx" : "api-key-npx",
+                  }),
+                });
+              }}
+            />
+          </StepContainer>
+        )}
+        {/* STEP 3.B: NPX Download */}
+        {step === "npx-download" && (
+          <StepContainer>
+            <BackButton
+              onClick={() => {
+                navigate({
+                  search: (prev) => ({
+                    ...prev,
+                    step: "project-type-select",
+                    projectType: null,
+                  }),
                 });
               }}
             />
@@ -266,6 +348,7 @@ function InteractiveOnboarding() {
             </div>
           </StepContainer>
         )}
+        {/* STEP 3.C: Manual Download */}
         {step === "manual-download" && (
           <StepContainer>
             <BackButton
@@ -273,7 +356,8 @@ function InteractiveOnboarding() {
                 navigate({
                   search: (prev) => ({
                     ...prev,
-                    step: "npx-download",
+                    step: "project-type-select",
+                    projectType: null,
                   }),
                 })
               }
@@ -292,6 +376,7 @@ function InteractiveOnboarding() {
             />
           </StepContainer>
         )}
+        {/* STEP 4: API Key */}
         {(step === "api-key-npx" || step === "api-key-manual") && (
           <StepContainer>
             <BackButton
@@ -300,9 +385,11 @@ function InteractiveOnboarding() {
                   search: (prev) => ({
                     ...prev,
                     step:
-                      step === "api-key-npx"
-                        ? "npx-download"
-                        : "manual-download",
+                      projectType === PROJECT_TYPE.existingProject
+                        ? "existing-project-download"
+                        : step === "api-key-npx"
+                          ? "npx-download"
+                          : "manual-download",
                   }),
                 })
               }
@@ -321,6 +408,7 @@ function InteractiveOnboarding() {
             </Button>
           </StepContainer>
         )}
+        {/* STEP 5: Run your app */}
         {(step === "sdk-installed-npx" || step === "sdk-installed-manual") && (
           <StepContainer>
             <BackButton
@@ -329,16 +417,21 @@ function InteractiveOnboarding() {
                   search: (prev) => ({
                     ...prev,
                     step:
-                      step === "sdk-installed-npx"
-                        ? "npx-download"
-                        : "manual-download",
+                      projectType === PROJECT_TYPE.existingProject
+                        ? "existing-project-download"
+                        : step === "sdk-installed-npx"
+                          ? "npx-download"
+                          : "manual-download",
                   }),
                 });
               }}
             />
             <p>
-              Run your app like you'd run any other{" "}
-              {lang === "python" ? "python script" : "Node.js script"}.
+              {projectType === PROJECT_TYPE.existingProject
+                ? "Run your project's normal dev command. For example:"
+                : lang === "python"
+                  ? "Run your app like you'd run any other python script."
+                  : "Run your app like you'd run any other Node.js script."}
             </p>
             {lang === "typescript" && (
               <Code
@@ -360,7 +453,16 @@ function InteractiveOnboarding() {
                 lang="bash"
               />
             )}
-            {lang === "python" && <Code code={`python app.py`} lang="bash" />}
+            {lang === "python" && (
+              <Code
+                code={
+                  projectType === PROJECT_TYPE.existingProject
+                    ? "# Flask\nflask --app app.py run\n\n# Django\npython manage.py runserver\n\n# Default\npython app.py"
+                    : `python app.py`
+                }
+                lang="bash"
+              />
+            )}
             <div className="flex flex-row p-4 rounded-brand border border-brand-neutral">
               {(!isConnected || !appRoute) && (
                 <Spinner size="6" text="Waiting for SDK to connect..." />

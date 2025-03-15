@@ -18,7 +18,7 @@ function InlineLink({
       className={classNames("cursor-pointer hover:underline", {
         "text-brand-primary hover:text-brand-primary-heavy":
           appearance === "primary",
-        "text-brand-neutral-2 hover:text-brand-neutral":
+        "text-brand-neutral-2 hover:text-brand-neutral-2 underline":
           appearance === "secondary",
         "text-brand-success hover:text-brand-success-heavy":
           appearance === "success",

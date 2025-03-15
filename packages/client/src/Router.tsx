@@ -25,6 +25,7 @@ import {
   InteractiveOnboarding,
   type Lang as InteractiveOnboardingLang,
   type Step as InteractiveOnboardingStep,
+  type ProjectType as InteractiveOnboardingProjectType,
 } from "./routes/interactiveOnboarding";
 import AppWrapper from "./routes/app/AppWrapper";
 
@@ -165,6 +166,7 @@ const newUserFlowRoute = createRoute({
 
 interface InteractiveOnboardingRouteSearch {
   lang: InteractiveOnboardingLang | null;
+  projectType: InteractiveOnboardingProjectType | null;
   step: InteractiveOnboardingStep;
 }
 
@@ -177,6 +179,9 @@ const interactiveOnboardingRoute = createRoute({
   ): InteractiveOnboardingRouteSearch => {
     return {
       lang: (search.lang as InteractiveOnboardingRouteSearch["lang"]) || null,
+      projectType:
+        (search.projectType as InteractiveOnboardingRouteSearch["projectType"]) ||
+        null,
       step:
         (search.step as InteractiveOnboardingRouteSearch["step"]) ||
         "lang-select",

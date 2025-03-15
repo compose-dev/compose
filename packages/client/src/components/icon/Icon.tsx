@@ -109,6 +109,7 @@ const ICON_COLOR = {
   "brand-error": "var(--brand-error)",
   "brand-bg": "var(--brand-bg-page)",
   "brand-primary": "var(--brand-primary)",
+  "yellow-500": "#eab308",
 } as const;
 
 type IconColor = keyof typeof ICON_COLOR;
