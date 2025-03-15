@@ -50,7 +50,11 @@ def view_users_handler(page: c.Page, ui: c.UI):
 view_users_app = c.App(route="view-users", handler=view_users_handler)
 ```
 
-**The Compose SDKs** provide tables, forms, charts, file uploads, and 40+ other components to build whatever you need. Connecting these components to your own data and logic is as easy as importing functions and calling them within the Compose Apps that you define.
+#### Result in the Compose web dashboard
+
+<img src="https://raw.githubusercontent.com/compose-dev/compose/refs/heads/main/docs/readme-table-example.png" style="margin-top: 16px; margin-bottom: 16px; max-height: 400px; border-radius: 8px;">
+
+**The Compose SDK** includes tables, forms, charts, file uploads, and 40+ other components to build whatever you need. Connecting these components to your own data and logic is as easy as importing functions and calling them within the Compose Apps that you define.
 
 **The Compose web dashboard** renders beautiful, responsive UIs for your tools and enables you to share them with your entire team. It also includes audit logs, RBAC, and other useful features to manage your tools without any configuration on your end.
 
