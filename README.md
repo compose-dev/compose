@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-    Open-source platform for building custom internal tools
+    Open-source platform for building custom internal tools fast
     <br />
     <a href="https://composehq.com">Website</a>
     ·
@@ -16,74 +16,49 @@
 
 ## About
 
-Compose is a dramatically faster way for developers to build custom internal tools.
+Compose is an open-source platform that makes it dramatically faster for developers to build and share internal tools with their team - without leaving their codebase.
 
-Compose provides:
-- Backend SDKs for TypeScript and Python that expose high-level building blocks like tables, forms, charts, and more that integrate seamlessly with your existing services and logic.
-- A hosted web app (composehq.com or self-hosted) that handles auth, permissions, audit logs, and generates exceptionally great UIs for your team.
+The platform has two parts:
+- Build internal tools in your codebase using our SDKs for Python and TypeScript.
+- Use and share those tools via your team's Compose web dashboard.
 
-The examples below show how you can build a dashboard to view and create users in ~20 lines of code.
+Here's a simple tool that displays a table of users from your database:
 
-See the [docs](https://docs.composehq.com) to learn more.
-
-## Examples
-
-### TypeScript
-
+#### TypeScript
 ```typescript
 import { Compose } from "@composehq/sdk";
+import { database } from "../database";
 
-new Compose.App({
-    name: "Users Dashboard",
-    handler: ({ page, ui }) => {
-        // Display a table of users
-        const users = await database.selectUsers();
-        page.add(() => ui.table("users", users))
-
-        // Display a form to create new users
-        page.add(() => ui.form(
-            "new-user",
-            [
-                ui.textInput("name"),
-                ui.emailInput("email"),
-                ui.selectBox("role", ["admin", "user", "guest"]),
-            ],
-            {
-                onSubmit: async (values) => { // fully-typed response
-                    await database.createUser(values)
-                }
-            }
-        ))
+const viewUsersApp = new Compose.App({
+    route: "view-users",
+    handler: async ({ page, ui }) => {
+        const users = await database.selectUsers() // query your database
+        page.add(() => ui.table("users-table", users)); // display results in a table
     }
 })
 ```
 
-### Python
-
+#### Python
 ```python
 import compose_sdk as c
+from database import database
 
-def handler(page: c.Page, ui: c.UI):
-    # Display a table of users
-    users = database.select_users()
-    page.add(lambda: ui.table("users", users))
+def view_users_handler(page: c.Page, ui: c.UI):
+    users = database.select_users() # query your database
+    page.add(lambda: ui.table("users-table", users)) # display results in a table
 
-    # Display a form to create new users
-    page.add(lambda: ui.form(
-        "new-user",
-        [
-            ui.text_input("name"),
-            ui.email_input("email"),
-            ui.select_box("role", ["admin", "user", "guest"])
-        ],
-        on_submit=lambda values: database.create_user(values) # fully validated response
-    ))
-
-c.App(
-    name="Users Dashboard",
-    handler=handler
-)
+view_users_app = c.App(route="view-users", handler=view_users_handler)
 ```
+
+**The Compose SDKs** provide tables, forms, charts, file uploads, and 40+ other components to build whatever you need. Connecting these components to your own data and logic is as easy as importing functions and calling them within the Compose Apps that you define.
+
+**The Compose web dashboard** renders beautiful, responsive UIs for your tools and enables you to share them with your entire team. It also includes audit logs, RBAC, and other useful features to manage your tools without any configuration on your end.
+
+Under the hood, the web dashboard maintains a secure, proxied websocket connection to the Compose SDK to run the tools you build.
+
+Compose's biggest benefit is speed and simplicity, but it's also fully featured and scales with your needs to support complex, reactive, multi-page tools when you need it.
+
+See the [docs](https://docs.composehq.com) to learn more.
 
 ## Getting started
 
