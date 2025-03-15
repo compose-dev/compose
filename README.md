@@ -56,7 +56,7 @@ view_users_app = c.App(route="view-users", handler=view_users_handler)
 
 Under the hood, the web dashboard maintains a secure, proxied websocket connection to the Compose SDK to run the tools you build.
 
-Compose's biggest benefit is speed and simplicity, but it's also fully featured and scales with your needs to support complex, reactive, multi-page tools when you need it.
+Compose's biggest benefit is speed and simplicity, but it's also fully featured and scales to support complex, reactive, multi-page tools when you need it.
 
 See the [docs](https://docs.composehq.com) to learn more.
 

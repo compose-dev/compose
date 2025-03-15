@@ -4,6 +4,7 @@ import Icon from "~/components/icon";
 import { toast } from "~/utils/toast";
 import { useState } from "react";
 import { InlineLink } from "~/components/inline-link";
+import DescriptiveButton from "./DescriptiveButton";
 
 function MobileDeviceCallout() {
   const { addToast } = toast.useStore();
@@ -53,52 +54,27 @@ function LanguageSelect({ setLang }: { setLang: (lang: Lang) => void }) {
       </p>
       <p className="text-center">Choose your platform to get started.</p>
       <div className="flex flex-col gap-4 w-full">
-        <Button
-          variant="outline"
+        <DescriptiveButton
           onClick={() => setLang(LANG.typescript)}
-          className="w-full max-w-md"
-        >
-          <div className="flex flex-row items-center gap-4 w-full">
-            <Icon name="typescript" size="lg" color="brand-primary" />{" "}
-            <div className="flex flex-col items-start text-left flex-1">
-              <span className="text-lg font-medium">TypeScript</span>
-              <span className="text-brand-neutral-2 text-sm">
-                Supports all major runtimes (Node.js, Bun, Deno) and frameworks
-                (Express, Fastify, Koa, etc.)
-              </span>
-            </div>
-          </div>
-        </Button>
-        <Button
-          variant="outline"
+          iconName="typescript"
+          iconColor="brand-primary"
+          name="TypeScript"
+          description="Supports all major runtimes (Node.js, Bun, Deno) and frameworks (Express, Fastify, Koa, etc.)"
+        />
+        <DescriptiveButton
           onClick={() => setLang(LANG.javascript)}
-          className="w-full max-w-md"
-        >
-          <div className="flex flex-row items-center gap-4 w-full">
-            <Icon name="javascript" size="lg" color="yellow-500" />{" "}
-            <div className="flex flex-col items-start text-left flex-1">
-              <span className="text-lg font-medium">JavaScript</span>
-              <span className="text-brand-neutral-2 text-sm">
-                Identical to TypeScript, but with types removed from the starter
-                app.
-              </span>
-            </div>
-          </div>
-        </Button>
-        <Button
-          variant="outline"
+          iconName="javascript"
+          iconColor="yellow-500"
+          name="JavaScript"
+          description="Identical to TypeScript, but with types removed from the starter app."
+        />
+        <DescriptiveButton
           onClick={() => setLang(LANG.python)}
-          className="w-full max-w-md"
-        >
-          <Icon name="python" size="lg" color="brand-success" />{" "}
-          <div className="flex flex-col items-start text-left flex-1">
-            <span className="text-lg font-medium">Python</span>
-            <span className="text-brand-neutral-2 text-sm">
-              Supports pure Python applications and all major frameworks
-              (Django, Flask, FastAPI, etc.)
-            </span>
-          </div>
-        </Button>
+          iconName="python"
+          iconColor="brand-success"
+          name="Python"
+          description="Supports pure Python applications and all major frameworks (Django, Flask, FastAPI, etc.)"
+        />
       </div>
 
       <p className="text-sm text-center text-brand-neutral-2">
