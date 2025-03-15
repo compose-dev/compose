@@ -45,6 +45,14 @@ function Docs() {
     );
   }
 
+  if (type === DOC_TYPE["get-started-quickstart-table"]) {
+    return (
+      <BrowserWrapper>
+        <GetStarted.Quickstart.Table />
+      </BrowserWrapper>
+    );
+  }
+
   if (type === DOC_TYPE["get-started-fundamentals-add-ui"]) {
     return (
       <BrowserWrapper>

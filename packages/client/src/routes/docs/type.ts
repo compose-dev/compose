@@ -1,4 +1,5 @@
 const DOC_TYPE = {
+  "get-started-quickstart-table": "get-started-quickstart-table",
   "get-started-fundamentals-add-ui": "get-started-fundamentals-add-ui",
   "get-started-fundamentals-control-layout":
     "get-started-fundamentals-control-layout",
