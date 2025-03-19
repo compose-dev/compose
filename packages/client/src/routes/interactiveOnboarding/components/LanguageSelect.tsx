@@ -49,8 +49,10 @@ function LanguageSelect({ setLang }: { setLang: (lang: Lang) => void }) {
   return (
     <>
       <MobileDeviceCallout />
-      <p className="text-center">
-        Install the SDK and run a basic starter app in just a few steps.
+      <p className="text-center max-w-md">
+        Install the SDK into your{" "}
+        <span className="font-medium">backend application</span> and run a basic
+        starter app in just a few steps.
       </p>
       <p className="text-center">Choose your platform to get started.</p>
       <div className="flex flex-col gap-4 w-full">
@@ -77,8 +79,10 @@ function LanguageSelect({ setLang }: { setLang: (lang: Lang) => void }) {
         />
       </div>
 
-      <p className="text-sm text-center text-brand-neutral-2">
-        Not sure? Learn more about Compose in the{" "}
+      <p className="text-sm text-center text-brand-neutral-2 max-w-md">
+        The Compose SDK installs into your{" "}
+        <span className="italic font-medium">backend</span> (not your frontend)!
+        Learn more in the{" "}
         <InlineLink
           url="https://docs.composehq.com"
           appearance="secondary"

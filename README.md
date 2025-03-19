@@ -19,7 +19,7 @@
 Compose is an open-source platform that makes it dramatically faster for developers to build and share internal tools with their team - without leaving their codebase.
 
 The platform has two parts:
-- Build internal tools in your codebase using our SDKs for Python and TypeScript.
+- Build internal tools with just backend code using our SDKs for Python and TypeScript.
 - Use and share those tools via your team's Compose web dashboard.
 
 Here's a simple tool that displays a table of users from your database:
@@ -54,7 +54,7 @@ view_users_app = c.App(route="view-users", handler=view_users_handler)
 
 <img src="https://raw.githubusercontent.com/compose-dev/compose/refs/heads/main/docs/readme-table-example.png" style="margin-top: 16px; margin-bottom: 16px; max-height: 400px; border-radius: 8px;">
 
-**The Compose SDK** includes tables, forms, charts, file uploads, and 40+ other components to build whatever you need. Connecting these components to your own data and logic is as easy as importing functions and calling them within the Compose Apps that you define.
+**The Compose SDK** includes tables, forms, charts, file uploads, and 40+ other components to build whatever you need in just a few lines of code. Since the SDK is installed into your backend, connecting these components to your own data and logic is as easy as importing functions and calling them within the Compose Apps that you define.
 
 **The Compose web dashboard** renders beautiful, responsive UIs for your tools and enables you to share them with your entire team. It also includes audit logs, RBAC, and other useful features to manage your tools without any configuration on your end.
 
