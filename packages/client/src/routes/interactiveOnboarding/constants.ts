@@ -84,6 +84,7 @@ db_users = [
 
 
 def view_users_handler(page: c.Page, ui: c.UI):
+    page.add(lambda: ui.header("View Users", size="lg"))
     users = [*db_users]  # fake database call
     page.add(lambda: ui.table("users-table", users))
 
@@ -94,6 +95,7 @@ def create_user_handler(page: c.Page, ui: c.UI):
         page.toast("User created successfully", appearance="success")
         page.link("view-users")
 
+    page.add(lambda: ui.header("Create User", size="lg"))
     page.add(
         lambda: ui.form(
             "create-user-form",
@@ -129,6 +131,7 @@ const viewUsersApp = new Compose.App({
   route: "view-users",
   navigation: nav,
   handler: async ({ page, ui }) => {
+    page.add(() => ui.header("View Users", { size: "lg" }));
     const users = [...dbUsers]; // fake database call
     page.add(() => ui.table("users-table", users));
   },
@@ -138,6 +141,7 @@ const createUserApp = new Compose.App({
   route: "create-user",
   navigation: nav,
   handler: async ({ page, ui }) => {
+    page.add(() => ui.header("Create User", { size: "lg" }));
     page.add(() =>
       ui.form(
         "create-user-form",

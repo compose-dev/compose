@@ -14,6 +14,7 @@ const viewUsersApp = new Compose.App({
   route: "view-users",
   navigation: nav,
   handler: async ({ page, ui }) => {
+    page.add(() => ui.header("View Users", { size: "lg" }));
     const users = [...dbUsers]; // fake database call
     page.add(() => ui.table("users-table", users));
   },
@@ -23,6 +24,7 @@ const createUserApp = new Compose.App({
   route: "create-user",
   navigation: nav,
   handler: async ({ page, ui }) => {
+    page.add(() => ui.header("Create User", { size: "lg" }));
     page.add(() =>
       ui.form(
         "create-user-form",

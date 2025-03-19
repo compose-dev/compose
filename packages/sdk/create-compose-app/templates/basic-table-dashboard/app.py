@@ -13,6 +13,7 @@ db_users = [
 
 
 def view_users_handler(page: c.Page, ui: c.UI):
+    page.add(lambda: ui.header("View Users", size="lg"))
     users = [*db_users]  # fake database call
     page.add(lambda: ui.table("users-table", users))
 
@@ -23,6 +24,7 @@ def create_user_handler(page: c.Page, ui: c.UI):
         page.toast("User created successfully", appearance="success")
         page.link("view-users")
 
+    page.add(lambda: ui.header("Create User", size="lg"))
     page.add(
         lambda: ui.form(
             "create-user-form",
