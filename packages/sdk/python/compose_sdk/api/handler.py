@@ -133,7 +133,7 @@ class APIHandler:
         try:
             async with websockets.connect(
                 uri=self.WS_URL,
-                extra_headers=headers,
+                additional_headers=headers,
                 ssl=ssl_context,
                 max_size=10485760,  # 10 MB
             ) as ws:
@@ -227,6 +227,8 @@ class APIHandler:
                     )
 
             else:
+                if self.debug:
+                    print(e)
                 print(
                     f"🔄 Failed to connect to Compose server. Attempting to reconnect after {reconnect_after} seconds...",
                 )
