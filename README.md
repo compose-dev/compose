@@ -9,9 +9,11 @@
 <p align="center">
     Open-source platform for building custom internal tools fast
     <br />
-    <a href="https://composehq.com">Website</a>
+    <a href="https://composehq.com" target="_blank">Website</a>
     ·
-    <a href="https://docs.composehq.com">Documentation</a>
+    <a href="https://docs.composehq.com" target="_blank">Documentation</a>
+    ·
+    <a href="https://discord.gg/82rk2N8ZE6" target="_blank">Discord</a>
   </p>
 
 ## About
@@ -22,7 +24,7 @@ The platform has two parts:
 - Build internal tools with just backend code using our SDKs for Python and TypeScript.
 - Use and share those tools via your team's Compose web dashboard.
 
-Here's a simple tool that displays a table of users from your database:
+Here's a simple tool that displays a table of users from your database in 9 lines of code:
 
 #### TypeScript
 ```typescript
