@@ -7,6 +7,7 @@ import {
   getFilteredRowModel,
   Updater,
   FilterFn,
+  Cell,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React, {
@@ -492,19 +493,14 @@ function Table({
                       }}
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <React.Fragment key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </React.Fragment>
+                        <TableRowsMemo key={cell.id} cell={cell} />
                       ))}
                     </div>
                   );
                 })}
               </div>
             </div>
-            {table.getRowModel().rows.length === 0 && (
+            {rows.length === 0 && (
               <p className="p-2 bg-brand-io text-brand-neutral-2">
                 {loading ? "Loading..." : "No data to display"}
               </p>
@@ -532,6 +528,12 @@ function Table({
       </div>
     </div>
   );
+}
+
+const TableRowsMemo = React.memo(TableRows);
+
+function TableRows({ cell }: { cell: Cell<FormattedTableRow, unknown> }) {
+  return flexRender(cell.column.columnDef.cell, cell.getContext());
 }
 
 export default Table;

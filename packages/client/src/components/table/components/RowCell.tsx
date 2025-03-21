@@ -18,7 +18,7 @@ function RowCell({
         {
           "first:rounded-bl-brand last:rounded-br-brand": isLastRow,
         },
-        className,
+        className
       )}
       style={style}
     >
