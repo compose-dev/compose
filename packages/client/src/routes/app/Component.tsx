@@ -254,12 +254,23 @@ function Component({
         style={{
           ...componentStyles,
           height:
-            // The table component directly controls the height since the rows
-            // are scrollable. Setting height here for the table could result
-            // in two scrollbars.
-            component.type === UI.TYPE.INPUT_TABLE
+            // - Table directly controls it's height since rows are scrollable.
+            // - Text area directly controls it's height since it's resizable.
+            // Hence, we set height auto here and handle the height deeper in
+            // the tree.
+            component.type === UI.TYPE.INPUT_TABLE ||
+            component.type === UI.TYPE.INPUT_TEXT_AREA
               ? "auto"
               : componentStyles?.height || "auto",
+          // text area also sets the min and max height properties directly.
+          minHeight:
+            component.type === UI.TYPE.INPUT_TEXT_AREA
+              ? "auto"
+              : componentStyles?.minHeight || "auto",
+          maxHeight:
+            component.type === UI.TYPE.INPUT_TEXT_AREA
+              ? "auto"
+              : componentStyles?.maxHeight || "auto",
         }}
       >
         <InputInteractionComponent

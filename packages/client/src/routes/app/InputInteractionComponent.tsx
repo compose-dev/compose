@@ -22,6 +22,30 @@ import { useTransferFiles } from "./utils";
 import { BrowserToServerEvent } from "@compose/ts";
 import { Checkbox } from "~/components/checkbox";
 
+function textAreaInputStyle(
+  style: UI.Components.InputTextArea["model"]["style"]
+) {
+  if (!style) {
+    return undefined;
+  }
+
+  const styleObj: React.CSSProperties = {};
+
+  if (style.minHeight) {
+    styleObj.minHeight = style.minHeight;
+  }
+
+  if (style.height) {
+    styleObj.height = style.height;
+  }
+
+  if (style.maxHeight) {
+    styleObj.maxHeight = style.maxHeight;
+  }
+
+  return Object.keys(styleObj).length > 0 ? styleObj : undefined;
+}
+
 function InputInteractionComponent({
   componentId,
   renderId,
@@ -437,6 +461,7 @@ function InputInteractionComponent({
             ? () => onInputHook()
             : undefined
         }
+        inputStyle={textAreaInputStyle(component.model.style)}
       />
     );
   }

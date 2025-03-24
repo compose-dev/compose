@@ -18,6 +18,7 @@ function TextAreaInput({
   right = null,
   onEnter = null,
   testId,
+  inputStyle = undefined,
 }: {
   label: string | null;
   value: string | null;
@@ -29,6 +30,7 @@ function TextAreaInput({
   errorMessage?: string | null;
   rootClassName?: string;
   inputClassName?: string;
+  inputStyle?: React.CSSProperties;
   right?: React.ReactNode;
   onEnter?: (() => void) | null;
   testId?: string;
@@ -72,6 +74,7 @@ function TextAreaInput({
             },
             inputClassName
           )}
+          style={inputStyle}
           onKeyDown={(e) => {
             if (
               ((e.metaKey && e.key === "Enter") ||
