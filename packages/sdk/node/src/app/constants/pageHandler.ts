@@ -48,6 +48,26 @@ interface PageHandler {
     }>
   ) => void;
   /**
+   * Log information to audit logs. Only available on Pro plans.
+   *
+   * @example
+   * ```ts
+   * page.log("Deleted database record", { severity: "info", data: { recordId: 123 } });
+   * ```
+   *
+   * @param message The message to log.
+   * @param options Optional properties for the log message.
+   * @param options.severity The severity of the log message.
+   * @param options.data Additional metadata to log.
+   */
+  log: (
+    message: string,
+    options?: Partial<{
+      severity: "trace" | "debug" | "info" | "warn" | "error" | "fatal";
+      data: Record<string, any>;
+    }>
+  ) => void;
+  /**
    * Get the current page parameters. Empty by default. You can pass
    * parameters between pages when using page.link() to create multipage
    * apps.

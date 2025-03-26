@@ -119,6 +119,7 @@ class AppRunner {
     this.setConfig = this.setConfig.bind(this);
     this.download = this.download.bind(this);
     this.link = this.link.bind(this);
+    this.log = this.log.bind(this);
     this.reload = this.reload.bind(this);
     this.onStateUpdate = this.onStateUpdate.bind(this);
     this.setInputs = this.setInputs.bind(this);
@@ -864,6 +865,13 @@ class AppRunner {
 
             this.download(file, filename);
           },
+          log: (
+            message: string,
+            options?: Partial<{
+              severity: "trace" | "debug" | "info" | "warn" | "error" | "fatal";
+              data: Record<string, any>;
+            }>
+          ) => this.log(message, options),
           link: (
             appRouteOrUrl: string,
             options?: Partial<{
@@ -923,6 +931,16 @@ class AppRunner {
           : `An error occurred while running the app:\n\n${"message" in error ? error.message : "Unknown error"}`
       );
     }
+  }
+
+  async log(
+    message: string,
+    options?: Partial<{
+      severity: "trace" | "debug" | "info" | "warn" | "error" | "fatal";
+      data: Record<string, any>;
+    }>
+  ) {
+    return;
   }
 
   async onClickHook(componentId: string, renderId: string) {
