@@ -21,6 +21,7 @@ import { useWSContext } from "~/utils/wsContext";
 import { useTransferFiles } from "./utils";
 import { BrowserToServerEvent } from "@compose/ts";
 import { Checkbox } from "~/components/checkbox";
+import { JsonEditor } from "~/components/code-editor";
 
 function textAreaInputStyle(
   style: UI.Components.InputTextArea["model"]["style"]
@@ -247,9 +248,7 @@ function InputInteractionComponent({
         hasError={errorMessage !== null}
         errorMessage={errorMessage}
         onEnter={
-          component.model.properties.hasOnEnterHook
-            ? () => onInputHook()
-            : undefined
+          component.model.properties.hasOnEnterHook ? onInputHook : undefined
         }
       />
     );
@@ -277,9 +276,7 @@ function InputInteractionComponent({
         hasError={errorMessage !== null}
         errorMessage={errorMessage}
         onEnter={
-          component.model.properties.hasOnEnterHook
-            ? () => onInputHook()
-            : undefined
+          component.model.properties.hasOnEnterHook ? onInputHook : undefined
         }
       />
     );
@@ -307,9 +304,7 @@ function InputInteractionComponent({
         hasError={errorMessage !== null}
         errorMessage={errorMessage}
         onEnter={
-          component.model.properties.hasOnEnterHook
-            ? () => onInputHook()
-            : undefined
+          component.model.properties.hasOnEnterHook ? onInputHook : undefined
         }
       />
     );
@@ -337,9 +332,7 @@ function InputInteractionComponent({
         hasError={errorMessage !== null}
         errorMessage={errorMessage}
         onEnter={
-          component.model.properties.hasOnEnterHook
-            ? () => onInputHook()
-            : undefined
+          component.model.properties.hasOnEnterHook ? onInputHook : undefined
         }
       />
     );
@@ -367,9 +360,7 @@ function InputInteractionComponent({
         hasError={errorMessage !== null}
         errorMessage={errorMessage}
         onEnter={
-          component.model.properties.hasOnEnterHook
-            ? () => onInputHook()
-            : undefined
+          component.model.properties.hasOnEnterHook ? onInputHook : undefined
         }
       />
     );
@@ -397,9 +388,7 @@ function InputInteractionComponent({
         hasError={errorMessage !== null}
         errorMessage={errorMessage}
         onEnter={
-          component.model.properties.hasOnEnterHook
-            ? () => onInputHook()
-            : undefined
+          component.model.properties.hasOnEnterHook ? onInputHook : undefined
         }
       />
     );
@@ -427,9 +416,37 @@ function InputInteractionComponent({
         hasError={errorMessage !== null}
         errorMessage={errorMessage}
         onEnter={
-          component.model.properties.hasOnEnterHook
-            ? () => onInputHook()
-            : undefined
+          component.model.properties.hasOnEnterHook ? onInputHook : undefined
+        }
+      />
+    );
+  }
+
+  if (
+    component.type === UI.TYPE.INPUT_JSON &&
+    componentOutput.type === UI.TYPE.INPUT_JSON
+  ) {
+    return (
+      <JsonEditor
+        id={component.model.id}
+        label={component.model.label}
+        description={component.model.description}
+        errorMessage={errorMessage}
+        hasError={errorMessage !== null}
+        value={componentOutput.output.internalValue}
+        onChange={(newValue) =>
+          dispatch({
+            type: appStore.EVENT_TYPE.UPDATE_JSON_INPUT_VALUE,
+            properties: {
+              componentId: component.model.id,
+              internalValue: newValue,
+              renderId,
+            },
+          })
+        }
+        inputStyle={textAreaInputStyle(component.model.style)}
+        onEnter={
+          component.model.properties.hasOnEnterHook ? onInputHook : undefined
         }
       />
     );
@@ -457,9 +474,7 @@ function InputInteractionComponent({
         hasError={errorMessage !== null}
         errorMessage={errorMessage}
         onEnter={
-          component.model.properties.hasOnEnterHook
-            ? () => onInputHook()
-            : undefined
+          component.model.properties.hasOnEnterHook ? onInputHook : undefined
         }
         inputStyle={textAreaInputStyle(component.model.style)}
       />
@@ -488,9 +503,7 @@ function InputInteractionComponent({
         hasError={errorMessage !== null}
         errorMessage={errorMessage}
         onEnter={
-          component.model.properties.hasOnEnterHook
-            ? () => onInputHook()
-            : undefined
+          component.model.properties.hasOnEnterHook ? onInputHook : undefined
         }
       />
     );

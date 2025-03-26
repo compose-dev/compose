@@ -2,7 +2,6 @@ from typing import Union, Callable, Dict, Any, List
 from ..ui import (
     INTERACTION_TYPE,
     TYPE,
-    Nullable,
     LAYOUT_ALIGN,
     LAYOUT_DIRECTION,
     LAYOUT_JUSTIFY,
@@ -14,6 +13,7 @@ from ..ui import (
     ComponentReturn,
     ValidatorResponse,
     VoidResponse,
+    ComponentStyle,
 )
 from ..utils import Utils
 
@@ -27,7 +27,7 @@ def layout_stack(
     justify: LAYOUT_JUSTIFY = LAYOUT_JUSTIFY_DEFAULT,
     align: LAYOUT_ALIGN = LAYOUT_ALIGN_DEFAULT,
     spacing: LAYOUT_SPACING = LAYOUT_SPACING_DEFAULT,
-    style: Nullable.Style = None
+    style: Union[ComponentStyle, None] = None
 ) -> ComponentReturn:
     """A flexible container for arranging and styling its children. For example:
 
@@ -78,7 +78,7 @@ def layout_row(
     justify: LAYOUT_JUSTIFY = LAYOUT_JUSTIFY_DEFAULT,
     align: LAYOUT_ALIGN = LAYOUT_ALIGN_DEFAULT,
     spacing: LAYOUT_SPACING = LAYOUT_SPACING_DEFAULT,
-    style: Nullable.Style = None
+    style: Union[ComponentStyle, None] = None
 ) -> ComponentReturn:
     """A flexible container for arranging and styling its children in a horizontal row. For example:
 
@@ -119,7 +119,7 @@ def layout_distributed_row(
     *,
     align: LAYOUT_ALIGN = "center",
     spacing: LAYOUT_SPACING = LAYOUT_SPACING_DEFAULT,
-    style: Nullable.Style = None
+    style: Union[ComponentStyle, None] = None
 ) -> ComponentReturn:
     """A flexible container that distributes its children evenly in a row.
 
@@ -176,7 +176,7 @@ def layout_card(
     justify: LAYOUT_JUSTIFY = LAYOUT_JUSTIFY_DEFAULT,
     align: LAYOUT_ALIGN = LAYOUT_ALIGN_DEFAULT,
     spacing: LAYOUT_SPACING = LAYOUT_SPACING_DEFAULT,
-    style: Nullable.Style = None
+    style: Union[ComponentStyle, None] = None
 ) -> ComponentReturn:
     """A flexible container that renders its children inside a card UI.
 
@@ -253,7 +253,7 @@ def layout_form(
     justify: LAYOUT_JUSTIFY = LAYOUT_JUSTIFY_DEFAULT,
     align: LAYOUT_ALIGN = LAYOUT_ALIGN_DEFAULT,
     spacing: LAYOUT_SPACING = LAYOUT_SPACING_DEFAULT,
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
     clear_on_submit: bool = False,
     hide_submit_button: bool = False,
     validate: Union[

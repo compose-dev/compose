@@ -8,6 +8,19 @@ import * as SelectOption from "./selectOption";
 import * as TTable from "./table";
 import * as ComposeFile from "./composeFile";
 
+/**
+ * Represents any valid JSON value in TypeScript.
+ * This includes primitives (string, number, boolean, null),
+ * arrays of JSON values, and objects with string keys and JSON values.
+ */
+type BaseJson =
+  | string
+  | number
+  | boolean
+  | null
+  | BaseJson[]
+  | { [key: string]: BaseJson };
+
 type Text = string;
 type Email = string;
 type Url = string;
@@ -23,6 +36,7 @@ type TimeInput = DateTime.TimeRepresentation;
 type DateTimeInput = DateTime.DateTimeRepresentationWithJsDate;
 type TextArea = string;
 type Checkbox = boolean;
+type Json = BaseJson;
 
 export {
   Text,
@@ -35,6 +49,7 @@ export {
   MultiSelectDropdown,
   Table,
   FileDrop,
+  Json,
   DateInput as Date,
   TimeInput as Time,
   DateTimeInput as DateTime,

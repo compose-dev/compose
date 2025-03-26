@@ -15,6 +15,7 @@ interface UIHandler {
   timeInput: typeof Generator.input.time;
   dateTimeInput: typeof Generator.input.dateTime;
   textArea: typeof Generator.input.textArea;
+  jsonInput: typeof Generator.input.json;
   checkbox: typeof Generator.input.checkbox;
   text: typeof Generator.display.text;
   header: typeof Generator.display.header;
@@ -52,6 +53,7 @@ const ui: UIHandler = {
   timeInput: Generator.input.time,
   dateTimeInput: Generator.input.dateTime,
   textArea: Generator.input.textArea,
+  jsonInput: Generator.input.json,
   checkbox: Generator.input.checkbox,
 
   // Display

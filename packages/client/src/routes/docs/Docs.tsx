@@ -385,6 +385,14 @@ function Docs() {
     );
   }
 
+  if (type === DOC_TYPE["components-input-json"]) {
+    return (
+      <BrowserWrapper>
+        <Components.Input.Json />
+      </BrowserWrapper>
+    );
+  }
+
   if (type === DOC_TYPE["components-input-radio-group"]) {
     return (
       <BrowserWrapper>

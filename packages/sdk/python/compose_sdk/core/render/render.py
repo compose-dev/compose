@@ -8,6 +8,7 @@ from ..run_hook_function import run_hook_function
 from ..ui import INTERACTION_TYPE, TYPE, TableSelectionReturn
 from ..file import File
 from ..static_tree import StaticTree
+from ..json import JSON
 
 
 class Render:
@@ -70,6 +71,11 @@ class Render:
                                 data["value"]["hour"],
                                 data["value"]["minute"],
                             )
+                    elif data["type"] == TYPE.INPUT_JSON:
+                        try:
+                            hydrated[key] = JSON.parse(data["value"])
+                        except Exception:
+                            hydrated[key] = data["value"]
                     elif data["type"] == TYPE.INPUT_TABLE:
                         component = StaticTree.find_component.by_id(component_tree, key)
 

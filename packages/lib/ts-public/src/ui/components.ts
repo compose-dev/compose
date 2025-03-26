@@ -198,6 +198,17 @@ export interface InputTextArea<
   interactionType: typeof INTERACTION_TYPE.INPUT;
 }
 
+export interface InputJson<
+  TId extends BaseGeneric.Id = BaseGeneric.Id,
+  TRequired extends BaseGeneric.Required = BaseGeneric.Required,
+> extends Base {
+  model: Model.InputInteraction.Json<TId, TRequired>;
+  output: Output.InputJson;
+  hooks: Hooks.InputJson<TRequired>;
+  type: typeof TYPE.INPUT_JSON;
+  interactionType: typeof INTERACTION_TYPE.INPUT;
+}
+
 export interface InputCheckbox<
   TId extends BaseGeneric.Id = BaseGeneric.Id,
   TRequired extends BaseGeneric.Required = BaseGeneric.Required,
@@ -377,6 +388,7 @@ export type All<
   | InputTime<TId, TRequired>
   | InputDateTime<TId, TRequired>
   | InputTextArea<TId, TRequired>
+  | InputJson<TId, TRequired>
   | InputCheckbox<TId, TRequired>
   | ButtonBarChart<TId>
   | ButtonLineChart<TId>

@@ -16,6 +16,7 @@ from ..ui import (
     ChartBarGroupMode,
     ChartScale,
     chart_format_series_data,
+    ComponentStyle,
 )
 from ..types import NullableStr
 
@@ -25,7 +26,7 @@ def _create_button(
     id: str,
     *,
     appearance: BUTTON_APPEARANCE = BUTTON_APPEARANCE_DEFAULT,
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
     label: NullableStr = None,
     on_click: Nullable.NoArgumentsCallable = None,
 ) -> ComponentReturn:
@@ -53,8 +54,8 @@ def button_default(
     id: str,
     *,
     appearance: BUTTON_APPEARANCE = BUTTON_APPEARANCE_DEFAULT,
-    style: Nullable.Style = None,
-    label: Nullable.Str = None,
+    style: Union[ComponentStyle, None] = None,
+    label: Union[str, None] = None,
     on_click: Nullable.NoArgumentsCallable = None,
 ) -> ComponentReturn:
     return _create_button(
@@ -71,8 +72,8 @@ def button_form_submit(
     id: str,
     *,
     appearance: BUTTON_APPEARANCE = BUTTON_APPEARANCE_DEFAULT,
-    style: Nullable.Style = None,
-    label: Nullable.Str = None,
+    style: Union[ComponentStyle, None] = None,
+    label: Union[str, None] = None,
     on_click: Nullable.NoArgumentsCallable = None,
 ) -> ComponentReturn:
     return _create_button(
@@ -106,7 +107,7 @@ def button_bar_chart(
     orientation: ChartBarOrientation = "vertical",
     group_mode: ChartBarGroupMode = "stacked",
     scale: ChartScale = "linear",
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
 ) -> ComponentReturn:
     """A bar chart component that can be clicked.
 

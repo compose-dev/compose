@@ -6,14 +6,15 @@ from ..ui import (
     INTERACTION_TYPE,
     TYPE,
     Nullable,
-    DISPLAY_UTILS,
     ComponentReturn,
     LanguageName,
     HeaderSize,
     TextColor,
     TextSize,
+    ComponentStyle,
 )
 from ..utils import Utils
+from ..types import Json
 
 
 def display_text(
@@ -27,7 +28,7 @@ def display_text(
     *,
     color: Union[TextColor, None] = None,
     size: Union[TextSize, None] = None,
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
 ) -> ComponentReturn:
     id = Utils.generate_id()
 
@@ -57,7 +58,7 @@ def display_header(
     *,
     color: Union[TextColor, None] = None,
     size: Union[HeaderSize, None] = None,
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
 ) -> ComponentReturn:
     id = Utils.generate_id()
 
@@ -83,11 +84,11 @@ def display_header(
 
 
 def display_json(
-    json: DISPLAY_UTILS.Json,
+    json: Json,
     *,
-    label: Nullable.Str = None,
-    description: Nullable.Str = None,
-    style: Nullable.Style = None,
+    label: Union[str, None] = None,
+    description: Union[str, None] = None,
+    style: Union[ComponentStyle, None] = None,
 ) -> ComponentReturn:
     id = Utils.generate_id()
 
@@ -108,7 +109,7 @@ def display_json(
 
 
 def display_spinner(
-    *, text: Nullable.Str = None, style: Nullable.Style = None
+    *, text: Union[str, None] = None, style: Union[ComponentStyle, None] = None
 ) -> ComponentReturn:
     id = Utils.generate_id()
 
@@ -132,7 +133,7 @@ def display_code(
     label: Union[str, None] = None,
     description: Union[str, None] = None,
     lang: Union[LanguageName, None] = None,
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
 ) -> ComponentReturn:
     id = Utils.generate_id()
 
@@ -162,7 +163,9 @@ def display_code(
     }
 
 
-def display_image(src: str, *, style: Nullable.Style = None) -> ComponentReturn:
+def display_image(
+    src: str, *, style: Union[ComponentStyle, None] = None
+) -> ComponentReturn:
     id = Utils.generate_id()
 
     return {
@@ -179,7 +182,9 @@ def display_image(src: str, *, style: Nullable.Style = None) -> ComponentReturn:
     }
 
 
-def display_markdown(markdown: str, *, style: Nullable.Style = None) -> ComponentReturn:
+def display_markdown(
+    markdown: str, *, style: Union[ComponentStyle, None] = None
+) -> ComponentReturn:
     id = Utils.generate_id()
 
     return {
@@ -199,11 +204,11 @@ def display_markdown(markdown: str, *, style: Nullable.Style = None) -> Componen
 def display_pdf(
     file: Union[bytes, io.BufferedIOBase],
     *,
-    label: Nullable.Str = None,
-    description: Nullable.Str = None,
+    label: Union[str, None] = None,
+    description: Union[str, None] = None,
     annotations: Nullable.Annotations = None,
     scroll: Union[Literal["vertical", "horizontal"], None] = None,
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
 ) -> ComponentReturn:
     id = Utils.generate_id()
 

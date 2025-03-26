@@ -52,12 +52,11 @@ from .types import (
     Stale,
 )
 from .componentGenerators import ComponentReturn
-from .constants import DISPLAY_UTILS, Nullable
+from .constants import Nullable
 from .interactive_component_type import is_interactive_component
 from .types.chart import *
 
 __all__ = [
-    "DISPLAY_UTILS",
     "Nullable",
     "is_interactive_component",
     "INTERACTION_TYPE",

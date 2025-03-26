@@ -112,6 +112,15 @@ export interface InputTextArea extends Base {
   customerReturnedValue: Factory.Nullable<BaseInputValue.TextArea>;
 }
 
+export interface InputJson extends Base {
+  internalValue: Factory.Nullable<string>;
+  networkTransferValue: {
+    value: Factory.Nullable<string>;
+    type: typeof TYPE.INPUT_JSON;
+  };
+  customerReturnedValue: Factory.Nullable<BaseInputValue.Json>;
+}
+
 export interface InputCheckbox extends Base {
   internalValue: BaseInputValue.Checkbox;
   networkTransferValue: BaseInputValue.Checkbox;
@@ -165,6 +174,7 @@ export type All =
   | InputTime
   | InputDateTime
   | InputTextArea
+  | InputJson
   | InputCheckbox
   | ButtonBarChart
   | ButtonLineChart

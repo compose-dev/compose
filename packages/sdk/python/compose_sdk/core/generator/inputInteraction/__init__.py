@@ -8,15 +8,16 @@ from ...ui import (
     TYPE,
     SelectOptionValue,
     SelectOptions,
-    Nullable,
     ComponentReturn,
     ValidatorResponse,
     VoidResponse,
+    ComponentStyle,
 )
 from ...file import File
 from ...date_utils import DateUtils
 from ..base import MULTI_SELECTION_MIN_DEFAULT, MULTI_SELECTION_MAX_DEFAULT
 from .tableComponent import table, dataframe
+from ...types import Json
 
 
 def input_text(
@@ -34,7 +35,7 @@ def input_text(
         Callable[[], VoidResponse],
         Callable[[Union[str, None]], VoidResponse],
     ] = None,
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
 ) -> ComponentReturn:
     return {
         "model": {
@@ -73,7 +74,7 @@ def input_email(
         Callable[[], VoidResponse],
         Callable[[Union[str, None]], VoidResponse],
     ] = None,
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
 ) -> ComponentReturn:
     return {
         "model": {
@@ -100,10 +101,10 @@ def input_email(
 def input_url(
     id: str,
     *,
-    label: Nullable.Str = None,
+    label: Union[str, None] = None,
     required: bool = True,
-    description: Nullable.Str = None,
-    initial_value: Nullable.Str = None,
+    description: Union[str, None] = None,
+    initial_value: Union[str, None] = None,
     validate: Union[
         Callable[[], ValidatorResponse],
         Callable[[Union[str, None]], ValidatorResponse],
@@ -112,7 +113,7 @@ def input_url(
         Callable[[], VoidResponse],
         Callable[[Union[str, None]], VoidResponse],
     ] = None,
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
 ) -> ComponentReturn:
     return {
         "model": {
@@ -151,7 +152,7 @@ def input_number(
         Callable[[], VoidResponse],
         Callable[[Union[int, float, None]], VoidResponse],
     ] = None,
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
 ) -> ComponentReturn:
     return {
         "model": {
@@ -178,10 +179,10 @@ def input_number(
 def input_password(
     id: str,
     *,
-    label: Nullable.Str = None,
+    label: Union[str, None] = None,
     required: bool = True,
-    description: Nullable.Str = None,
-    initial_value: Nullable.Str = None,
+    description: Union[str, None] = None,
+    initial_value: Union[str, None] = None,
     validate: Union[
         Callable[[], ValidatorResponse],
         Callable[[Union[str, None]], ValidatorResponse],
@@ -190,7 +191,7 @@ def input_password(
         Callable[[], VoidResponse],
         Callable[[Union[str, None]], VoidResponse],
     ] = None,
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
 ) -> ComponentReturn:
     return {
         "model": {
@@ -214,15 +215,18 @@ def input_password(
     }
 
 
+NullableDate = Union[datetime.date, datetime.datetime, None]
+
+
 def input_date(
     id: str,
     *,
-    label: Nullable.Str = None,
+    label: Union[str, None] = None,
     required: bool = True,
-    description: Nullable.Str = None,
-    initial_value: Nullable.Date = None,
-    min: Nullable.Date = None,
-    max: Nullable.Date = None,
+    description: Union[str, None] = None,
+    initial_value: NullableDate = None,
+    min: NullableDate = None,
+    max: NullableDate = None,
     validate: Union[
         Callable[[], ValidatorResponse],
         Callable[[Union[datetime.date, None]], ValidatorResponse],
@@ -231,7 +235,7 @@ def input_date(
         Callable[[], VoidResponse],
         Callable[[Union[datetime.date, None]], VoidResponse],
     ] = None,
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
 ) -> ComponentReturn:
 
     return {
@@ -258,15 +262,18 @@ def input_date(
     }
 
 
+NullableTime = Union[datetime.time, datetime.datetime, None]
+
+
 def input_time(
     id: str,
     *,
-    label: Nullable.Str = None,
+    label: Union[str, None] = None,
     required: bool = True,
-    description: Nullable.Str = None,
-    initial_value: Nullable.Time = None,
-    min: Nullable.Time = None,
-    max: Nullable.Time = None,
+    description: Union[str, None] = None,
+    initial_value: NullableTime = None,
+    min: NullableTime = None,
+    max: NullableTime = None,
     validate: Union[
         Callable[[], ValidatorResponse],
         Callable[[Union[datetime.time, None]], ValidatorResponse],
@@ -275,7 +282,7 @@ def input_time(
         Callable[[], VoidResponse],
         Callable[[Union[datetime.time, None]], VoidResponse],
     ] = None,
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
 ) -> ComponentReturn:
 
     return {
@@ -302,24 +309,27 @@ def input_time(
     }
 
 
+NullableDatetime = Union[datetime.datetime, None]
+
+
 def input_datetime(
     id: str,
     *,
-    label: Nullable.Str = None,
+    label: Union[str, None] = None,
     required: bool = True,
-    description: Nullable.Str = None,
-    initial_value: Nullable.Datetime = None,
-    min: Nullable.Datetime = None,
-    max: Nullable.Datetime = None,
+    description: Union[str, None] = None,
+    initial_value: NullableDatetime = None,
+    min: NullableDatetime = None,
+    max: NullableDatetime = None,
     validate: Union[
         Callable[[], ValidatorResponse],
-        Callable[[Union[datetime.datetime, None]], ValidatorResponse],
+        Callable[[NullableDatetime], ValidatorResponse],
     ] = None,
     on_enter: Union[
         Callable[[], VoidResponse],
-        Callable[[Union[datetime.datetime, None]], VoidResponse],
+        Callable[[NullableDatetime], VoidResponse],
     ] = None,
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
 ) -> ComponentReturn:
 
     return {
@@ -350,10 +360,10 @@ def radio_group(
     id: str,
     options: SelectOptions,
     *,
-    label: Nullable.Str = None,
+    label: Union[str, None] = None,
     required: bool = True,
-    description: Nullable.Str = None,
-    initial_value: Nullable.SelectOptionValue = None,
+    description: Union[str, None] = None,
+    initial_value: Union[SelectOptionValue, None] = None,
     validate: Union[
         Callable[[], ValidatorResponse],
         Callable[[Union[SelectOptionValue, None]], ValidatorResponse],
@@ -362,7 +372,7 @@ def radio_group(
         Callable[[], VoidResponse],
         Callable[[Union[SelectOptionValue, None]], VoidResponse],
     ] = None,
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
 ) -> ComponentReturn:
     if not isinstance(options, list):
         raise TypeError(
@@ -397,9 +407,9 @@ def radio_group(
 def checkbox(
     id: str,
     *,
-    label: Nullable.Str = None,
+    label: Union[str, None] = None,
     required: bool = True,
-    description: Nullable.Str = None,
+    description: Union[str, None] = None,
     initial_value: bool = False,
     validate: Union[
         Callable[[], ValidatorResponse],
@@ -409,7 +419,7 @@ def checkbox(
         Callable[[], VoidResponse],
         Callable[[bool], VoidResponse],
     ] = None,
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
 ) -> ComponentReturn:
     return {
         "model": {
@@ -437,10 +447,10 @@ def select_dropdown_single(
     id: str,
     options: SelectOptions,
     *,
-    label: Nullable.Str = None,
+    label: Union[str, None] = None,
     required: bool = True,
-    description: Nullable.Str = None,
-    initial_value: Nullable.SelectOptionValue = None,
+    description: Union[str, None] = None,
+    initial_value: Union[SelectOptionValue, None] = None,
     validate: Union[
         Callable[[], ValidatorResponse],
         Callable[[Union[SelectOptionValue, None]], ValidatorResponse],
@@ -449,7 +459,7 @@ def select_dropdown_single(
         Callable[[], VoidResponse],
         Callable[[Union[SelectOptionValue, None]], VoidResponse],
     ] = None,
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
 ) -> ComponentReturn:
     if not isinstance(options, list):
         raise TypeError(
@@ -485,9 +495,9 @@ def select_dropdown_multi(
     id: str,
     options: SelectOptions,
     *,
-    label: Nullable.Str = None,
+    label: Union[str, None] = None,
     required: bool = True,
-    description: Nullable.Str = None,
+    description: Union[str, None] = None,
     initial_value: List[SelectOptionValue] = [],
     validate: Union[
         Callable[[], ValidatorResponse],
@@ -497,7 +507,7 @@ def select_dropdown_multi(
         Callable[[], VoidResponse],
         Callable[[List[SelectOptionValue]], VoidResponse],
     ] = None,
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
     min_selections: int = MULTI_SELECTION_MIN_DEFAULT,
     max_selections: int = MULTI_SELECTION_MAX_DEFAULT,
 ) -> ComponentReturn:
@@ -548,7 +558,7 @@ def input_file_drop(
         Callable[[], ValidatorResponse],
         Callable[[List[File]], ValidatorResponse],
     ] = None,
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
     on_change: Union[
         Callable[[], VoidResponse],
         Callable[[List[File]], VoidResponse],
@@ -584,10 +594,10 @@ def input_file_drop(
 def input_text_area(
     id: str,
     *,
-    label: Nullable.Str = None,
+    label: Union[str, None] = None,
     required: bool = True,
-    description: Nullable.Str = None,
-    initial_value: Nullable.Str = None,
+    description: Union[str, None] = None,
+    initial_value: Union[str, None] = None,
     validate: Union[
         Callable[[], ValidatorResponse],
         Callable[[Union[str, None]], ValidatorResponse],
@@ -596,7 +606,7 @@ def input_text_area(
         Callable[[], VoidResponse],
         Callable[[Union[str, None]], VoidResponse],
     ] = None,
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
 ) -> ComponentReturn:
     return {
         "model": {
@@ -616,5 +626,44 @@ def input_text_area(
             "onEnter": on_enter,
         },
         "type": TYPE.INPUT_TEXT_AREA,
+        "interactionType": INTERACTION_TYPE.INPUT,
+    }
+
+
+def input_json(
+    id: str,
+    *,
+    label: Union[str, None] = None,
+    required: bool = True,
+    description: Union[str, None] = None,
+    initial_value: Union[Json, None] = None,
+    validate: Union[
+        Callable[[], ValidatorResponse],
+        Callable[[Union[Json, None]], ValidatorResponse],
+    ] = None,
+    on_enter: Union[
+        Callable[[], VoidResponse],
+        Callable[[Union[Json, None]], VoidResponse],
+    ] = None,
+    style: Union[ComponentStyle, None] = None,
+) -> ComponentReturn:
+    return {
+        "model": {
+            "id": id,
+            "label": label,
+            "description": description,
+            "required": required,
+            "hasValidateHook": validate is not None,
+            "style": style,
+            "properties": {
+                "initialValue": initial_value,
+                "hasOnEnterHook": on_enter is not None,
+            },
+        },
+        "hooks": {
+            "validate": validate,
+            "onEnter": on_enter,
+        },
+        "type": TYPE.INPUT_JSON,
         "interactionType": INTERACTION_TYPE.INPUT,
     }

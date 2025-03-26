@@ -26,6 +26,7 @@ export type All<
   | InputInteraction.Time<TId, TRequired>
   | InputInteraction.DateTime<TId, TRequired>
   | InputInteraction.TextArea<TId, TRequired>
+  | InputInteraction.Json<TId, TRequired>
   | InputInteraction.Checkbox<TId, TRequired>
   | ButtonInteraction.Default<TId>
   | ButtonInteraction.FormSubmit<TId>

@@ -38,6 +38,8 @@ import {
   updateTimeInputValue,
   updateDateTimeInputValue,
   updateCheckboxValue,
+  updateJsonInputValue,
+  UpdateJsonInputValueEvent,
 } from "./eventHandlers/updateInputValue";
 import {
   ShowFormLocalErrorsEvent,
@@ -116,7 +118,8 @@ type AppRunnerEvent =
   | CloseModalEvent
   | UpdateLoadingEvent
   | TablePageChangeResponseEvent
-  | UpdateComponentStaleStateEvent;
+  | UpdateComponentStaleStateEvent
+  | UpdateJsonInputValueEvent;
 
 function appRunnerReducer(
   appState: AppStore,
@@ -159,6 +162,9 @@ function appRunnerReducer(
       }
       case APP_RUNNER_EVENT_TYPE.UPDATE_TABLE_INPUT_VALUE: {
         return updateTableInputValue(appState, event);
+      }
+      case APP_RUNNER_EVENT_TYPE.UPDATE_JSON_INPUT_VALUE: {
+        return updateJsonInputValue(appState, event);
       }
       case APP_RUNNER_EVENT_TYPE.UPDATE_FILE_UPLOAD_INPUT_VALUE: {
         return updateFileUploadInputValue(appState, event);

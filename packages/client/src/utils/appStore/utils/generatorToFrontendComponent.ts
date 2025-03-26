@@ -151,6 +151,15 @@ function generatorToFrontendModel(
           label: guessLabel(component.model.id, component.model.label),
         },
       };
+    case UI.TYPE.INPUT_JSON:
+      return {
+        ...component,
+        formId: metadata[component.model.id].formId,
+        model: {
+          ...component.model,
+          label: guessLabel(component.model.id, component.model.label),
+        },
+      };
     case UI.TYPE.INPUT_SELECT_DROPDOWN_MULTI:
       return {
         ...component,
@@ -400,6 +409,25 @@ function generatorToFrontendOutput(
       };
     } else if (component.type === UI.TYPE.INPUT_FILE_DROP) {
       const output = initialInputInteractionOutput.fileDrop();
+
+      return {
+        type: component.type,
+        interactionType: component.interactionType,
+        output,
+        validation: {
+          localErrorMessage: getComponentLocalErrorMessage(
+            component,
+            output.internalValue
+          ),
+          remoteErrorMessage: null,
+          showLocalErrorIfExists: false,
+        },
+        id: component.model.id,
+      };
+    } else if (component.type === UI.TYPE.INPUT_JSON) {
+      const output = initialInputInteractionOutput.json(
+        component.model.properties.initialValue
+      );
 
       return {
         type: component.type,

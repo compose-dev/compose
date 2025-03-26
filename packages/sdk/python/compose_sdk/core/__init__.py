@@ -4,7 +4,6 @@ from .utils import Utils
 from .render import Render
 from .ui import (
     ComponentReturn,
-    DISPLAY_UTILS,
     Nullable,
     is_interactive_component,
     INTERACTION_TYPE,
@@ -80,7 +79,6 @@ __all__ = [
     "DateUtils",
     "StaticTree",
     "ComponentReturn",
-    "DISPLAY_UTILS",
     "Nullable",
     "is_interactive_component",
     "INTERACTION_TYPE",

@@ -40,6 +40,7 @@ const DOC_TYPE = {
   "components-input-checkbox": "components-input-checkbox",
   "components-input-time": "components-input-time",
   "components-input-datetime": "components-input-datetime",
+  "components-input-json": "components-input-json",
   "components-display-text": "components-display-text",
   "components-display-text-appearance": "components-display-text-appearance",
   "components-display-text-nested": "components-display-text-nested",

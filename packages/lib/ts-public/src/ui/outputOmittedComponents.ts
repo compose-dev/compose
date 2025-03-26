@@ -84,6 +84,11 @@ export type InputTextArea<
   TRequired extends BaseGeneric.Required = BaseGeneric.Required,
 > = Omit<Components.InputTextArea<TId, TRequired>, OmitKeys>;
 
+export type InputJson<
+  TId extends BaseGeneric.Id = BaseGeneric.Id,
+  TRequired extends BaseGeneric.Required = BaseGeneric.Required,
+> = Omit<Components.InputJson<TId, TRequired>, OmitKeys>;
+
 export type InputCheckbox<
   TId extends BaseGeneric.Id = BaseGeneric.Id,
   TRequired extends BaseGeneric.Required = BaseGeneric.Required,

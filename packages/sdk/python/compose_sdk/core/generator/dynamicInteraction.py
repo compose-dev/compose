@@ -3,7 +3,6 @@ from .displayInteraction import display_none
 from .layoutInteraction import layout_stack
 from ..ui import (
     ComponentReturn,
-    Nullable,
     LAYOUT_ALIGN,
     LAYOUT_DIRECTION,
     LAYOUT_JUSTIFY,
@@ -12,6 +11,7 @@ from ..ui import (
     LAYOUT_JUSTIFY_DEFAULT,
     LAYOUT_SPACING,
     LAYOUT_SPACING_DEFAULT,
+    ComponentStyle,
 )
 import inspect
 
@@ -66,7 +66,7 @@ def dynamic_for_each(
     justify: LAYOUT_JUSTIFY = LAYOUT_JUSTIFY_DEFAULT,
     align: LAYOUT_ALIGN = LAYOUT_ALIGN_DEFAULT,
     spacing: LAYOUT_SPACING = LAYOUT_SPACING_DEFAULT,
-    style: Nullable.Style = None,
+    style: Union[ComponentStyle, None] = None,
 ) -> ComponentReturn:
     """
     Map an iterable of items to a list of components. For example:

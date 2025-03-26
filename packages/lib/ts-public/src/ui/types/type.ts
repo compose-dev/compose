@@ -15,6 +15,7 @@ const TYPE = {
   INPUT_TIME: "input-time",
   INPUT_TEXT_AREA: "input-text-area",
   INPUT_CHECKBOX: "input-checkbox",
+  INPUT_JSON: "ij",
 
   // CHART TYPES
   BUTTON_BAR_CHART: "btn-bar-chart",

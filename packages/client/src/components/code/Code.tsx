@@ -39,7 +39,7 @@ function Code({
       {description && (
         <IOComponent.Description as="p">{description}</IOComponent.Description>
       )}
-      <div className="rounded-brand overflow-clip relative group">
+      <div className="rounded-brand overflow-clip relative group text-sm">
         <pre>
           <code
             ref={codeRef}

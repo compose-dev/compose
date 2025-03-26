@@ -18,6 +18,7 @@ class TYPE(str, Enum):
     INPUT_DATE_TIME = "input-date-time"
     INPUT_TEXT_AREA = "input-text-area"
     INPUT_CHECKBOX = "input-checkbox"
+    INPUT_JSON = "ij"
 
     # BUTTON TYPES
     BUTTON_DEFAULT = "button-default"

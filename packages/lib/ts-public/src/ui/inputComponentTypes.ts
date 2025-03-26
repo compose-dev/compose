@@ -18,7 +18,8 @@ type InputEnterType =
   | typeof TYPE.INPUT_DATE
   | typeof TYPE.INPUT_TIME
   | typeof TYPE.INPUT_DATE_TIME
-  | typeof TYPE.INPUT_TEXT_AREA;
+  | typeof TYPE.INPUT_TEXT_AREA
+  | typeof TYPE.INPUT_JSON;
 
 type InputSelectType =
   | typeof TYPE.INPUT_RADIO_GROUP
@@ -62,7 +63,8 @@ function isInputEnterType<T extends { type: Components.All["type"] }>(
     component.type === TYPE.INPUT_DATE ||
     component.type === TYPE.INPUT_TIME ||
     component.type === TYPE.INPUT_DATE_TIME ||
-    component.type === TYPE.INPUT_TEXT_AREA
+    component.type === TYPE.INPUT_TEXT_AREA ||
+    component.type === TYPE.INPUT_JSON
   );
 }
 

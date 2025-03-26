@@ -192,6 +192,16 @@ export interface TextArea<
   };
 }
 
+export interface Json<
+  TId extends BaseGeneric.Id,
+  TRequired extends BaseGeneric.Required,
+> extends BaseWithInputInteraction<TId, TRequired> {
+  properties: {
+    initialValue: Components.InputJson["output"]["customerReturnedValue"];
+    hasOnEnterHook: boolean;
+  };
+}
+
 export interface Checkbox<
   TId extends BaseGeneric.Id,
   TRequired extends BaseGeneric.Required,

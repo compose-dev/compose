@@ -8,7 +8,7 @@ import table from "./table";
 import date from "./date";
 import time from "./time";
 import dateTime from "./dateTime";
-import { text, email, url, number, password, textArea } from "./text";
+import { text, email, url, number, password, textArea, json } from "./text";
 import {
   radioGroup,
   selectDropdownSingle,
@@ -217,6 +217,7 @@ const inputGenerator = {
   table,
   text,
   textArea,
+  json,
   url,
 };
 

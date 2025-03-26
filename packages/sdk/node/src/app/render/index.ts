@@ -194,6 +194,8 @@ function hydrateFormData(
               "An error occurred while trying to hydrate a table input: could not find the table within the component tree"
             );
           }
+        } else if (formData[key].type === UI.TYPE.INPUT_JSON) {
+          hydrated[key] = JSON.parse(formData[key].value);
         } else {
           hydrated[key] = formData[key].value;
         }

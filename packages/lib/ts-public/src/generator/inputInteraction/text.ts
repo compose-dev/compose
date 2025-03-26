@@ -51,6 +51,9 @@ interface PasswordProperties<TRequired extends UI.BaseGeneric.Required>
 interface TextAreaProperties<TRequired extends UI.BaseGeneric.Required>
   extends BaseTextProperties<UI.BaseInputValue.TextArea, TRequired> {}
 
+interface JsonProperties<TRequired extends UI.BaseGeneric.Required>
+  extends BaseTextProperties<UI.BaseInputValue.Json, TRequired> {}
+
 type OptionalTextProperties<TRequired extends UI.BaseGeneric.Required> = Omit<
   TextProperties<TRequired>,
   BaseRequiredFields
@@ -77,6 +80,11 @@ type OptionalPasswordProperties<TRequired extends UI.BaseGeneric.Required> =
 type OptionalTextAreaProperties<TRequired extends UI.BaseGeneric.Required> =
   Omit<TextAreaProperties<TRequired>, BaseRequiredFields>;
 
+type OptionalJsonProperties<TRequired extends UI.BaseGeneric.Required> = Omit<
+  JsonProperties<TRequired>,
+  BaseRequiredFields
+>;
+
 const defaultBaseProperties: OptionalTextProperties<UI.BaseGeneric.Required> = {
   initialValue: null,
   label: null,
@@ -97,6 +105,16 @@ const defaultNumberProperties: OptionalNumberProperties<UI.BaseGeneric.Required>
     onEnter: null,
     style: null,
   };
+
+const defaultJsonProperties: OptionalJsonProperties<UI.BaseGeneric.Required> = {
+  initialValue: null,
+  label: null,
+  required: true,
+  description: null,
+  validate: null,
+  onEnter: null,
+  style: null,
+};
 
 /**
  * Generate a text input component.
@@ -774,4 +792,113 @@ function textArea<
   };
 }
 
-export { text, email, url, number, password, textArea };
+/**
+ * Generate a JSON input component, which will allow the user to edit JSON data..
+ *
+ * ```typescript
+ * // Basic example
+ * page.add(() => ui.jsonInput("json", {
+ *   onEnter: (json) => {
+ *     console.log(json);
+ *   },
+ * }));
+ *
+ * // Part of a form
+ * page.add(() =>
+ *  ui.form("form", [ui.jsonInput("featureFlags")], {
+ *    onSubmit: (formData) => {
+ *      const { featureFlags } = formData;
+ *    },
+ *  })
+ * );
+ * ```
+ *
+ * Read the full {@link https://docs.composehq.com/components/input/json-input documentation}.
+ *
+ * @param {string} id - Unique id to identify the component.
+ * @param {Partial<OptionalJsonProperties<TRequired>>} properties - Optional properties to configure the JSON input component.
+ * @param {OptionalJsonProperties<TRequired>["label"]} properties.label - Label to display above the JSON input.
+ * @param {OptionalJsonProperties<TRequired>["description"]} properties.description - Description to display below the label.
+ * @param {OptionalJsonProperties<TRequired>["required"]} properties.required - Whether the JSON input is required (e.g. part of a form). Defaults to `true`.
+ * @param {OptionalJsonProperties<TRequired>["validate"]} properties.validate - Custom function to validate the user's input. Return nothing if valid, or a string error message if invalid.
+ * @param {OptionalJsonProperties<TRequired>["onEnter"]} properties.onEnter - Callback function that is called when the user presses enter while the JSON input is focused.
+ * @param {OptionalJsonProperties<TRequired>["initialValue"]} properties.initialValue - The initial value of the JSON input. Defaults to `null`.
+ * @param {OptionalJsonProperties<TRequired>["style"]} properties.style - CSS styles object to directly style the JSON input HTML element.
+ * @returns The configured JSON input component.
+ */
+function json<TId extends UI.BaseGeneric.Id, TRequired extends true>(
+  id: TId,
+  properties?: Partial<OptionalJsonProperties<TRequired>>
+): UI.OutputOmittedComponents.InputJson<TId, TRequired>;
+
+/**
+ * Generate a JSON input component, which will allow the user to edit JSON data..
+ *
+ * ```typescript
+ * // Basic example
+ * page.add(() => ui.jsonInput("json", {
+ *   onEnter: (json) => {
+ *     console.log(json);
+ *   },
+ * }));
+ *
+ * // Part of a form
+ * page.add(() =>
+ *  ui.form("form", [ui.jsonInput("featureFlags")], {
+ *    onSubmit: (formData) => {
+ *      const { featureFlags } = formData;
+ *    },
+ *  })
+ * );
+ * ```
+ *
+ * Read the full {@link https://docs.composehq.com/components/input/json-input documentation}.
+ *
+ * @param {string} id - Unique id to identify the component.
+ * @param {Partial<OptionalJsonProperties<TRequired>>} properties - Optional properties to configure the JSON input component.
+ * @param {OptionalJsonProperties<TRequired>["label"]} properties.label - Label to display above the JSON input.
+ * @param {OptionalJsonProperties<TRequired>["description"]} properties.description - Description to display below the label.
+ * @param {OptionalJsonProperties<TRequired>["required"]} properties.required - Whether the JSON input is required (e.g. part of a form). Defaults to `true`.
+ * @param {OptionalJsonProperties<TRequired>["validate"]} properties.validate - Custom function to validate the user's input. Return nothing if valid, or a string error message if invalid.
+ * @param {OptionalJsonProperties<TRequired>["onEnter"]} properties.onEnter - Callback function that is called when the user presses enter while the JSON input is focused.
+ * @param {OptionalJsonProperties<TRequired>["initialValue"]} properties.initialValue - The initial value of the JSON input. Defaults to `null`.
+ * @param {OptionalJsonProperties<TRequired>["style"]} properties.style - CSS styles object to directly style the JSON input HTML element.
+ * @returns The configured JSON input component.
+ */
+function json<TId extends UI.BaseGeneric.Id, TRequired extends false>(
+  id: TId,
+  properties?: Partial<OptionalJsonProperties<TRequired>>
+): UI.OutputOmittedComponents.InputJson<TId, TRequired>;
+
+function json<
+  TId extends UI.BaseGeneric.Id,
+  TRequired extends UI.BaseGeneric.Required,
+>(
+  id: TId,
+  properties: Partial<OptionalJsonProperties<TRequired>> = {}
+): UI.OutputOmittedComponents.InputJson<TId, TRequired> {
+  const mergedProperties = { ...defaultJsonProperties, ...properties };
+
+  return {
+    model: {
+      id,
+      label: mergedProperties.label,
+      description: mergedProperties.description,
+      required: mergedProperties.required as TRequired,
+      hasValidateHook: mergedProperties.validate !== null,
+      properties: {
+        initialValue: mergedProperties.initialValue,
+        hasOnEnterHook: mergedProperties.onEnter !== null,
+      },
+      style: mergedProperties.style,
+    },
+    hooks: {
+      validate: mergedProperties.validate,
+      onEnter: mergedProperties.onEnter,
+    },
+    type: UI.TYPE.INPUT_JSON,
+    interactionType: UI.INTERACTION_TYPE.INPUT,
+  };
+}
+
+export { text, email, url, number, password, textArea, json };

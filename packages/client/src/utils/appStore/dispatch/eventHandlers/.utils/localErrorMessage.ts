@@ -20,7 +20,8 @@ function getComponentLocalErrorMessage(
     component.type === UI.TYPE.INPUT_DATE ||
     component.type === UI.TYPE.INPUT_TIME ||
     component.type === UI.TYPE.INPUT_DATE_TIME ||
-    component.type === UI.TYPE.INPUT_TEXT_AREA;
+    component.type === UI.TYPE.INPUT_TEXT_AREA ||
+    component.type === UI.TYPE.INPUT_JSON;
 
   if (emptyValueIsNull && component.model.required === true && value === null) {
     return makeError("This field is required.");
@@ -249,6 +250,20 @@ function getComponentLocalErrorMessage(
       return makeError(
         `You must select at most ${component.model.properties.maxSelections} items.`
       );
+    }
+  }
+
+  if (component.type === UI.TYPE.INPUT_JSON) {
+    const isValidlyEmpty = component.model.required === false && value === null;
+
+    if (!isValidlyEmpty) {
+      try {
+        JSON.parse(value as string);
+      } catch (error) {
+        return makeError(
+          `Invalid JSON: ${error instanceof Error ? error.message : "Unknown error"}`
+        );
+      }
     }
   }
 

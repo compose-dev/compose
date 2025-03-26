@@ -84,6 +84,9 @@ export interface InputDateTime<TRequired extends BaseGeneric.Required>
 export interface InputTextArea<TRequired extends BaseGeneric.Required>
   extends BaseWithInputEnterInteraction<BaseInputValue.TextArea, TRequired> {}
 
+export interface InputJson<TRequired extends BaseGeneric.Required>
+  extends BaseWithInputEnterInteraction<BaseInputValue.Json, TRequired> {}
+
 export interface InputRadioGroup<
   TRequired extends BaseGeneric.Required,
   TOptions extends SelectOption.List,
@@ -194,6 +197,7 @@ export type All<
   | InputTime<TRequired>
   | InputDateTime<TRequired>
   | InputTextArea<TRequired>
+  | InputJson<TRequired>
   | InputMultiSelectDropdown<TOptions>
   | InputTable
   | InputFileDrop

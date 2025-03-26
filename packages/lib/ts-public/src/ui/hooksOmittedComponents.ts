@@ -37,6 +37,8 @@ export type InputDateTime = Omit<Components.InputDateTime, OmitKeys>;
 
 export type InputTextArea = Omit<Components.InputTextArea, OmitKeys>;
 
+export type InputJson = Omit<Components.InputJson, OmitKeys>;
+
 export type InputCheckbox = Omit<Components.InputCheckbox, OmitKeys>;
 
 export type ButtonBarChart = Omit<Components.ButtonBarChart, OmitKeys>;

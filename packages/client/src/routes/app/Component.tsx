@@ -259,16 +259,19 @@ function Component({
             // Hence, we set height auto here and handle the height deeper in
             // the tree.
             component.type === UI.TYPE.INPUT_TABLE ||
-            component.type === UI.TYPE.INPUT_TEXT_AREA
+            component.type === UI.TYPE.INPUT_TEXT_AREA ||
+            component.type === UI.TYPE.INPUT_JSON
               ? "auto"
               : componentStyles?.height || "auto",
           // text area also sets the min and max height properties directly.
           minHeight:
-            component.type === UI.TYPE.INPUT_TEXT_AREA
+            component.type === UI.TYPE.INPUT_TEXT_AREA ||
+            component.type === UI.TYPE.INPUT_JSON
               ? "auto"
               : componentStyles?.minHeight || "auto",
           maxHeight:
-            component.type === UI.TYPE.INPUT_TEXT_AREA
+            component.type === UI.TYPE.INPUT_TEXT_AREA ||
+            component.type === UI.TYPE.INPUT_JSON
               ? "auto"
               : componentStyles?.maxHeight || "auto",
         }}

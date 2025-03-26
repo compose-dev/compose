@@ -647,3 +647,21 @@ code.hljs {
 .theme-light .hljs-tag {
   /* purposely ignored */
 }
+
+.ace_gutter {
+  background-color: var(--brand-bg-overlay) !important;
+  color: var(--brand-neutral-text-2) !important;
+  border-right: 1px solid var(--brand-neutral-border) !important;
+}
+
+.ace_gutter-active-line {
+  background-color: var(--brand-bg-overlay-3) !important;
+}
+
+.ace_editor {
+  background-color: var(--brand-bg-io) !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  font-family: "JetBrains Mono", monospace !important;
+  color: var(--brand-neutral-text) !important;
+}

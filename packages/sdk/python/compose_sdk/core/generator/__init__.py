@@ -36,6 +36,7 @@ from .inputInteraction import (
     radio_group,
     input_text_area,
     checkbox,
+    input_json,
 )
 from .dynamicInteraction import dynamic_cond, dynamic_for_each
 from .pageInteraction import page_confirm
@@ -78,6 +79,10 @@ class Component:
     @property
     def text_area(self):
         return input_text_area
+
+    @property
+    def json_input(self):
+        return input_json
 
     @property
     def checkbox(self):

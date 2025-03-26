@@ -16,7 +16,8 @@ interface UpdateInputValueEvent extends AppRunnerBaseEvent {
     | typeof APP_RUNNER_EVENT_TYPE.UPDATE_DATE_INPUT_VALUE
     | typeof APP_RUNNER_EVENT_TYPE.UPDATE_TIME_INPUT_VALUE
     | typeof APP_RUNNER_EVENT_TYPE.UPDATE_DATE_TIME_INPUT_VALUE
-    | typeof APP_RUNNER_EVENT_TYPE.UPDATE_CHECKBOX_INPUT_VALUE;
+    | typeof APP_RUNNER_EVENT_TYPE.UPDATE_CHECKBOX_INPUT_VALUE
+    | typeof APP_RUNNER_EVENT_TYPE.UPDATE_JSON_INPUT_VALUE;
   properties: {
     renderId: string;
     componentId: string;

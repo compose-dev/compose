@@ -158,6 +158,22 @@ function getInputFileDropDefaultOutput() {
   };
 }
 
+function getInputJsonDefaultOutput(
+  initialValue: UI.ComponentGenerators.InputJson["model"]["properties"]["initialValue"]
+) {
+  const corrected =
+    initialValue === null ? null : JSON.stringify(initialValue, undefined, 2);
+
+  return {
+    networkTransferValue: {
+      value: corrected,
+      type: UI.TYPE.INPUT_JSON,
+    },
+    customerReturnedValue: null,
+    internalValue: corrected,
+  };
+}
+
 export {
   getInputTableDefaultOutput as table,
   getInputSelectDropdownMultiDefaultOutput as selectDropdownMulti,
@@ -166,4 +182,5 @@ export {
   getInputTimeDefaultOutput as time,
   getInputDateTimeDefaultOutput as dateTime,
   getInputInteractionNullOutput as nullOutput,
+  getInputJsonDefaultOutput as json,
 };

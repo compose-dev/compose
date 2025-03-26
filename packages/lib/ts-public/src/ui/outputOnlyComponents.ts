@@ -37,6 +37,8 @@ export type InputDateTime = Pick<Components.InputDateTime, PickKeys>;
 
 export type InputTextArea = Pick<Components.InputTextArea, PickKeys>;
 
+export type InputJson = Pick<Components.InputJson, PickKeys>;
+
 export type InputCheckbox = Pick<Components.InputCheckbox, PickKeys>;
 
 export type ButtonDefault = Pick<Components.ButtonDefault, PickKeys>;

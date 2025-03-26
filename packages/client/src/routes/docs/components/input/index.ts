@@ -15,6 +15,7 @@ import Date from "./Date";
 import Time from "./Time";
 import DateTime from "./DateTime";
 import TextArea from "./TextArea";
+import { Json } from "./Json";
 import Checkbox from "./Checkbox";
 
 export {
@@ -36,4 +37,5 @@ export {
   Time,
   DateTime,
   Checkbox,
+  Json,
 };

@@ -75,6 +75,22 @@ export function useBilling(
       return;
     }
 
+    if (billingData && numStandardSeats < billingData.standardSeatsUsed) {
+      addToast({
+        message: `Cannot provision less standard seats than what you're currently using. Current standard seats usage: ${billingData.standardSeatsUsed}`,
+        appearance: "error",
+      });
+      return;
+    }
+
+    if (billingData && numExternalSeats < billingData.externalSeatsUsed) {
+      addToast({
+        message: `Cannot provision less external seats than what you're currently using. Current external seats usage: ${billingData.externalSeatsUsed}`,
+        appearance: "error",
+      });
+      return;
+    }
+
     setLoadingCheckoutSession(true);
 
     const response = await api.routes.createCheckoutSession({

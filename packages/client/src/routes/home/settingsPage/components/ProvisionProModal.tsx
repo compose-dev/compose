@@ -29,7 +29,7 @@ export default function ProvisionProModal({
           />
         </div>
         <p className="text-brand-neutral-2">
-          Provision seats for your organization.
+          Provision seats for your organization. You can add more seats later.
         </p>
       </Modal.Header>
       <Modal.Body>

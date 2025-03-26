@@ -8,3 +8,4 @@ export * from "./updateDateInputValue";
 export * from "./updateTimeInputValue";
 export * from "./updateDateTimeInputValue";
 export * from "./updateCheckboxValue";
+export * from "./updateJsonInputValue";

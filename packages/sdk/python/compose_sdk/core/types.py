@@ -1,4 +1,4 @@
-from typing import Any, Union, Callable, Awaitable
+from typing import Any, Union, Callable, Awaitable, List, Mapping
 
 
 IntFloat = Union[int, float]
@@ -14,3 +14,7 @@ NullableIntFloatStr = Union[int, float, str, None]
 NullableUntypedCallable = Union[UntypedCallable, None]
 
 AnyOrAwaitableAny = Union[Awaitable[Any], Any]
+
+
+JsonValue = Union[str, int, float, bool, None, Mapping[str, Any], List[Any]]
+Json = Union[Mapping[str, JsonValue], List[JsonValue], JsonValue]
