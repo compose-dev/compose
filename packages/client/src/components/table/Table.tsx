@@ -493,7 +493,15 @@ function Table({
                       }}
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <TableRowsMemo key={cell.id} cell={cell} />
+                        <TableRowsMemo
+                          key={cell.id}
+                          cell={cell}
+                          // Since we memoize the table row, we need to directly pass the selection state
+                          // so that the checkbox re-renders when the selection state changes!
+                          isSelected={
+                            table.getState().rowSelection[row.index + offset]
+                          }
+                        />
                       ))}
                     </div>
                   );
@@ -530,10 +538,17 @@ function Table({
   );
 }
 
-const TableRowsMemo = React.memo(TableRows);
-
-function TableRows({ cell }: { cell: Cell<FormattedTableRow, unknown> }) {
+function TableRows({
+  cell,
+}: {
+  cell: Cell<FormattedTableRow, unknown>;
+  // This is a prop purely to force a re-render when the selection state
+  // changes.
+  isSelected: boolean;
+}) {
   return flexRender(cell.column.columnDef.cell, cell.getContext());
 }
+
+const TableRowsMemo = React.memo(TableRows);
 
 export default Table;
