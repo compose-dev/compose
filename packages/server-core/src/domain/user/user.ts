@@ -54,6 +54,7 @@ async function insert(
       type: m.ErrorLog.ENTRY_TYPE.FAILED_TO_CREATE_USER,
       message: (error as Error).message,
       notes: "Failed in analytics step",
+      userEmail: email,
     });
   }
 
@@ -83,6 +84,7 @@ async function insert(
           type: m.ErrorLog.ENTRY_TYPE.FAILED_TO_CREATE_USER,
           message: (error as Error).message,
           notes: "Failed in email service step",
+          userEmail: email,
         });
       });
   } catch (error) {
@@ -90,6 +92,7 @@ async function insert(
       type: m.ErrorLog.ENTRY_TYPE.FAILED_TO_CREATE_USER,
       message: (error as Error).message,
       notes: "Failed in email service step",
+      email,
     });
   }
 

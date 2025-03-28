@@ -1,6 +1,7 @@
 import { BrowserToServerEvent, m, u } from "@compose/ts";
 import { FastifyInstance } from "fastify";
 
+import { d } from "../../domain";
 import { db } from "../../models";
 
 async function externalAppUserRoutes(server: FastifyInstance) {
@@ -197,28 +198,11 @@ async function externalAppUserRoutes(server: FastifyInstance) {
         return reply.status(403).send({ message: "Forbidden" });
       }
 
-      const isEmail =
-        u.string.isValidEmail(externalAppUser.email) &&
-        externalAppUser.email !==
-          m.ExternalAppUser.EMAIL_FIELD_VALUE_FOR_PUBLIC_APP &&
-        !externalAppUser.email.startsWith(
-          m.ExternalAppUser.INHERIT_PERMISSIONS_FROM_APP_PREFIX
-        );
-
-      // Only decrement the external seat count when an app is shared with a
-      // specific email, as opposed to making it public.
-      if (isEmail) {
-        const company = await db.company.selectById(server.pg, user.companyId);
-        const customerBilling = await server.billing.fetchCustomer(
-          server,
-          company,
-          server.pg
-        );
-
-        await customerBilling.updateSubscriptionExternalSeatQuantity(
-          customerBilling.externalSeatsUsed - 1
-        );
-      }
+      await d.externalAppUser.maybeDecrementExternalSeatCountInBilling(
+        server,
+        externalAppUser,
+        user.companyId
+      );
 
       await db.externalAppUser.deleteById(server.pg, id);
 

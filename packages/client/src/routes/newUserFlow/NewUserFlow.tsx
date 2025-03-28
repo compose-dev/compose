@@ -73,7 +73,8 @@ function NewUserFlow() {
     new Date(inviteCodeData.expiresAt).getTime() < new Date().getTime();
 
   const isIncorrectEmailForInvite =
-    inviteCodeData && inviteCodeData.email !== email;
+    inviteCodeData &&
+    inviteCodeData.email.toLowerCase() !== email.toLowerCase();
 
   const onContinue = async () => {
     if (!firstName || !lastName) {

@@ -17,6 +17,19 @@ async function selectByEmail(pg: Postgres, email: string) {
   return result.rows[0];
 }
 
+async function selectByEmailCaseInsensitive(pg: Postgres, email: string) {
+  const result = await pg.query<m.User.DB>(
+    `SELECT * FROM "user" WHERE lower("email") = lower($1)`,
+    [email]
+  );
+
+  if (result.rowCount === 0) {
+    return null;
+  }
+
+  return result.rows[0];
+}
+
 async function selectById(pg: Postgres, id: string) {
   const result = await pg.query<m.User.DB>(
     `SELECT * FROM "user" WHERE "id" = $1`,
@@ -144,6 +157,7 @@ async function updatePermission(
 
 export {
   selectByEmail,
+  selectByEmailCaseInsensitive,
   selectById,
   selectByCompanyId,
   insert,

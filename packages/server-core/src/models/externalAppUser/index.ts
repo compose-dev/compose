@@ -113,6 +113,24 @@ async function selectByCompanyId(pg: Postgres, companyId: string) {
   return result.rows;
 }
 
+async function selectAllWithCompanyNameAndEnvironmentName(pg: Postgres) {
+  const result = await pg.query<
+    m.ExternalAppUser.DB & { companyName: string; environmentName: string }
+  >(
+    `
+        SELECT 
+          "externalAppUser".*,
+          "company"."name" AS "companyName",
+          "environment"."name" AS "environmentName"
+        FROM "externalAppUser"
+        LEFT JOIN "company" ON "externalAppUser"."companyId" = "company"."id"
+        LEFT JOIN "environment" ON "externalAppUser"."environmentId" = "environment"."id"
+      `
+  );
+
+  return result.rows;
+}
+
 export {
   insert,
   insertFromSdk,
@@ -122,4 +140,5 @@ export {
   selectById,
   deleteById,
   selectByCompanyId,
+  selectAllWithCompanyNameAndEnvironmentName,
 };

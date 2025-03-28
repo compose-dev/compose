@@ -74,10 +74,23 @@ async function selectByCompanyId(pg: Postgres, companyId: string) {
   return result.rows;
 }
 
+async function selectAllWithCompanyName(pg: Postgres) {
+  const result = await pg.query<m.EmailCode.DB & { companyName: string }>(
+    `SELECT
+      "emailCode".*,
+      "company"."name" AS "companyName"
+    FROM "emailCode"
+    LEFT JOIN "company" ON "emailCode"."companyId" = "company"."id"`
+  );
+
+  return result.rows;
+}
+
 export {
   insert,
   selectById,
   selectByIdWithCompany,
   deleteById,
   selectByCompanyId,
+  selectAllWithCompanyName,
 };

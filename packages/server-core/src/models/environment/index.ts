@@ -169,6 +169,16 @@ async function selectAll(pg: Postgres) {
   return result.rows;
 }
 
+async function selectAllWithCompanyName(pg: Postgres) {
+  const result = await pg.query<
+    m.Environment.ApiAndDecryptableKeyOmittedDB & { companyName: string }
+  >(
+    `SELECT ${API_AND_DECRYPTABLE_KEY_OMITTED_SELECT_FIELDS}, "company"."name" AS "companyName" FROM "environment" LEFT JOIN "company" ON "environment"."companyId" = "company"."id"`
+  );
+
+  return result.rows;
+}
+
 async function deleteById(pg: Postgres, id: string, companyId: string) {
   await pg.query(
     `DELETE FROM "environment" WHERE "id" = $1 AND "companyId" = $2`,
@@ -188,4 +198,5 @@ export {
   selectByIdWithExternalUsers,
   selectAll,
   deleteById,
+  selectAllWithCompanyName,
 };

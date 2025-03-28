@@ -49,16 +49,19 @@ async function routes(server: FastifyInstance) {
 
       if (email !== body.email) {
         return reply.status(400).send({
-          message: "Email mismatch.",
+          message: `Email mismatch. Received email ${email} but expected ${body.email}.`,
           code: BrowserToServerEvent.authUtils.SignUpErrorCode.EMAIL_MISMATCH,
         });
       }
 
-      const existingUser = await db.user.selectByEmail(server.pg, email);
+      const existingUser = await db.user.selectByEmailCaseInsensitive(
+        server.pg,
+        email
+      );
 
       if (existingUser) {
         return reply.status(400).send({
-          message: "User already exists.",
+          message: `User already exists. Found user with email ${existingUser.email}. Please reach out to support to resolve this issue: atul@composehq.com`,
           code: BrowserToServerEvent.authUtils.SignUpErrorCode
             .USER_ALREADY_EXISTS,
         });
@@ -208,18 +211,22 @@ async function routes(server: FastifyInstance) {
         });
       }
 
-      if (email !== emailCode.email) {
+      // Lowercase the emails to ensure case-insensitive matching.
+      if (email.toLowerCase() !== emailCode.email.toLowerCase()) {
         return reply.status(400).send({
           message: "Email mismatch.",
           code: BrowserToServerEvent.authUtils.SignUpErrorCode.EMAIL_MISMATCH,
         });
       }
 
-      const existingUser = await db.user.selectByEmail(server.pg, email);
+      const existingUser = await db.user.selectByEmailCaseInsensitive(
+        server.pg,
+        email
+      );
 
       if (existingUser) {
         return reply.status(400).send({
-          message: "User already exists.",
+          message: `User already exists. Found user with email ${existingUser.email}. Please reach out to support to resolve this issue: atul@composehq.com`,
           code: BrowserToServerEvent.authUtils.SignUpErrorCode
             .USER_ALREADY_EXISTS,
         });

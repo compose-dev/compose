@@ -197,12 +197,14 @@ async function routes(server: FastifyInstance, wsGateway: WSGateway) {
         });
       }
 
-      const invitedUser = await db.user.selectByEmail(server.pg, body.email);
+      const invitedUser = await db.user.selectByEmailCaseInsensitive(
+        server.pg,
+        body.email
+      );
 
       if (invitedUser) {
         return reply.status(400).send({
-          message:
-            "Invited user already exists. Please reach out to support to resolve this issue: atul@composehq.com",
+          message: `Invited user already exists. Found user with email ${invitedUser.email}. Please reach out to support to resolve this issue: atul@composehq.com`,
         });
       }
 

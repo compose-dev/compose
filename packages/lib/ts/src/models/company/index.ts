@@ -16,8 +16,9 @@ const FLAG_KEYS = {
 } as const;
 
 type FlagKey = (typeof FLAG_KEYS)[keyof typeof FLAG_KEYS];
+type FlagValue = string | boolean | number | null | undefined;
 
-const DEFAULT_FLAGS: Record<FlagKey, string | boolean | number | undefined> = {
+const DEFAULT_FLAGS: Record<FlagKey, FlagValue> = {
   FRIENDS_AND_FAMILY_FREE: false,
   AFFILIATE_CODE: undefined,
 };
@@ -29,7 +30,7 @@ interface CompanyDB {
   updatedAt: Date;
   plan: Plan;
   billingId: string;
-  flags: Record<FlagKey, string | boolean | number | undefined>;
+  flags: Record<FlagKey, FlagValue>;
 }
 
 const FAKE_COMPANY_ID = "00000000-0000-0000-0000-000000000000";
