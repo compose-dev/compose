@@ -4,14 +4,16 @@ You can easily self-host Compose on your own servers for greater control over yo
 
 Support is available on the Compose [Discord server](https://discord.gg/82rk2N8ZE6).
 
-## Prerequisites
+## Step-by-step guide
+
+### Prerequisites
 
 Compose requires the following resources to run:
 - A postgres database
 - A virtual machine that can run the Compose docker image
 - Google OAuth2 credentials to enable sign-in with Google
 
-## Step 1: Provision resources
+### Step 1: Provision resources
 
 Choose a hosting provider (AWS, GCP, Render, etc.) and provision the following resources:
 
@@ -26,7 +28,7 @@ The virtual machine should be configured with an SSL-enabled domain (i.e. the do
 
 Providers like Render and Railway automatically provide custom, SSL-enabled domains for web services. For other providers, we recommend putting a load balancer in front of the virtual machine that does SSL termination.
 
-## Step 2: Obtain Google OAuth2 credentials
+### Step 2: Obtain Google OAuth2 credentials
 
 To use Google as a social provider, you need to obtain OAuth2 credentials from the [Google Cloud Console](https://console.cloud.google.com/apis/dashboard).
 
@@ -37,7 +39,7 @@ When creating the OAuth2 credentials, you'll need to specify the following:
 
 We'll use the client ID and client secret later when configuring environment variables.
 
-## Step 3: Run database migrations
+### Step 3: Run database migrations
 
 Run all the [database migrations](https://github.com/compose-dev/compose/tree/main/db-migrations) on the database to bring it up to date with the current schema. The easiest way to do this is to connect to your database through the terminal and run all the migrations at once using the `all.sql` file. For example:
 
@@ -45,7 +47,7 @@ Run all the [database migrations](https://github.com/compose-dev/compose/tree/ma
 psql <database-url> -f all.sql
 ```
 
-## Step 3: Configure environment variables
+### Step 4: Configure environment variables
 
 Configure environment variables based on instructions from your hosting provider so that they're available to the virtual machine's docker container at runtime.
 
@@ -78,18 +80,18 @@ openssl rand -hex 32
 
 You can also pass an optional `BUILD_VERSION` environment variable. This should be a unique value for each deployment of the server and enables the server to gracefully terminate websocket connections when a new deployment is detected. Learn more about this in the notes section below.
 
-## Step 4: Deploy the Docker image
+### Step 5: Deploy the Docker image
 
 Use the Dockerfile that's located in the root of the repository to build the Docker image.
 
-## Step 5: Configure the Compose SDK
+### Step 6: Configure the Compose SDK
 
 The last step is to configure the Compose SDK to connect to your self-hosted server, which you can do by passing the `host` parameter to the client constructor.
 
 #### Python
 
 ```python
-client = ComposeClient(
+client = c.Client(
     api_key="your_api_key",
     host="example.com"
 )
@@ -105,6 +107,59 @@ const client = new Compose.Client({
 ```
 
 Don't include the protocol (e.g. `wss://`) or path (e.g. `/api/v1`) in this value.
+
+Note: if you're having trouble connecting, you can enable `debug` mode to get better error messages in your console.
+
+### Step 7: Upgrade to the Pro plan
+
+Once you have Compose running and you've created an account, go to the settings page from the homepage and click "upgrade to pro". In the open-source build, Compose will automatically upgrade that account to the Pro plan, which will enable you to use the full Compose feature set.
+
+Note: refresh the page after clicking "upgrade to pro" to confirm the upgrade.
+
+## Maintenance
+
+Compose is under active development. We recommend regularly checking and applying the latest updates from the main branch of the repository to your self-hosted deployment. Also check the following when upgrading:
+
+- Any new database migrations (to date, all migrations are idempotent, so you don't need to track which migrations have already been applied)
+- Any new versions to the Compose SDK (in general, always upgrade the SDK to the most recent version after upgrading the server)
+- Any new environment variables
+
+If you're looking for additional support and assistance with your self-hosted deployment, we offer a high priority dedicated support plan. Reach out to us at atul@composehq.com to learn more.
+
+## Local Development
+
+Local development is quite similar to the normal self-hosting guide.
+
+1. Get a Postgres database up and running. You can use Docker to run a local Postgres instance.
+2. Run the database migrations on the local database
+3. Configure the environment variables.
+4. Clone the repository and run `pnpm install` to install dependencies.
+5. Run `pnpm run build:compose-app` to create local builds of all the packages. This is necessary since the monorepo contains internal packages that are consumed by the client and server, and thus need to be built locally.
+6. Run `pnpm --filter server run dev` to start the Node server.
+7. Run `pnpm --filter client run dev` to start the React client.
+8. In order to get the SDK to connect to the local server, you'll need to pass a local development flag to the constructor.
+
+
+#### Python
+
+```python
+client = c.Client(
+    api_key="your_api_key",
+    DANGEROUS_ENABLE_DEV_MODE=True
+)
+```
+
+#### TypeScript/JavaScript
+
+```typescript
+const client = new Compose.Client({
+    apiKey: "your_api_key",
+    // @ts-expect-error this field is intentionally hidden from typescript
+    DANGEROUS_ENABLE_DEV_MODE: true,
+})
+```
+
+Running the SDK in dev mode will disable SSL verification and prompt the SDK to connect to `localhost:8080`, which is the default port for the local server.
 
 ## Notes
 
