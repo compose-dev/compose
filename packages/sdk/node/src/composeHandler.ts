@@ -9,6 +9,8 @@ import * as app from "./app";
 import { PACKAGE_VERSION } from "./packageVersion";
 import { debug } from "./utils";
 
+const MAX_AUDIT_LOGS_PER_MINUTE = 10000;
+
 type ComposeOptions<TApps extends readonly app.Definition[]> = {
   /**
    * A list of apps to serve.
@@ -177,6 +179,8 @@ class ComposeClient<TApps extends readonly app.Definition[]> {
 
   private navSummaries: u.navigation.UserProvidedInterface[];
 
+  private auditLogRateLimiter: u.RateLimiter;
+
   /**
    * Initialize a new Compose client. The client is responsible for
    * connecting to Compose's servers and transmitting events between
@@ -242,6 +246,13 @@ class ComposeClient<TApps extends readonly app.Definition[]> {
 
     this.navSummaries = this.summarizeNavs();
     ensureValidNavs(this.navSummaries, appRoutes);
+
+    // Allow 10000 audit log writes per 60 seconds. This is a sanity check to
+    // prevent abuse.
+    this.auditLogRateLimiter = new u.RateLimiter(
+      MAX_AUDIT_LOGS_PER_MINUTE,
+      60 * 1000
+    );
 
     this.connect = this.connect.bind(this);
     this.summarizeApps = this.summarizeApps.bind(this);
@@ -468,6 +479,7 @@ class ComposeClient<TApps extends readonly app.Definition[]> {
       browserSessionId,
       {
         debug: this.debug,
+        auditLogRateLimiter: this.auditLogRateLimiter,
       }
     );
 

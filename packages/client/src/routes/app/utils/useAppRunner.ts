@@ -208,7 +208,6 @@ function useAppRunner() {
     // Initialize the app on page load
     if (currentRoute !== null && !isInitialized.current) {
       isInitialized.current = true;
-
       setEnvironmentOnline(environmentId, false);
       initializeApp(environmentId, currentRoute);
     }
@@ -217,7 +216,6 @@ function useAppRunner() {
     appRoute,
     environmentId,
     initializeApp,
-    isInitialized,
     setEnvironmentOnline,
   ]);
 
@@ -494,6 +492,14 @@ function useAppRunner() {
         data.type === ServerToBrowserEvent.TYPE.APP_ERROR_V2
       ) {
         if (args.executionId !== executionId) {
+          return;
+        }
+
+        if (data.severity === "info") {
+          addToast({
+            message: data.errorMessage,
+            appearance: "warning",
+          });
           return;
         }
 

@@ -1,5 +1,5 @@
 interface DeployDB {
-  id: string;
+  id: number;
   deployId: string;
   createdAt: Date;
 }

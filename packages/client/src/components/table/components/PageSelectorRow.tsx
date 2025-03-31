@@ -39,7 +39,7 @@ export default function PageSelectorRow({
       </Button>
       <p className="text-brand-neutral-2 text-sm">
         Page {u.string.formatNumber(pageIndex + 1)} of{" "}
-        {u.string.formatNumber(totalPages)}
+        {totalRecords === Infinity ? "???" : u.string.formatNumber(totalPages)}
       </p>
       <Button
         variant="ghost"
@@ -49,19 +49,22 @@ export default function PageSelectorRow({
       >
         <Icon name="chevron-right-package" color="brand-neutral-2" size="mlg" />
       </Button>
-      <Button
-        variant="ghost"
-        onClick={() =>
-          onPageChange(
-            (completePages === totalPages ? completePages - 1 : completePages) *
-              pageSize
-          )
-        }
-        className="pl-1"
-        disabled={pageIndex >= totalPages - 1 || disabled}
-      >
-        <Icon name="chevron-pipe-right" color="brand-neutral-2" size="mlg" />
-      </Button>
+      {totalRecords !== Infinity && (
+        <Button
+          variant="ghost"
+          onClick={() =>
+            onPageChange(
+              (completePages === totalPages
+                ? completePages - 1
+                : completePages) * pageSize
+            )
+          }
+          className="pl-1"
+          disabled={pageIndex >= totalPages - 1 || disabled}
+        >
+          <Icon name="chevron-pipe-right" color="brand-neutral-2" size="mlg" />
+        </Button>
+      )}
     </div>
   );
 }

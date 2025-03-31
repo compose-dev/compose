@@ -42,6 +42,8 @@ interface TableColumn {
   tagColors?: Record<string | number, UI.Table.TagColor>;
 
   width?: string;
+
+  truncate?: boolean;
 }
 
 export { INTERNAL_COLUMN_ID };

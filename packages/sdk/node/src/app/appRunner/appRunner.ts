@@ -7,6 +7,8 @@ import {
   Generator,
   compress,
   dateUtils,
+  u as uPublic,
+  u,
 } from "@composehq/ts-public";
 import { v4 as uuid } from "uuid";
 
@@ -29,6 +31,7 @@ const DELETED_RENDER = "DELETED";
 class AppRunner {
   private appDefinition: AppDefinition;
   private api: api.Handler;
+  private auditLogRateLimiter: u.RateLimiter | null;
   private debug: boolean;
 
   executionId: string;
@@ -92,6 +95,7 @@ class AppRunner {
     browserSessionId: string,
     options: {
       debug?: boolean;
+      auditLogRateLimiter?: u.RateLimiter;
     } = {}
   ) {
     this.appDefinition = appDefinition;
@@ -99,6 +103,7 @@ class AppRunner {
     this.executionId = executionId;
     this.browserSessionId = browserSessionId;
     this.debug = options.debug ?? false;
+    this.auditLogRateLimiter = options.auditLogRateLimiter ?? null;
 
     this.confirmationDialog = null;
 
@@ -119,7 +124,7 @@ class AppRunner {
     this.setConfig = this.setConfig.bind(this);
     this.download = this.download.bind(this);
     this.link = this.link.bind(this);
-    this.log = this.log.bind(this);
+    this.writeAuditLog = this.writeAuditLog.bind(this);
     this.reload = this.reload.bind(this);
     this.onStateUpdate = this.onStateUpdate.bind(this);
     this.setInputs = this.setInputs.bind(this);
@@ -140,6 +145,50 @@ class AppRunner {
 
     this.state = state;
     this.manuallyUpdateState = manualUpdate;
+  }
+
+  private async writeAuditLog(
+    message: string,
+    options?: Partial<{
+      severity: uPublic.log.Severity;
+      data: Record<string, any>;
+    }>
+  ) {
+    try {
+      if (!this.auditLogRateLimiter) {
+        return;
+      }
+
+      await this.auditLogRateLimiter.invoke(
+        () => {
+          uPublic.log.validateLog(
+            message,
+            options?.data ?? null,
+            options?.severity ?? uPublic.log.SEVERITY.INFO
+          );
+        },
+        () => {
+          this.sendError(
+            "Audit log rate limit exceeded. Logs are hard capped at 10,000 per minute. Reach out to support if you need this increased.",
+            "info"
+          );
+        }
+      );
+    } catch (error) {
+      this.sendError((error as Error).message, "info");
+      return;
+    }
+
+    this.api.send(
+      {
+        type: SdkToServerEvent.TYPE.WRITE_AUDIT_LOG,
+        message,
+        severity: options?.severity || undefined,
+        data: options?.data || undefined,
+      },
+      this.browserSessionId,
+      this.executionId
+    );
   }
 
   private async renderUI<ResolveData>(
@@ -868,10 +917,16 @@ class AppRunner {
           log: (
             message: string,
             options?: Partial<{
-              severity: "trace" | "debug" | "info" | "warn" | "error" | "fatal";
+              severity: uPublic.log.Severity;
               data: Record<string, any>;
             }>
-          ) => this.log(message, options),
+          ) => {
+            if (this.debug) {
+              debug.log("Page", "write to audit log");
+            }
+
+            this.writeAuditLog(message, options);
+          },
           link: (
             appRouteOrUrl: string,
             options?: Partial<{
@@ -931,16 +986,6 @@ class AppRunner {
           : `An error occurred while running the app:\n\n${"message" in error ? error.message : "Unknown error"}`
       );
     }
-  }
-
-  async log(
-    message: string,
-    options?: Partial<{
-      severity: "trace" | "debug" | "info" | "warn" | "error" | "fatal";
-      data: Record<string, any>;
-    }>
-  ) {
-    return;
   }
 
   async onClickHook(componentId: string, renderId: string) {
@@ -1449,7 +1494,10 @@ class AppRunner {
     }
   }
 
-  private sendError(errorMessage: string, severity?: "error" | "warning") {
+  private sendError(
+    errorMessage: string,
+    severity?: "error" | "warning" | "info"
+  ) {
     this.api.send(
       {
         type: SdkToServerEvent.TYPE.APP_ERROR_V2,

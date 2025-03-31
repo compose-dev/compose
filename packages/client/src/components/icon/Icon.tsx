@@ -24,6 +24,7 @@ import {
   IconBrandJavascript,
   IconBrandPython,
   IconLayoutSidebarRight,
+  IconClipboardText,
 } from "@tabler/icons-react";
 
 const ICON_NAME = {
@@ -32,6 +33,7 @@ const ICON_NAME = {
   "arrows-diff": "arrows-diff",
   bolt: "bolt",
   checkmark: "checkmark",
+  "clipboard-text": "clipboard-text",
   "chevron-down": "chevron-down",
   "chevron-left": "chevron-left",
   "chevron-right": "chevron-right",
@@ -106,7 +108,10 @@ const ICON_COLOR = {
   "brand-neutral-2": "var(--brand-neutral-text-2)",
   "brand-neutral-3": "var(--brand-bg-overlay-3)",
   "brand-success": "var(--brand-success)",
+  "brand-warning": "var(--brand-warning)",
+  "brand-warning-heavy": "var(--brand-warning-heavy)",
   "brand-error": "var(--brand-error)",
+  "brand-error-heavy": "var(--brand-error-heavy)",
   "brand-bg": "var(--brand-bg-page)",
   "brand-primary": "var(--brand-primary)",
   "yellow-500": "#eab308",
@@ -236,6 +241,16 @@ function Icon({
   if (name === ICON_NAME["chevron-right-package"]) {
     return (
       <IconChevronRight
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME["clipboard-text"]) {
+    return (
+      <IconClipboardText
         size={16 * SIZE_MULTIPLIER[size]}
         color={ICON_COLOR[color]}
         strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}

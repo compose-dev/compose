@@ -3,7 +3,7 @@ export * as User from "./user";
 export * as Session from "./session";
 export * as Company from "./company";
 export * as Deploy from "./deploy";
-export * as Deployment from "./deployment";
 export * as ExternalAppUser from "./externalAppUser";
 export * as EmailCode from "./emailCode";
 export * as ErrorLog from "./errorLog";
+export * as Log from "./log";

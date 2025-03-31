@@ -40,6 +40,9 @@ class SDK_TO_SERVER_EVENT_TYPE:
     STALE_STATE_UPDATE_V2 = "bk"
     FILE_TRANSFER_V2 = "bl"
 
+    # sdk to server ONLY events
+    WRITE_AUDIT_LOG = "50"
+
 
 SDK_TO_SERVER_EVENT_TYPE_TO_PRETTY = {
     "aa": "App Error",
@@ -80,6 +83,7 @@ SDK_TO_SERVER_EVENT_TYPE_TO_PRETTY = {
     "bj": "Table Page Change Response V2",
     "bk": "Stale State Update V2",
     "bl": "File Transfer V2",
+    "50": "Write Audit Log",
 }
 
 

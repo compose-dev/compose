@@ -7,7 +7,13 @@ import {
 } from "@tanstack/react-router";
 
 import App from "~/routes/app/App";
-import { Home, SettingsPage, HomeWrapper, BillingDetails } from "~/routes/home";
+import {
+  Home,
+  SettingsPage,
+  HomeWrapper,
+  BillingDetails,
+  AuditLog,
+} from "~/routes/home";
 import { Root, RootIndexRoute } from "~/routes/root";
 
 import { AuthProvider } from "~/utils/authContext";
@@ -235,6 +241,12 @@ const settingsRoute = createRoute({
   component: SettingsPage,
 });
 
+const auditLogsRoute = createRoute({
+  getParentRoute: () => homeRoute,
+  path: "audit-log",
+  component: AuditLog,
+});
+
 interface BillingDetailsRouteSearch {
   checkoutResult?: "SUCCESS" | "ERROR";
 }
@@ -278,7 +290,12 @@ const routeTree = rootRoute.addChildren([
   newUserFlowRoute,
   docsRoute,
   interactiveOnboardingRoute,
-  homeRoute.addChildren([homeIndexRoute, settingsRoute, billingDetailsRoute]),
+  homeRoute.addChildren([
+    homeIndexRoute,
+    settingsRoute,
+    billingDetailsRoute,
+    auditLogsRoute,
+  ]),
   appWrapperRoute.addChildren([appRoute]),
 ]);
 

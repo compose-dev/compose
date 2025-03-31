@@ -55,10 +55,10 @@ interface PageHandler {
    * page.log("Deleted database record", { severity: "info", data: { recordId: 123 } });
    * ```
    *
-   * @param message The message to log.
+   * @param message The message to log. Max length is 1024 characters.
    * @param options Optional properties for the log message.
-   * @param options.severity The severity of the log message.
-   * @param options.data Additional metadata to log.
+   * @param options.severity The severity of the log message. Defaults to "info".
+   * @param options.data Additional metadata to log. Should be a JSON serializable object. Max size is 4 kilobytes.
    */
   log: (
     message: string,

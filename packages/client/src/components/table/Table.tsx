@@ -445,7 +445,7 @@ function Table({
             )}
             <p className="text-brand-neutral-2 text-sm">
               {paginated
-                ? `${u.string.formatNumber(offset + 1)} - ${u.string.formatNumber(offset + rows.length)} of ${u.string.formatNumber(totalRecords)} results`
+                ? `${u.string.formatNumber(offset + 1)} - ${u.string.formatNumber(offset + rows.length)} of ${totalRecords === Infinity ? "???" : u.string.formatNumber(totalRecords)} results`
                 : `${u.string.formatNumber(rows.length)} results`}
             </p>
           </div>

@@ -165,7 +165,7 @@ function App() {
   }
 
   return (
-    <div className="w-full h-full">
+    <>
       {error !== null && (
         <Modal.Root
           isOpen={true}
@@ -314,7 +314,7 @@ function App() {
         </div>
       </div>
       <LoadingOverlay loading={pageLoading} />
-    </div>
+    </>
   );
 }
 

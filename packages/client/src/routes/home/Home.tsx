@@ -196,6 +196,13 @@ function Home() {
               },
             },
             {
+              label: "Audit logs",
+              left: <Icon name="clipboard-text" color="brand-neutral" />,
+              onClick: async () => {
+                navigate({ to: "/home/audit-log" });
+              },
+            },
+            {
               label: "Log out",
               left: <Icon name="logout" color="brand-error" />,
               onClick: async () => {

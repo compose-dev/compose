@@ -418,6 +418,20 @@ async function logError(body: BrowserToServerEvent.LogError.RequestBody) {
   });
 }
 
+async function getPageOfLogs(
+  body: BrowserToServerEvent.GetPageOfLogs.RequestBody
+) {
+  return await request<
+    BrowserToServerEvent.GetPageOfLogs.SuccessResponseBody,
+    BrowserToServerEvent.GetPageOfLogs.ErrorResponseBody
+  >({
+    route: `/${BrowserToServerEvent.GetPageOfLogs.route}`,
+    method: BrowserToServerEvent.GetPageOfLogs.method,
+    forwardLog: log,
+    body,
+  });
+}
+
 export {
   initialize,
   fetchEnvironmentWithDetails,
@@ -444,4 +458,5 @@ export {
   logEvent,
   oauthLogin,
   logError,
+  getPageOfLogs,
 };

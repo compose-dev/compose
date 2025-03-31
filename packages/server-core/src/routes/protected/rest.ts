@@ -1,4 +1,5 @@
 import { BrowserToServerEvent, m, u } from "@compose/ts";
+import { u as uPublic } from "@composehq/ts-public";
 import { FastifyInstance } from "fastify";
 
 import { db } from "../../models";
@@ -336,6 +337,23 @@ async function routes(server: FastifyInstance, wsGateway: WSGateway) {
 
       if (!company) {
         return reply.status(400).send({ message: "Company not found" });
+      }
+
+      if (company.plan !== m.Company.PLANS.HOBBY) {
+        await db.log.insert(
+          server.pg,
+          company.id,
+          environment.id,
+          user.id === m.User.FAKE_ID ? null : user.id,
+          user.email === m.ExternalAppUser.EMAIL_FIELD_VALUE_FOR_PUBLIC_APP
+            ? null
+            : user.email,
+          appRoute,
+          "App initialized",
+          null,
+          uPublic.log.SEVERITY.INFO,
+          uPublic.log.TYPE.SYSTEM
+        );
       }
 
       return reply.status(200).send({

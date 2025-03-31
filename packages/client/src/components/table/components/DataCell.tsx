@@ -267,6 +267,7 @@ function DataCell({
         <RowCell
           className={classNames({
             "flex-1 min-w-48": !column.width,
+            "truncate !block": column.truncate === true,
           })}
           style={
             column.width ? { width: column.width, minWidth: column.width } : {}

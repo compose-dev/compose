@@ -24,9 +24,10 @@ const PERMISSION_TO_LABEL = {
 } as const;
 
 const PERMISSION_TO_SUMMARY = {
-  [PERMISSION.OWNER]: "Full control over the organization, including billing.",
+  [PERMISSION.OWNER]:
+    "Full control over your team's account, including billing.",
   [PERMISSION.ADMIN]:
-    "App manager permissions, plus the ability to add, remove, and manage users in the organization.",
+    "App manager permissions, plus the ability to view audit logs and add/remove users within your team.",
   [PERMISSION.APP_MANAGER]:
     "Member permissions, plus the ability to manage how apps are shared with external users.",
   [PERMISSION.MEMBER]: "Access to use and build apps.",

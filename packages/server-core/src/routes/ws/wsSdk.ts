@@ -30,6 +30,7 @@ type SdkClient = {
   environment: m.Environment.ApiAndDecryptableKeyOmittedDB;
   packageName: uPublic.sdkPackage.Name;
   packageVersion: string;
+  company: m.Company.DB;
 };
 
 function isAppHidden(hidden: boolean | undefined, isChildApp: boolean) {
@@ -53,6 +54,8 @@ class WSSdk {
   private sdkConnections: SdkConnections;
   private authorizations: Authorizations;
 
+  private auditLogRateLimiters: Record<string, uPublic.RateLimiter>;
+
   constructor(
     server: FastifyInstance,
     browserConnections: BrowserConnections,
@@ -65,10 +68,14 @@ class WSSdk {
     this.sdkConnections = sdkConnections;
     this.authorizations = authorizations;
 
+    this.auditLogRateLimiters = {};
+
     this.authenticate = this.authenticate.bind(this);
     this.onConnection = this.onConnection.bind(this);
     this.onMessage = this.onMessage.bind(this);
     this.onClose = this.onClose.bind(this);
+    this.handleInitialize = this.handleInitialize.bind(this);
+    this.handleWriteAuditLog = this.handleWriteAuditLog.bind(this);
 
     this.wsBase = new WSBase(this.authenticate, this.onConnection);
   }
@@ -132,6 +139,18 @@ class WSSdk {
       return ConnectionError.generate("Invalid API key.", "srvr8");
     }
 
+    const company = await db.company.selectById(
+      this.server.pg,
+      environment.companyId
+    );
+
+    if (company === null) {
+      return ConnectionError.generate(
+        "Could not find account associated with this API key.",
+        "srvr10"
+      );
+    }
+
     if (this.sdkConnections.exists(environment.id)) {
       return ConnectionError.generate("Connection already exists.", "srvr9");
     }
@@ -142,6 +161,7 @@ class WSSdk {
         environment,
         packageName,
         packageVersion,
+        company,
       },
     };
   }
@@ -219,6 +239,17 @@ class WSSdk {
       ) {
         return;
       }
+    }
+
+    // Write to audit log AFTER the executionId is validated
+    if (eventType === SdkToServerEvent.TYPE.WRITE_AUDIT_LOG) {
+      try {
+        this.handleWriteAuditLog(connectionId, buffer, client);
+      } catch (error) {
+        // Swallow any errors to prevent crashing
+        console.error("Error in handleWriteAuditLog:", error);
+      }
+      return;
     }
 
     this.browserConnections.push(connectionId, event);
@@ -334,6 +365,99 @@ class WSSdk {
           )
         )
     );
+  }
+
+  private async handleWriteAuditLog(
+    connectionId: string,
+    buffer: Uint8Array,
+    client: SdkClient
+  ) {
+    try {
+      if (client.company.plan === m.Company.PLANS.HOBBY) {
+        throw new Error(
+          "Failed to write audit log. Hobby plan does not support audit logs."
+        );
+      }
+
+      if (!this.auditLogRateLimiters[client.company.id]) {
+        const rateLimit =
+          client.company.flags[
+            m.Company.FLAG_KEYS.AUDIT_LOG_RATE_LIMIT_PER_MINUTE
+          ];
+
+        this.auditLogRateLimiters[client.company.id] = new uPublic.RateLimiter(
+          typeof rateLimit === "number" ? rateLimit : 200,
+          60 * 1000
+        );
+      }
+
+      const rateLimiter = this.auditLogRateLimiters[client.company.id];
+
+      await rateLimiter.invoke(
+        async () => {
+          const browserData = this.browserConnections.get(connectionId);
+
+          if (!browserData) {
+            throw new Error(
+              "Failed to write audit log. Browser connection not found."
+            );
+          }
+
+          const metadataEmail = browserData.metadata.userEmail;
+          const metadataUserId = browserData.metadata.userId;
+
+          const userEmail =
+            metadataEmail === m.ExternalAppUser.EMAIL_FIELD_VALUE_FOR_PUBLIC_APP
+              ? null
+              : metadataEmail;
+
+          const userId =
+            metadataUserId === m.User.FAKE_ID ? null : metadataUserId;
+
+          const data = JSON.parse(
+            textDecoder.decode(buffer.slice(74))
+          ) as SdkToServerEvent.WriteAuditLog.Data;
+
+          await d.log.writeLogIfValid(
+            this.server,
+            data.message,
+            data.data ?? null,
+            data.severity ?? uPublic.log.SEVERITY.INFO,
+            uPublic.log.TYPE.USER,
+            client.company.id,
+            client.environment.id,
+            userId,
+            userEmail,
+            browserData.metadata.appRoute ?? "UNKNOWN_APP_ROUTE",
+            client.company.plan
+          );
+        },
+        () => {
+          throw new Error(
+            `Audit log rate limit exceeded. Max allowed is ${rateLimiter.maxInvocationsPerInterval} logs per minute. Please contact support if you need to increase this limit.`
+          );
+        }
+      );
+    } catch (e) {
+      if (e instanceof Error) {
+        const eventData: ServerToBrowserEvent.AppErrorV2.Data = {
+          type: ServerToBrowserEvent.TYPE.APP_ERROR_V2,
+          errorMessage: e.message,
+          severity: "info",
+        };
+
+        const executionId = textDecoder.decode(buffer.slice(38, 74));
+        const eventHeader = `${ServerToBrowserEvent.TYPE.APP_ERROR_V2}${connectionId}${executionId}`;
+
+        const event = WSUtils.Message.generateBinary(
+          eventHeader,
+          WSUtils.Message.getBufferFromJson(eventData)
+        );
+
+        // Notify the browser client via toast that an error occurred
+        this.browserConnections.push(connectionId, event);
+      }
+    }
   }
 
   private async onClose(client: SdkClient) {

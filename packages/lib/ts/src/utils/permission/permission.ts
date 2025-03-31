@@ -21,6 +21,7 @@ const FEATURE = {
   REMOVE_APP_MANAGER_PERMISSION: "remove-app-manager-permission",
   ADD_MEMBER_PERMISSION: "add-member-permission",
   REMOVE_MEMBER_PERMISSION: "remove-member-permission",
+  VIEW_AUDIT_LOGS: "view-audit-logs",
 
   // APP MANAGER+ ONLY
   SHARE_APP_PUBLICLY: "share-app-publicly",
@@ -95,7 +96,8 @@ function isAllowed(
     feature === FEATURE.ADD_APP_MANAGER_PERMISSION ||
     feature === FEATURE.REMOVE_APP_MANAGER_PERMISSION ||
     feature === FEATURE.ADD_MEMBER_PERMISSION ||
-    feature === FEATURE.REMOVE_MEMBER_PERMISSION
+    feature === FEATURE.REMOVE_MEMBER_PERMISSION ||
+    feature === FEATURE.VIEW_AUDIT_LOGS
   ) {
     return isAdminOrAbove(permission);
   }

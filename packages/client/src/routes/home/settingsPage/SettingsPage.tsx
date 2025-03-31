@@ -74,16 +74,34 @@ function SettingsPage() {
   }
 
   if (loading || loadingBilling || !settingsData || !billingData) {
-    return <CenteredSpinner />;
+    return (
+      <div className="py-16 px-4 flex justify-center bg-brand-page">
+        <div className="flex flex-col w-full max-w-5xl items-start justify-start gap-12">
+          <div className="flex flex-row items-center justify-between w-full">
+            <h2>Settings</h2>
+            <Button variant="outline" onClick={() => navigate({ to: "/home" })}>
+              <Icon name="arrow-back-up" color="brand-neutral" />
+              Back to home
+            </Button>
+          </div>
+          <div className="w-full border-b border-brand-neutral" />
+
+          <CenteredSpinner />
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="py-16 px-4 flex justify-center bg-brand-page">
       <div className="flex flex-col w-full max-w-5xl items-start justify-start gap-12">
-        <Button variant="outline" onClick={() => navigate({ to: "/home" })}>
-          <Icon name="arrow-back-up" color="brand-neutral" />
-          Back to home
-        </Button>
+        <div className="flex flex-row items-center justify-between w-full">
+          <h2>Settings</h2>
+          <Button variant="outline" onClick={() => navigate({ to: "/home" })}>
+            <Icon name="arrow-back-up" color="brand-neutral" />
+            Back to home
+          </Button>
+        </div>
         <div className="w-full border-b border-brand-neutral" />
         <SettingsSection title="User Profile">
           <UserProfileSection />

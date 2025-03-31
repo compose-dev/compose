@@ -14,6 +14,7 @@ import { TYPE as SDK_TO_BROWSER_TYPE } from "../sdkToBrowserEvent";
 export const TYPE = {
   ...SDK_TO_BROWSER_TYPE,
   INITIALIZE: "ab",
+  WRITE_AUDIT_LOG: "50",
 } as const;
 
 export type Type = (typeof TYPE)[keyof typeof TYPE];

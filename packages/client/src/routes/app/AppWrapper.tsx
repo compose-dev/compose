@@ -22,17 +22,6 @@ function AppWrapper() {
   });
   const companyName = appStore.useNavigation((state) => state.companyName);
 
-  if (!nav) {
-    return (
-      <div
-        className="w-full h-full overflow-x-auto overflow-y-auto"
-        style={{ scrollbarWidth: "thin" }}
-      >
-        <Outlet />
-      </div>
-    );
-  }
-
   return (
     <AppNavigation
       nav={nav}

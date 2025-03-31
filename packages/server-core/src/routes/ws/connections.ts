@@ -117,7 +117,11 @@ class SdkConnections extends Connections<
 
 class BrowserConnections extends Connections<
   NodeWebSocketRawData,
-  Record<string, never>
+  {
+    userId: string | null;
+    userEmail: string | null;
+    appRoute: string | null;
+  }
 > {}
 
 export { Connections, SdkConnections, BrowserConnections };

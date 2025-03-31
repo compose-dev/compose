@@ -13,6 +13,7 @@ const PLAN_TO_LABEL = {
 const FLAG_KEYS = {
   FRIENDS_AND_FAMILY_FREE: "FRIENDS_AND_FAMILY_FREE",
   AFFILIATE_CODE: "AFFILIATE_CODE",
+  AUDIT_LOG_RATE_LIMIT_PER_MINUTE: "AUDIT_LOG_RATE_LIMIT_PER_MINUTE",
 } as const;
 
 type FlagKey = (typeof FLAG_KEYS)[keyof typeof FLAG_KEYS];
@@ -21,6 +22,7 @@ type FlagValue = string | boolean | number | null | undefined;
 const DEFAULT_FLAGS: Record<FlagKey, FlagValue> = {
   FRIENDS_AND_FAMILY_FREE: false,
   AFFILIATE_CODE: undefined,
+  AUDIT_LOG_RATE_LIMIT_PER_MINUTE: 200,
 };
 
 interface CompanyDB {

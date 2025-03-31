@@ -25,6 +25,7 @@ type BrowserClient = {
   appRoute: string | null;
   environmentId: string | null;
   userId: string | null;
+  userEmail: string | null;
   companyId: string | null;
   executionId: string | null;
 };
@@ -97,6 +98,7 @@ class WSBrowser {
         environmentId,
         userId: sessionUser.id,
         companyId: sessionUser.companyId,
+        userEmail: sessionUser.email,
         executionId,
       },
     };
@@ -179,7 +181,12 @@ class WSBrowser {
       subscribeTo = filteredEnvironments.map((environment) => environment.id);
     }
 
-    this.browserConnections.add(client.sessionId, push, subscribeTo, {});
+    this.browserConnections.add(client.sessionId, push, subscribeTo, {
+      userId: client.userId,
+      userEmail: client.userEmail,
+      appRoute: client.appRoute,
+    });
+
     if (client.environmentId && client.appRoute) {
       if (client.executionId) {
         this.authorizations.authorizeBrowserAndExecution(
