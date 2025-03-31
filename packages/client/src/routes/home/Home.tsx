@@ -355,7 +355,7 @@ function Home() {
                   0 && (
                   <p className="text-brand-neutral-2">
                     No apps found. Get going with the{" "}
-                    <InlineLink url="https://docs.composehq.com/get-started/quickstart">
+                    <InlineLink url="https://docs.composehq.com/quickstart">
                       quickstart guide
                     </InlineLink>
                     .

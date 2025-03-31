@@ -84,7 +84,7 @@ function LanguageSelect({ setLang }: { setLang: (lang: Lang) => void }) {
         <span className="italic font-medium">backend</span> (not your frontend)!
         Learn more in the{" "}
         <InlineLink
-          url="https://docs.composehq.com"
+          url="https://docs.composehq.com/quickstart"
           appearance="secondary"
           newTab
         >

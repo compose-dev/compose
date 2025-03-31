@@ -27,7 +27,7 @@ export default function NewUserGuide({
       </p>
       <p>
         Get started fast by reading the{" "}
-        <InlineLink url="https://docs.composehq.com/get-started/quickstart">
+        <InlineLink url="https://docs.composehq.com/quickstart">
           quickstart guide
         </InlineLink>
         , which will take you through the process of installing the Compose SDK

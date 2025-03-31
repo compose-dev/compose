@@ -14,6 +14,7 @@ import { useHomeStore } from "../useHomeStore";
 import { classNames } from "~/utils/classNames";
 import { DateTimeInput, TextInput } from "~/components/input";
 import { ComboboxMulti, ComboboxSingle } from "~/components/combobox";
+import { InlineLink } from "~/components/inline-link";
 
 type Filters = {
   limit: number;
@@ -485,6 +486,19 @@ function AuditLog() {
               pageSize={filters.limit}
               offset={filters.offset}
             />
+          </div>
+        )}
+        {!didError && (
+          <div className="flex flex-col gap-6 w-full">
+            <h3>Learn more</h3>
+            <p>
+              Learn more about how to collect audit logs from your Compose Apps
+              in the{" "}
+              <InlineLink url="https://docs.composehq.com/page-actions/log">
+                docs
+              </InlineLink>
+              .
+            </p>
           </div>
         )}
       </div>
