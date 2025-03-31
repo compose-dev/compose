@@ -159,20 +159,16 @@ class AppRunner {
         return;
       }
 
-      await this.auditLogRateLimiter.invoke(
-        () => {
-          uPublic.log.validateLog(
-            message,
-            options?.data ?? null,
-            options?.severity ?? uPublic.log.SEVERITY.INFO
-          );
-        },
-        () => {
-          this.sendError(
-            "Audit log rate limit exceeded. Logs are hard capped at 10,000 per minute. Reach out to support if you need this increased.",
-            "info"
-          );
-        }
+      if (this.auditLogRateLimiter.invoke() === "error") {
+        throw new Error(
+          "Audit log rate limit exceeded. Logs are hard capped at 10,000 per minute. Reach out to support if you need this increased."
+        );
+      }
+
+      uPublic.log.validateLog(
+        message,
+        options?.data ?? null,
+        options?.severity ?? uPublic.log.SEVERITY.INFO
       );
     } catch (error) {
       this.sendError((error as Error).message, "info");

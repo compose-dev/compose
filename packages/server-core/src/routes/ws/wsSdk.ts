@@ -393,50 +393,46 @@ class WSSdk {
 
       const rateLimiter = this.auditLogRateLimiters[client.company.id];
 
-      await rateLimiter.invoke(
-        async () => {
-          const browserData = this.browserConnections.get(connectionId);
+      if (rateLimiter.invoke() === "error") {
+        throw new Error(
+          `Audit log rate limit exceeded. Max allowed is ${rateLimiter.maxInvocationsPerInterval} logs per minute. Please contact support if you need to increase this limit.`
+        );
+      }
 
-          if (!browserData) {
-            throw new Error(
-              "Failed to write audit log. Browser connection not found."
-            );
-          }
+      const browserData = this.browserConnections.get(connectionId);
 
-          const metadataEmail = browserData.metadata.userEmail;
-          const metadataUserId = browserData.metadata.userId;
+      if (!browserData) {
+        throw new Error(
+          "Failed to write audit log. Browser connection not found."
+        );
+      }
 
-          const userEmail =
-            metadataEmail === m.ExternalAppUser.EMAIL_FIELD_VALUE_FOR_PUBLIC_APP
-              ? null
-              : metadataEmail;
+      const metadataEmail = browserData.metadata.userEmail;
+      const metadataUserId = browserData.metadata.userId;
 
-          const userId =
-            metadataUserId === m.User.FAKE_ID ? null : metadataUserId;
+      const userEmail =
+        metadataEmail === m.ExternalAppUser.EMAIL_FIELD_VALUE_FOR_PUBLIC_APP
+          ? null
+          : metadataEmail;
 
-          const data = JSON.parse(
-            textDecoder.decode(buffer.slice(74))
-          ) as SdkToServerEvent.WriteAuditLog.Data;
+      const userId = metadataUserId === m.User.FAKE_ID ? null : metadataUserId;
 
-          await d.log.writeLogIfValid(
-            this.server,
-            data.message,
-            data.data ?? null,
-            data.severity ?? uPublic.log.SEVERITY.INFO,
-            uPublic.log.TYPE.USER,
-            client.company.id,
-            client.environment.id,
-            userId,
-            userEmail,
-            browserData.metadata.appRoute ?? "UNKNOWN_APP_ROUTE",
-            client.company.plan
-          );
-        },
-        () => {
-          throw new Error(
-            `Audit log rate limit exceeded. Max allowed is ${rateLimiter.maxInvocationsPerInterval} logs per minute. Please contact support if you need to increase this limit.`
-          );
-        }
+      const data = JSON.parse(
+        textDecoder.decode(buffer.slice(74))
+      ) as SdkToServerEvent.WriteAuditLog.Data;
+
+      await d.log.writeLogIfValid(
+        this.server,
+        data.message,
+        data.data ?? null,
+        data.severity ?? uPublic.log.SEVERITY.INFO,
+        uPublic.log.TYPE.USER,
+        client.company.id,
+        client.environment.id,
+        userId,
+        userEmail,
+        browserData.metadata.appRoute ?? "UNKNOWN_APP_ROUTE",
+        client.company.plan
       );
     } catch (e) {
       if (e instanceof Error) {

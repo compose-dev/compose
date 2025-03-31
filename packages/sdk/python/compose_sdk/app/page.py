@@ -3,6 +3,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Awaitable,
+    Mapping,
     TypedDict,
     Union,
     Callable,
@@ -62,6 +63,7 @@ class Page:
     - `download`: Download a file to the user's device.
     - `set`: Edit the default page configuration.
     - `link`: Navigate to another Compose App, or link to an external URL.
+    - `log`: Log an event to your team's audit logs. Available on Pro plans.
     - `reload`: Reload the page.
     - `confirm`: Quickly confirm an action with a confirmation dialog.
     - `toast`: Provide feedback to the user with an unobtrusive toast notification.
@@ -335,6 +337,46 @@ class Page:
 
         self.__appRunner.scheduler.create_task(
             self.__appRunner.link(appRouteOrUrl, new_tab or newTab, params)
+        )
+
+    def log(
+        self,
+        message: str,
+        *,
+        severity: Union[
+            Literal["trace", "debug", "info", "warn", "error", "fatal"], None
+        ] = None,
+        data: Union[Mapping[str, Any], None] = None,
+    ) -> None:
+        """
+        Log an event to your team's audit logs.
+
+        >>> page.log(
+        ...     "User deleted from users table",
+        ...     severity="warn",
+        ...     data={"user_email": "john@example.com"}
+        ... )
+
+        Documentation
+        ----------
+        https://docs.composehq.com/page-actions/log
+
+        Parameters
+        ----------
+        message : `str`
+            The message to log.
+
+        severity : `Literal["trace", "debug", "info", "warn", "error", "fatal"]`, optional
+            The severity of the log. Defaults to "info".
+
+        data : `Mapping[str, Any]`, optional
+            Additional data to log, in the form of a JSON object.
+        """
+        if self.__debug:
+            Debug.log("Page", "log")
+
+        self.__appRunner.scheduler.create_task(
+            self.__appRunner.log(message, severity=severity, data=data)
         )
 
     def reload(self) -> None:

@@ -18,10 +18,7 @@ class RateLimiter {
     this.invocationCount = 0;
   }
 
-  public async invoke(
-    onSuccess: () => unknown | Promise<unknown>,
-    onError: () => unknown | Promise<unknown>
-  ): Promise<void> {
+  public invoke(): "success" | "error" {
     const now = Date.now();
 
     // Check if a minute has passed since the current window started.
@@ -33,13 +30,9 @@ class RateLimiter {
 
     if (this.invocationCount < this.maxInvocationsPerInterval) {
       this.invocationCount++;
-      try {
-        await onSuccess();
-      } catch (error) {
-        throw error;
-      }
+      return "success";
     } else {
-      await onError();
+      return "error";
     }
   }
 }

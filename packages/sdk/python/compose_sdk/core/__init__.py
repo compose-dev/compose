@@ -65,6 +65,8 @@ from .table_state import TableState
 from .ui.types.chart import *
 from .debug import Debug
 from .string import prettify_key
+from .audit_log import validate_audit_log
+from .rate_limiter import RateLimiter
 
 __all__ = [
     "EventType",
@@ -134,4 +136,6 @@ __all__ = [
     "Stale",
     "Debug",
     "prettify_key",
+    "validate_audit_log",
+    "RateLimiter",
 ]

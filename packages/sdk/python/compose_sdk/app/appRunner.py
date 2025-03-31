@@ -4,7 +4,7 @@ import asyncio
 import inspect
 import io
 import traceback
-from typing import Any, TypedDict, Callable, Union, Dict, Literal
+from typing import Any, TypedDict, Callable, Union, Dict, Literal, Mapping
 import time
 
 from ..scheduler import Scheduler
@@ -37,6 +37,8 @@ from ..core import (
     Stale,
     TableDefault,
     Debug,
+    RateLimiter,
+    validate_audit_log,
 )
 
 from .appDefinition import AppDefinition
@@ -75,6 +77,7 @@ class AppRunner:
         browserSessionId: str,
         *,
         debug: bool = False,
+        audit_log_rate_limiter: Union[RateLimiter, None] = None,
     ):
         self.scheduler = scheduler
         self.api = api
@@ -82,6 +85,7 @@ class AppRunner:
         self.executionId = executionId
         self.browserSessionId = browserSessionId
         self.debug = debug
+        self.audit_log_rate_limiter = audit_log_rate_limiter
 
         self.renders: Dict[str, Union[RenderObj, DeletedRender]] = {}
         self.tempFiles = {}
@@ -525,6 +529,53 @@ class AppRunner:
                 f"An error occurred while updating the page:\n\n{str(error)}\n\n{''.join(traceback.format_tb(error.__traceback__))}"
             )
 
+    async def log(
+        self,
+        message: str,
+        *,
+        severity: Literal["trace", "debug", "info", "warn", "error", "fatal"] = None,
+        data: Mapping[str, Any] = None,
+    ) -> None:
+        if not self.audit_log_rate_limiter:
+            await self.__send_error(
+                "Failed to write to audit log. Audit log rate limiter not set in SDK. This is a bug. Please reach out to support.",
+                "info",
+            )
+            return
+
+        if self.audit_log_rate_limiter.invoke() == "error":
+            await self.__send_error(
+                "Audit log rate limit exceeded. Logs are hard capped at 10,000 per minute. Reach out to support if you need this increased.",
+                "info",
+            )
+            return
+
+        try:
+            validate_audit_log(message, severity, data)
+        except ValueError as error:
+            await self.__send_error(
+                f"{str(error)}",
+                "info",
+            )
+            return
+
+        event_data = {
+            "type": EventType.SdkToServer.WRITE_AUDIT_LOG,
+            "message": message,
+        }
+
+        if severity is not None:
+            event_data["severity"] = severity
+
+        if data is not None:
+            event_data["data"] = data
+
+        await self.api.send(
+            event_data,
+            self.browserSessionId,
+            self.executionId,
+        )
+
     async def set_inputs(self, values: Dict[str, Any]):
         if not isinstance(values, dict):
             await self.__send_error(
@@ -660,7 +711,9 @@ class AppRunner:
         )
 
     async def __send_error(
-        self, errorMsg: str, severity: Literal["error", "warning"] = "error"
+        self,
+        errorMsg: str,
+        severity: Literal["error", "warning", "info"] = "error",
     ):
         await self.api.send(
             {

@@ -5,8 +5,8 @@ import importlib.metadata
 from .api import ApiHandler
 from .scheduler import Scheduler
 from .app import AppDefinition, AppRunner, PageParams
-from .core import EventType, Debug
-from .navigation import Navigation, NavigationConfiguration
+from .core import EventType, Debug, RateLimiter
+from .navigation import NavigationConfiguration
 
 # get package version
 try:
@@ -15,6 +15,8 @@ except importlib.metadata.PackageNotFoundError:
     package_version = "0.0.0"
 
 package_name = "compose-python"
+
+MAX_AUDIT_LOGS_PER_MINUTE = 10000
 
 
 class Theme(TypedDict):
@@ -163,6 +165,7 @@ class ComposeClient:
             host=host,
         )
         self.app_runners: Dict[str, AppRunner] = {}
+        self.audit_log_rate_limiter = RateLimiter(MAX_AUDIT_LOGS_PER_MINUTE, 60000)
 
     def connect(self) -> None:
         self.scheduler.initialize(True)
@@ -349,6 +352,7 @@ class ComposeClient:
             execution_id,
             browser_session_id,
             debug=self.debug,
+            audit_log_rate_limiter=self.audit_log_rate_limiter,
         )
 
         runner.execution_task = self.scheduler.create_task(runner.execute(params))
