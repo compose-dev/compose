@@ -260,6 +260,32 @@ class AppRunner {
           );
         }
 
+        let validationError: string | null;
+
+        if (this.debug) {
+          validationError = debug.measureDuration(
+            () => render.validateStaticLayout(staticLayout),
+            (elapsed) =>
+              debug.log(
+                `Page add (fragment: ${renderId})`,
+                `Validated layout in ${elapsed} ms`,
+                {
+                  durationMs: elapsed,
+                  warningThresholdMs: 10,
+                }
+              )
+          );
+        } else {
+          validationError = render.validateStaticLayout(staticLayout);
+        }
+
+        // Note: validation errors MUST error and force an app restart
+        // since it takes rendersById out of sync with renders.
+        if (validationError !== null) {
+          this.sendError(validationError);
+          return;
+        }
+
         this.rendersById[renderId] = {
           resolve: resolveRender,
           isResolved: false,

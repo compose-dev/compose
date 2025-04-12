@@ -13,6 +13,7 @@ def validate_static_layout_recursive(
     Internal recursive function for validating a static layout. Checks:
     - That the component ID is a string
     - That all components have unique IDs
+    - That on_enter hooks are not used for inputs inside forms
     - That a form is not inside another form
     - That the component tree does not exceed a depth of 100 (to prevent stack overflow)
     """
@@ -22,6 +23,11 @@ def validate_static_layout_recursive(
 
     if parent_form_id is not None and layout["type"] == TYPE.LAYOUT_FORM:
         return "Cannot render a form inside another form"
+
+    if parent_form_id is not None and layout["model"]["properties"].get(
+        "hasOnEnterHook", False
+    ):
+        return f"Invalid input: {layout['model']['id']}.\n\nInputs inside forms cannot have on_enter hooks since pressing enter will submit the form.\n\nPlace the input outside the form to use the on_enter hook."
 
     if depth > MAX_DEPTH:
         return f"Maximum component tree depth of {MAX_DEPTH} exceeded"

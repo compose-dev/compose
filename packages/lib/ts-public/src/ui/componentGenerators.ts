@@ -67,6 +67,8 @@ export type DisplayMarkdown = Omit<Components.DisplayMarkdown, OmitKeys>;
 
 export type DisplayPdf = Omit<Components.DisplayPdf, OmitKeys>;
 
+export type DisplayDivider = Omit<Components.DisplayDivider, OmitKeys>;
+
 export type LayoutStack = Omit<Components.LayoutStack, OmitKeys>;
 
 export type LayoutForm = Omit<Components.LayoutForm, OmitKeys>;

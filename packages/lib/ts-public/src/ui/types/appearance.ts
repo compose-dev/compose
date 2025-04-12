@@ -24,4 +24,12 @@ const TEXT = {
 } as const;
 type Text = (typeof TEXT)[keyof typeof TEXT];
 
-export { TEXT, type Text };
+const DIVIDER = {
+  PRIMARY: "primary",
+  NEUTRAL: "neutral",
+  WARNING: "warning",
+  DANGER: "danger",
+} as const;
+type Divider = (typeof DIVIDER)[keyof typeof DIVIDER];
+
+export { TEXT, type Text, DIVIDER, type Divider };

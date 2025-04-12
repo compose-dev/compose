@@ -303,6 +303,73 @@ function displayPdf(
   };
 }
 
+interface DisplayDividerProperties extends BaseWithDisplayInteraction {
+  /**
+   * The orientation of the divider. Options:
+   * - `horizontal`
+   * - `vertical`
+   *
+   * @default "horizontal"
+   */
+  orientation: UI.Components.DisplayDivider["model"]["properties"]["orientation"];
+  /**
+   * The thickness of the divider. Options:
+   * - `thin` (1px)
+   * - `medium` (2px)
+   * - `thick` (4px)
+   *
+   * @default "thin"
+   */
+  thickness: UI.Components.DisplayDivider["model"]["properties"]["thickness"];
+}
+
+type RequiredDisplayDividerFields = "id";
+type OptionalDisplayDividerProperties = Omit<
+  DisplayDividerProperties,
+  RequiredDisplayDividerFields
+>;
+
+/**
+ * Displays a divider line to visually separate content.
+ *
+ * @example
+ * ```ts
+ * page.add(() => ui.stack([
+ *   ui.text("First item"),
+ *   ui.divider(),
+ *   ui.text("Second item"),
+ * ]))
+ * ```
+ *
+ * @link Read the full {@link https://docs.composehq.com/components/display/divider documentation}
+ *
+ * @param {Partial<OptionalDisplayDividerProperties>} properties - Optional properties to configure the divider.
+ * @param {Partial<OptionalDisplayDividerProperties>["orientation"]} properties.orientation - The orientation of the divider. Options: `"horizontal"` or `"vertical"`. Defaults to `"horizontal"`.
+ * @param {Partial<OptionalDisplayDividerProperties>["thickness"]} properties.thickness - The thickness of the divider. Options: `"thin"` (1px), `"medium"` (2px), or `"thick"` (4px). Defaults to `"thin"`.
+ * @param {Partial<OptionalDisplayDividerProperties>["style"]} properties.style - CSS styles object to directly style the divider HTML element.
+ */
+function displayDivider(
+  properties: Partial<OptionalDisplayDividerProperties> = {}
+): UI.OutputOmittedComponents.DisplayDivider {
+  const id = uuid();
+
+  return {
+    model: {
+      id,
+      style: properties.style || null,
+      properties: {
+        ...{
+          orientation: properties.orientation,
+          thickness: properties.thickness,
+        },
+      },
+    },
+    hooks: null,
+    type: UI.TYPE.DISPLAY_DIVIDER,
+    interactionType: UI.INTERACTION_TYPE.DISPLAY,
+  };
+}
+
 function displayNone(): UI.OutputOmittedComponents.DisplayNone {
   const id = uuid();
 
@@ -327,6 +394,7 @@ const displayGenerator = {
   image: displayImage,
   markdown: displayMarkdown,
   pdf: displayPdf,
+  divider: displayDivider,
   none: displayNone,
 };
 

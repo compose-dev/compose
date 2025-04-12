@@ -14,19 +14,89 @@ type TableAction<TData extends UI.Table.DataRow[]> = NonNullable<
 
 interface TableProperties<TData extends UI.Table.DataRow[]>
   extends BaseWithInputInteraction<boolean> {
-  // This is slightly different from the internal representation since we
-  // add an "original" field to the column after compressing the data.
+  /**
+   * Manually specify the columns to be displayed in the table. Usage:
+   *
+   * @example
+   * ```typescript
+   * // Simple usage:
+   * page.add(() => ui.table("companies", companies, {
+   *   columns: ["name", "location", "revenue"],
+   * }));
+   *
+   * // Advanced usage:
+   * page.add(() => ui.table("companies", companies, {
+   *   columns: [
+   *     "name",
+   *     { key: "location", format: "tag" },
+   *     { key: "revenue", label: "ARR", format: "currency" },
+   *   ],
+   * }));
+   * ```
+   *
+   * @link https://docs.composehq.com/components/input/table#columns
+   * Learn more in the {@link https://docs.composehq.com/components/input/table#columns documentation}.
+   */
   columns: UI.Table.ColumnGenerator<TData>[] | null;
+  /**
+   * A list of actions that can be performed on table rows.
+   *
+   * @example
+   * ```typescript
+   * page.add(() => ui.table("companies", companies, {
+   *   actions: [
+   *     { label: "Delete", onClick: (row) => database.deleteCompany(row.id) },
+   *     { label: "Details", onClick: (row) => page.modal(() => ui.json(row)) },
+   *   ],
+   * }));
+   * ```
+   *
+   * @link
+   * Learn more in the {@link https://docs.composehq.com/components/input/table#row-actions documentation}.
+   */
   actions: TableAction<TData>[] | null;
+  /**
+   * The minimum number of rows that must be selected. Defaults to `0`.
+   */
   minSelections: number;
+  /**
+   * The maximum number of rows that can be selected. Defaults to `1000000000`.
+   */
   maxSelections: number;
+  /**
+   * A custom validation function that is called on selected rows. Return nothing if valid, or a string error message if invalid.
+   */
   validate: UI.Components.InputTable["hooks"]["validate"];
   data: TData;
+  /**
+   * Whether the table should allow row selection. Defaults to `true`.
+   */
   allowSelect: UI.Components.InputTable["model"]["properties"]["allowSelect"];
+  /**
+   * A function that is called when the user selects or deselects rows. It receives the selected rows as an argument, or the selected row indices if the `selectionReturnType` parameter is set to `index`.
+   */
   onChange: UI.Components.InputTable["hooks"]["onSelect"];
+  /**
+   * A list of row indices (e.g. `[0, 1, 2]`) to pre-select when the table is first rendered. Defaults to empty list.
+   */
   initialSelectedRows: UI.Components.InputTable["model"]["properties"]["initialSelectedRows"];
+  /**
+   * How the table should return selected rows to hooks such as `onChange`. Options:
+   *
+   * - `full`: A list of rows.
+   * - `index`: A list of row indices.
+   *
+   * Defaults to `full`. Must be set to `index` if the table is paginated to enable row selection.
+   */
   selectionReturnType: UI.Components.InputTable["model"]["properties"]["selectMode"];
+  /**
+   * Whether the table should be searchable. Defaults to `true`, except for paginated tables, which must handle search server-side. See the docs for more info.
+   */
   searchable: boolean;
+  /**
+   * Whether the table should be paginated server-side. Enabling this can improve performance by only loading a subset of the data at a time. Defaults to `false`. Tables with more than 2500 rows will be paginated by default.
+   */
+  paginate: boolean;
 }
 
 type RequiredTableFields = "id" | "data";
@@ -50,6 +120,7 @@ const defaultTableProperties: OptionalTableProperties<UI.Table.DataRow[]> = {
   initialSelectedRows: [],
   selectionReturnType: UI.Table.SELECTION_RETURN_TYPE.FULL,
   searchable: true,
+  paginate: false,
 };
 
 function getModelActions(
@@ -121,6 +192,7 @@ function getHookActions(
  * @param {UI.Components.InputTable["model"]["maxSelections"]} properties.maxSelections - Maximum number of rows that can be selected. Defaults to `1`.
  * @param {UI.Components.InputTable["model"]["selectionReturnType"]} properties.selectionReturnType - How the table should return selected rows. Defaults to `full` (a list of rows). Must be `index` (a list of row indices) if the table is paginated.
  * @param {UI.Components.InputTable["model"]["searchable"]} properties.searchable - Whether the table should be searchable. Defaults to `true`.
+ * @param {boolean} properties.paginate - Whether the table should be paginated. Defaults to `false`. Tables with more than 2500 rows will be paginated by default.
  * @returns The configured table component.
  */
 function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
@@ -152,7 +224,9 @@ function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
 
   const manuallyPaged = typeof data === "function";
   const autoPaged =
-    typeof data !== "function" && data.length > UI.Table.PAGINATION_THRESHOLD;
+    typeof data !== "function" &&
+    (data.length > UI.Table.PAGINATION_THRESHOLD ||
+      mergedProperties.paginate === true);
 
   // Perform a shallow copy of the data to make it less likely to be mutated
   // by the user, and thus more likely that any page.update() calls will

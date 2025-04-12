@@ -254,6 +254,50 @@ def display_pdf(
     }
 
 
+def display_divider(
+    *,
+    orientation: Union[Literal["horizontal", "vertical"], None] = None,
+    thickness: Union[Literal["thin", "medium", "thick"], None] = None,
+    style: Union[ComponentStyle, None] = None,
+) -> ComponentReturn:
+    """Displays a divider line to visually separate content. For example:
+
+    >>> page.add(lambda: ui.stack([
+    ...     ui.text("First item"),
+    ...     ui.divider(),
+    ...     ui.text("Second item"),
+    ... ]))
+
+    Optional keyword arguments:
+    - `orientation`: The orientation of the divider. Options: "horizontal" or "vertical". Defaults to "horizontal".
+    - `thickness`: The thickness of the divider. Options: "thin" (1px), "medium" (2px), or "thick" (4px). Defaults to "thin".
+    - `style`: CSS styles object applied directly to the divider HTML element. Defaults to `None`.
+
+    Returns a configured divider component.
+
+    Read the full documentation: https://docs.composehq.com/components/display/divider
+    """
+    id = Utils.generate_id()
+
+    model_properties: Dict[str, Any] = {}
+
+    optional_properties = {
+        "orientation": orientation,
+        "thickness": thickness,
+    }
+
+    for key, value in optional_properties.items():
+        if value is not None:
+            model_properties[key] = value
+
+    return {
+        "model": {"id": id, "style": style, "properties": model_properties},
+        "hooks": None,
+        "type": TYPE.DISPLAY_DIVIDER,
+        "interactionType": INTERACTION_TYPE.DISPLAY,
+    }
+
+
 def display_none() -> ComponentReturn:
     id = Utils.generate_id()
 

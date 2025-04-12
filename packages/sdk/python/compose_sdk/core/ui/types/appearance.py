@@ -10,3 +10,5 @@ TextColor = Literal[
     "danger",
     "success",
 ]
+
+DividerColor = Literal["primary", "neutral", "warning", "danger"]

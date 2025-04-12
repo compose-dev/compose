@@ -186,7 +186,7 @@ function App() {
           </Modal.Header>
           <Modal.Body>
             <p
-              className={classNames("whitespace-pre-wrap break-all", {
+              className={classNames("whitespace-pre-wrap", {
                 "text-brand-error": error.severity === "error",
                 "text-brand-warning": error.severity === "warning",
               })}

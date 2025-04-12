@@ -219,6 +219,11 @@
     @apply font-semibold;
   }
 
+  ::placeholder {
+    color: var(--brand-neutral-text-2) !important;
+    opacity: 1 !important; /* Firefox */
+  }
+
   .hljs {
     background-color: var(--brand-bg-overlay) !important;
   }

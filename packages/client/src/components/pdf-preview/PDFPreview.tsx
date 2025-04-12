@@ -1,5 +1,5 @@
 import { pdfjs, Document, Page } from "react-pdf";
-
+import "react-pdf/dist/Page/TextLayer.css";
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -107,7 +107,7 @@ function PDFPreview({
               pageNumber={pageNumber}
               width={ignoreWidth ? undefined : computedWidth}
               height={ignoreHeight ? undefined : computedHeight}
-              renderTextLayer={false}
+              renderTextLayer={true}
               renderAnnotationLayer={false}
             />
           </Document>

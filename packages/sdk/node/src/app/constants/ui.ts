@@ -25,6 +25,7 @@ interface UIHandler {
   image: typeof Generator.display.image;
   markdown: typeof Generator.display.markdown;
   pdf: typeof Generator.display.pdf;
+  divider: typeof Generator.display.divider;
   button: typeof Generator.button.default;
   submitButton: typeof Generator.button.formSubmit;
   stack: typeof Generator.layout.stack;
@@ -65,6 +66,7 @@ const ui: UIHandler = {
   image: Generator.display.image,
   markdown: Generator.display.markdown,
   pdf: Generator.display.pdf,
+  divider: Generator.display.divider,
 
   // Button
   button: Generator.button.default,

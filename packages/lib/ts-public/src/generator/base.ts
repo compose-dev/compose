@@ -41,15 +41,27 @@ interface BaseWithInputInteraction<
 }
 
 interface BaseWithButtonInteraction extends Base {
+  /**
+   * Style the component directly using CSS. For complex components, this will
+   * be applied to the root element of the component.
+   */
   style: UI.Components.All["model"]["style"];
 }
 
 interface BaseWithDisplayInteraction extends Base {
+  /**
+   * Style the component directly using CSS. For complex components, this will
+   * be applied to the root element of the component.
+   */
   style: UI.Components.All["model"]["style"];
 }
 
 interface BaseWithLayoutInteraction<TChildren extends UI.BaseGeneric.Children>
   extends Base {
+  /**
+   * Style the component directly using CSS. For complex components, this will
+   * be applied to the root element of the component.
+   */
   style: UI.Components.All["model"]["style"];
   children: TChildren;
   direction: UI.Components.AllWithLayoutInteraction["model"]["direction"];

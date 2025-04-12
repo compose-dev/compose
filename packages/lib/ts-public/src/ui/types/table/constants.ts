@@ -120,7 +120,7 @@ type TableColumnGenerator<TData extends TableDataRow[]> =
   | StringOnlyKeys<TData[number]>
   | AdvancedTableColumnGenerator<TData>;
 
-const PAGINATION_THRESHOLD = 5000;
+const PAGINATION_THRESHOLD = 2500;
 const DEFAULT_PAGE_SIZE = 100;
 const DEFAULT_OFFSET = 0;
 const DEFAULT_SEARCH_QUERY = null;

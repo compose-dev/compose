@@ -171,6 +171,8 @@ export type DisplayMarkdown = null;
 
 export type DisplayPdf = null;
 
+export type DisplayDivider = null;
+
 export type LayoutStack = null;
 
 export type LayoutForm = {
@@ -214,6 +216,7 @@ export type All<
   | DisplayImage
   | DisplayMarkdown
   | DisplayPdf
+  | DisplayDivider
   | LayoutStack
   | LayoutForm;
 

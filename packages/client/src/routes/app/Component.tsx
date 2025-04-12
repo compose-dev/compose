@@ -12,6 +12,7 @@ import DisplayInteractionComponent from "./DisplayInteractionComponent";
 import { BrowserToServerEvent } from "@compose/ts";
 import { useWSContext } from "~/utils/wsContext";
 import { BarChart } from "~/components/chart/bar-chart";
+import { useShallow } from "zustand/react/shallow";
 
 const DEFAULT_SPACING = "16px";
 const NEGATIVE_DEFAULT_SPACING = `-${DEFAULT_SPACING}`;
@@ -38,6 +39,39 @@ function Component({
   const getFormData = appStore.use((state) => state.getFormData);
 
   const { transferFiles } = useTransferFiles(environmentId, executionId);
+
+  const componentWidthStyles = appStore.use(
+    useShallow((state) => {
+      const style = state.flattenedModel[renderId][componentId].model.style;
+
+      if (!style) {
+        return {};
+      } else {
+        return {
+          width: style.width || "auto",
+          minWidth: style.minWidth || "auto",
+          maxWidth: style.maxWidth || "auto",
+        };
+      }
+    })
+  );
+
+  const componentNonWidthStyles = appStore.use(
+    useShallow((state) => {
+      const style = state.flattenedModel[renderId][componentId].model.style;
+
+      if (!style) {
+        return {};
+      } else {
+        return {
+          ...style,
+          width: undefined,
+          minWidth: undefined,
+          maxWidth: undefined,
+        };
+      }
+    })
+  );
 
   const componentStyles = component.model.style ?? undefined;
   const useDefaultWidth =
@@ -291,7 +325,9 @@ function Component({
       component.type === UI.TYPE.DISPLAY_CODE ||
       component.type === UI.TYPE.DISPLAY_JSON ||
       component.type === UI.TYPE.DISPLAY_MARKDOWN ||
-      component.type === UI.TYPE.DISPLAY_PDF;
+      component.type === UI.TYPE.DISPLAY_PDF ||
+      (component.type === UI.TYPE.DISPLAY_DIVIDER &&
+        component.model.properties.orientation !== "vertical");
 
     const overflowComponent =
       component.type === UI.TYPE.DISPLAY_CODE ||
@@ -307,6 +343,9 @@ function Component({
           "c-manual-height": !useDefaultHeight,
           "c-manual-width": !useDefaultWidth,
           "overflow-x-auto": overflowComponent,
+          "self-stretch":
+            component.type === UI.TYPE.DISPLAY_DIVIDER &&
+            component.model.properties.orientation === "vertical",
         })}
         style={componentStyles}
       >
@@ -361,7 +400,7 @@ function Component({
     }
 
     return (
-      <div className="animate-slide-fade-in min-w-fit">
+      <div className="animate-slide-fade-in" style={componentWidthStyles}>
         <Button
           onClick={() => {
             if (component.model.properties.hasOnClickHook) {
@@ -372,7 +411,10 @@ function Component({
           type={
             component.type === UI.TYPE.BUTTON_FORM_SUBMIT ? "submit" : "button"
           }
-          style={componentStyles}
+          style={componentNonWidthStyles}
+          className={classNames({
+            "w-full": !useDefaultWidth,
+          })}
         >
           {component.model.properties.label || "\u00A0"}
         </Button>

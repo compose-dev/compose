@@ -71,7 +71,7 @@ describe("App Runner - Form Submit Button", () => {
             ui.code("SHEESH"),
             ui.form(
               "form",
-              ui.stack([ui.textInput("input"), ui.textInput("input")])
+              ui.stack([ui.textInput("input"), ui.textInput("input2")])
             ),
             ui.text("world"),
           ])
@@ -124,7 +124,7 @@ describe("App Runner - Form Submit Button", () => {
               ui.stack([
                 ui.textInput("input"),
                 ui.submitButton("yo button"),
-                ui.textInput("input"),
+                ui.textInput("input2"),
               ])
             ),
             ui.text("world"),
@@ -161,7 +161,7 @@ describe("App Runner - Form Submit Button", () => {
             ui.code("SHEESH"),
             ui.form(
               "form",
-              ui.stack([ui.textInput("input"), ui.textInput("input")]),
+              ui.stack([ui.textInput("input"), ui.textInput("input2")]),
               {
                 hideSubmitButton: true,
               }
@@ -204,7 +204,7 @@ describe("App Runner - Form Submit Button", () => {
                 ui.stack([
                   ui.textInput("input"),
                   ui.submitButton("yo button"),
-                  ui.textInput("input"),
+                  ui.textInput("input2"),
                 ]),
                 ui.submitButton("yo1 button"),
                 ui.stack(ui.submitButton("yo3 button")),

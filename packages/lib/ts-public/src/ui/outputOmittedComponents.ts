@@ -157,6 +157,11 @@ export type DisplayPdf<TId extends BaseGeneric.Id = BaseGeneric.Id> = Omit<
   OmitKeys
 >;
 
+export type DisplayDivider<TId extends BaseGeneric.Id = BaseGeneric.Id> = Omit<
+  Components.DisplayDivider<TId>,
+  OmitKeys
+>;
+
 export type LayoutStack<
   TId extends BaseGeneric.Id = BaseGeneric.Id,
   TChildren extends BaseGeneric.Children = BaseGeneric.Children,

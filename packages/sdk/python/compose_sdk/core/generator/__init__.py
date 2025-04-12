@@ -11,6 +11,7 @@ from .displayInteraction import (
     display_spinner,
     display_text,
     display_pdf,
+    display_divider,
 )
 from .layoutInteraction import (
     layout_form,
@@ -144,6 +145,10 @@ class Component:
     @property
     def text(self):
         return display_text
+
+    @property
+    def divider(self):
+        return display_divider
 
     # Layout
     @property

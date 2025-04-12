@@ -110,3 +110,11 @@ export interface Pdf<TId extends BaseGeneric.Id>
     scroll?: "vertical" | "horizontal";
   };
 }
+
+export interface Divider<TId extends BaseGeneric.Id>
+  extends BaseWithDisplayInteraction<TId> {
+  properties: {
+    orientation?: "horizontal" | "vertical";
+    thickness?: "thin" | "medium" | "thick";
+  };
+}

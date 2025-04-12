@@ -33,16 +33,18 @@ function Navigation() {
   }
 
   return (
-    <AppNavigationDocs
-      nav={nav}
-      companyName="ComposeHQ"
-      appRoute={currentRoute}
-      onClick={setCurrentRoute}
-    >
-      <div className="p-4">
-        <h3>{getText()}</h3>
-      </div>
-    </AppNavigationDocs>
+    <div className="h-screen w-screen">
+      <AppNavigationDocs
+        nav={nav}
+        companyName="ComposeHQ"
+        appRoute={currentRoute}
+        onClick={setCurrentRoute}
+      >
+        <div className="p-4">
+          <h3>{getText()}</h3>
+        </div>
+      </AppNavigationDocs>
+    </div>
   );
 }
 

@@ -34,6 +34,7 @@ const TYPE = {
   DISPLAY_IMAGE: "display-image",
   DISPLAY_MARKDOWN: "display-markdown",
   DISPLAY_PDF: "display-pdf",
+  DISPLAY_DIVIDER: "dd",
   // A special type that's used to represent when a render returns null
   // or undefined.
   DISPLAY_NONE: "display-none",

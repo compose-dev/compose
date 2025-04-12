@@ -37,6 +37,7 @@ import TableLoading from "./components/TableLoading";
 import { Spinner } from "../spinner";
 import { u } from "@compose/ts";
 import { useSearch, useFormattedData } from "./utils";
+import Icon from "../icon";
 
 type InternalTableColumn<T> =
   | (TableColumn & { header: string })
@@ -416,6 +417,7 @@ function Table({
                   }}
                   placeholder="Search"
                   label={null}
+                  left={<Icon name="search" color="brand-neutral-2" />}
                   rootClassName="!w-40 sm:!w-60 md:!w-72"
                 />
                 {search !== serverSearchQuery &&
@@ -441,6 +443,7 @@ function Table({
                 placeholder="Search"
                 label={null}
                 rootClassName="!w-40 sm:!w-72"
+                left={<Icon name="search" color="brand-neutral-2" />}
               />
             )}
             <p className="text-brand-neutral-2 text-sm">

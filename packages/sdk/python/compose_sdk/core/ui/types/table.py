@@ -143,7 +143,7 @@ TableActionsOnClick = List[TableActionOnClick]
 
 
 class TableDefault:
-    PAGINATION_THRESHOLD = 5000
+    PAGINATION_THRESHOLD = 2500
     PAGE_SIZE = 100
     OFFSET = 0
     SEARCH_QUERY = None

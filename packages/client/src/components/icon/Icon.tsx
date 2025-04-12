@@ -25,6 +25,7 @@ import {
   IconBrandPython,
   IconLayoutSidebarRight,
   IconClipboardText,
+  IconSearch,
 } from "@tabler/icons-react";
 
 const ICON_NAME = {
@@ -62,6 +63,7 @@ const ICON_NAME = {
   number: "number",
   plus: "plus",
   refresh: "refresh",
+  search: "search",
   settings: "settings",
   users: "users",
   x: "x",
@@ -142,6 +144,16 @@ function Icon({
   if (name === ICON_NAME["sidebar-right"]) {
     return (
       <IconLayoutSidebarRight
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME.search) {
+    return (
+      <IconSearch
         size={16 * SIZE_MULTIPLIER[size]}
         color={ICON_COLOR[color]}
         strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}

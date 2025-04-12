@@ -49,7 +49,7 @@ from .annotation import Annotation
 from .modal_width import MODAL_WIDTH, MODAL_WIDTH_DEFAULT
 from .render_appearance import RENDER_APPEARANCE, RENDER_APPEARANCE_DEFAULT
 from .validator_response import ValidatorResponse, VoidResponse
-from .appearance import TextColor
+from .appearance import TextColor, DividerColor
 from .size import HeaderSize, TextSize
 from .stale import Stale
 from .chart import *
@@ -85,6 +85,7 @@ __all__ = [
     "ValidatorResponse",
     "VoidResponse",
     "TextColor",
+    "DividerColor",
     "HeaderSize",
     "TextSize",
     "AdvancedTableColumn",

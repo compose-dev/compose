@@ -69,6 +69,7 @@ def _table(
     allow_select: bool = True,
     selection_return_type: TableSelectionReturn.TYPE = TableSelectionReturn.FULL,
     searchable: bool = True,
+    paginate: bool = False,
 ) -> ComponentReturn:
 
     if not isinstance(initial_selected_rows, list):
@@ -88,7 +89,9 @@ def _table(
         )
 
     manually_paged = isinstance(data, Callable)
-    auto_paged = not manually_paged and len(data) > TableDefault.PAGINATION_THRESHOLD
+    auto_paged = not manually_paged and (
+        len(data) > TableDefault.PAGINATION_THRESHOLD or paginate is True
+    )
 
     # Perform a shallow copy of the data to make it less likely to be mutated
     # by the user, and thus more likely that any page.update() calls will
@@ -183,6 +186,7 @@ def table(
     max_selections: int = MULTI_SELECTION_MAX_DEFAULT,
     selection_return_type: TableSelectionReturn.TYPE = TableSelectionReturn.FULL,
     searchable: bool = True,
+    paginate: bool = False,
 ) -> ComponentReturn:
     """Creates a table component.
 
@@ -239,6 +243,9 @@ def table(
     #### searchable : `bool`. Optional.
         Whether to enable the table search bar. Defaults to `True`, except for auto-paginated tables, which do not support client-side search. You should manually handle pagination to enable search for paginated tables.
 
+    #### paginate : `bool`. Optional.
+        Whether to paginate the table. Defaults to `False`. Tables with more than 2500 rows will be paginated by default.
+
     ## Returns
     The configured table component.
 
@@ -280,6 +287,7 @@ def table(
         allow_select=allow_select,
         selection_return_type=selection_return_type,
         searchable=searchable,
+        paginate=paginate,
     )
 
 
@@ -306,6 +314,7 @@ def dataframe(
     allow_select: bool = True,
     selection_return_type: TableSelectionReturn.TYPE = TableSelectionReturn.FULL,
     searchable: bool = True,
+    paginate: bool = False,
 ) -> ComponentReturn:
 
     # Replace empty values in the dataframe with None
@@ -334,4 +343,5 @@ def dataframe(
         allow_select=allow_select,
         selection_return_type=selection_return_type,
         searchable=searchable,
+        paginate=paginate,
     )

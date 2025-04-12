@@ -161,6 +161,24 @@ class AppRunner:
                     layout, resolve_render, renderId, self.table_state
                 )
 
+            if self.debug:
+                with Debug.measure_duration(
+                    lambda elapsed: Debug.log(
+                        f"Page add (fragment: {renderId})",
+                        f"validated layout in {elapsed:.2f} ms",
+                        duration_ms=elapsed,
+                        warning_threshold_ms=10,
+                    )
+                ):
+                    validation_error = StaticTree.validate(static_layout)
+            else:
+                validation_error = StaticTree.validate(static_layout)
+
+            if validation_error is not None:
+                return await self.__send_error(
+                    f"An error occurred while rendering the UI:\n\n{validation_error}"
+                )
+
             self.renders[renderId] = {
                 "resolve": resolve_render,
                 "layout": layout,

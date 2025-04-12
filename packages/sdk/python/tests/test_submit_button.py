@@ -98,7 +98,7 @@ async def test_add_submit_button_to_form_when_nested(
                         ui.code("SHEESH"),
                         ui.form(
                             "form",
-                            ui.stack([ui.text_input("input"), ui.text_input("input")]),
+                            ui.stack([ui.text_input("input"), ui.text_input("input2")]),
                         ),
                         ui.text("world"),
                     ]
@@ -160,7 +160,7 @@ async def test_not_add_submit_button_to_form_when_already_present(
                                 [
                                     ui.text_input("input"),
                                     ui.submit_button("yo button"),
-                                    ui.text_input("input"),
+                                    ui.text_input("input2"),
                                 ]
                             ),
                         ),
@@ -214,7 +214,7 @@ async def test_not_add_submit_button_to_form_when_hide_is_true(
                         ui.code("SHEESH"),
                         ui.form(
                             "form",
-                            ui.stack([ui.text_input("input"), ui.text_input("input")]),
+                            ui.stack([ui.text_input("input"), ui.text_input("input2")]),
                             hide_submit_button=True,
                         ),
                         ui.text("world"),
@@ -272,7 +272,7 @@ async def test_remove_submit_buttons_from_form_when_hide_is_true(
                                     [
                                         ui.text_input("input"),
                                         ui.submit_button("yo button"),
-                                        ui.text_input("input"),
+                                        ui.text_input("input2"),
                                     ]
                                 ),
                                 ui.submit_button("yo1 button"),

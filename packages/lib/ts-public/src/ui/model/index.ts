@@ -41,6 +41,7 @@ export type All<
   | DisplayInteraction.Image<TId>
   | DisplayInteraction.Markdown<TId>
   | DisplayInteraction.Pdf<TId>
+  | DisplayInteraction.Divider<TId>
   | LayoutInteraction.Stack<TId, TChildren>
   | LayoutInteraction.Form<TId, TChildren>;
 

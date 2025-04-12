@@ -69,12 +69,12 @@ describe("App Runner - Table", () => {
     expect(tracker.metCondition).toEqual(true);
   });
 
-  it("should return 5000 rows when data is provided", async () => {
+  it("should return 2500 rows when data is provided", async () => {
     const { appRunner, api } = mockRunner(async ({ page, ui }) => {
       page.add(() =>
         ui.table(
           "table",
-          Array.from({ length: 5000 }, (_, i) => ({ id: i }))
+          Array.from({ length: 2500 }, (_, i) => ({ id: i }))
         )
       );
     });
@@ -92,7 +92,7 @@ describe("App Runner - Table", () => {
             return false;
           }
 
-          if (ui.model.properties.data.length === 5000) {
+          if (ui.model.properties.data.length === 2500) {
             return true;
           }
         }
@@ -141,7 +141,7 @@ describe("App Runner - Table", () => {
     expect(tracker.metCondition).toEqual(true);
   });
 
-  it("should return 5000 rows when data is provided and table is nested", async () => {
+  it("should return 2500 rows when data is provided and table is nested", async () => {
     const { appRunner, api } = mockRunner(async ({ page, ui }) => {
       page.add(() =>
         ui.stack([
@@ -149,7 +149,7 @@ describe("App Runner - Table", () => {
           ui.stack([
             ui.table(
               "table",
-              Array.from({ length: 5000 }, (_, i) => ({ id: i }))
+              Array.from({ length: 2500 }, (_, i) => ({ id: i }))
             ),
           ]),
         ])
@@ -171,7 +171,7 @@ describe("App Runner - Table", () => {
             return false;
           }
 
-          if (ui.model.properties.data.length === 5000) {
+          if (ui.model.properties.data.length === 2500) {
             return true;
           }
         }
@@ -192,7 +192,7 @@ describe("App Runner - Table", () => {
           ui.stack([
             ui.table(
               "table",
-              Array.from({ length: 5000 }, (_, i) => ({
+              Array.from({ length: 2500 }, (_, i) => ({
                 id: i,
                 beepboop: "random",
                 thirdboi: "third",
@@ -262,7 +262,7 @@ describe("App Runner - Table", () => {
 
   it("should update when table data changes", async () => {
     const { appRunner, api } = mockRunner(async ({ page, ui }) => {
-      const data = Array.from({ length: 5000 }, (_, i) => ({ id: i }));
+      const data = Array.from({ length: 2500 }, (_, i) => ({ id: i }));
 
       page.add(() =>
         ui.stack([ui.stack([]), ui.stack([ui.table("table", data)])])
@@ -295,7 +295,7 @@ describe("App Runner - Table", () => {
 
   it("the updated data should be compressed", async () => {
     const { appRunner, api } = mockRunner(async ({ page, ui }) => {
-      const data = Array.from({ length: 5000 }, (_, i) => ({
+      const data = Array.from({ length: 2500 }, (_, i) => ({
         id: i,
         beepboop: "random",
         thirdboi: "third",

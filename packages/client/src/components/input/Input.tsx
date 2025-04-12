@@ -26,6 +26,7 @@ function Input({
   rootClassName = "",
   inputClassName = "",
   right = null,
+  left = null,
   onEnter = null,
   type = TYPE.TEXT,
   testId,
@@ -41,6 +42,7 @@ function Input({
   rootClassName?: string;
   inputClassName?: string;
   right?: React.ReactNode;
+  left?: React.ReactNode;
   onEnter?: (() => void) | null;
   type?: Type;
   testId?: string;
@@ -65,6 +67,9 @@ function Input({
         <IOComponent.Description>{description}</IOComponent.Description>
       )}
       <div className="relative">
+        {left !== null && (
+          <div className="absolute left-2 top-1/2 -translate-y-1/2">{left}</div>
+        )}
         <HeadlessInput
           value={value === null ? "" : value}
           placeholder={placeholder ?? undefined}
@@ -80,6 +85,7 @@ function Input({
               "border-brand-error": hasError,
               "border-brand-neutral": !hasError,
               "pr-8": right !== null,
+              "pl-8": left !== null,
               "bg-brand-io-disabled": disabled,
             },
             inputClassName

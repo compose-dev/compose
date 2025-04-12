@@ -82,16 +82,17 @@ function InputInteractionComponent({
       return;
     }
 
-    // If an input is in a form - the form supersedes the input's hooks
-    if (component.formId !== null) {
-      return;
-    }
-
     const isEnterHook = UI.InputComponentTypes.isEnterType(component);
     const isSelectHook = UI.InputComponentTypes.isSelectType(component);
     const isFileChangeHook = UI.InputComponentTypes.isFileChangeType(component);
 
     if (!isEnterHook && !isSelectHook && !isFileChangeHook) {
+      return;
+    }
+
+    // Ignore enter hooks if the input is in a form, since pressing enter
+    // will submit the form.
+    if (component.formId !== null && isEnterHook) {
       return;
     }
 

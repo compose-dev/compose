@@ -337,6 +337,15 @@ export interface DisplayPdf<TId extends BaseGeneric.Id = BaseGeneric.Id>
   interactionType: typeof INTERACTION_TYPE.DISPLAY;
 }
 
+export interface DisplayDivider<TId extends BaseGeneric.Id = BaseGeneric.Id>
+  extends Base {
+  model: Model.DisplayInteraction.Divider<TId>;
+  output: Output.DisplayDivider;
+  hooks: Hooks.DisplayDivider;
+  type: typeof TYPE.DISPLAY_DIVIDER;
+  interactionType: typeof INTERACTION_TYPE.DISPLAY;
+}
+
 export interface LayoutStack<
   TId extends BaseGeneric.Id = BaseGeneric.Id,
   TChildren extends BaseGeneric.Children = BaseGeneric.Children,
@@ -403,6 +412,7 @@ export type All<
   | DisplayImage<TId>
   | DisplayMarkdown<TId>
   | DisplayPdf<TId>
+  | DisplayDivider<TId>
   | LayoutStack<TId, TChildren>
   | LayoutForm<TId, TChildren>;
 
