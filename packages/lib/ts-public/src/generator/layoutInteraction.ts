@@ -16,6 +16,7 @@ const defaultLayoutStackProperties: OptionalLayoutStackProperties<UI.BaseGeneric
     align: "start",
     style: null,
     spacing: "16px",
+    responsive: undefined,
   };
 
 /**
@@ -40,6 +41,7 @@ const defaultLayoutStackProperties: OptionalLayoutStackProperties<UI.BaseGeneric
  * @param {Partial<OptionalLayoutStackProperties<TChildren>>["justify"]} properties.justify - Main-axis alignment of the child components. Defaults to `"start"`.
  * @param {Partial<OptionalLayoutStackProperties<TChildren>>["align"]} properties.align - Cross-axis alignment of the child components. Defaults to `"start"`.
  * @param {Partial<OptionalLayoutStackProperties<TChildren>>["spacing"]} properties.spacing - Spacing between the child components. Defaults to `"16px"`.
+ * @param {Partial<OptionalLayoutStackProperties<TChildren>>["responsive"]} properties.responsive - Whether the container should automatically adjust to a vertical layout on mobile devices. Defaults to `true`.
  * @param {Partial<OptionalLayoutStackProperties<TChildren>>["style"]} properties.style - CSS styles object to directly style the container HTML element.
  * @returns The configured stack component.
  */
@@ -54,17 +56,26 @@ function layoutStack<TChildren extends UI.BaseGeneric.Children>(
     ...properties,
   };
 
+  const model: UI.Components.LayoutStack<
+    UI.BaseGeneric.Id,
+    TChildren
+  >["model"] = {
+    id,
+    children,
+    direction: mergedProperties.direction,
+    justify: mergedProperties.justify,
+    align: mergedProperties.align,
+    style: mergedProperties.style,
+    spacing: mergedProperties.spacing,
+    properties: {},
+  };
+
+  if (properties.responsive === false) {
+    model.responsive = properties.responsive;
+  }
+
   return {
-    model: {
-      id,
-      children,
-      direction: mergedProperties.direction,
-      justify: mergedProperties.justify,
-      align: mergedProperties.align,
-      style: mergedProperties.style,
-      spacing: mergedProperties.spacing,
-      properties: {},
-    },
+    model,
     hooks: null,
     type: UI.TYPE.LAYOUT_STACK,
     interactionType: UI.INTERACTION_TYPE.LAYOUT,
@@ -90,6 +101,7 @@ function layoutStack<TChildren extends UI.BaseGeneric.Children>(
  * @param {Partial<OptionalLayoutStackProperties<TChild[]>>["justify"]} properties.justify - Main-axis alignment of the child components. Defaults to `"start"`.
  * @param {Partial<OptionalLayoutStackProperties<TChild[]>>["align"]} properties.align - Cross-axis alignment of the child components. Defaults to `"start"`.
  * @param {Partial<OptionalLayoutStackProperties<TChild[]>>["spacing"]} properties.spacing - Spacing between the child components. Defaults to `"16px"`.
+ * @param {Partial<OptionalLayoutStackProperties<TChild[]>>["responsive"]} properties.responsive - Whether the container should automatically adjust to a vertical layout on mobile devices. Defaults to `true`.
  * @param {Partial<OptionalLayoutStackProperties<TChild[]>>["style"]} properties.style - CSS styles object to directly style the container HTML element.
  * @returns The configured container component with the mapped child components.
  */
@@ -111,11 +123,28 @@ function dynamicForEach<TItem, TChild extends UI.OutputOmittedComponents.All>(
 }
 
 /**
- * A flexible container for arranging and styling its children. By default, it
- * arranges its children in a horizontal row.
+ * A flexible container for arranging and styling its children. By default, it arranges its children in a horizontal row.
  *
- * @param children - The children to be arranged by the row.
- * @param properties - Optional properties to configure the row.
+ * @example
+ * ```typescript
+ * page.add(() => ui.row(
+ *   [
+ *     ui.button("Add user"),
+ *     ui.button("Edit user"),
+ *     ui.button("Delete user"),
+ *   ],
+ * ));
+ * ```
+ *
+ * @link Read the full {@link https://docs.composehq.com/components/layout/row documentation}
+ *
+ * @param {TChildren} children - The children to be arranged by the row.
+ * @param {Partial<OptionalLayoutStackProperties<TChildren>>} properties - Optional properties to configure the row.
+ * @param {Partial<OptionalLayoutStackProperties<TChildren>>["justify"]} properties.justify - Main-axis alignment of the child components. Defaults to `"start"`.
+ * @param {Partial<OptionalLayoutStackProperties<TChildren>>["align"]} properties.align - Cross-axis alignment of the child components. Defaults to `"start"`.
+ * @param {Partial<OptionalLayoutStackProperties<TChildren>>["spacing"]} properties.spacing - Spacing between the child components. Defaults to `"16px"`.
+ * @param {Partial<OptionalLayoutStackProperties<TChildren>>["responsive"]} properties.responsive - Whether the container should automatically adjust to a vertical layout on mobile devices. Defaults to `true`.
+ * @param {Partial<OptionalLayoutStackProperties<TChildren>>["style"]} properties.style - CSS styles object to directly style the container HTML element.
  * @returns The configured row component.
  */
 function layoutRow<TChildren extends UI.BaseGeneric.Children>(
@@ -134,8 +163,24 @@ function layoutRow<TChildren extends UI.BaseGeneric.Children>(
  * A common use case is for headers where you have text on the left and buttons
  * on the right.
  *
- * @param children - The children to be arranged by the row.
- * @param properties - Optional properties to configure the row.
+ * @example
+ * ```typescript
+ * page.add(() => ui.distributedRow(
+ *   [
+ *     ui.header("Users"),
+ *     ui.button("Add user"),
+ *   ],
+ * ));
+ * ```
+ *
+ * @link Read the full {@link https://docs.composehq.com/components/layout/distributed-row documentation}
+ *
+ * @param {TChildren} children - The children to be arranged by the distributed row.
+ * @param {Partial<OptionalLayoutStackProperties<TChildren>>} properties - Optional properties to configure the distributed row.
+ * @param {Partial<OptionalLayoutStackProperties<TChildren>>["align"]} properties.align - Cross-axis alignment of the child components. Defaults to `"center"`.
+ * @param {Partial<OptionalLayoutStackProperties<TChildren>>["spacing"]} properties.spacing - Spacing between the child components. Defaults to `"16px"`.
+ * @param {Partial<OptionalLayoutStackProperties<TChildren>>["responsive"]} properties.responsive - Whether the container should automatically adjust to a vertical layout on mobile devices. Defaults to `true`.
+ * @param {Partial<OptionalLayoutStackProperties<TChildren>>["style"]} properties.style - CSS styles object to directly style the container HTML element.
  * @returns The configured distributed row component.
  */
 function layoutDistributedRow<TChildren extends UI.BaseGeneric.Children>(
@@ -156,8 +201,26 @@ function layoutDistributedRow<TChildren extends UI.BaseGeneric.Children>(
  * A flexible container for arranging and styling its children. By default, it
  * renders its children inside a card UI.
  *
- * @param children - The children to be arranged by the row.
- * @param properties - Optional properties to configure the row.
+ * @example
+ * ```typescript
+ * page.add(() => ui.card(
+ *   [
+ *     ui.header("User details"),
+ *     ui.json(user.data),
+ *   ],
+ * ));
+ * ```
+ *
+ * @link Read the full {@link https://docs.composehq.com/components/layout/card documentation}
+ *
+ * @param {TChildren} children - The children to be arranged within the card.
+ * @param {Partial<OptionalLayoutStackProperties<TChildren>>} properties - Optional properties to configure the card.
+ * @param {Partial<OptionalLayoutStackProperties<TChildren>>["direction"]} properties.direction - Direction to arrange the child components. Defaults to `"vertical"`.
+ * @param {Partial<OptionalLayoutStackProperties<TChildren>>["justify"]} properties.justify - Main-axis alignment of the child components. Defaults to `"start"`.
+ * @param {Partial<OptionalLayoutStackProperties<TChildren>>["align"]} properties.align - Cross-axis alignment of the child components. Defaults to `"start"`.
+ * @param {Partial<OptionalLayoutStackProperties<TChildren>>["spacing"]} properties.spacing - Spacing between the child components. Defaults to `"16px"`.
+ * @param {Partial<OptionalLayoutStackProperties<TChildren>>["responsive"]} properties.responsive - Whether the container should automatically adjust to a vertical layout on mobile devices. Defaults to `true`.
+ * @param {Partial<OptionalLayoutStackProperties<TChildren>>["style"]} properties.style - CSS styles object to directly style the container HTML element.
  * @returns The configured card component.
  */
 function layoutCard<TChildren extends UI.BaseGeneric.Children>(
@@ -210,7 +273,7 @@ type OptionalLayoutFormProperties<TChildren extends UI.BaseGeneric.Children> =
  * ));
  * ```
  *
- * @see Read the full {@link https://docs.composehq.com/components/layout/form documentation}
+ * @link Read the full {@link https://docs.composehq.com/components/layout/form documentation}
  *
  * @param {string} id - Unique id to identify the form.
  * @param {LayoutFormProperties["children"]} children - Child components that will be grouped into the form.
@@ -222,6 +285,7 @@ type OptionalLayoutFormProperties<TChildren extends UI.BaseGeneric.Children> =
  * @param {UI.Components.LayoutForm["model"]["justify"]} properties.justify - Main-axis alignment of child components. Follows css flexbox `justify-content`. Defaults to `"start"`.
  * @param {UI.Components.LayoutForm["hooks"]["onSubmit"]} properties.onSubmit - Function to be called when the form is submitted.
  * @param {UI.Components.LayoutForm["model"]["spacing"]} properties.spacing - Spacing between child components. Defaults to `16px`.
+ * @param {UI.Components.LayoutForm["model"]["responsive"]} properties.responsive - Whether the form should automatically adjust to a vertical layout on mobile devices. Defaults to `true`.
  * @param {UI.Components.LayoutForm["model"]["style"]} properties.style - CSS styles object to directly style the form HTML element.
  * @param {UI.Components.LayoutForm["hooks"]["validate"]} properties.validate - Custom validation function to validate the form inputs. Return nothing if valid, or a string error message if invalid.
  * @returns The configured form component.
@@ -245,17 +309,23 @@ function layoutForm<
     modelProperties.hideSubmitButton = properties.hideSubmitButton;
   }
 
+  const model: UI.Components.LayoutForm<TId, TChildren>["model"] = {
+    id,
+    children,
+    direction: properties.direction || "vertical",
+    justify: properties.justify || "start",
+    align: properties.align || "start",
+    style: properties.style || null,
+    spacing: properties.spacing || "16px",
+    properties: modelProperties,
+  };
+
+  if (properties.responsive === false) {
+    model.responsive = properties.responsive;
+  }
+
   return {
-    model: {
-      id,
-      children,
-      direction: properties.direction || "vertical",
-      justify: properties.justify || "start",
-      align: properties.align || "start",
-      style: properties.style || null,
-      spacing: properties.spacing || "16px",
-      properties: modelProperties,
-    },
+    model,
     hooks: {
       validate: (properties.validate ||
         null) as UI.OutputOmittedComponents.LayoutForm<

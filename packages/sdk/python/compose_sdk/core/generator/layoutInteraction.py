@@ -27,6 +27,7 @@ def layout_stack(
     justify: LAYOUT_JUSTIFY = LAYOUT_JUSTIFY_DEFAULT,
     align: LAYOUT_ALIGN = LAYOUT_ALIGN_DEFAULT,
     spacing: LAYOUT_SPACING = LAYOUT_SPACING_DEFAULT,
+    responsive: bool = True,
     style: Union[ComponentStyle, None] = None
 ) -> ComponentReturn:
     """A flexible container for arranging and styling its children. For example:
@@ -43,29 +44,33 @@ def layout_stack(
     - `children`: The components to be arranged by the stack. Can be a single component or a list of components.
 
     Optional keyword arguments:
-    - `direction`: Direction of child components. Defaults to `vertical`.
-    - `justify`: Main-axis alignment of child components. Defaults to `start`.
-    - `align`: Cross-axis alignment of child components. Defaults to `start`.
+    - `direction`: Direction of child components. Options: `vertical`, `vertical-reverse`, `horizontal`, `horizontal-reverse`. Defaults to `vertical`.
+    - `justify`: Main-axis alignment of child components. Options: `start`, `end`, `center`, `between`, `around`, `evenly`. Defaults to `start`.
+    - `align`: Cross-axis alignment of child components. Options: `start`, `end`, `center`, `stretch`, `baseline`. Defaults to `start`.
     - `spacing`: Spacing between child components. Defaults to `16px`.
+    - `responsive`: Whether the container should automatically adjust to a vertical layout on mobile devices. Defaults to `True`.
     - `style`: CSS styles object applied directly to the container HTML element. Defaults to `None`.
 
     Returns a configured container component with the provided children.
 
     Read the full documentation: https://docs.composehq.com/components/layout/stack
     """
-    id = Utils.generate_id()
+    model: Dict[str, Any] = {
+        "id": Utils.generate_id(),
+        "children": children,
+        "direction": direction,
+        "justify": justify,
+        "align": align,
+        "spacing": spacing,
+        "style": style,
+        "properties": {},
+    }
+
+    if responsive is False:
+        model["responsive"] = responsive
 
     return {
-        "model": {
-            "id": id,
-            "children": children,
-            "direction": direction,
-            "justify": justify,
-            "align": align,
-            "spacing": spacing,
-            "style": style,
-            "properties": {},
-        },
+        "model": model,
         "hooks": None,
         "type": TYPE.LAYOUT_STACK,
         "interactionType": INTERACTION_TYPE.LAYOUT,
@@ -78,6 +83,7 @@ def layout_row(
     justify: LAYOUT_JUSTIFY = LAYOUT_JUSTIFY_DEFAULT,
     align: LAYOUT_ALIGN = LAYOUT_ALIGN_DEFAULT,
     spacing: LAYOUT_SPACING = LAYOUT_SPACING_DEFAULT,
+    responsive: bool = True,
     style: Union[ComponentStyle, None] = None
 ) -> ComponentReturn:
     """A flexible container for arranging and styling its children in a horizontal row. For example:
@@ -94,9 +100,10 @@ def layout_row(
     - `children`: The components to be arranged by the stack. Can be a single component or a list of components.
 
     Optional keyword arguments:
-    - `justify`: Main-axis alignment of child components. Defaults to `start`.
-    - `align`: Cross-axis alignment of child components. Defaults to `start`.
+    - `justify`: Main-axis alignment of child components. Options: `start`, `end`, `center`, `between`, `around`, `evenly`. Defaults to `start`.
+    - `align`: Cross-axis alignment of child components. Options: `start`, `end`, `center`, `stretch`, `baseline`. Defaults to `start`.
     - `spacing`: Spacing between child components. Defaults to `16px`.
+    - `responsive`: Whether the container should automatically adjust to a vertical layout on mobile devices. Defaults to `True`.
     - `style`: CSS styles object applied directly to the container HTML element. Defaults to `None`.
 
     Returns a configured container component with the provided children.
@@ -110,6 +117,7 @@ def layout_row(
         justify=justify,
         align=align,
         spacing=spacing,
+        responsive=responsive,
         style=style,
     )
 
@@ -119,45 +127,30 @@ def layout_distributed_row(
     *,
     align: LAYOUT_ALIGN = "center",
     spacing: LAYOUT_SPACING = LAYOUT_SPACING_DEFAULT,
+    responsive: bool = True,
     style: Union[ComponentStyle, None] = None
 ) -> ComponentReturn:
-    """A flexible container that distributes its children evenly in a row.
+    """A flexible container that distributes its children evenly in a row. Great for section headers with a title and action buttons.
 
-    ## Documentation
-    https://docs.composehq.com/components/layout/distributed-row
-
-    ## Parameters
-    #### children
-        - `Component` | `List[Component]`
-        - Required
-        - Child components to be distributed in the row.
-
-    #### align
-        - `'start' | 'end' | 'center' | 'stretch' | 'baseline'`
-        - Optional
-        - Cross-axis alignment of child components. Follows CSS flexbox `align-items`. Defaults to "center".
-
-    #### spacing
-        - `str`
-        - Optional
-        - Spacing between child components. Defaults to `16px`.
-
-    #### style
-        - `dict`
-        - Optional
-        - CSS styles object to directly style the row HTML element.
-
-    ## Returns
-    The configured distributed row component.
-
-    ## Example
-    >>> ui.distributed_row(
+    >>> page.add(lambda: ui.distributed_row(
     ...     [
-    ...         ui.text("Title"),
-    ...         ui.button("action", label="Action"),
-    ...     ],
-    ...     align="center"
-    ... )
+    ...         ui.header("Users"),
+    ...         ui.button("Add user"),
+    ...     ]
+    ... ))
+
+    Required arguments:
+    - `children`: The components to be distributed by the row. Can be a single component or a list of components.
+
+    Optional keyword arguments:
+    - `align`: Cross-axis alignment of child components. Options: `start`, `end`, `center`, `stretch`, `baseline`. Defaults to `center`.
+    - `spacing`: Spacing between child components. Defaults to `16px`.
+    - `responsive`: Whether the container should automatically adjust to a vertical layout on mobile devices. Defaults to `True`.
+    - `style`: CSS styles object applied directly to the container HTML element. Defaults to `None`.
+
+    Returns a configured distributed row component with the provided children.
+
+    Read the full documentation: https://docs.composehq.com/components/layout/distributed-row
     """
     return layout_stack(
         children,
@@ -165,6 +158,7 @@ def layout_distributed_row(
         justify="between",
         align=align,
         spacing=spacing,
+        responsive=responsive,
         style=style,
     )
 
@@ -176,55 +170,32 @@ def layout_card(
     justify: LAYOUT_JUSTIFY = LAYOUT_JUSTIFY_DEFAULT,
     align: LAYOUT_ALIGN = LAYOUT_ALIGN_DEFAULT,
     spacing: LAYOUT_SPACING = LAYOUT_SPACING_DEFAULT,
+    responsive: bool = True,
     style: Union[ComponentStyle, None] = None
 ) -> ComponentReturn:
-    """A flexible container that renders its children inside a card UI.
+    """A flexible container that renders its children inside a card UI. Great for organizing content.
 
-    ## Documentation
-    https://docs.composehq.com/components/layout/card
-
-    ## Parameters
-    #### children
-        - `Component` | `List[Component]`
-        - Required
-        - Child components to be rendered inside the card.
-
-    #### direction
-        - `'vertical' | 'vertical-reverse' | 'horizontal' | 'horizontal-reverse'`
-        - Optional
-        - Direction of child components. Follows CSS flexbox `flex-direction`. Defaults to "vertical".
-
-    #### justify
-        - `'start' | 'end' | 'center' | 'between' | 'around' | 'evenly'`
-        - Optional
-        - Main-axis alignment of child components. Follows CSS flexbox `justify-content`. Defaults to "start".
-
-    #### align
-        - `'start' | 'end' | 'center' | 'stretch' | 'baseline'`
-        - Optional
-        - Cross-axis alignment of child components. Follows CSS flexbox `align-items`. Defaults to "start".
-
-    #### spacing
-        - `str`
-        - Optional
-        - Spacing between child components. Defaults to `16px`.
-
-    #### style
-        - `dict`
-        - Optional
-        - CSS styles object to directly style the card HTML element.
-
-    ## Returns
-    The configured card component.
-
-    ## Example
-    >>> ui.card(
+    >>> page.add(lambda: ui.card(
     ...     [
-    ...         ui.header("Card Title"),
-    ...         ui.text("Card content goes here"),
-    ...     ],
-    ...     spacing="24px"
-    ... )
+    ...         ui.header("User details"),
+    ...         ui.json(user["data"]),
+    ...     ]
+    ... ))
+
+    Required arguments:
+    - `children`: The components to be rendered inside the card. Can be a single component or a list of components.
+
+    Optional keyword arguments:
+    - `direction`: Direction of child components. Options: `vertical`, `vertical-reverse`, `horizontal`, `horizontal-reverse`. Defaults to `vertical`.
+    - `justify`: Main-axis alignment of child components. Options: `start`, `end`, `center`, `between`, `around`, `evenly`. Defaults to `start`.
+    - `align`: Cross-axis alignment of child components. Options: `start`, `end`, `center`, `stretch`, `baseline`. Defaults to `start`.
+    - `spacing`: Spacing between child components. Defaults to `16px`.
+    - `responsive`: Whether the container should automatically adjust to a vertical layout on mobile devices. Defaults to `True`.
+    - `style`: CSS styles object applied directly to the container HTML element. Defaults to `None`.
+
+    Returns a configured card component with the provided children.
+
+    Read the full documentation: https://docs.composehq.com/components/layout/card
     """
 
     stack = layout_stack(
@@ -233,6 +204,7 @@ def layout_card(
         justify=justify,
         align=align,
         spacing=spacing,
+        responsive=responsive,
         style=style,
     )
 
@@ -253,6 +225,7 @@ def layout_form(
     justify: LAYOUT_JUSTIFY = LAYOUT_JUSTIFY_DEFAULT,
     align: LAYOUT_ALIGN = LAYOUT_ALIGN_DEFAULT,
     spacing: LAYOUT_SPACING = LAYOUT_SPACING_DEFAULT,
+    responsive: bool = True,
     style: Union[ComponentStyle, None] = None,
     clear_on_submit: bool = False,
     hide_submit_button: bool = False,
@@ -267,71 +240,6 @@ def layout_form(
 ) -> ComponentReturn:
     """Creates a form component that groups child components into a single form.
 
-    ## Documentation
-    https://docs.composehq.com/components/layout/form
-
-    ## Parameters
-    #### id
-        - `str`
-        - Required
-        - Unique identifier for the form.
-
-    #### children
-        - `Component` | `List[Component]`
-        - Required
-        - Child components to be grouped into the form.
-
-    #### direction
-        - `'vertical' | 'vertical-reverse' | 'horizontal' | 'horizontal-reverse'`
-        - Optional
-        - Direction of child components. Follows CSS flexbox `flex-direction`. Defaults to "vertical".
-
-    #### justify
-        - `'start' | 'end' | 'center' | 'between' | 'around' | 'evenly'`
-        - Optional
-        - Main-axis alignment of child components. Follows CSS flexbox `justify-content`. Defaults to "start".
-
-    #### align
-        - `'start' | 'end' | 'center' | 'stretch' | 'baseline'`
-        - Optional
-        - Cross-axis alignment of child components. Follows CSS flexbox `align-items`. Defaults to "start".
-
-    #### spacing
-        - `str`
-        - Optional
-        - Spacing between child components. Defaults to `16px`.
-
-    #### style
-        - `dict`
-        - Optional
-        - CSS styles object to directly style the form HTML element.
-
-    #### clear_on_submit
-        - `bool`
-        - Optional
-        - Clear the form back to its initial state after submission. Defaults to `False`.
-
-    #### hide_submit_button
-        - `bool`
-        - Optional
-        - Hide the form submit button. Defaults to `False`.
-
-    #### validate
-        - `Callable[dict, str | None]`
-        - Optional
-        - Custom validation function to validate the form inputs. Return `None` if valid, or a string error message if invalid.
-
-    #### on_submit
-        - `Callable[dict, None]`
-        - Optional
-        - Function to be called when the form is submitted.
-
-
-    ## Returns
-    The configured form component.
-
-
-    ## Example
     >>> def handle_submit(form: Dict[str, Any]):
     ...     print(f"Name: {form['name']}, Email: {form['email']}")
     ...
@@ -343,6 +251,26 @@ def layout_form(
     ...     ],
     ...     on_submit=handle_submit
     ... )
+
+    Required arguments:
+    - `id`: Unique identifier for the form.
+    - `children`: Child components to be grouped into the form.
+
+    Optional keyword arguments:
+    - `on_submit`: Function to be called when the form is submitted. Passes the form data as a dictionary.
+    - `validate`: Supply a custom validation function. Passes the form data as a dictionary. Return `None` if valid, or a string error message if invalid.
+    - `clear_on_submit`: Clear the form back to its initial state after submission. Defaults to `False`.
+    - `hide_submit_button`: Hide the form submit button. Defaults to `False`.
+    - `direction`: Direction of child components. Options: `vertical`, `vertical-reverse`, `horizontal`, `horizontal-reverse`. Defaults to `vertical`.
+    - `justify`: Main-axis alignment of child components. Options: `start`, `end`, `center`, `between`, `around`, `evenly`. Defaults to `start`.
+    - `align`: Cross-axis alignment of child components. Options: `start`, `end`, `center`, `stretch`, `baseline`. Defaults to `start`.
+    - `spacing`: Spacing between child components. Defaults to `16px`.
+    - `responsive`: Whether the container should automatically adjust to a vertical layout on mobile devices. Defaults to `True`.
+    - `style`: CSS styles object applied directly to the container HTML element. Defaults to `None`.
+
+    Returns a configured form component.
+
+    Read the full documentation: https://docs.composehq.com/components/layout/form
     """
 
     model_properties = {
@@ -354,17 +282,22 @@ def layout_form(
     if hide_submit_button:
         model_properties["hideSubmitButton"] = hide_submit_button
 
+    model: Dict[str, Any] = {
+        "id": id,
+        "children": children,
+        "direction": direction,
+        "justify": justify,
+        "align": align,
+        "spacing": spacing,
+        "style": style,
+        "properties": model_properties,
+    }
+
+    if responsive is False:
+        model["responsive"] = responsive
+
     return {
-        "model": {
-            "id": id,
-            "children": children,
-            "direction": direction,
-            "justify": justify,
-            "align": align,
-            "spacing": spacing,
-            "style": style,
-            "properties": model_properties,
-        },
+        "model": model,
         "hooks": {
             "validate": validate,
             "onSubmit": on_submit,

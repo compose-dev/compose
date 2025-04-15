@@ -1,7 +1,7 @@
 {
   "name": "@composehq/sdk",
   "description": "The open-source SDK for building custom internal tools.",
-  "version": "0.26.7",
+  "version": "0.26.8",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",

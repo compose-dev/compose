@@ -63,11 +63,47 @@ interface BaseWithLayoutInteraction<TChildren extends UI.BaseGeneric.Children>
    * be applied to the root element of the component.
    */
   style: UI.Components.All["model"]["style"];
+  /**
+   * The children to be arranged by the component. Can be a single component or
+   * a list of components.
+   */
   children: TChildren;
+  /**
+   * The direction to arrange the children. Options:
+   * - `vertical`
+   * - `vertical-reverse`
+   * - `horizontal`
+   * - `horizontal-reverse`
+   */
   direction: UI.Components.AllWithLayoutInteraction["model"]["direction"];
+  /**
+   * Main-axis alignment of the child components. Options:
+   * - `start`
+   * - `end`
+   * - `center`
+   * - `between`
+   * - `around`
+   * - `evenly`
+   */
   justify: UI.Components.AllWithLayoutInteraction["model"]["justify"];
+  /**
+   * Cross-axis alignment of the child components. Options:
+   * - `start`
+   * - `end`
+   * - `center`
+   * - `baseline`
+   * - `stretch`
+   */
   align: UI.Components.AllWithLayoutInteraction["model"]["align"];
+  /**
+   * Spacing between child components. Defaults to `16px`.
+   */
   spacing: UI.Components.AllWithLayoutInteraction["model"]["spacing"];
+  /**
+   * Whether the component should automatically adjust to a vertical layout
+   * on mobile devices. Defaults to `true`.
+   */
+  responsive: UI.Components.AllWithLayoutInteraction["model"]["responsive"];
 }
 
 interface BaseWithPageInteraction extends Base {}

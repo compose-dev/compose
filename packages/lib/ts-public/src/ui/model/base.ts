@@ -71,6 +71,7 @@ export interface BaseWithLayoutInteraction<
     | "160px"
     | (`${number}px` & {});
   appearance?: LayoutAppearance.Type;
+  responsive?: boolean;
 }
 
 export interface BaseWithPageInteraction<TId extends BaseGeneric.Id>

@@ -164,25 +164,63 @@ function Component({
     const justify = component.model.justify || "start";
     const align = component.model.align || "start";
 
+    // The component is not responsive only if the responsive property is
+    // explicitly set to false. All other cases (undefined, null, true) are
+    // assumed to be responsive.
+    const responsive = !(component.model.responsive === false);
+    const isResponsiveForwardRow = direction === "horizontal" && responsive;
+    const isResponsiveReverseRow =
+      direction === "horizontal-reverse" && responsive;
+    const isResponsiveRow = isResponsiveForwardRow || isResponsiveReverseRow;
+
     const className = classNames("flex c-container max-w-full w-full", {
+      /*********************
+       * BASE CLASSES
+       *********************/
       "c-manual-width": !useDefaultWidth,
       "c-manual-height": !useDefaultHeight,
-      "flex-row c-row": direction === "horizontal",
-      "flex-col c-stack": direction === "vertical",
-      "flex-row-reverse c-row": direction === "horizontal-reverse",
-      "flex-col-reverse c-stack": direction === "vertical-reverse",
+      card: component.model.appearance === UI.LayoutAppearance.TYPE.CARD,
+
+      /*********************
+       * DIRECTION CLASSES
+       *********************/
+      // Non-responsive rows are always horizontal
+      "flex-row c-row": direction === "horizontal" && !responsive,
+      "flex-row-reverse c-row":
+        direction === "horizontal-reverse" && !responsive,
+      // Stacks are always vertical. Responsive rows are vertical on mobile.
+      "flex-col c-stack": direction === "vertical" || isResponsiveForwardRow,
+      "flex-col-reverse c-stack":
+        direction === "vertical-reverse" || isResponsiveReverseRow,
+      // Responsive rows are horizontal on tablet and desktop.
+      "sm:flex-row sm:c-row": isResponsiveForwardRow,
+      "sm:flex-row-reverse sm:c-row": isResponsiveReverseRow,
+
+      /*********************
+       * JUSTIFY CLASSES
+       *********************/
       "justify-center": justify === "center",
       "justify-start": justify === "start",
       "justify-end": justify === "end",
       "justify-between": justify === "between",
       "justify-around": justify === "around",
       "justify-evenly": justify === "evenly",
-      "items-center": align === "center",
-      "items-start": align === "start",
-      "items-end": align === "end",
-      "items-baseline": align === "baseline",
-      "items-stretch": align === "stretch",
-      card: component.model.appearance === UI.LayoutAppearance.TYPE.CARD,
+
+      /*********************
+       * ALIGN CLASSES
+       *********************/
+      // Responsive row layout switch to start alignment on mobile.
+      "items-start": align === "start" || isResponsiveRow,
+      // Switch back to normal alignment on tablet and desktop for responsive row layouts.
+      "sm:items-center": align === "center" && isResponsiveRow,
+      "sm:items-end": align === "end" && isResponsiveRow,
+      "sm:items-baseline": align === "baseline" && isResponsiveRow,
+      "sm:items-stretch": align === "stretch" && isResponsiveRow,
+      // Horizontal layouts that are non-responsive should always respect the alignment.
+      "items-center": align === "center" && !isResponsiveRow,
+      "items-end": align === "end" && !isResponsiveRow,
+      "items-baseline": align === "baseline" && !isResponsiveRow,
+      "items-stretch": align === "stretch" && !isResponsiveRow,
     });
 
     const getChildren = (
