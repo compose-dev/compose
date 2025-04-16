@@ -324,6 +324,9 @@ function useTheme() {
     setThemeColor("--brand-error-border");
     setThemeColor("--brand-success-border");
     setThemeColor("--brand-warning-border");
+
+    setThemeColor("--brand-green-tag-text");
+    setThemeColor("--brand-red-tag-text");
   }, []);
 
   const updatePreference = useCallback(

@@ -36,6 +36,7 @@ class TYPE(str, Enum):
     DISPLAY_MARKDOWN = "display-markdown"
     DISPLAY_PDF = "display-pdf"
     DISPLAY_DIVIDER = "dd"
+    DISPLAY_STATISTIC = "ds"
     # A special type that's used to represent when a render returns None
     DISPLAY_NONE = "display-none"
 

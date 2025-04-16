@@ -59,6 +59,7 @@ const DOC_TYPE = {
   "components-display-pdf-horizontal-scroll":
     "components-display-pdf-horizontal-scroll",
   "components-display-pdf-annotation": "components-display-pdf-annotation",
+  "components-display-statistic": "components-display-statistic",
   "components-dynamic-condition": "components-dynamic-cond",
   "page-actions-confirm-modal": "page-actions-confirm-modal",
   "page-actions-modal": "page-actions-modal",

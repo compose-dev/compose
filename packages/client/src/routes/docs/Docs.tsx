@@ -217,6 +217,14 @@ function Docs() {
     );
   }
 
+  if (type === DOC_TYPE["components-display-statistic"]) {
+    return (
+      <BrowserWrapper>
+        <Components.Display.Statistic />
+      </BrowserWrapper>
+    );
+  }
+
   if (type === DOC_TYPE["components-display-markdown"]) {
     return (
       <BrowserWrapper>

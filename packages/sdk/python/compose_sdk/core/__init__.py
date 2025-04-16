@@ -57,6 +57,7 @@ from .ui import (
     TablePagination,
     TableSelectionReturn,
     Stale,
+    NumberFormat,
 )
 from .json import JSON
 from .compress import Compress
@@ -140,4 +141,5 @@ __all__ = [
     "prettify_key",
     "validate_audit_log",
     "RateLimiter",
+    "NumberFormat",
 ]

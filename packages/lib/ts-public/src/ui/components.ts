@@ -346,6 +346,15 @@ export interface DisplayDivider<TId extends BaseGeneric.Id = BaseGeneric.Id>
   interactionType: typeof INTERACTION_TYPE.DISPLAY;
 }
 
+export interface DisplayStatistic<TId extends BaseGeneric.Id = BaseGeneric.Id>
+  extends Base {
+  model: Model.DisplayInteraction.Statistic<TId>;
+  output: Output.DisplayStatistic;
+  hooks: Hooks.DisplayStatistic;
+  type: typeof TYPE.DISPLAY_STATISTIC;
+  interactionType: typeof INTERACTION_TYPE.DISPLAY;
+}
+
 export interface LayoutStack<
   TId extends BaseGeneric.Id = BaseGeneric.Id,
   TChildren extends BaseGeneric.Children = BaseGeneric.Children,
@@ -413,6 +422,7 @@ export type All<
   | DisplayMarkdown<TId>
   | DisplayPdf<TId>
   | DisplayDivider<TId>
+  | DisplayStatistic<TId>
   | LayoutStack<TId, TChildren>
   | LayoutForm<TId, TChildren>;
 

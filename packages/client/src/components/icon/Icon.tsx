@@ -26,6 +26,8 @@ import {
   IconLayoutSidebarRight,
   IconClipboardText,
   IconSearch,
+  IconTrendingUp,
+  IconTrendingDown,
 } from "@tabler/icons-react";
 
 const ICON_NAME = {
@@ -75,6 +77,8 @@ const ICON_NAME = {
   javascript: "javascript",
   python: "python",
   "sidebar-right": "sidebar-right",
+  "trending-up": "trending-up",
+  "trending-down": "trending-down",
 } as const;
 
 const SIZE = {
@@ -116,6 +120,8 @@ const ICON_COLOR = {
   "brand-error-heavy": "var(--brand-error-heavy)",
   "brand-bg": "var(--brand-bg-page)",
   "brand-primary": "var(--brand-primary)",
+  "brand-green-tag-text": "var(--brand-green-tag-text)",
+  "brand-red-tag-text": "var(--brand-red-tag-text)",
   "yellow-500": "#eab308",
 } as const;
 
@@ -144,6 +150,26 @@ function Icon({
   if (name === ICON_NAME["sidebar-right"]) {
     return (
       <IconLayoutSidebarRight
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME["trending-up"]) {
+    return (
+      <IconTrendingUp
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME["trending-down"]) {
+    return (
+      <IconTrendingDown
         size={16 * SIZE_MULTIPLIER[size]}
         color={ICON_COLOR[color]}
         strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}

@@ -162,6 +162,9 @@ export type DisplayDivider<TId extends BaseGeneric.Id = BaseGeneric.Id> = Omit<
   OmitKeys
 >;
 
+export type DisplayStatistic<TId extends BaseGeneric.Id = BaseGeneric.Id> =
+  Omit<Components.DisplayStatistic<TId>, OmitKeys>;
+
 export type LayoutStack<
   TId extends BaseGeneric.Id = BaseGeneric.Id,
   TChildren extends BaseGeneric.Children = BaseGeneric.Children,

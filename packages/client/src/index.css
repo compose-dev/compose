@@ -90,6 +90,11 @@
   --DARK--brand-success-btn-bg: #16a34a; /* green 600 */
   --DARK--brand-success-btn-bg-hover: #22c55e; /* green 500 */
 
+  --LIGHT--brand-green-tag-text: #052e16; /* green 950 */
+  --LIGHT--brand-red-tag-text: #450a0a; /* red 950 */
+  --DARK--brand-green-tag-text: rgba(255, 255, 255, 0.82);
+  --DARK--brand-red-tag-text: rgba(255, 255, 255, 0.82);
+
   --brand-neutral-text: var(--LIGHT--brand-neutral-text);
   --text-color: var(--brand-neutral-text);
 
@@ -132,6 +137,9 @@
   --brand-success-heavy: var(--LIGHT--brand-success-heavy);
   --brand-success-btn-bg: var(--LIGHT--brand-success-btn-bg);
   --brand-success-btn-bg-hover: var(--LIGHT--brand-success-btn-bg-hover);
+
+  --brand-green-tag-text: var(--LIGHT--brand-green-tag-text);
+  --brand-red-tag-text: var(--LIGHT--brand-red-tag-text);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -180,6 +188,9 @@
     --brand-success-heavy: var(--DARK--brand-success-heavy);
     --brand-success-btn-bg: var(--DARK--brand-success-btn-bg);
     --brand-success-btn-bg-hover: var(--DARK--brand-success-btn-bg-hover);
+
+    --brand-green-tag-text: var(--DARK--brand-green-tag-text);
+    --brand-red-tag-text: var(--DARK--brand-red-tag-text);
   }
 }
 
@@ -194,29 +205,48 @@
     @apply !bg-brand-page;
     @apply !text-brand-neutral;
   }
-  h1 {
+  .h1 {
     @apply text-5xl;
     @apply font-medium;
   }
-  h2 {
+  .h2 {
     @apply text-3xl;
     @apply font-medium;
   }
-  h3 {
+  .h3 {
     @apply text-2xl;
     @apply font-medium;
   }
-  h4 {
+  .h4 {
     @apply text-xl;
     @apply font-medium;
   }
-  h5 {
+  .h5 {
     @apply text-lg;
     @apply font-semibold;
   }
-  h6 {
+  .h6 {
     @apply text-sm;
     @apply font-semibold;
+  }
+
+  h1 {
+    @apply h1;
+  }
+  h2 {
+    @apply h2;
+  }
+  h3 {
+    @apply h3;
+  }
+  h4 {
+    @apply h4;
+  }
+  h5 {
+    @apply h5;
+  }
+  h6 {
+    @apply h6;
   }
 
   ::placeholder {
@@ -279,13 +309,15 @@
   }
 
   .red-tag {
-    @apply bg-red-200 text-red-950;
+    @apply bg-red-200;
+    color: var(--brand-red-tag-text);
   }
   .orange-tag {
     @apply bg-orange-200 text-orange-950;
   }
   .green-tag {
-    @apply bg-green-200 text-green-950;
+    @apply bg-green-200;
+    color: var(--brand-green-tag-text);
   }
   .blue-tag {
     @apply bg-blue-200 text-blue-950;
@@ -313,7 +345,6 @@
 
   .theme-dark .red-tag {
     background-color: hsla(0, 66%, 35%, 0.5);
-    color: rgba(255, 255, 255, 0.82);
   }
   .theme-dark .orange-tag {
     background-color: #854c1d;
@@ -321,7 +352,6 @@
   }
   .theme-dark .green-tag {
     background-color: hsla(142, 66%, 29%, 0.5);
-    color: rgba(255, 255, 255, 0.82);
   }
   .theme-dark .blue-tag {
     background-color: hsla(210, 66%, 35%, 0.5);

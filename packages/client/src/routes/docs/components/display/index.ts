@@ -13,6 +13,7 @@ import PDF from "./PDF";
 import PDFDefaultScroll from "./PDFDefaultScroll";
 import PDFHorizontalScroll from "./PDFHorizontalScroll";
 import PDFAnnotation from "./PDFAnnotation";
+import Statistic from "./Statistic";
 
 export {
   Text,
@@ -30,4 +31,5 @@ export {
   PDFDefaultScroll,
   PDFHorizontalScroll,
   PDFAnnotation,
+  Statistic,
 };

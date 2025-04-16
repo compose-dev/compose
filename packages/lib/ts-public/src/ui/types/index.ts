@@ -19,6 +19,7 @@ export * as Chart from "./chart";
 export * as Factory from "./factory";
 export * as BaseInputValue from "./baseInputValue";
 export * as BaseGeneric from "./baseGeneric";
+export * as NumberFormat from "./numberFormat";
 
 export type OmitUnion<T, K extends keyof T> = T extends any
   ? Omit<T, K>

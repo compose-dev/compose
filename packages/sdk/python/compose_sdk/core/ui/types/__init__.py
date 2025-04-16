@@ -53,6 +53,7 @@ from .appearance import TextColor, DividerColor
 from .size import HeaderSize, TextSize
 from .stale import Stale
 from .chart import *
+from .number_format import NumberFormat
 
 __all__ = [
     "INTERACTION_TYPE",
@@ -107,4 +108,5 @@ __all__ = [
     "TablePagination",
     "TableSelectionReturn",
     "Stale",
+    "NumberFormat",
 ]

@@ -69,6 +69,8 @@ export type DisplayPdf = Pick<Components.DisplayPdf, PickKeys>;
 
 export type DisplayDivider = Pick<Components.DisplayDivider, PickKeys>;
 
+export type DisplayStatistic = Pick<Components.DisplayStatistic, PickKeys>;
+
 export type LayoutStack = Pick<Components.LayoutStack, PickKeys>;
 
 export type LayoutForm = Pick<Components.LayoutForm, PickKeys>;

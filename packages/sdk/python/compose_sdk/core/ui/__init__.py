@@ -51,6 +51,7 @@ from .types import (
     TablePagination,
     TableSelectionReturn,
     Stale,
+    NumberFormat,
 )
 from .componentGenerators import ComponentReturn
 from .constants import Nullable
@@ -113,4 +114,5 @@ __all__ = [
     "TableSelectionReturn",
     "Stale",
     "ComponentReturn",
+    "NumberFormat",
 ]

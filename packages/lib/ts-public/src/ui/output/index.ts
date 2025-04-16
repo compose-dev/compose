@@ -155,6 +155,8 @@ export type DisplayPdf = null;
 
 export type DisplayDivider = null;
 
+export type DisplayStatistic = null;
+
 export type LayoutStack = null;
 
 export type LayoutForm = null;
@@ -191,6 +193,7 @@ export type All =
   | DisplayMarkdown
   | DisplayPdf
   | DisplayDivider
+  | DisplayStatistic
   | LayoutStack
   | LayoutForm;
 

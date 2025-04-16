@@ -7,6 +7,8 @@ import RenderText from "./RenderText";
 import Json from "~/components/json";
 import { PDFPreview } from "~/components/pdf-preview";
 import { classNames } from "~/utils/classNames";
+import { Statistic } from "~/components/statistic";
+import { useShallow } from "zustand/react/shallow";
 
 function DisplayInteractionComponent({
   componentId,
@@ -17,6 +19,23 @@ function DisplayInteractionComponent({
 }) {
   const component = appStore.use(
     (state) => state.flattenedModel[renderId][componentId]
+  );
+
+  const componentNonWidthStyles = appStore.use(
+    useShallow((state) => {
+      const style = state.flattenedModel[renderId][componentId].model.style;
+
+      if (!style) {
+        return {};
+      } else {
+        return {
+          ...style,
+          width: undefined,
+          minWidth: undefined,
+          maxWidth: undefined,
+        };
+      }
+    })
   );
 
   if (component.type === UI.TYPE.DISPLAY_TEXT) {
@@ -119,10 +138,6 @@ function DisplayInteractionComponent({
     );
   }
 
-  if (component.type === UI.TYPE.DISPLAY_SPINNER) {
-    return <Spinner text={component.model.properties.text} />;
-  }
-
   if (component.type === UI.TYPE.DISPLAY_CODE) {
     return (
       <Code
@@ -207,6 +222,32 @@ function DisplayInteractionComponent({
         scroll={component.model.properties.scroll}
       />
     );
+  }
+
+  if (component.type === UI.TYPE.DISPLAY_STATISTIC) {
+    return (
+      <Statistic
+        label={component.model.properties.label}
+        value={component.model.properties.value}
+        description={component.model.properties.description}
+        format={component.model.properties.format}
+        labelColor={component.model.properties.labelColor}
+        valueColor={component.model.properties.valueColor}
+        descriptionColor={component.model.properties.descriptionColor}
+        decimals={component.model.properties.decimals}
+        delta={component.model.properties.delta}
+        deltaDecimals={component.model.properties.deltaDecimals}
+        deltaFormat={component.model.properties.deltaFormat}
+        isPositiveDelta={component.model.properties.isPositiveDelta}
+        prefix={component.model.properties.prefix}
+        suffix={component.model.properties.suffix}
+        style={componentNonWidthStyles}
+      />
+    );
+  }
+
+  if (component.type === UI.TYPE.DISPLAY_SPINNER) {
+    return <Spinner text={component.model.properties.text} />;
   }
 
   return null;

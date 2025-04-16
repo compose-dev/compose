@@ -36,6 +36,7 @@ interface UIHandler {
   cond: typeof Generator.dynamic.cond;
   barChart: typeof Generator.button.barChart;
   forEach: typeof Generator.dynamic.forEach;
+  statistic: typeof Generator.display.statistic;
 }
 
 const ui: UIHandler = {
@@ -67,6 +68,7 @@ const ui: UIHandler = {
   markdown: Generator.display.markdown,
   pdf: Generator.display.pdf,
   divider: Generator.display.divider,
+  statistic: Generator.display.statistic,
 
   // Button
   button: Generator.button.default,

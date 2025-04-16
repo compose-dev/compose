@@ -31,6 +31,7 @@ import {
   BaseInputValue,
   BaseGeneric,
   DateTime,
+  NumberFormat,
 } from "./types";
 
 export {
@@ -66,4 +67,5 @@ export {
   BaseInputValue,
   BaseGeneric,
   DateTime,
+  NumberFormat,
 };

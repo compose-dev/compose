@@ -201,5 +201,6 @@ export {
   formatNumber,
   isValidJSON,
   sortAlphabetically,
+  addThousandsSeparator,
   SANS_SERIF_14_CHAR_WIDTH,
 };

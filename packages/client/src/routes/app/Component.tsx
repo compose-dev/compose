@@ -364,6 +364,7 @@ function Component({
       component.type === UI.TYPE.DISPLAY_JSON ||
       component.type === UI.TYPE.DISPLAY_MARKDOWN ||
       component.type === UI.TYPE.DISPLAY_PDF ||
+      component.type === UI.TYPE.DISPLAY_STATISTIC ||
       (component.type === UI.TYPE.DISPLAY_DIVIDER &&
         component.model.properties.orientation !== "vertical");
 
@@ -385,7 +386,13 @@ function Component({
             component.type === UI.TYPE.DISPLAY_DIVIDER &&
             component.model.properties.orientation === "vertical",
         })}
-        style={componentStyles}
+        style={
+          // Eventually we'll want to transition to the new "componentWidthStyles"
+          // format for all components.
+          component.type === UI.TYPE.DISPLAY_STATISTIC
+            ? componentWidthStyles
+            : componentStyles
+        }
       >
         <DisplayInteractionComponent
           componentId={componentId}
@@ -438,7 +445,10 @@ function Component({
     }
 
     return (
-      <div className="animate-slide-fade-in" style={componentWidthStyles}>
+      <div
+        className="animate-slide-fade-in min-w-fit"
+        style={componentWidthStyles}
+      >
         <Button
           onClick={() => {
             if (component.model.properties.hasOnClickHook) {

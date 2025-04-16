@@ -6,6 +6,7 @@ import {
   Appearance,
   Size,
   BaseGeneric,
+  NumberFormat,
 } from "../types";
 
 export interface Text<TId extends BaseGeneric.Id>
@@ -116,5 +117,25 @@ export interface Divider<TId extends BaseGeneric.Id>
   properties: {
     orientation?: "horizontal" | "vertical";
     thickness?: "thin" | "medium" | "thick";
+  };
+}
+
+export interface Statistic<TId extends BaseGeneric.Id>
+  extends BaseWithDisplayInteraction<TId> {
+  properties: {
+    label: string;
+    value: number;
+    description?: string;
+    format?: NumberFormat.Option;
+    decimals?: number;
+    suffix?: string;
+    prefix?: string;
+    labelColor?: Appearance.Text;
+    valueColor?: Appearance.Text;
+    descriptionColor?: Appearance.Text;
+    delta?: number;
+    deltaFormat?: NumberFormat.Option;
+    deltaDecimals?: number;
+    isPositiveDelta?: boolean;
   };
 }
