@@ -1,5 +1,5 @@
 import base64
-from typing import Union, List, Literal, Dict, Any, Callable
+from typing import TypeVar, Union, List, Literal, Dict, Any, Callable
 import io
 import inspect
 
@@ -300,20 +300,23 @@ def display_divider(
     }
 
 
+TDelta = TypeVar("TDelta", int, float, str)
+
+
 def display_statistic(
     label: Union[str, None] = None,
-    value: Union[int, float, None] = None,
+    value: Union[int, float, str, None] = None,
     *,
     description: Union[str, None] = None,
     format: Union[NumberFormat, None] = None,
-    delta: Union[int, float, None] = None,
+    delta: Union[TDelta, None] = None,
     decimals: Union[int, None] = None,
     prefix: Union[str, None] = None,
     suffix: Union[str, None] = None,
     delta_format: Union[NumberFormat, None] = None,
     delta_decimals: Union[int, None] = None,
     is_positive_delta: Union[
-        bool, Callable[[], bool], Callable[[Union[int, float]], bool], None
+        bool, Callable[[], bool], Callable[[TDelta], bool], None
     ] = None,
     label_color: Union[TextColor, None] = None,
     value_color: Union[TextColor, None] = None,
@@ -337,7 +340,7 @@ def display_statistic(
 
     Required positional arguments:
     - `label`: The title for the statistic.
-    - `value`: The numeric value to display.
+    - `value`: The value to display.
 
     Optional keyword arguments:
     - `description`: Additional text description displayed below the value. Defaults to `None`.

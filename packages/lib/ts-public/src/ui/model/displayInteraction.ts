@@ -124,7 +124,7 @@ export interface Statistic<TId extends BaseGeneric.Id>
   extends BaseWithDisplayInteraction<TId> {
   properties: {
     label: string;
-    value: number;
+    value: number | string;
     description?: string;
     format?: NumberFormat.Option;
     decimals?: number;
@@ -133,7 +133,7 @@ export interface Statistic<TId extends BaseGeneric.Id>
     labelColor?: Appearance.Text;
     valueColor?: Appearance.Text;
     descriptionColor?: Appearance.Text;
-    delta?: number;
+    delta?: number | string;
     deltaFormat?: NumberFormat.Option;
     deltaDecimals?: number;
     isPositiveDelta?: boolean;

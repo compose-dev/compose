@@ -24,6 +24,29 @@ function roundWithoutPadding(number: number, decimals: number): string {
   return parseFloat(number.toFixed(decimals)).toString();
 }
 
+function countDecimals(number: number): number {
+  // Return 0 for non-numeric values, NaN, Infinity, or integers
+  if (
+    typeof number !== "number" ||
+    isNaN(number) ||
+    !isFinite(number) ||
+    Number.isInteger(number)
+  ) {
+    return 0;
+  }
+
+  // Convert to string and split by decimal point
+  const str = number.toString();
+  const decimalPart = str.split(".")[1];
+
+  // If there's no decimal part, return 0
+  if (!decimalPart) {
+    return 0;
+  }
+
+  return decimalPart.length;
+}
+
 /**
  * Corrects a number by removing trailing imprecision in its fractional part.
  *
@@ -66,4 +89,22 @@ function correctFloatingPoint(num: number): number {
   return correctedCandidate;
 }
 
-export { clamp, roundWithPadding, roundWithoutPadding, correctFloatingPoint };
+/**
+ * Return the number, or NaN.
+ */
+function convertFromString(num?: number | string): number {
+  if (num === undefined) {
+    return Number.NaN;
+  }
+
+  return typeof num === "string" ? parseFloat(num) : num;
+}
+
+export {
+  clamp,
+  roundWithPadding,
+  roundWithoutPadding,
+  correctFloatingPoint,
+  countDecimals,
+  convertFromString,
+};

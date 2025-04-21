@@ -4,27 +4,59 @@ import { u } from "@compose/ts";
 import Icon from "../icon";
 
 function formatValue(
-  value: number,
+  value: number | string,
   format?: UI.NumberFormat.Option,
-  decimals?: number
+  decimals?: number,
+  absolute?: boolean
 ) {
-  function getRoundedNumber() {
+  function getRoundedNumber(val: number) {
     if (format === UI.NumberFormat.OPTION.PERCENT) {
       if (decimals === undefined) {
-        return u.number.correctFloatingPoint(value * 100);
+        return u.number.correctFloatingPoint(val * 100);
       } else {
-        return u.number.roundWithoutPadding(value * 100, decimals);
+        return u.number.roundWithoutPadding(val * 100, decimals);
+      }
+    }
+
+    if (format === UI.NumberFormat.OPTION.CURRENCY) {
+      if (decimals === undefined) {
+        const corrected = u.number.correctFloatingPoint(val);
+
+        // if a currency number has one decimal, it's more normal
+        // to just return with a trailing 0.
+        if (u.number.countDecimals(corrected) === 1) {
+          return u.number.roundWithPadding(corrected, 2);
+        }
+
+        return corrected;
+      } else {
+        return u.number.roundWithoutPadding(val, decimals);
       }
     }
 
     if (decimals === undefined) {
-      return u.number.correctFloatingPoint(value);
+      return u.number.correctFloatingPoint(val);
     } else {
-      return u.number.roundWithoutPadding(value, decimals);
+      return u.number.roundWithoutPadding(val, decimals);
     }
   }
 
-  return u.string.addThousandsSeparator(getRoundedNumber());
+  function getFormattedNumber(val: number) {
+    const corrected = absolute ? Math.abs(val) : val;
+    return u.string.addThousandsSeparator(getRoundedNumber(corrected));
+  }
+
+  if (typeof value === "string") {
+    const parsed = parseFloat(value);
+
+    if (Number.isNaN(parsed)) {
+      return value;
+    }
+
+    return getFormattedNumber(parsed);
+  }
+
+  return getFormattedNumber(value);
 }
 
 function getFormattedSuffix(
@@ -57,16 +89,18 @@ function getFormattedPrefix(
   return undefined;
 }
 
-function getDeltaTrend(delta?: number, isPositiveDelta?: boolean) {
+function getDeltaTrend(delta?: number | string, isPositiveDelta?: boolean) {
   if (isPositiveDelta !== undefined) {
     return isPositiveDelta ? "up" : "down";
   }
 
-  if (delta === undefined || delta === 0) {
+  const parsed = u.number.convertFromString(delta);
+
+  if (Number.isNaN(parsed) || parsed === 0) {
     return "neutral";
   }
 
-  if (delta > 0) {
+  if (parsed > 0) {
     return "up";
   }
 
@@ -91,7 +125,7 @@ export default function Statistic({
   style,
 }: {
   label: string;
-  value: number;
+  value: number | string;
   description?: string;
   labelColor?: UI.Appearance.Text;
   valueColor?: UI.Appearance.Text;
@@ -100,7 +134,7 @@ export default function Statistic({
   decimals?: number;
   suffix?: string;
   prefix?: string;
-  delta?: number;
+  delta?: number | string;
   deltaDecimals?: number;
   deltaFormat?: UI.NumberFormat.Option;
   isPositiveDelta?: boolean;
@@ -112,7 +146,7 @@ export default function Statistic({
 
   const formattedDelta =
     delta !== undefined
-      ? formatValue(Math.abs(delta), deltaFormat, deltaDecimals)
+      ? formatValue(delta, deltaFormat, deltaDecimals, true)
       : undefined;
   const formattedDeltaSuffix =
     delta !== undefined ? getFormattedSuffix(deltaFormat) : undefined;
@@ -187,9 +221,15 @@ export default function Statistic({
           >
             <Icon
               name={
-                delta !== undefined && delta >= 0
-                  ? "trending-up"
-                  : "trending-down"
+                delta === undefined
+                  ? "trending-down"
+                  : typeof delta === "number"
+                    ? delta >= 0
+                      ? "trending-up"
+                      : "trending-down"
+                    : deltaTrend === "neutral" || deltaTrend === "up"
+                      ? "trending-up"
+                      : "trending-down"
               }
               color={
                 deltaTrend === "up"

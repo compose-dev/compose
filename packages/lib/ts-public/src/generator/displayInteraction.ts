@@ -370,7 +370,9 @@ function displayDivider(
   };
 }
 
-interface DisplayStatisticProperties extends BaseWithDisplayInteraction {
+interface DisplayStatisticProperties<
+  TDelta extends UI.Components.DisplayStatistic["model"]["properties"]["delta"],
+> extends BaseWithDisplayInteraction {
   /**
    * The label for the statistic.
    */
@@ -395,7 +397,7 @@ interface DisplayStatisticProperties extends BaseWithDisplayInteraction {
   /**
    * A numeric value representing change (will display with up/down indicators).
    */
-  delta: UI.Components.DisplayStatistic["model"]["properties"]["delta"];
+  delta: TDelta;
   /**
    * Round the value to a specific number of decimal places. By default, the value is not rounded.
    */
@@ -428,7 +430,7 @@ interface DisplayStatisticProperties extends BaseWithDisplayInteraction {
    */
   isPositiveDelta:
     | UI.Components.DisplayStatistic["model"]["properties"]["isPositiveDelta"]
-    | ((delta: number) => boolean);
+    | ((delta: TDelta) => boolean);
   /**
    * Color for the label text. Options:
    * - `text`
@@ -471,10 +473,9 @@ interface DisplayStatisticProperties extends BaseWithDisplayInteraction {
 }
 
 type RequiredDisplayStatisticFields = "label" | "value" | "id";
-type OptionalDisplayStatisticProperties = Omit<
-  DisplayStatisticProperties,
-  RequiredDisplayStatisticFields
->;
+type OptionalDisplayStatisticProperties<
+  TDelta extends UI.Components.DisplayStatistic["model"]["properties"]["delta"],
+> = Omit<DisplayStatisticProperties<TDelta>, RequiredDisplayStatisticFields>;
 
 /**
  * Display a well-formatted, highly-customizable statistic with configurable delta indicators, formatting, and colors.
@@ -517,10 +518,12 @@ type OptionalDisplayStatisticProperties = Omit<
  * @param {OptionalDisplayStatisticProperties["style"]} properties.style - CSS styles object applied directly to the outermost statistic HTML element.
  * @returns The configured statistic component.
  */
-function displayStatistic(
-  label: DisplayStatisticProperties["label"],
-  value: DisplayStatisticProperties["value"],
-  properties: Partial<OptionalDisplayStatisticProperties> = {}
+function displayStatistic<
+  TDelta extends UI.Components.DisplayStatistic["model"]["properties"]["delta"],
+>(
+  label: DisplayStatisticProperties<TDelta>["label"],
+  value: DisplayStatisticProperties<TDelta>["value"],
+  properties: Partial<OptionalDisplayStatisticProperties<TDelta>> = {}
 ): UI.OutputOmittedComponents.DisplayStatistic {
   const id = uuid();
 
