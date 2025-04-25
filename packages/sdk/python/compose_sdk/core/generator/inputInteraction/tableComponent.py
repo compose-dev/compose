@@ -17,6 +17,7 @@ from ...ui import (
     TablePagination,
     TableSelectionReturn,
     ComponentStyle,
+    TABLE_COLUMN_OVERFLOW,
 )
 from ..base import MULTI_SELECTION_MIN_DEFAULT, MULTI_SELECTION_MAX_DEFAULT
 
@@ -70,6 +71,7 @@ def _table(
     selection_return_type: TableSelectionReturn.TYPE = TableSelectionReturn.FULL,
     searchable: bool = True,
     paginate: bool = False,
+    overflow: Union[TABLE_COLUMN_OVERFLOW, None] = None,
 ) -> ComponentReturn:
 
     if not isinstance(initial_selected_rows, list):
@@ -107,7 +109,7 @@ def _table(
         "minSelections": min_selections,
         "maxSelections": max_selections,
         "allowSelect": allow_select,
-        "v": 2,
+        "v": 3,
     }
 
     if auto_paged or not searchable:
@@ -141,6 +143,9 @@ def _table(
         )
     )
 
+    if overflow is not None and overflow != "ellipsis":
+        model_properties["overflow"] = overflow
+
     return {
         "model": {
             "id": id,
@@ -170,6 +175,7 @@ def table(
     columns: Union[TableColumns, None] = None,
     actions: Union[TableActions, None] = None,
     label: Union[str, None] = None,
+    overflow: Union[TABLE_COLUMN_OVERFLOW, None] = None,
     required: bool = True,
     description: Union[str, None] = None,
     initial_selected_rows: List[int] = [],
@@ -188,7 +194,26 @@ def table(
     searchable: bool = True,
     paginate: bool = False,
 ) -> ComponentReturn:
-    """Creates a table component.
+    """A powerful and highly customizable table component. For example:
+
+    >>> data = [
+    ...     {"name": "John", "age": 30, "confirmed": True, "id": 1},
+    ...     {"name": "Jane", "age": 25, "confirmed": False, "id": 2},
+    ... ]
+    ...
+    ... page.add(lambda: ui.table(
+    ...     "users-table",
+    ...     data,
+    ...     columns=[
+    ...         "name",
+    ...         "age",
+    ...         {"key": "confirmed", "format": "boolean"},
+    ...     ],
+    ...     actions=[
+    ...         {"label": "Edit", "on_click": lambda row, idx: print(f"Editing row: {row} at index {idx}")},
+    ...         {"label": "Delete", "on_click": lambda row: print(f"Deleting row: {row}")},
+    ...     ]
+    ... ))
 
     ## Documentation
     https://docs.composehq.com/components/input/table
@@ -212,6 +237,15 @@ def table(
 
     #### label : `str`. Optional.
         Label text to display above the table.
+
+    #### overflow : `ellipsis` | `clip` | `dynamic`. Optional.
+        The overflow behavior of table cells. Options:
+
+        - `ellipsis`: Show ellipsis when the text overflows.
+        - `clip`: Clip the text.
+        - `dynamic`: Expand the cell height to fit the content.
+
+        Defaults to `ellipsis`.
 
     #### required : `bool`. Optional.
         Whether the table requires at least one row selection. Defaults to `True`.
@@ -248,27 +282,6 @@ def table(
 
     ## Returns
     The configured table component.
-
-
-    ## Example
-    >>> data = [
-    ...     {"name": "John", "age": 30, "confirmed": True, "id": 1},
-    ...     {"name": "Jane", "age": 25, "confirmed": False, "id": 2},
-    ... ]
-    ...
-    ... page.add(lambda: ui.table(
-    ...     "users-table",
-    ...     data,
-    ...     columns=[
-    ...         "name",
-    ...         "age",
-    ...         {"key": "confirmed", "format": "boolean"},
-    ...     ],
-    ...     actions=[
-    ...         {"label": "Edit", "on_click": lambda row, idx: print(f"Editing row: {row} at index {idx}")},
-    ...         {"label": "Delete", "on_click": lambda row: print(f"Deleting row: {row}")},
-    ...     ]
-    ... ))
     """
     return _table(
         id,
@@ -288,6 +301,7 @@ def table(
         selection_return_type=selection_return_type,
         searchable=searchable,
         paginate=paginate,
+        overflow=overflow,
     )
 
 
@@ -315,6 +329,7 @@ def dataframe(
     selection_return_type: TableSelectionReturn.TYPE = TableSelectionReturn.FULL,
     searchable: bool = True,
     paginate: bool = False,
+    overflow: Union[TABLE_COLUMN_OVERFLOW, None] = None,
 ) -> ComponentReturn:
 
     # Replace empty values in the dataframe with None
@@ -344,4 +359,5 @@ def dataframe(
         selection_return_type=selection_return_type,
         searchable=searchable,
         paginate=paginate,
+        overflow=overflow,
     )

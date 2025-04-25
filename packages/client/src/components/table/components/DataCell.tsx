@@ -76,11 +76,15 @@ function DataCell({
     if (column.format === UI.Table.COLUMN_FORMAT.boolean) {
       return (
         <RowCell
-          className={classNames({ "flex-1 min-w-48": !column.width })}
+          className={classNames({
+            "flex-1 min-w-48": !column.width,
+          })}
           style={
             column.width ? { width: column.width, minWidth: column.width } : {}
           }
           isLastRow={isLastRow}
+          expand={column.expand}
+          overflow={column.overflow}
         >
           <CircleX />
         </RowCell>
@@ -99,6 +103,8 @@ function DataCell({
             column.width ? { width: column.width, minWidth: column.width } : {}
           }
           isLastRow={isLastRow}
+          expand={column.expand}
+          overflow={column.overflow}
         >
           NULL
         </RowCell>
@@ -112,6 +118,8 @@ function DataCell({
           column.width ? { width: column.width, minWidth: column.width } : {}
         }
         isLastRow={isLastRow}
+        expand={column.expand}
+        overflow={column.overflow}
       >
         <></>
       </RowCell>
@@ -129,6 +137,8 @@ function DataCell({
             column.width ? { width: column.width, minWidth: column.width } : {}
           }
           isLastRow={isLastRow}
+          expand={column.expand}
+          overflow={column.overflow}
         >
           {meta[column.accessorKey]}
         </RowCell>
@@ -144,6 +154,8 @@ function DataCell({
             column.width ? { width: column.width, minWidth: column.width } : {}
           }
           isLastRow={isLastRow}
+          expand={column.expand}
+          overflow={column.overflow}
         >
           {meta[column.accessorKey]}
         </RowCell>
@@ -161,6 +173,8 @@ function DataCell({
             column.width ? { width: column.width, minWidth: column.width } : {}
           }
           isLastRow={isLastRow}
+          expand={column.expand}
+          overflow={column.overflow}
         >
           {currency}
         </RowCell>
@@ -178,6 +192,8 @@ function DataCell({
             column.width ? { width: column.width, minWidth: column.width } : {}
           }
           isLastRow={isLastRow}
+          expand={column.expand}
+          overflow={column.overflow}
         >
           {number}
         </RowCell>
@@ -195,6 +211,8 @@ function DataCell({
             column.width ? { width: column.width, minWidth: column.width } : {}
           }
           isLastRow={isLastRow}
+          expand={column.expand}
+          overflow={column.overflow}
         >
           {isTrue ? <CircleCheck /> : <CircleX />}
         </RowCell>
@@ -206,7 +224,7 @@ function DataCell({
       return (
         <RowCell
           className={classNames(
-            "break-normal flex flex-wrap gap-[.375rem] py-2.5",
+            " flex flex-wrap gap-[.375rem] py-2.5 content-start",
             {
               "flex-1 min-w-48": !column.width,
             }
@@ -215,6 +233,8 @@ function DataCell({
             column.width ? { width: column.width, minWidth: column.width } : {}
           }
           isLastRow={isLastRow}
+          expand={column.expand}
+          overflow={column.overflow}
         >
           {arrayTags.map((value, idx) => {
             if (value === null) {
@@ -250,6 +270,16 @@ function DataCell({
                     "pink-tag": tagColor === UI.Table.TAG_COLOR.pink,
                     "brown-tag": tagColor === UI.Table.TAG_COLOR.brown,
                     "slate-tag": tagColor === UI.Table.TAG_COLOR.gray,
+                    // Setting overflow ellipsis/clip overrides the container to use
+                    // block instead of flex, which makes the "gap" property not work.
+                    // Hence, we manually add the same spacing here. We don't use
+                    // this for dynamic overflow since "gap" also applies vertical spacing
+                    // while this only applies horizontal spacing (which is fine since
+                    // ellipsis/clip already truncate the cell to one line).
+                    "ml-[0.375rem]":
+                      idx > 0 &&
+                      (column.overflow === "ellipsis" ||
+                        column.overflow === "clip"),
                   }
                 )}
               >
@@ -267,12 +297,13 @@ function DataCell({
         <RowCell
           className={classNames({
             "flex-1 min-w-48": !column.width,
-            "truncate !block": column.truncate === true,
           })}
           style={
             column.width ? { width: column.width, minWidth: column.width } : {}
           }
           isLastRow={isLastRow}
+          expand={column.expand}
+          overflow={column.overflow}
         >
           {formatted}
         </RowCell>

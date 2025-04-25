@@ -9,7 +9,10 @@ import { classNames } from "~/utils/classNames";
 
 function guessColumns(
   data: UI.Components.InputTable["model"]["properties"]["data"],
-  columns: UI.Components.InputTable["model"]["properties"]["columns"]
+  columns: UI.Components.InputTable["model"]["properties"]["columns"],
+  defaultOverflow: NonNullable<
+    UI.Components.InputTable["model"]["properties"]["overflow"]
+  >
 ): React.ComponentProps<typeof Table.Root>["columns"] {
   if (data.length === 0) {
     return [];
@@ -50,6 +53,11 @@ function guessColumns(
       const width =
         typeof column === "string" ? undefined : (column.width ?? undefined);
 
+      const overflow =
+        typeof column === "string"
+          ? defaultOverflow
+          : (column.overflow ?? defaultOverflow);
+
       return {
         id: key,
         accessorKey: key,
@@ -57,6 +65,7 @@ function guessColumns(
         format,
         width,
         tagColors,
+        overflow,
       };
     });
   }
@@ -69,6 +78,7 @@ function guessColumns(
     accessorKey: key,
     format: Table.guessColumnFormat(data, key),
     tagColors: {},
+    overflow: defaultOverflow,
   }));
 }
 
@@ -202,13 +212,39 @@ export default function TableComponent({
   const columns = useMemo(() => {
     let cols: React.ComponentProps<typeof Table.Root>["columns"] = [];
 
+    // The default overflow behavior for columns. First, try to use the
+    // user provided overflow behavior. If that's not set, use ellipsis
+    // for v3+ and dynamic for v2 and below.
+    const defaultOverflow = component.model.properties.overflow
+      ? component.model.properties.overflow
+      : component.model.properties.v && component.model.properties.v >= 3
+        ? UI.Table.OVERFLOW_BEHAVIOR.ELLIPSIS
+        : UI.Table.OVERFLOW_BEHAVIOR.DYNAMIC;
+
     cols = guessColumns(
       component.model.properties.data,
-      component.model.properties.columns
+      component.model.properties.columns,
+      defaultOverflow
     );
 
+    const allColumnsHaveFixedWidth = cols.every(
+      (col) => col.width !== undefined
+    );
+
+    if (allColumnsHaveFixedWidth && cols.length > 0) {
+      cols[cols.length - 1] = {
+        ...cols[cols.length - 1],
+        expand: true,
+      };
+    }
+
     return cols;
-  }, [component.model.properties.columns, component.model.properties.data]);
+  }, [
+    component.model.properties.columns,
+    component.model.properties.data,
+    component.model.properties.overflow,
+    component.model.properties.v,
+  ]);
 
   return (
     <div

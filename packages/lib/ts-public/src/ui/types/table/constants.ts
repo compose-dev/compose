@@ -22,6 +22,15 @@ type OnPageChange<TData extends TableDataRow[]> = (
   input: TablePageChangeParams
 ) => Promise<TablePageChangeResponse<TData>> | TablePageChangeResponse<TData>;
 
+const OVERFLOW_BEHAVIOR = {
+  CLIP: "clip",
+  ELLIPSIS: "ellipsis",
+  DYNAMIC: "dynamic",
+} as const;
+
+type OverflowBehavior =
+  (typeof OVERFLOW_BEHAVIOR)[keyof typeof OVERFLOW_BEHAVIOR];
+
 /**
  * Convenience types to quickly format table data.
  *
@@ -117,6 +126,21 @@ type AdvancedTableColumn<TData extends TableDataRow[]> = {
       _default: TagColor;
     }
   >;
+  /**
+   * The overflow behavior of the column. In most cases, you should set the
+   * overflow behavior for all columns at once using the `overflow` property
+   * that's available directly on the table component. If you need to
+   * override the overflow behavior for a specific column, you can do so here.
+   *
+   * Options:
+   *
+   * - `clip`: Clip the text.
+   * - `ellipsis`: Show ellipsis when the text overflows.
+   * - `dynamic`: Expand the cell height to fit the content.
+   *
+   * @default `ellipsis`
+   */
+  overflow?: OverflowBehavior;
 };
 
 // Omit the original field in the type that's shown to the user.
@@ -179,4 +203,6 @@ export {
   DEFAULT_OFFSET as DEFAULT_OFFSET,
   DEFAULT_SEARCH_QUERY as DEFAULT_SEARCH_QUERY,
   DEFAULT_PAGINATED as DEFAULT_PAGINATED,
+  OVERFLOW_BEHAVIOR as OVERFLOW_BEHAVIOR,
+  OverflowBehavior as OverflowBehavior,
 };

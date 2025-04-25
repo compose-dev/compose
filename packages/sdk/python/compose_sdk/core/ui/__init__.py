@@ -52,6 +52,7 @@ from .types import (
     TableSelectionReturn,
     Stale,
     NumberFormat,
+    TABLE_COLUMN_OVERFLOW,
 )
 from .componentGenerators import ComponentReturn
 from .constants import Nullable
@@ -115,4 +116,5 @@ __all__ = [
     "Stale",
     "ComponentReturn",
     "NumberFormat",
+    "TABLE_COLUMN_OVERFLOW",
 ]

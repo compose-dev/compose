@@ -75,6 +75,8 @@ TableTagColors = Dict[
     ],
 ]
 
+TABLE_COLUMN_OVERFLOW = Literal["clip", "ellipsis", "dynamic"]
+
 
 class AdvancedTableColumn(TypedDict):
     key: str
@@ -108,6 +110,21 @@ class AdvancedTableColumn(TypedDict):
         "_default": "gray", # Render unspecified values as gray
     }
     ```
+
+    See the [docs](https://docs.composehq.com/components/input/table#columns) for more details.
+    """
+    overflow: NotRequired[TABLE_COLUMN_OVERFLOW]
+    """
+    The overflow behavior of the column. In most cases, you should set the
+    overflow behavior for all columns at once using the `overflow` property
+    that's available directly on the table component. If you need to
+    override the overflow behavior for a specific column, you can do so here.
+
+    Options:
+
+    - `clip`: Clip the text.
+    - `ellipsis`: Show ellipsis when the text overflows.
+    - `dynamic`: Expand the cell height to fit the content.
 
     See the [docs](https://docs.composehq.com/components/input/table#columns) for more details.
     """

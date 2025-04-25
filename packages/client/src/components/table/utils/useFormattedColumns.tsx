@@ -33,6 +33,7 @@ function formatColumn(column: TableColumnProp) {
         <HeaderCell
           className={classNames({
             "min-w-48 flex-1": !column.width,
+            "flex-1": column.expand === true,
           })}
           style={
             column.width ? { width: column.width, minWidth: column.width } : {}
@@ -109,6 +110,7 @@ function formatSelectColumn(
       <RowCell
         className="pt-3"
         isLastRow={row.index === table.getRowModel().rows.length - 1}
+        overflow="dynamic"
       >
         <CheckboxRaw
           enabled={table.getState().rowSelection[row.index + offset] === true}
@@ -199,6 +201,7 @@ function formatActionColumn(
           style={{
             contain: "paint",
           }}
+          overflow="dynamic"
         >
           <TableActionCell
             actions={actions}

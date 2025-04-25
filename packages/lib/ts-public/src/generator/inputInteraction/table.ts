@@ -97,6 +97,16 @@ interface TableProperties<TData extends UI.Table.DataRow[]>
    * Whether the table should be paginated server-side. Enabling this can improve performance by only loading a subset of the data at a time. Defaults to `false`. Tables with more than 2500 rows will be paginated by default.
    */
   paginate: boolean;
+  /**
+   * The overflow behavior of table cells. Options:
+   *
+   * - `clip`: Clip the content.
+   * - `ellipsis`: Show ellipsis when the content overflows.
+   * - `dynamic`: Expand the cell height to fit the content.
+   *
+   * @default `ellipsis`
+   */
+  overflow?: UI.Components.InputTable["model"]["properties"]["overflow"];
 }
 
 type RequiredTableFields = "id" | "data";
@@ -193,6 +203,14 @@ function getHookActions(
  * @param {UI.Components.InputTable["model"]["selectionReturnType"]} properties.selectionReturnType - How the table should return selected rows. Defaults to `full` (a list of rows). Must be `index` (a list of row indices) if the table is paginated.
  * @param {UI.Components.InputTable["model"]["searchable"]} properties.searchable - Whether the table should be searchable. Defaults to `true`.
  * @param {boolean} properties.paginate - Whether the table should be paginated. Defaults to `false`. Tables with more than 2500 rows will be paginated by default.
+ * @param {UI.Components.InputTable["model"]["overflow"]} properties.overflow - The overflow behavior of table cells. Options:
+ *
+ * - `ellipsis`: Show ellipsis when the text overflows.
+ * - `clip`: Clip the text.
+ * - `dynamic`: Expand the cell height to fit the content.
+ *
+ * Defaults to `ellipsis`.
+ *
  * @returns The configured table component.
  */
 function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
@@ -242,7 +260,7 @@ function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
     hasOnSelectHook: mergedProperties.onChange !== null,
     actions: getModelActions(mergedProperties.actions),
     initialSelectedRows: mergedProperties.initialSelectedRows,
-    v: 2,
+    v: 3,
   };
 
   if (autoPaged || mergedProperties.searchable === false) {
@@ -265,6 +283,10 @@ function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
     modelProperties.selectMode !== UI.Table.SELECTION_RETURN_TYPE.INDEX
   ) {
     modelProperties.allowSelect = false;
+  }
+
+  if (properties.overflow && properties.overflow !== "ellipsis") {
+    modelProperties.overflow = properties.overflow;
   }
 
   return {

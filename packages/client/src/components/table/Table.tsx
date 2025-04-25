@@ -257,7 +257,14 @@ function Table({
             }}
             ref={tableContainerRef}
           >
-            <div className="border-brand-neutral">
+            {/* 
+            - min-w-full: allows the table to expand to fill the full width
+            there aren't enough rows to naturally fill the width.
+            - w-max: allows the table row container to expand to fill the width
+            of the row when there is horizontal scroll and thus the row stretches
+            beyond the visible content area.
+            */}
+            <div className="border-brand-neutral w-max min-w-full">
               <div className="flex sticky top-0 z-10 bg-brand-overlay">
                 {table
                   .getHeaderGroups()
@@ -286,7 +293,7 @@ function Table({
                       key={row.id}
                       data-index={virtualRow.index}
                       ref={(node) => rowVirtualizer.measureElement(node)}
-                      className="w-full min-w-fit flex border-b-brand border-brand-neutral bg-brand-io absolute hover:bg-brand-overlay group"
+                      className="w-full flex border-b-brand border-brand-neutral bg-brand-io absolute hover:bg-brand-overlay group"
                       style={{
                         transform: `translateY(${virtualRow.start}px)`,
                       }}

@@ -69,10 +69,16 @@ interface TableColumnProp {
    */
   width?: string;
   /**
-   * Whether to truncate the cells in the column or
-   * allow them to span onto multiple lines.
+   * The overflow behavior of the column.
    */
-  truncate?: boolean;
+  overflow: NonNullable<
+    UI.Table.AdvancedColumn<UI.Table.DataRow[]>["overflow"]
+  >;
+  /**
+   * Whether the column should expand to fill the available width. Essentially,
+   * all column cells should set `flex-1` if this is true.
+   */
+  expand?: boolean;
 }
 
 export { INTERNAL_COLUMN_ID };

@@ -111,7 +111,7 @@ export interface Table<
     /**
      * The table model version.
      */
-    v?: 1 | 2;
+    v?: 1 | 2 | 3;
     paged?: boolean;
     notSearchable?: boolean;
     totalRecords?: number;
@@ -119,6 +119,7 @@ export interface Table<
     pageSize?: number;
     searchQuery?: string | null;
     selectMode?: TTable.SelectionReturnType;
+    overflow?: TTable.OverflowBehavior;
   };
 }
 
