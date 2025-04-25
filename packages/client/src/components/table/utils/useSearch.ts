@@ -2,12 +2,12 @@ import { useCallback, useMemo } from "react";
 import {
   FormattedTableRow,
   INTERNAL_COLUMN_ID,
-  TableColumn,
-} from "../constants";
+  TableColumnProp,
+} from "./constants";
 import { Row } from "@tanstack/react-table";
 import { UI } from "@composehq/ts-public";
 
-function useSearch(columns: TableColumn[]) {
+function useSearch(columns: TableColumnProp[]) {
   const keyToFormat = useMemo(() => {
     return columns.reduce<Record<string, string | undefined>>((acc, column) => {
       acc[column.accessorKey] = column.format;

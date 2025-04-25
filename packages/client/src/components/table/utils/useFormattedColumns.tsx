@@ -1,0 +1,244 @@
+import { Table as TanStackTable, Row } from "@tanstack/react-table";
+import {
+  FormattedTableRow,
+  INTERNAL_COLUMN_ID,
+  TableColumnProp,
+} from "./constants";
+import { UI } from "@composehq/ts-public";
+import { useMemo } from "react";
+import { classNames } from "~/utils/classNames";
+import HeaderCell from "../components/HeaderCell";
+import DataCell from "../components/DataCell";
+import { CheckboxRaw } from "~/components/checkbox";
+import RowCell from "../components/RowCell";
+import TableActionCell from "../components/TableActionCell";
+
+type InternalTableColumn<T> = {
+  id: string;
+  header: string | (({ table }: { table: TanStackTable<T> }) => JSX.Element);
+  cell: ({
+    row,
+    table,
+  }: {
+    row: Row<T>;
+    table: TanStackTable<T>;
+  }) => JSX.Element;
+};
+
+function formatColumn(column: TableColumnProp) {
+  return {
+    ...column,
+    header: () => {
+      return (
+        <HeaderCell
+          className={classNames({
+            "min-w-48 flex-1": !column.width,
+          })}
+          style={
+            column.width ? { width: column.width, minWidth: column.width } : {}
+          }
+        >
+          {column.label}
+        </HeaderCell>
+      );
+    },
+    cell: ({
+      row,
+      table,
+    }: {
+      row: Row<FormattedTableRow>;
+      table: TanStackTable<FormattedTableRow>;
+    }) => {
+      return (
+        <DataCell
+          value={row.original[column.accessorKey]}
+          column={column}
+          meta={row.original[INTERNAL_COLUMN_ID.META]}
+          isLastRow={row.index === table.getRowModel().rows.length - 1}
+        />
+      );
+    },
+  };
+}
+
+function formatSelectColumn(
+  totalRecords: number,
+  disableRowSelection: boolean,
+  allowMultiSelection: boolean,
+  offset: number,
+  hasError: boolean
+) {
+  return {
+    id: INTERNAL_COLUMN_ID.SELECT,
+    header: ({ table }: { table: TanStackTable<FormattedTableRow> }) => {
+      const hasOneRow = table.getRowModel().rows.length >= 1;
+
+      if (!hasOneRow) {
+        return <></>;
+      }
+
+      return (
+        <HeaderCell>
+          <CheckboxRaw
+            enabled={
+              Object.keys(table.getState().rowSelection).length >= totalRecords
+            }
+            setEnabled={(isChecked) => {
+              if (!isChecked) {
+                table.setRowSelection({});
+              } else {
+                const obj: Record<number, boolean> = {};
+                for (let i = 0; i < totalRecords; i++) {
+                  obj[i] = true;
+                }
+                table.setRowSelection(obj);
+              }
+            }}
+            disabled={disableRowSelection || !allowMultiSelection}
+          />
+        </HeaderCell>
+      );
+    },
+    cell: ({
+      row,
+      table,
+    }: {
+      row: Row<FormattedTableRow>;
+      table: TanStackTable<FormattedTableRow>;
+    }) => (
+      <RowCell
+        className="pt-3"
+        isLastRow={row.index === table.getRowModel().rows.length - 1}
+      >
+        <CheckboxRaw
+          enabled={table.getState().rowSelection[row.index + offset] === true}
+          setEnabled={(enabled) => {
+            if (enabled) {
+              if (!row.getCanMultiSelect()) {
+                table.setRowSelection({
+                  [row.index + offset]: enabled,
+                });
+              } else {
+                table.setRowSelection({
+                  ...table.getState().rowSelection,
+                  [row.index + offset]: enabled,
+                });
+              }
+            } else {
+              const newRowSelections = {
+                ...table.getState().rowSelection,
+              };
+              delete newRowSelections[row.index + offset];
+              table.setRowSelection(newRowSelections);
+            }
+          }}
+          disabled={disableRowSelection}
+          hasError={hasError}
+        />
+      </RowCell>
+    ),
+  };
+}
+
+function formatActionColumn(
+  actions: NonNullable<
+    UI.Components.InputTable["model"]["properties"]["actions"]
+  >,
+  onTableRowActionHook: (rowIdx: number, actionIdx: number) => void
+) {
+  return {
+    id: INTERNAL_COLUMN_ID.ACTION,
+    header: ({ table }: { table: TanStackTable<FormattedTableRow> }) => {
+      const hasOneRow = table.getRowModel().rows.length >= 1;
+
+      if (!hasOneRow) {
+        return <></>;
+      }
+
+      return (
+        <HeaderCell className="sticky z-10 right-0 bg-brand-io border-l border-brand-neutral w-fit">
+          <TableActionCell actions={actions} hidden={true} onClick={() => {}} />
+        </HeaderCell>
+      );
+    },
+    cell: ({
+      row,
+      table,
+    }: {
+      row: Row<FormattedTableRow>;
+      table: TanStackTable<FormattedTableRow>;
+    }) => {
+      return (
+        <RowCell
+          className="sticky z-10 right-0 bg-brand-io border-l border-brand-neutral group-hover:bg-brand-overlay !py-[7px]"
+          isLastRow={row.index === table.getRowModel().rows.length - 1}
+        >
+          <TableActionCell
+            actions={actions}
+            onClick={(actionIdx) => {
+              onTableRowActionHook(row.index, actionIdx);
+            }}
+          />
+        </RowCell>
+      );
+    },
+  };
+}
+
+function useFormattedColumns(
+  columns: TableColumnProp[],
+  enableRowSelection: boolean,
+  allowMultiSelection: boolean,
+  hasError: boolean,
+  disableRowSelection: boolean,
+  totalRecords: number,
+  offset: number,
+  actions: UI.Components.InputTable["model"]["properties"]["actions"],
+  onTableRowActionHook: (rowIdx: number, actionIdx: number) => void
+) {
+  const formattedColumns = useMemo(() => {
+    const formatted: InternalTableColumn<FormattedTableRow>[] = [];
+
+    // Add the row selections column first
+    if (enableRowSelection) {
+      formatted.push(
+        formatSelectColumn(
+          totalRecords,
+          disableRowSelection,
+          allowMultiSelection,
+          offset,
+          hasError
+        )
+      );
+    }
+
+    // Then add all data columns
+    columns.forEach((column) => {
+      if (column.accessorKey === INTERNAL_COLUMN_ID.META) {
+        return;
+      }
+      formatted.push(formatColumn(column));
+    });
+
+    // Finally, add the actions column
+    if (actions && actions.length > 0) {
+      formatted.push(formatActionColumn(actions, onTableRowActionHook));
+    }
+
+    return formatted;
+  }, [
+    columns,
+    enableRowSelection,
+    allowMultiSelection,
+    hasError,
+    disableRowSelection,
+    totalRecords,
+    offset,
+    actions,
+    onTableRowActionHook,
+  ]);
+
+  return formattedColumns;
+}
+
+export { useFormattedColumns };

@@ -2,62 +2,30 @@ import {
   useReactTable,
   getCoreRowModel,
   flexRender,
-  Table as TanStackTable,
-  Row,
   getFilteredRowModel,
   Updater,
   FilterFn,
   Cell,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { CheckboxRaw } from "~/components/checkbox";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { classNames } from "~/utils/classNames";
 import { useThrottledCallback } from "~/utils/useThrottledCallback";
-import {
-  INTERNAL_COLUMN_ID,
-  type FormattedTableRow,
-  type TableColumn,
-} from "./constants";
 import { IOComponent } from "~/components/io-component";
-import TableActionCell from "./components/TableActionCell";
-import HeaderCell from "./components/HeaderCell";
-import RowCell from "./components/RowCell";
 import { TextInput } from "../input";
-import DataCell from "./components/DataCell";
 import { UI } from "@composehq/ts-public";
 import PageSelectorRow from "./components/PageSelectorRow";
 import TableLoading from "./components/TableLoading";
 import { Spinner } from "../spinner";
 import { u } from "@compose/ts";
-import { useSearch, useFormattedData } from "./utils";
+import {
+  useSearch,
+  useFormattedData,
+  useFormattedColumns,
+  type FormattedTableRow,
+  type TableColumnProp,
+} from "./utils";
 import Icon from "../icon";
-
-type InternalTableColumn<T> =
-  | (TableColumn & { header: string })
-  | {
-      id: string;
-      header:
-        | string
-        | (({ table }: { table: TanStackTable<T> }) => JSX.Element);
-      cell: ({
-        row,
-        table,
-      }: {
-        row: Row<T>;
-        table: TanStackTable<T>;
-      }) => JSX.Element;
-    }
-  | (TableColumn & {
-      header: string;
-      cell: ({ row }: { row: Row<T> }) => JSX.Element;
-    });
 
 // Add our custom search function to the table type
 // https://tanstack.com/table/v8/docs/framework/react/examples/filters-fuzzy
@@ -92,7 +60,7 @@ function Table({
   height,
 }: {
   data: UI.Components.InputTable["model"]["properties"]["data"];
-  columns: TableColumn[];
+  columns: TableColumnProp[];
   actions: UI.Components.InputTable["model"]["properties"]["actions"];
   totalRecords: number;
   onTablePageChangeHook: (
@@ -121,177 +89,7 @@ function Table({
 
   const searchTable = useSearch(columns);
   const formattedData = useFormattedData(data, columns);
-
-  const formattedColumns = useMemo(() => {
-    function formatColumn(column: TableColumn) {
-      return {
-        ...column,
-        header: () => {
-          return (
-            <HeaderCell
-              className={classNames({
-                "min-w-48 flex-1": !column.width,
-              })}
-              style={
-                column.width
-                  ? { width: column.width, minWidth: column.width }
-                  : {}
-              }
-            >
-              {column.label}
-            </HeaderCell>
-          );
-        },
-        cell: ({
-          row,
-          table,
-        }: {
-          row: Row<FormattedTableRow>;
-          table: TanStackTable<FormattedTableRow>;
-        }) => {
-          return (
-            <DataCell
-              value={row.original[column.accessorKey]}
-              column={column}
-              meta={row.original[INTERNAL_COLUMN_ID.META]}
-              isLastRow={row.index === table.getRowModel().rows.length - 1}
-            />
-          );
-        },
-      };
-    }
-
-    const formatted: InternalTableColumn<FormattedTableRow>[] = [];
-
-    if (enableRowSelection) {
-      formatted.push({
-        id: INTERNAL_COLUMN_ID.SELECT,
-        header: ({ table }: { table: TanStackTable<FormattedTableRow> }) => {
-          const hasOneRow = table.getRowModel().rows.length >= 1;
-
-          if (!hasOneRow) {
-            return <></>;
-          }
-
-          return (
-            <HeaderCell>
-              <CheckboxRaw
-                enabled={
-                  Object.keys(table.getState().rowSelection).length >=
-                  totalRecords
-                }
-                setEnabled={(isChecked) => {
-                  if (!isChecked) {
-                    table.setRowSelection({});
-                  } else {
-                    const obj: Record<number, boolean> = {};
-                    for (let i = 0; i < totalRecords; i++) {
-                      obj[i] = true;
-                    }
-                    table.setRowSelection(obj);
-                  }
-                }}
-                disabled={disableRowSelection || !allowMultiSelection}
-              />
-            </HeaderCell>
-          );
-        },
-        cell: ({
-          row,
-          table,
-        }: {
-          row: Row<FormattedTableRow>;
-          table: TanStackTable<FormattedTableRow>;
-        }) => (
-          <RowCell
-            className="pt-3"
-            isLastRow={row.index === table.getRowModel().rows.length - 1}
-          >
-            <CheckboxRaw
-              enabled={
-                table.getState().rowSelection[row.index + offset] === true
-              }
-              setEnabled={(enabled) => {
-                if (enabled) {
-                  if (!row.getCanMultiSelect()) {
-                    table.setRowSelection({
-                      [row.index + offset]: enabled,
-                    });
-                  } else {
-                    table.setRowSelection({
-                      ...table.getState().rowSelection,
-                      [row.index + offset]: enabled,
-                    });
-                  }
-                } else {
-                  const newRowSelections = {
-                    ...table.getState().rowSelection,
-                  };
-                  delete newRowSelections[row.index + offset];
-                  table.setRowSelection(newRowSelections);
-                }
-              }}
-              disabled={disableRowSelection}
-              hasError={hasError}
-            />
-          </RowCell>
-        ),
-      });
-    }
-
-    columns.forEach((column) => {
-      if (column.accessorKey === INTERNAL_COLUMN_ID.META) {
-        return;
-      }
-      formatted.push(formatColumn(column));
-    });
-
-    if (actions && actions.length > 0) {
-      formatted.push({
-        id: INTERNAL_COLUMN_ID.ACTION,
-        header: ({ table }: { table: TanStackTable<FormattedTableRow> }) => {
-          const hasOneRow = table.getRowModel().rows.length >= 1;
-
-          if (!hasOneRow) {
-            return <></>;
-          }
-
-          return (
-            <HeaderCell className="sticky z-10 right-0 bg-brand-io border-l border-brand-neutral w-fit">
-              <TableActionCell
-                actions={actions}
-                hidden={true}
-                onClick={() => {}}
-              />
-            </HeaderCell>
-          );
-        },
-        cell: ({
-          row,
-          table,
-        }: {
-          row: Row<FormattedTableRow>;
-          table: TanStackTable<FormattedTableRow>;
-        }) => {
-          return (
-            <RowCell
-              className="z-10 sticky right-0 bg-brand-io border-l border-brand-neutral group-hover:bg-brand-overlay !py-[7px]"
-              isLastRow={row.index === table.getRowModel().rows.length - 1}
-            >
-              <TableActionCell
-                actions={actions}
-                onClick={(actionIdx) => {
-                  onTableRowActionHook(row.index, actionIdx);
-                }}
-              />
-            </RowCell>
-          );
-        },
-      });
-    }
-
-    return formatted;
-  }, [
+  const formattedColumns = useFormattedColumns(
     columns,
     enableRowSelection,
     allowMultiSelection,
@@ -300,8 +98,8 @@ function Table({
     totalRecords,
     offset,
     actions,
-    onTableRowActionHook,
-  ]);
+    onTableRowActionHook
+  );
 
   const handleRowSelectionChange = useCallback(
     (newRowSelections: Updater<Record<string, boolean>>) => {

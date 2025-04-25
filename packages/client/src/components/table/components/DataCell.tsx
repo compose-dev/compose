@@ -1,7 +1,7 @@
 import { UI } from "@composehq/ts-public";
 import RowCell from "./RowCell";
 import { classNames } from "~/utils/classNames";
-import { TableColumn } from "../constants";
+import { TableColumnProp } from "../utils";
 import Icon from "~/components/icon";
 import { u } from "@compose/ts";
 
@@ -68,7 +68,7 @@ function DataCell({
   isLastRow,
 }: {
   value: unknown;
-  column: TableColumn;
+  column: TableColumnProp;
   meta: Record<string, string>;
   isLastRow: boolean;
 }) {

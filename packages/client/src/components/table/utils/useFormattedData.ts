@@ -1,14 +1,17 @@
-import { FormattedTableRow, TableColumn } from "../constants";
+import {
+  FormattedTableRow,
+  TableColumnProp,
+  INTERNAL_COLUMN_ID,
+} from "./constants";
 
 import { u } from "@compose/ts";
 import { UI } from "@composehq/ts-public";
 
-import { INTERNAL_COLUMN_ID } from "../constants";
 import { useMemo } from "react";
 
 function useFormattedData(
   data: UI.Components.InputTable["model"]["properties"]["data"],
-  columns: TableColumn[]
+  columns: TableColumnProp[]
 ) {
   const formattedRows: FormattedTableRow[] = useMemo(() => {
     const metaColumns = columns.filter(

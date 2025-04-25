@@ -71,6 +71,10 @@ type TableColumnFormat =
   (typeof TABLE_COLUMN_FORMAT)[keyof typeof TABLE_COLUMN_FORMAT];
 
 type AdvancedTableColumn<TData extends TableDataRow[]> = {
+  /**
+   * The key that will be used to access the column data from
+   * the passed in data.
+   */
   key: StringOnlyKeys<TData[number]>;
   /**
    * The original key of the column. Now that we compress key names
@@ -78,6 +82,10 @@ type AdvancedTableColumn<TData extends TableDataRow[]> = {
    * name so we can map it back to the original data.
    */
   original?: string;
+  /**
+   * The label of the column. By default, the label will be inferred
+   * from the key.
+   */
   label?: string;
   /**
    * Format the column data.
@@ -85,6 +93,10 @@ type AdvancedTableColumn<TData extends TableDataRow[]> = {
    * @see {@link TABLE_COLUMN_FORMAT Table column format options}
    */
   format?: TableColumnFormat;
+  /**
+   * The width of the column, e.g. `100px`. By default, the width will be
+   * set dynamically.
+   */
   width?: string;
   /**
    * Map tag colors to values or lists of values. Use optional `_default` key

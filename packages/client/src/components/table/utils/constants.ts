@@ -1,17 +1,41 @@
 import { UI } from "@composehq/ts-public";
 
+/**
+ * Column IDs that are applied by Compose to the table data to enable certain
+ * table features.
+ */
 const INTERNAL_COLUMN_ID = {
+  /**
+   * The ID applied to the actions column, which is added to table data to
+   * enable actions buttons on table rows.
+   */
   ACTION: "a-//&&wreqa#jksejsl-*AFSS",
+  /**
+   * The ID applied to the row selection checkboxes column, which is added
+   * to table data to enable row selections.
+   */
   SELECT: "s-//&&wreqa#jksejsl-*!!AFSS",
+  /**
+   * A hidden column that is added to every row that includes metadata about
+   * that row. This enables features such as custom fuzzy search which we
+   * use to search over date columns.
+   */
   META: "m-//&&wreqa#jksejsl-*!!AFSS",
 } as const;
 
+/**
+ * A table row after initial pre-processing. This is the data type that's
+ * actually used throughout the table component.
+ */
 type FormattedTableRow =
   UI.Components.InputTable["model"]["properties"]["data"][number] & {
     [INTERNAL_COLUMN_ID.META]: Record<string, string>;
   };
 
-interface TableColumn {
+/**
+ * The table column type that's expected as a prop input into the Table component.
+ */
+interface TableColumnProp {
   /**
    * The unique identifier for the column.
    */
@@ -40,11 +64,16 @@ interface TableColumn {
    * The colors to use for the column.
    */
   tagColors?: Record<string | number, UI.Table.TagColor>;
-
+  /**
+   * Width of the column in pixels/rem/etc.
+   */
   width?: string;
-
+  /**
+   * Whether to truncate the cells in the column or
+   * allow them to span onto multiple lines.
+   */
   truncate?: boolean;
 }
 
 export { INTERNAL_COLUMN_ID };
-export type { FormattedTableRow, TableColumn };
+export type { FormattedTableRow, TableColumnProp };
