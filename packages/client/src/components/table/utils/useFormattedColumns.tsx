@@ -156,7 +156,23 @@ function formatActionColumn(
       }
 
       return (
-        <HeaderCell className="sticky z-10 right-0 bg-brand-io border-l border-brand-neutral w-fit">
+        <HeaderCell
+          className="sticky z-10 right-0 border-l border-brand-neutral"
+          /* 
+          Fixes a 2px visual gap that appears between the rightmost sticky column and the table edge 
+          at arbritary screen widths/zooms in Chromium due to subpixel compositing issues with position: sticky. 
+
+          - `contain: paint` isolates each sticky cell into its own paint layer to reduce bleed-through.
+          - `box-shadow: 1px 0 0 white` overlays a solid line to visually mask the remaining gap 
+            without affecting layout or causing issues at other zoom levels.
+
+          This is a visual patch for a known rendering quirk — not a layout fix.
+          */
+          style={{
+            contain: "paint",
+            boxShadow: "1px 0 0 var(--brand-bg-overlay)",
+          }}
+        >
           <TableActionCell actions={actions} hidden={true} onClick={() => {}} />
         </HeaderCell>
       );
@@ -172,6 +188,17 @@ function formatActionColumn(
         <RowCell
           className="sticky z-10 right-0 bg-brand-io border-l border-brand-neutral group-hover:bg-brand-overlay !py-[7px]"
           isLastRow={row.index === table.getRowModel().rows.length - 1}
+          /* 
+          Fixes a 1px visual gap that appears between the rightmost sticky column and the table edge 
+          at 100% zoom in Chromium due to subpixel compositing issues with position: sticky. 
+
+          - `contain: paint` isolates each sticky cell into its own paint layer to reduce bleed-through.
+
+          This is a visual patch for a known rendering quirk — not a layout fix.
+          */
+          style={{
+            contain: "paint",
+          }}
         >
           <TableActionCell
             actions={actions}

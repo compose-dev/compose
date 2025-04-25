@@ -251,28 +251,26 @@ function Table({
             </p>
           </div>
           <div
-            className="flex flex-col overflow-y-auto w-full h-full"
+            className="flex flex-col overflow-auto w-full h-full"
             style={{
               scrollbarWidth: "thin",
             }}
             ref={tableContainerRef}
           >
             <div className="border-brand-neutral">
-              <div className="flex flex-col sticky top-0 z-10 bg-brand-io">
-                <div className="w-full flex">
-                  {table
-                    .getHeaderGroups()
-                    .map((group) =>
-                      group.headers.map((header) => (
-                        <React.Fragment key={header.id}>
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                        </React.Fragment>
-                      ))
-                    )}
-                </div>
+              <div className="flex sticky top-0 z-10 bg-brand-overlay">
+                {table
+                  .getHeaderGroups()
+                  .map((group) =>
+                    group.headers.map((header) => (
+                      <React.Fragment key={header.id}>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                      </React.Fragment>
+                    ))
+                  )}
               </div>
               <div
                 className="w-full flex flex-col"
