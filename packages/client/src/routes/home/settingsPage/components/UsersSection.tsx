@@ -94,7 +94,7 @@ function UsersSection({
                       <Icon
                         name="dots-vertical"
                         color="brand-neutral-2"
-                        size="mlg"
+                        size="1.25"
                       />
                     }
                     labelVariant="ghost"

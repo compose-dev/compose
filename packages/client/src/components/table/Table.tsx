@@ -6,6 +6,7 @@ import {
   Updater,
   FilterFn,
   Cell,
+  getSortedRowModel,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -126,6 +127,8 @@ function Table({
     },
     globalFilterFn: "fuzzy",
     getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    enableSorting: !paginated,
   });
 
   const tableContainerRef = useRef<HTMLDivElement>(null);

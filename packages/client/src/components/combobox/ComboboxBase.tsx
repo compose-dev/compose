@@ -156,7 +156,7 @@ function ComboboxOptions<T extends SelectValue>({
             <div className="flex items-center justify-between">
               <p className="text-brand-neutral text-base/6">{option.label}</p>
               {selectedValues.includes(option.value) && (
-                <Icon name="checkmark" size="sm" color="brand-neutral-2" />
+                <Icon name="checkmark" size="0.75" color="brand-neutral-2" />
               )}
             </div>
             {option.description && (
@@ -188,7 +188,7 @@ function ComboboxOptions<T extends SelectValue>({
           <div className="flex items-center justify-between">
             <p className="text-brand-neutral text-base/6">{option.label}</p>
             {selectedValues.includes(option.value) && (
-              <Icon name="checkmark" size="sm" color="brand-neutral-2" />
+              <Icon name="checkmark" size="0.75" color="brand-neutral-2" />
             )}
           </div>
           {option.description && (

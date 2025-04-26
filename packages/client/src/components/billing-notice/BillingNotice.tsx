@@ -20,7 +20,7 @@ export default function BillingNotice({
       )}
     >
       <div className="flex flex-row space-x-1 items-center">
-        <Icon name="coin" color="brand-neutral" size="lg" />
+        <Icon name="coin" color="brand-neutral" size="1.5" />
         <p className="font-medium">Billing</p>
       </div>
       <p className="text-brand-neutral-2">{children}</p>

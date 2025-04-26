@@ -184,7 +184,7 @@ function Home() {
               <p className="text-brand-neutral font-semibold">
                 {user.firstName} {user.lastName}
               </p>
-              <Icon name="chevron-down" size="sm" color="brand-neutral-2" />
+              <Icon name="chevron-down" size="0.75" color="brand-neutral-2" />
             </div>
           }
           options={[
@@ -334,7 +334,7 @@ function Home() {
                               : "chevron-down"
                           }
                           color="brand-neutral-2"
-                          size="sm"
+                          size="0.75"
                         />
                       </div>
                     </Button>

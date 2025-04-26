@@ -18,12 +18,12 @@ function BrowserWrapper({
           </div>
         </div>
         <div className="bg-brand-page text-brand-neutral-2 text-xs p-1 px-4 flex items-center gap-1 rounded-xl">
-          <Icon name="lock" color="brand-neutral-2" size="xs" />
+          <Icon name="lock" color="brand-neutral-2" size="0.5" />
           <p>composehq.com</p>
         </div>
         <div className="absolute h-full right-2 items-center hidden xs:flex">
           <div className="flex items-center gap-0.5">
-            <Icon name="lightning" color="brand-neutral-3" size="sm" />
+            <Icon name="lightning" color="brand-neutral-3" size="0.75" />
             <p className="text-[10px] leading-3 tracking-wider text-brand-neutral-3">
               LIVE DEMO
             </p>

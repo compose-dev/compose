@@ -139,7 +139,7 @@ function AppRow({
                 <div className="w-6 h-6 flex items-center justify-center rounded-brand hover:bg-brand-overlay-2">
                   <Icon
                     name="dots"
-                    size="sm"
+                    size="0.75"
                     color={hidden ? "brand-neutral-2" : "brand-neutral-2"}
                   />
                 </div>

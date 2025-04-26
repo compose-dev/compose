@@ -262,7 +262,7 @@ function AuditLog() {
                 <Icon
                   name="exclamation-circle"
                   color="brand-error-heavy"
-                  size="lg"
+                  size="1.5"
                 />
                 <h4 className="text-brand-error-heavy">Error fetching logs</h4>
               </div>
@@ -277,7 +277,7 @@ function AuditLog() {
                 <Icon
                   name="exclamation-circle"
                   color="brand-warning-heavy"
-                  size="lg"
+                  size="1.5"
                   stroke="semi-bold"
                 />
                 <h4 className="text-brand-warning-heavy">

@@ -64,7 +64,7 @@ function TableActionCell({
       {menuItems.length > 0 && (
         <DropdownMenu
           label={
-            <Icon name="dots-vertical" color="brand-neutral-2" size="mlg" />
+            <Icon name="dots-vertical" color="brand-neutral-2" size="1.25" />
           }
           labelVariant="ghost"
           options={menuItems.map((item) => ({

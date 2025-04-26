@@ -184,6 +184,19 @@ const SELECTION_RETURN_TYPE = {
 type SelectionReturnType =
   (typeof SELECTION_RETURN_TYPE)[keyof typeof SELECTION_RETURN_TYPE];
 
+/**
+ * Determine if a column should sort in descending order by default.
+ */
+function shouldSortDescendingFirst(format: TableColumnFormat | undefined) {
+  return (
+    format === "date" ||
+    format === "datetime" ||
+    format === "number" ||
+    format === "currency" ||
+    format === "boolean"
+  );
+}
+
 export {
   TableDataRow as DataRow,
   OnPageChange as OnPageChange,
@@ -205,4 +218,5 @@ export {
   DEFAULT_PAGINATED as DEFAULT_PAGINATED,
   OVERFLOW_BEHAVIOR as OVERFLOW_BEHAVIOR,
   OverflowBehavior as OverflowBehavior,
+  shouldSortDescendingFirst as shouldSortDescendingFirst,
 };

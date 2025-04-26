@@ -39,7 +39,7 @@ function Login() {
             size="lg"
             className="w-80"
           >
-            <Icon name="google-with-color" size="lg" />
+            <Icon name="google-with-color" size="1.5" />
             <p>Continue with Google</p>
           </Button>
           <p className="text-brand-neutral-2 text-sm">

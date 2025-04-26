@@ -27,7 +27,7 @@ export default function PageSelectorRow({
         className="px-1"
         disabled={pageIndex <= 0 || disabled}
       >
-        <Icon name="chevron-pipe-left" color="brand-neutral-2" size="mlg" />
+        <Icon name="chevron-pipe-left" color="brand-neutral-2" size="1.25" />
       </Button>
       <Button
         variant="ghost"
@@ -35,7 +35,7 @@ export default function PageSelectorRow({
         className="px-1"
         disabled={pageIndex <= 0 || disabled}
       >
-        <Icon name="chevron-left-package" color="brand-neutral-2" size="mlg" />
+        <Icon name="chevron-left-package" color="brand-neutral-2" size="1.25" />
       </Button>
       <p className="text-brand-neutral-2 text-sm">
         Page {u.string.formatNumber(pageIndex + 1)} of{" "}
@@ -47,7 +47,11 @@ export default function PageSelectorRow({
         className="px-1"
         disabled={pageIndex >= totalPages - 1 || disabled}
       >
-        <Icon name="chevron-right-package" color="brand-neutral-2" size="mlg" />
+        <Icon
+          name="chevron-right-package"
+          color="brand-neutral-2"
+          size="1.25"
+        />
       </Button>
       {totalRecords !== Infinity && (
         <Button
@@ -62,7 +66,7 @@ export default function PageSelectorRow({
           className="pl-1"
           disabled={pageIndex >= totalPages - 1 || disabled}
         >
-          <Icon name="chevron-pipe-right" color="brand-neutral-2" size="mlg" />
+          <Icon name="chevron-pipe-right" color="brand-neutral-2" size="1.25" />
         </Button>
       )}
     </div>

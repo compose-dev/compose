@@ -16,7 +16,7 @@ function CircleCheck() {
 function CircleX() {
   return (
     <div className="h-[24px] flex items-center">
-      <Icon name="x" color="brand-error" stroke="bold" size="sm" />
+      <Icon name="x" color="brand-error" stroke="bold" size="0.75" />
     </div>
   );
 }

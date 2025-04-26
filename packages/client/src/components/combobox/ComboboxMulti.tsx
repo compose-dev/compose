@@ -69,7 +69,7 @@ function ComboboxMulti<T extends SelectValue>({
                 onClick={() => onRemoveOption(option)}
                 disabled={props.disabled}
               >
-                <Icon name="x" size="xs" />
+                <Icon name="x" size="0.5" />
               </Button>
             </div>
           ))}

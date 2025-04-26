@@ -1,4 +1,4 @@
-import { Table as TanStackTable, Row } from "@tanstack/react-table";
+import { Table as TanStackTable, Row, ColumnDef } from "@tanstack/react-table";
 import {
   FormattedTableRow,
   INTERNAL_COLUMN_ID,
@@ -7,30 +7,22 @@ import {
 import { UI } from "@composehq/ts-public";
 import { useMemo } from "react";
 import { classNames } from "~/utils/classNames";
-import HeaderCell from "../components/HeaderCell";
-import DataCell from "../components/DataCell";
 import { CheckboxRaw } from "~/components/checkbox";
-import RowCell from "../components/RowCell";
-import TableActionCell from "../components/TableActionCell";
+import { HeaderCell, DataCell, RowCell, TableActionCell } from "../components";
 
-type InternalTableColumn<T> = {
-  id: string;
-  header: string | (({ table }: { table: TanStackTable<T> }) => JSX.Element);
-  cell: ({
-    row,
-    table,
-  }: {
-    row: Row<T>;
-    table: TanStackTable<T>;
-  }) => JSX.Element;
-};
+type TanStackTableColumn = ColumnDef<FormattedTableRow>;
 
-function formatColumn(column: TableColumnProp) {
+function formatColumn(column: TableColumnProp): TanStackTableColumn {
   return {
     ...column,
-    header: () => {
+    sortingFn: "basic",
+    sortDescFirst: UI.Table.shouldSortDescendingFirst(column.format),
+    header: (header) => {
       return (
         <HeaderCell
+          sortDirection={header.column.getIsSorted()}
+          nextSortDirection={header.column.getNextSortingOrder()}
+          isSortable={header.column.getCanSort()}
           className={classNames({
             "min-w-48 flex-1": !column.width,
             "flex-1": column.expand === true,
@@ -38,6 +30,7 @@ function formatColumn(column: TableColumnProp) {
           style={
             column.width ? { width: column.width, minWidth: column.width } : {}
           }
+          onClick={header.column.getToggleSortingHandler()}
         >
           {column.label}
         </HeaderCell>
@@ -68,7 +61,7 @@ function formatSelectColumn(
   allowMultiSelection: boolean,
   offset: number,
   hasError: boolean
-) {
+): TanStackTableColumn {
   return {
     id: INTERNAL_COLUMN_ID.SELECT,
     header: ({ table }: { table: TanStackTable<FormattedTableRow> }) => {
@@ -147,7 +140,7 @@ function formatActionColumn(
     UI.Components.InputTable["model"]["properties"]["actions"]
   >,
   onTableRowActionHook: (rowIdx: number, actionIdx: number) => void
-) {
+): TanStackTableColumn {
   return {
     id: INTERNAL_COLUMN_ID.ACTION,
     header: ({ table }: { table: TanStackTable<FormattedTableRow> }) => {
@@ -227,7 +220,7 @@ function useFormattedColumns(
   onTableRowActionHook: (rowIdx: number, actionIdx: number) => void
 ) {
   const formattedColumns = useMemo(() => {
-    const formatted: InternalTableColumn<FormattedTableRow>[] = [];
+    const formatted: TanStackTableColumn[] = [];
 
     // Add the row selections column first
     if (enableRowSelection) {
