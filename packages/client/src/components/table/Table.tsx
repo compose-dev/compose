@@ -7,18 +7,14 @@ import {
   FilterFn,
   Cell,
   getSortedRowModel,
+  SortingState,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { classNames } from "~/utils/classNames";
 import { useThrottledCallback } from "~/utils/useThrottledCallback";
 import { IOComponent } from "~/components/io-component";
-import { TextInput } from "../input";
 import { UI } from "@composehq/ts-public";
-import PageSelectorRow from "./components/PageSelectorRow";
-import TableLoading from "./components/TableLoading";
-import { Spinner } from "../spinner";
-import { u } from "@compose/ts";
 import {
   useSearch,
   useFormattedData,
@@ -26,7 +22,7 @@ import {
   type FormattedTableRow,
   type TableColumnProp,
 } from "./utils";
-import Icon from "../icon";
+import { ColumnHeaderRow, FooterRow, ToolbarRow } from "./components";
 
 // Add our custom search function to the table type
 // https://tanstack.com/table/v8/docs/framework/react/examples/filters-fuzzy
@@ -38,6 +34,7 @@ declare module "@tanstack/react-table" {
 }
 
 function Table({
+  id,
   data,
   columns,
   actions,
@@ -60,6 +57,7 @@ function Table({
   loading = false,
   height,
 }: {
+  id: string;
   data: UI.Components.InputTable["model"]["properties"]["data"];
   columns: TableColumnProp[];
   actions: UI.Components.InputTable["model"]["properties"]["actions"];
@@ -88,8 +86,9 @@ function Table({
 }) {
   const fixedHeight = paginated || totalRecords > 35;
 
-  const searchTable = useSearch(columns);
+  const customFilterFn = useSearch(columns);
   const formattedData = useFormattedData(data, columns);
+  const [sort, setSort] = useState<SortingState>([]);
   const formattedColumns = useFormattedColumns(
     columns,
     enableRowSelection,
@@ -117,18 +116,20 @@ function Table({
     columns: formattedColumns,
     state: {
       rowSelection: rowSelections,
+      sorting: sort,
     },
     onRowSelectionChange: handleRowSelectionChange,
     getCoreRowModel: getCoreRowModel(),
     enableRowSelection,
     enableMultiRowSelection: allowMultiSelection,
     filterFns: {
-      fuzzy: searchTable,
+      fuzzy: customFilterFn,
     },
     globalFilterFn: "fuzzy",
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     enableSorting: !paginated,
+    onSortingChange: setSort,
   });
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -147,32 +148,19 @@ function Table({
     overscan: 15,
   });
 
-  const [search, setSearch] = useState(serverSearchQuery);
+  const [searchQuery, setSearchQuery] = useState(serverSearchQuery);
   const { throttledCallback: setGlobalFilter } = useThrottledCallback(
     (value: string) => {
       table.setGlobalFilter(value);
     },
     300
   );
-  const prevLoadingRef = useRef(loading);
 
-  useEffect(() => {
-    if (
-      prevLoadingRef.current !== loading &&
-      loading === UI.Stale.OPTION.FALSE
-    ) {
-      rowVirtualizer.scrollToOffset(0, {
-        behavior: "auto",
-      });
-    }
-
-    if (
-      loading === UI.Stale.OPTION.UPDATE_DISABLED ||
-      loading === UI.Stale.OPTION.FALSE
-    ) {
-      prevLoadingRef.current = loading;
-    }
-  }, [rowVirtualizer, loading]);
+  const scrollToTop = useCallback(() => {
+    rowVirtualizer.scrollToOffset(0, {
+      behavior: "auto",
+    });
+  }, [rowVirtualizer]);
 
   return (
     <div className="w-full">
@@ -191,70 +179,29 @@ function Table({
           )}
           style={{ height }}
         >
+          <ToolbarRow
+            tableId={id}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            setTableFilter={(val) => {
+              setGlobalFilter(val || "");
+            }}
+            serverSearchQuery={serverSearchQuery}
+            loading={loading}
+            paginated={paginated}
+            onTablePageChangeHook={() => {
+              onTablePageChangeHook(searchQuery, 0, pageSize);
+            }}
+            table={table}
+            columns={columns}
+            disableSearch={disableSearch}
+            disableSort={paginated}
+            offset={offset}
+            rowCount={rows.length}
+            totalRecords={totalRecords}
+          />
           <div
-            className={classNames(
-              "flex justify-between p-2 w-full border-b border-brand-neutral",
-              {
-                "flex-col sm:flex-row items-start sm:items-center": paginated,
-                "items-center": !paginated,
-              }
-            )}
-          >
-            {disableSearch ? (
-              <div />
-            ) : paginated ? (
-              <form
-                className="flex flex-row space-x-2 items-center mb-2 sm:mb-0 sm:mr-2"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  // Changing the search query should always reset the offset
-                  onTablePageChangeHook(search, 0, pageSize);
-                }}
-              >
-                <TextInput
-                  value={search}
-                  setValue={(value) => {
-                    setSearch(value);
-                  }}
-                  placeholder="Search"
-                  label={null}
-                  left={<Icon name="search" color="brand-neutral-2" />}
-                  rootClassName="!w-40 sm:!w-60 md:!w-72"
-                />
-                {search !== serverSearchQuery &&
-                  loading !== UI.Stale.OPTION.UPDATE_DISABLED && (
-                    <p className="text-brand-neutral-2 text-sm min-w-fit">
-                      <span className="hidden sm:block">
-                        Press Enter to search
-                      </span>
-                      <span className="block sm:hidden">Enter to search</span>
-                    </p>
-                  )}
-                {loading === UI.Stale.OPTION.UPDATE_DISABLED && (
-                  <Spinner size="sm" variant="neutral" />
-                )}
-              </form>
-            ) : (
-              <TextInput
-                value={search}
-                setValue={(value) => {
-                  setSearch(value);
-                  setGlobalFilter(value || "");
-                }}
-                placeholder="Search"
-                label={null}
-                rootClassName="!w-40 sm:!w-72"
-                left={<Icon name="search" color="brand-neutral-2" />}
-              />
-            )}
-            <p className="text-brand-neutral-2 text-sm">
-              {paginated
-                ? `${u.string.formatNumber(offset + 1)} - ${u.string.formatNumber(offset + rows.length)} of ${totalRecords === Infinity ? "???" : u.string.formatNumber(totalRecords)} results`
-                : `${u.string.formatNumber(rows.length)} results`}
-            </p>
-          </div>
-          <div
-            className="flex flex-col overflow-auto w-full h-full"
+            className="flex flex-col overflow-auto w-full h-full border-t border-brand-neutral"
             style={{
               scrollbarWidth: "thin",
             }}
@@ -268,20 +215,7 @@ function Table({
             beyond the visible content area.
             */}
             <div className="border-brand-neutral w-max min-w-full">
-              <div className="flex sticky top-0 z-10 bg-brand-overlay">
-                {table
-                  .getHeaderGroups()
-                  .map((group) =>
-                    group.headers.map((header) => (
-                      <React.Fragment key={header.id}>
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                      </React.Fragment>
-                    ))
-                  )}
-              </div>
+              <ColumnHeaderRow table={table} />
               <div
                 className="w-full flex flex-col"
                 style={{
@@ -323,20 +257,18 @@ function Table({
               </p>
             )}
           </div>
-          {paginated && (
-            <div className="flex flex-row justify-between space-x-2 items-center p-2 w-full border-t border-brand-neutral bg-brand-io">
-              <TableLoading loading={loading} />
-              <PageSelectorRow
-                offset={offset}
-                pageSize={pageSize}
-                totalRecords={totalRecords}
-                onPageChange={(offset) => {
-                  onTablePageChangeHook(search, offset, pageSize);
-                }}
-                disabled={loading === UI.Stale.OPTION.UPDATE_DISABLED}
-              />
-            </div>
-          )}
+          <FooterRow
+            paginated={paginated}
+            loading={loading}
+            offset={offset}
+            pageSize={pageSize}
+            totalRecords={totalRecords}
+            onTablePageChangeHook={(offset, pageSize) => {
+              onTablePageChangeHook(searchQuery, offset, pageSize);
+            }}
+            scrollToTop={scrollToTop}
+            rowCount={rows.length}
+          />
           <div className="absolute bottom-0 left-0 w-full border-b border-brand-neutral rounded-brand pointer-events-none " />
         </div>
         {hasError && errorMessage !== null && (

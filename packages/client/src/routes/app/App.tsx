@@ -18,6 +18,7 @@ import Icon from "~/components/icon";
 import { ConnectionStatusIndicator } from "~/components/connection-status-indicator";
 import { useCallback, useEffect, useMemo } from "react";
 import LoadingOverlay from "./LoadingOverlay";
+import { Tooltip } from "react-tooltip";
 
 const routeApi = getRouteApi("/app/$environmentId/$appRoute");
 
@@ -314,6 +315,13 @@ function App() {
         </div>
       </div>
       <LoadingOverlay loading={pageLoading} />
+      <Tooltip
+        id="top-tooltip"
+        className="tooltip z-40"
+        place="top"
+        offset={8}
+        noArrow={true}
+      />
     </>
   );
 }

@@ -407,6 +407,7 @@ function AuditLog() {
           <div className="flex flex-col gap-6 w-full">
             <h3>Data</h3>
             <Table.Root
+              id="audit-logs"
               data={data?.logs ?? []}
               loading={loading ? UI.Stale.OPTION.UPDATE_DISABLED : false}
               columns={[
@@ -424,6 +425,7 @@ function AuditLog() {
                     error: "orange",
                     fatal: "red",
                   },
+                  overflow: "ellipsis",
                 },
                 {
                   id: "source",
@@ -435,33 +437,35 @@ function AuditLog() {
                     system: "green",
                     user: "orange",
                   },
+                  overflow: "ellipsis",
                 },
                 {
                   id: "timestamp",
                   label: "Timestamp (UTC)",
                   accessorKey: "createdAtUTC",
                   width: "210px",
+                  overflow: "ellipsis",
                 },
                 {
                   id: "userEmail",
                   label: "User Email",
                   accessorKey: "userEmail",
                   width: "240px",
-                  truncate: true,
+                  overflow: "ellipsis",
                 },
                 {
                   id: "appRoute",
                   label: "App Route",
                   accessorKey: "appRoute",
                   width: "200px",
-                  truncate: true,
+                  overflow: "ellipsis",
                 },
                 {
                   id: "message",
                   label: "Message",
                   accessorKey: "message",
                   width: "1000px",
-                  truncate: true,
+                  overflow: "ellipsis",
                 },
               ]}
               actions={[{ label: "View Details" }]}

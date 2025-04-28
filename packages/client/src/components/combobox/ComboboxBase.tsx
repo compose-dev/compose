@@ -84,8 +84,8 @@ function ComboboxInputRoot({
       >
         {children}
       </div>
-      <ComboboxButton className="group absolute bottom-3 right-0 px-2.5">
-        <Icon name="chevron-down" color="brand-neutral-2" />
+      <ComboboxButton className="group absolute bottom-3.5 right-0 px-2.5">
+        <Icon name="chevron-down" color="brand-neutral-2" size="0.75" />
       </ComboboxButton>
     </div>
   );
@@ -142,7 +142,7 @@ function ComboboxOptions<T extends SelectValue>({
       <HeadlessComboboxOptions
         anchor={OPTIONS_ANCHOR}
         className={classNames(
-          "w-[var(--input-width)] bg-brand-io border-brand border-brand-neutral rounded-brand shadow-sm [--anchor-gap:4px] text-sm/6 text-brand-neutral py-2 mt-2 z-20",
+          "w-[var(--input-width)] bg-brand-io border-brand border-brand-neutral rounded-brand shadow-sm [--anchor-gap:4px] text-sm/6 text-brand-neutral py-2 mt-2 z-30",
           optionsBoxClassName
         )}
         key={filteredOptions.length}
@@ -174,7 +174,7 @@ function ComboboxOptions<T extends SelectValue>({
     <HeadlessComboboxOptions
       anchor={OPTIONS_ANCHOR}
       className={classNames(
-        "w-[var(--input-width)] bg-brand-io border-brand border-brand-neutral rounded-brand shadow-sm [--anchor-gap:4px] text-sm/6 text-brand-neutral py-2 mt-2 z-20",
+        "w-[var(--input-width)] bg-brand-io border-brand border-brand-neutral rounded-brand shadow-sm [--anchor-gap:4px] text-sm/6 text-brand-neutral py-2 mt-2 z-30",
         optionsBoxClassName
       )}
       key={filteredOptions.length}

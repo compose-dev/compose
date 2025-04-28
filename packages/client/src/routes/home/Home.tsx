@@ -20,6 +20,7 @@ import AppRow from "./AppRow";
 import { useHomeStore, type HomeStore } from "./useHomeStore";
 import NewUserGuide from "./NewUserGuide";
 import NewEnvironmentModal from "./NewEnvironmentModal";
+import { Tooltip } from "react-tooltip";
 
 function HomeWrapper() {
   return (
@@ -417,6 +418,7 @@ function Home() {
           window.location.reload();
         }}
       />
+      <Tooltip id="top-tooltip" className="tooltip" noArrow={true} />
     </div>
   );
 }

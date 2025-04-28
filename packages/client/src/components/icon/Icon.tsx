@@ -2,6 +2,7 @@ import { classNames } from "~/utils/classNames";
 import {
   IconArrowUp,
   IconArrowDown,
+  IconArrowsSort,
   IconHome,
   IconRefresh,
   IconCopy,
@@ -30,6 +31,11 @@ import {
   IconSearch,
   IconTrendingUp,
   IconTrendingDown,
+  IconEye,
+  IconFilter,
+  IconDownload,
+  IconAdjustmentsHorizontal,
+  IconMenu2,
 } from "@tabler/icons-react";
 
 const ICON_NAME = {
@@ -73,20 +79,26 @@ const ICON_NAME = {
   x: "x",
   world: "world",
   stack: "stack",
-
   // directly from tabler (note: not yet accurate, but thought I'd the separation process...)
   "arrow-up": "arrow-up",
   "arrow-down": "arrow-down",
+  "arrows-sort": "arrows-sort",
+  eye: "eye",
+  download: "download",
   typescript: "typescript",
   javascript: "javascript",
   python: "python",
+  filter: "filter",
   "sidebar-right": "sidebar-right",
   "trending-up": "trending-up",
   "trending-down": "trending-down",
+  adjustments: "adjustments",
+  "hamburger-menu": "hamburger-menu",
 } as const;
 
 const SIZE = {
   "0.5": "0.5",
+  "0.625": "0.625",
   "0.75": "0.75",
   "1": "1",
   "1.125": "1.125",
@@ -98,6 +110,7 @@ type Size = (typeof SIZE)[keyof typeof SIZE];
 
 const SIZE_MULTIPLIER = {
   [SIZE["0.5"]]: 0.5,
+  [SIZE["0.625"]]: 0.625,
   [SIZE["0.75"]]: 0.75,
   [SIZE["1"]]: 1,
   [SIZE["1.125"]]: 1.125,
@@ -163,6 +176,55 @@ function Icon({
     );
   }
 
+  if (name === ICON_NAME.adjustments) {
+    return (
+      <IconAdjustmentsHorizontal
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME["hamburger-menu"]) {
+    return (
+      <IconMenu2
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+  if (name === ICON_NAME.download) {
+    return (
+      <IconDownload
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME.filter) {
+    return (
+      <IconFilter
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME.eye) {
+    return (
+      <IconEye
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
   if (name === ICON_NAME["arrow-up"]) {
     return (
       <IconArrowUp
@@ -176,6 +238,16 @@ function Icon({
   if (name === ICON_NAME["arrow-down"]) {
     return (
       <IconArrowDown
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME["arrows-sort"]) {
+    return (
+      <IconArrowsSort
         size={16 * SIZE_MULTIPLIER[size]}
         color={ICON_COLOR[color]}
         strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}

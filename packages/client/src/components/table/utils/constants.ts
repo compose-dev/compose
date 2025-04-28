@@ -1,4 +1,5 @@
 import { UI } from "@composehq/ts-public";
+import { Table } from "@tanstack/react-table";
 
 /**
  * Column IDs that are applied by Compose to the table data to enable certain
@@ -81,5 +82,7 @@ interface TableColumnProp {
   expand?: boolean;
 }
 
+type TanStackTable = Table<FormattedTableRow>;
+
 export { INTERNAL_COLUMN_ID };
-export type { FormattedTableRow, TableColumnProp };
+export type { FormattedTableRow, TableColumnProp, TanStackTable };

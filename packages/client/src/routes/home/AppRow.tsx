@@ -103,7 +103,7 @@ function AppRow({
           <div className="flex flex-row items-center space-x-2">
             {isPublic(environment, route) && (
               <div
-                data-tooltip-id="public-app"
+                data-tooltip-id="top-tooltip"
                 data-tooltip-content="This app is public and accessible to anyone with the link."
               >
                 <Icon
@@ -114,7 +114,7 @@ function AppRow({
             )}
             {isInheritingFrom(environment, route) && (
               <div
-                data-tooltip-id="inheriting-from-app"
+                data-tooltip-id="top-tooltip"
                 data-tooltip-content="This app is inheriting permissions from another app."
               >
                 <Icon
@@ -125,7 +125,7 @@ function AppRow({
             )}
             {isSharedViaEmail(environment, route) && (
               <div
-                data-tooltip-id="shared-via-email"
+                data-tooltip-id="top-tooltip"
                 data-tooltip-content="This app is shared with external users via email."
               >
                 <Icon
@@ -172,9 +172,6 @@ function AppRow({
         environmentApps={environment.apps}
         externalUsers={externalUsersForApp}
       />
-      <Tooltip id="public-app" className="tooltip" />
-      <Tooltip id="inheriting-from-app" className="tooltip" />
-      <Tooltip id="shared-via-email" className="tooltip" />
     </>
   );
 }

@@ -68,8 +68,16 @@ function ModalComponent() {
           </Modal.Root>
         )}
         <Table.Root
+          id="users"
           data={users}
-          columns={[{ id: "name", label: "Name", accessorKey: "name" }]}
+          columns={[
+            {
+              id: "name",
+              label: "Name",
+              accessorKey: "name",
+              overflow: "ellipsis",
+            },
+          ]}
           actions={[{ label: "View Details" }]}
           onTableRowActionHook={(rowIdx) => {
             setModalContent(users[rowIdx]);

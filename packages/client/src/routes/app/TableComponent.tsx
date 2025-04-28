@@ -262,6 +262,7 @@ export default function TableComponent({
       )}
       <div className="self-stretch">
         <Table.Root
+          id={componentId}
           data={component.model.properties.data}
           columns={columns}
           actions={component.model.properties.actions}

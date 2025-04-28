@@ -1,8 +1,9 @@
-import { Table as TanStackTable, Row, ColumnDef } from "@tanstack/react-table";
+import { Row, ColumnDef } from "@tanstack/react-table";
 import {
   FormattedTableRow,
   INTERNAL_COLUMN_ID,
   TableColumnProp,
+  TanStackTable,
 } from "./constants";
 import { UI } from "@composehq/ts-public";
 import { useMemo } from "react";
@@ -41,7 +42,7 @@ function formatColumn(column: TableColumnProp): TanStackTableColumn {
       table,
     }: {
       row: Row<FormattedTableRow>;
-      table: TanStackTable<FormattedTableRow>;
+      table: TanStackTable;
     }) => {
       return (
         <DataCell
@@ -64,7 +65,7 @@ function formatSelectColumn(
 ): TanStackTableColumn {
   return {
     id: INTERNAL_COLUMN_ID.SELECT,
-    header: ({ table }: { table: TanStackTable<FormattedTableRow> }) => {
+    header: ({ table }: { table: TanStackTable }) => {
       const hasOneRow = table.getRowModel().rows.length >= 1;
 
       if (!hasOneRow) {
@@ -98,7 +99,7 @@ function formatSelectColumn(
       table,
     }: {
       row: Row<FormattedTableRow>;
-      table: TanStackTable<FormattedTableRow>;
+      table: TanStackTable;
     }) => (
       <RowCell
         className="pt-3"
@@ -143,7 +144,7 @@ function formatActionColumn(
 ): TanStackTableColumn {
   return {
     id: INTERNAL_COLUMN_ID.ACTION,
-    header: ({ table }: { table: TanStackTable<FormattedTableRow> }) => {
+    header: ({ table }: { table: TanStackTable }) => {
       const hasOneRow = table.getRowModel().rows.length >= 1;
 
       if (!hasOneRow) {
@@ -177,7 +178,7 @@ function formatActionColumn(
       table,
     }: {
       row: Row<FormattedTableRow>;
-      table: TanStackTable<FormattedTableRow>;
+      table: TanStackTable;
     }) => {
       return (
         <RowCell

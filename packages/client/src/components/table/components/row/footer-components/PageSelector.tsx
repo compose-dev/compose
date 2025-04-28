@@ -2,7 +2,7 @@ import { u } from "@compose/ts";
 import Button from "~/components/button";
 import Icon from "~/components/icon";
 
-export default function PageSelectorRow({
+function PageSelector({
   offset,
   pageSize,
   totalRecords,
@@ -20,11 +20,11 @@ export default function PageSelectorRow({
   const totalPages = Math.ceil(totalRecords / pageSize);
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex flex-1 items-center space-x-0.5 sm:space-x-2 justify-end">
       <Button
         variant="ghost"
         onClick={() => onPageChange(0)}
-        className="px-1"
+        className="pr-1"
         disabled={pageIndex <= 0 || disabled}
       >
         <Icon name="chevron-pipe-left" color="brand-neutral-2" size="1.25" />
@@ -38,7 +38,8 @@ export default function PageSelectorRow({
         <Icon name="chevron-left-package" color="brand-neutral-2" size="1.25" />
       </Button>
       <p className="text-brand-neutral-2 text-sm">
-        Page {u.string.formatNumber(pageIndex + 1)} of{" "}
+        <span className="hidden sm:inline">Page</span>{" "}
+        {u.string.formatNumber(pageIndex + 1)} of{" "}
         {totalRecords === Infinity ? "???" : u.string.formatNumber(totalPages)}
       </p>
       <Button
@@ -72,3 +73,5 @@ export default function PageSelectorRow({
     </div>
   );
 }
+
+export default PageSelector;

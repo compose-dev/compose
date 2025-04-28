@@ -59,17 +59,30 @@ function TableComponent() {
         </Modal.Root>
       )}
       <Table.Root
+        id="users"
         data={data}
         columns={[
-          { id: "name", label: "Name", accessorKey: "name" },
+          {
+            id: "name",
+            label: "Name",
+            accessorKey: "name",
+            overflow: "ellipsis",
+          },
           {
             id: "approved",
             label: "Approved",
             accessorKey: "approved",
             format: "boolean",
             width: "170px",
+            overflow: "ellipsis",
           },
-          { id: "age", label: "Age", accessorKey: "age", width: "170px" },
+          {
+            id: "age",
+            label: "Age",
+            accessorKey: "age",
+            width: "170px",
+            overflow: "ellipsis",
+          },
         ]}
         actions={[]}
         onTableRowActionHook={() => {}}
