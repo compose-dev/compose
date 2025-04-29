@@ -128,6 +128,10 @@ class AdvancedTableColumn(TypedDict):
 
     See the [docs](https://docs.composehq.com/components/input/table#columns) for more details.
     """
+    hidden: NotRequired[bool]
+    """
+    Whether the column is initially hidden. By default, the column is visible.
+    """
 
 
 TableColumn = Union[str, AdvancedTableColumn]

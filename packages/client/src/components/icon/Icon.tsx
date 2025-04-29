@@ -36,6 +36,8 @@ import {
   IconDownload,
   IconAdjustmentsHorizontal,
   IconMenu2,
+  IconAdjustments,
+  IconPin,
 } from "@tabler/icons-react";
 
 const ICON_NAME = {
@@ -94,6 +96,8 @@ const ICON_NAME = {
   "trending-down": "trending-down",
   adjustments: "adjustments",
   "hamburger-menu": "hamburger-menu",
+  "adjustments-vertical": "adjustments-vertical",
+  pin: "pin",
 } as const;
 
 const SIZE = {
@@ -169,6 +173,26 @@ function Icon({
   if (name === ICON_NAME["sidebar-right"]) {
     return (
       <IconLayoutSidebarRight
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME.pin) {
+    return (
+      <IconPin
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME["adjustments-vertical"]) {
+    return (
+      <IconAdjustments
         size={16 * SIZE_MULTIPLIER[size]}
         color={ICON_COLOR[color]}
         strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}

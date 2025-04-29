@@ -10,6 +10,7 @@ import { Popover } from "~/components/popover";
 import { useState } from "react";
 import { TextInput } from "~/components/input";
 import { Alert } from "~/components/alert";
+import { Checkbox } from "~/components/checkbox";
 
 function DownloadCSVPanel({
   table,
@@ -25,10 +26,20 @@ function DownloadCSVPanel({
   defaultFileName: string;
 }) {
   const [filename, setFilename] = useState<string | null>(defaultFileName);
+  const [includeHiddenColumns, setIncludeHiddenColumns] = useState(false);
 
   function downloadCSV(filename?: string | null) {
-    generateAndDownloadCSV(table, columns, filename ?? defaultFileName);
+    generateAndDownloadCSV(
+      table,
+      columns,
+      filename ?? defaultFileName,
+      includeHiddenColumns
+    );
   }
+
+  const hiddenColumnCount = Object.values(
+    table.getState().columnVisibility
+  ).filter((column) => column === false).length;
 
   return (
     <div
@@ -43,10 +54,19 @@ function DownloadCSVPanel({
       <TextInput
         value={filename}
         setValue={(val) => setFilename(val)}
-        placeholder="Filename"
-        label={null}
+        label="File name"
         postFix=".csv"
       />
+      {hiddenColumnCount > 0 && (
+        <Checkbox
+          checked={includeHiddenColumns}
+          setChecked={(val) => setIncludeHiddenColumns(val)}
+          label="Include hidden columns"
+          description={`${hiddenColumnCount} hidden ${
+            hiddenColumnCount === 1 ? "column" : "columns"
+          } will be included in the CSV download.`}
+        />
+      )}
       <Button variant="primary" onClick={() => downloadCSV(filename)}>
         Download CSV
       </Button>
@@ -68,7 +88,10 @@ function DownloadCSVPopover({
   return (
     <Popover.Root>
       <Popover.Trigger>
-        <div data-tooltip-id="top-tooltip" data-tooltip-content="Download CSV">
+        <div
+          data-tooltip-id="top-tooltip-offset4"
+          data-tooltip-content="Download CSV"
+        >
           <Icon name="download" color="brand-neutral-2" />
         </div>
       </Popover.Trigger>

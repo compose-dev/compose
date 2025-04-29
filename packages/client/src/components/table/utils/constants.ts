@@ -80,6 +80,11 @@ interface TableColumnProp {
    * all column cells should set `flex-1` if this is true.
    */
   expand?: boolean;
+  /**
+   * Whether the column is initially hidden.
+   * @default `false`
+   */
+  hidden?: boolean;
 }
 
 type TanStackTable = Table<FormattedTableRow>;

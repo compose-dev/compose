@@ -2,7 +2,11 @@ import { u } from "@compose/ts";
 import Icon from "~/components/icon";
 import { TextInput } from "~/components/input";
 import { TableColumnProp, TanStackTable } from "../../utils";
-import { DownloadCSVPopover, SortColumnsPopover } from "./toolbar-components";
+import {
+  DownloadCSVPopover,
+  PinAndHideColumnsPopover,
+  SortColumnsPopover,
+} from "./toolbar-components";
 import { classNames } from "~/utils/classNames";
 import { UI } from "@composehq/ts-public";
 import { Spinner } from "~/components/spinner";
@@ -144,14 +148,12 @@ function ToolbarRow({
             columns={columns}
           />
         )}
-        {/* <button onClick={() => console.log("preview")}>
-          <div
-            data-tooltip-id="top-tooltip"
-            data-tooltip-content="Hide columns"
-          >
-            <Icon name="eye" color="brand-neutral-2" />
-          </div>
-        </button> */}
+        <PinAndHideColumnsPopover
+          columns={columns}
+          columnVisibility={table.getState().columnVisibility}
+          setColumnVisibility={table.setColumnVisibility}
+          resetColumnVisibility={table.resetColumnVisibility}
+        />
         <DownloadCSVPopover
           table={table}
           columns={columns}

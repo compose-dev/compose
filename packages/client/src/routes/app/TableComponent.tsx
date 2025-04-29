@@ -58,6 +58,9 @@ function guessColumns(
           ? defaultOverflow
           : (column.overflow ?? defaultOverflow);
 
+      const hidden =
+        typeof column === "string" ? false : (column.hidden ?? false);
+
       return {
         id: key,
         accessorKey: key,
@@ -66,6 +69,7 @@ function guessColumns(
         width,
         tagColors,
         overflow,
+        hidden,
       };
     });
   }
@@ -79,6 +83,7 @@ function guessColumns(
     format: Table.guessColumnFormat(data, key),
     tagColors: {},
     overflow: defaultOverflow,
+    hidden: false,
   }));
 }
 

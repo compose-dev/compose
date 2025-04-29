@@ -169,7 +169,7 @@ function SortColumnsPopover({
     <Popover.Root>
       <Popover.Trigger>
         <div
-          data-tooltip-id="top-tooltip"
+          data-tooltip-id="top-tooltip-offset4"
           data-tooltip-content={getSortingTooltipContent()}
         >
           <Icon

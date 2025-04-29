@@ -316,10 +316,17 @@ function App() {
       </div>
       <LoadingOverlay loading={pageLoading} />
       <Tooltip
-        id="top-tooltip"
+        id="top-tooltip-offset8"
         className="tooltip z-40"
         place="top"
         offset={8}
+        noArrow={true}
+      />
+      <Tooltip
+        id="top-tooltip-offset4"
+        className="tooltip z-40"
+        place="top"
+        offset={4}
         noArrow={true}
       />
     </>

@@ -8,6 +8,7 @@ import {
   Cell,
   getSortedRowModel,
   SortingState,
+  ColumnPinningState,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { useCallback, useRef, useState } from "react";
@@ -21,6 +22,7 @@ import {
   useFormattedColumns,
   type FormattedTableRow,
   type TableColumnProp,
+  INTERNAL_COLUMN_ID,
 } from "./utils";
 import { ColumnHeaderRow, FooterRow, ToolbarRow } from "./components";
 
@@ -89,6 +91,10 @@ function Table({
   const customFilterFn = useSearch(columns);
   const formattedData = useFormattedData(data, columns);
   const [sort, setSort] = useState<SortingState>([]);
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
+    left: enableRowSelection ? [INTERNAL_COLUMN_ID.SELECT] : [],
+    right: [],
+  });
   const formattedColumns = useFormattedColumns(
     columns,
     enableRowSelection,
@@ -117,6 +123,18 @@ function Table({
     state: {
       rowSelection: rowSelections,
       sorting: sort,
+      columnPinning,
+    },
+    // Setting initial state here allows us to leverage tanstack table's "resetColumnVisibility"
+    // which functionality to easily reset visibility to the initial state.
+    initialState: {
+      columnVisibility: columns.reduce(
+        (acc, column) => {
+          acc[column.id] = !column.hidden;
+          return acc;
+        },
+        {} as Record<string, boolean>
+      ),
     },
     onRowSelectionChange: handleRowSelectionChange,
     getCoreRowModel: getCoreRowModel(),
@@ -130,6 +148,7 @@ function Table({
     getSortedRowModel: getSortedRowModel(),
     enableSorting: !paginated,
     onSortingChange: setSort,
+    onColumnPinningChange: setColumnPinning,
   });
 
   const tableContainerRef = useRef<HTMLDivElement>(null);

@@ -141,6 +141,12 @@ type AdvancedTableColumn<TData extends TableDataRow[]> = {
    * @default `ellipsis`
    */
   overflow?: OverflowBehavior;
+  /**
+   * Whether the column is initially hidden.
+   *
+   * @default `false`
+   */
+  hidden?: boolean;
 };
 
 // Omit the original field in the type that's shown to the user.
