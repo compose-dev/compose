@@ -9,6 +9,12 @@ import {
 type TableAction<TData extends UI.Table.DataRow[]> = NonNullable<
   UI.Components.InputTable["model"]["properties"]["actions"]
 >[number] & {
+  /**
+   * The function to call when the action is clicked.
+   *
+   * @param row - The row that was clicked.
+   * @param index - The index of the row that was clicked.
+   */
   onClick: (row: TData[number], index: number) => void;
 };
 
@@ -394,9 +400,9 @@ function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
     minSelections: mergedProperties.minSelections,
     maxSelections: mergedProperties.maxSelections,
     allowSelect: getSelectable(
-      mergedProperties.selectable,
-      mergedProperties.allowSelect,
-      mergedProperties.onChange
+      properties.selectable,
+      properties.allowSelect,
+      properties.onChange
     ),
     hasOnSelectHook: mergedProperties.onChange !== null,
     actions: getModelActions(mergedProperties.actions),

@@ -31,11 +31,12 @@ function HeaderCell({
   return (
     <div
       className={classNames(
-        "px-2 py-2 border-b border-brand-neutral flex items-center bg-brand-overlay font-medium group",
+        "px-2 border-b border-brand-neutral flex items-center bg-brand-overlay font-medium group",
         {
           "cursor-pointer": isSortable,
-          "py-1": density === UI.Table.DENSITY.COMPACT,
-          "py-2": density === UI.Table.DENSITY.STANDARD,
+          "py-2":
+            density === UI.Table.DENSITY.STANDARD ||
+            density === UI.Table.DENSITY.COMPACT,
           "py-3": density === UI.Table.DENSITY.COMFORTABLE,
         },
         className

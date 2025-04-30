@@ -57,10 +57,17 @@ function TableActionCell({
         <Button
           key={idx}
           onClick={() => onClick(button)}
-          variant="outline"
+          variant={actions[button].appearance || "outline"}
           size={density === "compact" ? "xs" : "sm"}
-          // Need to set font-normal to override the font-medium set in the header column.
-          className="!bg-brand-io hover:!bg-brand-page-inverted-5 whitespace-nowrap max-h-fit !font-normal"
+          className={classNames("whitespace-nowrap max-h-fit", {
+            // Need to set font-normal to override the font-medium set in the header column.
+            "!bg-brand-io hover:!bg-brand-page-inverted-5 !font-normal":
+              actions[button].appearance === "outline" ||
+              !actions[button].appearance,
+            "border-transparent border":
+              !!actions[button].appearance &&
+              actions[button].appearance !== "outline",
+          })}
         >
           {actions[button].label}
         </Button>
@@ -78,6 +85,13 @@ function TableActionCell({
           options={menuItems.map((item) => ({
             label: actions[item].label,
             onClick: () => onClick(item),
+            variant: actions[item].appearance
+              ? actions[item].appearance === "outline"
+                ? "neutral"
+                : actions[item].appearance === "danger"
+                  ? "error"
+                  : actions[item].appearance
+              : "neutral",
           }))}
           className="h-full items-center"
         />

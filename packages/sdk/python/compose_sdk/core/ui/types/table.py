@@ -10,6 +10,7 @@ from typing import (
 )
 from typing_extensions import NotRequired
 from .validator_response import VoidResponse
+from .button_appearance import BUTTON_APPEARANCE
 
 TableValue = Any
 TableDataRow = Dict[str, TableValue]
@@ -149,7 +150,22 @@ TableColumns = List[TableColumn]
 
 class TableActionWithoutOnClick(TypedDict):
     label: str
+    """
+    The label of the action.
+    """
     surface: NotRequired[bool]
+    """
+    Whether to render the action as a button or inside a dropdown menu.
+    """
+    appearance: NotRequired[BUTTON_APPEARANCE]
+    """
+    The appearance of the action. Options:
+
+    - `outline` (default)
+    - `primary`
+    - `warning`
+    - `danger`
+    """
 
 
 TableActionOnClick = Union[

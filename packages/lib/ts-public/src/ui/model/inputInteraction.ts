@@ -1,4 +1,9 @@
-import { SelectOption, Table as TTable, BaseGeneric } from "../types";
+import {
+  SelectOption,
+  Table as TTable,
+  BaseGeneric,
+  ButtonAppearance,
+} from "../types";
 import { BaseWithInputInteraction } from "./base";
 import * as Components from "../components";
 
@@ -100,8 +105,25 @@ export interface Table<
     columns: TTable.Column<TTable.DataRow[]>[] | null;
     actions:
       | {
+          /**
+           * The label of the action.
+           */
           label: string;
+          /**
+           * Whether the action should be displayed as a button, or inside a dropdown menu.
+           */
           surface?: boolean;
+          /**
+           * The appearance of the action. Options:
+           *
+           * - `primary`
+           * - `outline`
+           * - `warning`
+           * - `danger`
+           *
+           * Defaults to `outline`.
+           */
+          appearance?: ButtonAppearance.Type;
         }[]
       | null;
     allowSelect: boolean;

@@ -108,7 +108,11 @@ function formatSelectColumn(
       table: TanStackTable;
     }) => (
       <RowCell
-        className="pt-3"
+        className={classNames({
+          "pt-2": density === "compact",
+          "pt-3": density === "standard",
+          "pt-4": density === "comfortable",
+        })}
         isLastRow={row.index === table.getRowModel().rows.length - 1}
         overflow="dynamic"
         density={density}
