@@ -301,19 +301,19 @@ export default function TableComponent({
           errorMessage={errorMessage}
           allowMultiSelection={component.model.properties.maxSelections > 1}
           disableRowSelection={disabled}
-          disableSearch={component.model.properties.notSearchable}
           serverSearchQuery={component.model.properties.searchQuery}
           paginated={component.model.properties.paged}
           loading={componentLoading}
           height={component.model.style?.height ?? undefined}
           sortBy={component.model.properties.sortBy}
-          sortable={
-            component.model.properties.sortable === undefined
-              ? component.model.properties.paged
-                ? UI.Table.SORT_OPTION.DISABLED
-                : UI.Table.SORT_OPTION.MULTI
-              : component.model.properties.sortable
-          }
+          // We expect the SDK to return undefined if the table should be
+          // multi-column sortable. Else, it'll explicitly return the
+          // sortable option to use.
+          sortable={component.model.properties.sortable}
+          // We expect the SDK to return undefined if the table should be
+          // searchable. Else, it'll explicitly return the searchable option
+          // to use.
+          disableSearch={component.model.properties.notSearchable}
         />
       </div>
     </div>

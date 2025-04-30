@@ -55,6 +55,47 @@ def camel_case_columns(columns: TableColumns) -> TableColumns:
     ]
 
 
+def get_searchable(
+    searchable: Union[bool, None], manually_paged: bool, auto_paged: bool
+) -> bool:
+    # If auto-paginated, then it is never searchable.
+    if auto_paged:
+        return False
+
+    # If manually paged, then it is searchable only if explicitly set to true.
+    if manually_paged and searchable is True:
+        return True
+
+    # If not paged and explicitly set, then use the explicitly set value.
+    if searchable is not None:
+        return searchable
+
+    # Otherwise, if not paged, the table is default searchable.
+    return True
+
+
+def get_sortable(
+    sortable: Union[TableSortOption, None], manually_paged: bool, auto_paged: bool
+) -> TableSortOption:
+    # If auto-paginated, then it is never sortable.
+    if auto_paged:
+        return TableSortOption.DISABLED
+
+    # If manually paged, then it is sortable only if explicitly set.
+    if manually_paged:
+        if sortable is None:
+            return TableSortOption.DISABLED
+
+        return sortable
+
+    # If not paged and explicitly set, then use the explicitly set value.
+    if sortable is not None:
+        return sortable
+
+    # Otherwise, if not paged, the table is default multi-column sortable.
+    return TableSortOption.MULTI
+
+
 def _table(
     id: str,
     data: Union[TableData, TableOnPageChange],
@@ -117,8 +158,14 @@ def _table(
         "v": 3,
     }
 
-    if auto_paged or not searchable:
+    # Only set `notSearchable` if the table is not searchable.
+    if get_searchable(searchable, manually_paged, auto_paged) is False:
         model_properties["notSearchable"] = True
+
+    # Only set `sortable` if the table is not multi-column sortable.
+    sortable = get_sortable(sortable, manually_paged, auto_paged)
+    if sortable != TableSortOption.MULTI:
+        model_properties["sortable"] = sortable
 
     if manually_paged or auto_paged:
         model_properties["paged"] = True

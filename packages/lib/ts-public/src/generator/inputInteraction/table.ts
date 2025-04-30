@@ -90,7 +90,7 @@ interface TableProperties<TData extends UI.Table.DataRow[]>
    */
   selectionReturnType: UI.Components.InputTable["model"]["properties"]["selectMode"];
   /**
-   * Whether the table should be searchable. Defaults to `true`, except for paginated tables, which must handle search server-side. See the docs for more info.
+   * Whether the table should be searchable. Defaults to `true` for normal tables, `false` for paginated tables.
    */
   searchable: boolean;
   /**
@@ -108,7 +108,7 @@ interface TableProperties<TData extends UI.Table.DataRow[]>
    */
   overflow?: UI.Components.InputTable["model"]["properties"]["overflow"];
   /**
-   * Whether to allow single-column, multi-column, or no sorting. Options:
+   * Whether the table should be sortable. Options:
    *
    * - `true`: Allow multi-column sorting.
    * - `"single"`: Allow single-column sorting.
@@ -186,6 +186,58 @@ function getHookActions(
   return actions.map(({ onClick }) => onClick);
 }
 
+function getSearchable(
+  searchable: boolean | undefined,
+  manuallyPaged: boolean,
+  autoPaged: boolean
+) {
+  // If auto-paginated, then it is never searchable.
+  if (autoPaged) {
+    return false;
+  }
+
+  // If manually paged, then it is searchable only if explicitly set to true.
+  if (manuallyPaged && searchable === true) {
+    return true;
+  }
+
+  // If not paged and explicitly set, then use the explicitly set value.
+  if (searchable !== undefined) {
+    return searchable;
+  }
+
+  // Otherwise, if not paged, the table is default searchable.
+  return true;
+}
+
+function getSortable(
+  sortable: UI.Table.SortOption | undefined,
+  manuallyPaged: boolean,
+  autoPaged: boolean
+) {
+  // If auto-paginated, then it is never sortable.
+  if (autoPaged) {
+    return UI.Table.SORT_OPTION.DISABLED;
+  }
+
+  // If manually paged, then it is sortable only if explicitly set.
+  if (manuallyPaged) {
+    if (sortable === undefined) {
+      return UI.Table.SORT_OPTION.DISABLED;
+    }
+
+    return sortable;
+  }
+
+  // If not paged and explicitly set, then use the explicitly set value.
+  if (sortable !== undefined) {
+    return sortable;
+  }
+
+  // Otherwise, if not paged, the table is default multi-column sortable.
+  return UI.Table.SORT_OPTION.MULTI;
+}
+
 /**
  * Generate a table component that allows users to view and interact with rows of data.
  *
@@ -232,7 +284,7 @@ function getHookActions(
  * @param {UI.Components.InputTable["model"]["minSelections"]} properties.minSelections - Minimum number of rows that must be selected. Defaults to `1`.
  * @param {UI.Components.InputTable["model"]["maxSelections"]} properties.maxSelections - Maximum number of rows that can be selected. Defaults to `1`.
  * @param {UI.Components.InputTable["model"]["selectionReturnType"]} properties.selectionReturnType - How the table should return selected rows. Defaults to `full` (a list of rows). Must be `index` (a list of row indices) if the table is paginated.
- * @param {UI.Components.InputTable["model"]["searchable"]} properties.searchable - Whether the table should be searchable. Defaults to `true`.
+ * @param {UI.Components.InputTable["model"]["searchable"]} properties.searchable - Whether the table should be searchable. Defaults to `true` for normal tables, `false` for paginated tables.
  * @param {boolean} properties.paginate - Whether the table should be paginated. Defaults to `false`. Tables with more than 2500 rows will be paginated by default.
  * @param {UI.Components.InputTable["model"]["overflow"]} properties.overflow - The overflow behavior of table cells. Options:
  *
@@ -301,10 +353,6 @@ function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
     v: 3,
   };
 
-  if (autoPaged || mergedProperties.searchable === false) {
-    modelProperties.notSearchable = true;
-  }
-
   if (manuallyPaged || autoPaged) {
     modelProperties.paged = true;
   }
@@ -327,14 +375,15 @@ function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
     modelProperties.overflow = properties.overflow;
   }
 
-  if (properties.sortable !== undefined) {
-    modelProperties.sortable = properties.sortable;
+  // Only set `notSearchable` if the table is not searchable.
+  if (!getSearchable(properties.searchable, manuallyPaged, autoPaged)) {
+    modelProperties.notSearchable = true;
   }
 
-  if (properties.sortBy) {
-    modelProperties.sortBy = properties.sortBy as UI.Table.ColumnSort<
-      UI.Table.DataRow[]
-    >[];
+  // Only set `sortable` if the table is not multi-column sortable.
+  const sortable = getSortable(properties.sortable, manuallyPaged, autoPaged);
+  if (sortable !== UI.Table.SORT_OPTION.MULTI) {
+    modelProperties.sortable = sortable;
   }
 
   return {
