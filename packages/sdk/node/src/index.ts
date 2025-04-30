@@ -9,7 +9,9 @@ type TableColumn<TData extends UI.Table.DataRow[] = UI.Table.DataRow[]> =
   UI.Table.ColumnGenerator<TData>;
 type TableColumns<TData extends UI.Table.DataRow[] = UI.Table.DataRow[]> =
   UI.Table.ColumnGenerator<TData>[];
-type TablePageChangeParams = UI.Table.PageChangeParams;
+type TablePageChangeParams<
+  TData extends UI.Table.DataRow[] = UI.Table.DataRow[],
+> = UI.Table.PageChangeParams<TData>;
 type TablePageChangeResponse<
   TData extends UI.Table.DataRow[] = UI.Table.DataRow[],
 > = UI.Table.PageChangeResponse<TData>;

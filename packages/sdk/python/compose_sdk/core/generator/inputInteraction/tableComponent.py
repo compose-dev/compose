@@ -2,6 +2,7 @@
 
 import pandas
 from typing import Union, Callable, List
+
 from ...ui import (
     INTERACTION_TYPE,
     TYPE,
@@ -17,6 +18,8 @@ from ...ui import (
     TablePagination,
     TableSelectionReturn,
     ComponentStyle,
+    TableSortOption,
+    TableColumnSort,
     TABLE_COLUMN_OVERFLOW,
 )
 from ..base import MULTI_SELECTION_MIN_DEFAULT, MULTI_SELECTION_MAX_DEFAULT
@@ -72,6 +75,8 @@ def _table(
     searchable: bool = True,
     paginate: bool = False,
     overflow: Union[TABLE_COLUMN_OVERFLOW, None] = None,
+    sort_by: Union[List[TableColumnSort], None] = None,
+    sortable: Union[TableSortOption, None] = None,
 ) -> ComponentReturn:
 
     if not isinstance(initial_selected_rows, list):
@@ -146,6 +151,12 @@ def _table(
     if overflow is not None and overflow != "ellipsis":
         model_properties["overflow"] = overflow
 
+    if sort_by is not None:
+        model_properties["sortBy"] = sort_by
+
+    if sortable is not None:
+        model_properties["sortable"] = sortable
+
     return {
         "model": {
             "id": id,
@@ -193,6 +204,8 @@ def table(
     selection_return_type: TableSelectionReturn.TYPE = TableSelectionReturn.FULL,
     searchable: bool = True,
     paginate: bool = False,
+    sort_by: Union[List[TableColumnSort], None] = None,
+    sortable: Union[TableSortOption.TYPE, None] = None,
 ) -> ComponentReturn:
     """A powerful and highly customizable table component. For example:
 
@@ -280,6 +293,30 @@ def table(
     #### paginate : `bool`. Optional.
         Whether to paginate the table. Defaults to `False`. Tables with more than 2500 rows will be paginated by default.
 
+    #### sort_by : `List[TableColumnSort]`. Optional.
+        An ordered list of columns to initially sort by. For example:
+
+        >>> sort_by = [
+        ...     {"key": "name", "direction": "asc"},
+        ...     {"key": "age", "direction": "desc"},
+        ... ]
+
+        Each item in the list should have the following fields:
+
+        - `key`: The key of the column to sort by.
+        - `direction`: The direction to sort by. Either `asc` or `desc`.
+
+        Defaults to `[]`.
+
+    #### sortable : `single` | `multi` | `False`. Optional.
+        Whether the table should allow multi-column, single-column, or no sorting. Options:
+
+        - `True`: Allow multi-column sorting.
+        - `"single"`: Allow single-column sorting.
+        - `False`: Disable sorting.
+
+        Defaults to `True` for normal tables, `False` for paginated tables.
+
     ## Returns
     The configured table component.
     """
@@ -302,6 +339,8 @@ def table(
         searchable=searchable,
         paginate=paginate,
         overflow=overflow,
+        sort_by=sort_by,
+        sortable=sortable,
     )
 
 
@@ -330,6 +369,8 @@ def dataframe(
     searchable: bool = True,
     paginate: bool = False,
     overflow: Union[TABLE_COLUMN_OVERFLOW, None] = None,
+    sort_by: Union[List[TableColumnSort], None] = None,
+    sortable: Union[TableSortOption.TYPE, None] = None,
 ) -> ComponentReturn:
 
     # Replace empty values in the dataframe with None
@@ -360,4 +401,6 @@ def dataframe(
         searchable=searchable,
         paginate=paginate,
         overflow=overflow,
+        sort_by=sort_by,
+        sortable=sortable,
     )

@@ -70,6 +70,7 @@ function guessColumns(
         tagColors,
         overflow,
         hidden,
+        original: typeof column === "string" ? undefined : column.original,
       };
     });
   }
@@ -84,6 +85,7 @@ function guessColumns(
     tagColors: {},
     overflow: defaultOverflow,
     hidden: false,
+    original: key,
   }));
 }
 
@@ -175,7 +177,12 @@ export default function TableComponent({
   );
 
   const onTablePageChangeHook = useCallback(
-    (searchQuery: string | null, offset: number, pageSize: number) => {
+    (
+      searchQuery: string | null,
+      offset: number,
+      pageSize: number,
+      sortBy: UI.Table.ColumnSort<UI.Table.DataRow[]>[]
+    ) => {
       if (!executionId || !environmentId) {
         return;
       }
@@ -188,8 +195,7 @@ export default function TableComponent({
           executionId,
           offset,
           searchQuery,
-          sortKey: null,
-          sortDirection: null,
+          sortBy,
           pageSize,
         },
         environmentId
@@ -300,6 +306,14 @@ export default function TableComponent({
           paginated={component.model.properties.paged}
           loading={componentLoading}
           height={component.model.style?.height ?? undefined}
+          sortBy={component.model.properties.sortBy}
+          sortable={
+            component.model.properties.sortable === undefined
+              ? component.model.properties.paged
+                ? UI.Table.SORT_OPTION.DISABLED
+                : UI.Table.SORT_OPTION.MULTI
+              : component.model.properties.sortable
+          }
         />
       </div>
     </div>

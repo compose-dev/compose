@@ -16,12 +16,21 @@ TableDataRow = Dict[str, TableValue]
 TableData = List[TableDataRow]
 
 
+TABLE_COLUMN_SORT_DIRECTION = Literal["asc", "desc"]
+
+
+class TableColumnSort(TypedDict):
+    key: str
+    direction: TABLE_COLUMN_SORT_DIRECTION
+
+
 class TablePageChangeArgs(TypedDict):
     offset: int
     page_size: int
     search_query: Union[str, None]
     prev_search_query: Union[str, None]
     prev_total_records: Union[int, None]
+    sort_by: List[TableColumnSort]
 
 
 class TablePageChangeResponse(TypedDict):
@@ -181,3 +190,10 @@ class TableSelectionReturn:
     FULL = "full"
     INDEX = "index"
     TYPE = Literal["full", "index"]
+
+
+class TableSortOption:
+    SINGLE = "single"
+    MULTI = True
+    DISABLED = False
+    TYPE = Literal["single", True, False]

@@ -57,12 +57,16 @@ function SortColumnsPanel({
   sortingState,
   setSortingState,
   columns,
+  sortable,
+  resetSortingState,
   className = "",
 }: {
   sortingState: SortingState;
   setSortingState: (sortingState: SortingState) => void;
   columns: TableColumnProp[];
+  sortable: UI.Table.SortOption;
   className?: string;
+  resetSortingState: () => void;
 }) {
   const sortColumnOptions = columns.map((column) => ({
     label: column.label,
@@ -109,35 +113,45 @@ function SortColumnsPanel({
           ))}
         </div>
       )}
-      <div>
-        <DropdownMenu
-          labelVariant="ghost"
-          label={
-            <div className="flex flex-row items-center space-x-1 border border-brand-neutral rounded-brand p-1.5 px-2 bg-brand-io">
-              <Icon name="plus" />
-              <p className="text-sm">Add sort</p>
-            </div>
-          }
-          dropdownAnchor="bottom start"
-          options={sortColumnOptions.map((option) => ({
-            label: option.label,
-            onClick: () => {
-              setSortingState([
-                ...sortingState,
-                {
-                  id: option.value,
-                  desc: UI.Table.shouldSortDescendingFirst(option.format),
-                },
-              ]);
-            },
-          }))}
-        />
+      <div className="flex flex-row gap-x-4">
+        {(sortable !== UI.Table.SORT_OPTION.SINGLE ||
+          sortingState.length < 1) && (
+          <DropdownMenu
+            labelVariant="ghost"
+            label={
+              <div className="flex flex-row items-center space-x-1 border border-brand-neutral rounded-brand p-1.5 px-2 bg-brand-io">
+                <Icon name="plus" />
+                <p className="text-sm">Add sort</p>
+              </div>
+            }
+            dropdownAnchor="bottom start"
+            options={sortColumnOptions.map((option) => ({
+              label: option.label,
+              onClick: () => {
+                setSortingState([
+                  ...sortingState,
+                  {
+                    id: option.value,
+                    desc: UI.Table.shouldSortDescendingFirst(option.format),
+                  },
+                ]);
+              },
+            }))}
+          />
+        )}
+        <Button variant="ghost" onClick={resetSortingState}>
+          <p className="text-sm text-brand-neutral-2">Reset to default</p>
+        </Button>
       </div>
-      <div className="flex w-full border-b border-brand-neutral" />
-      <p className="text-xs text-brand-neutral-2">
-        Hold <span className="font-mono">shift</span> when clicking on a column
-        header to add it as an additional sort level.
-      </p>
+      {sortable === UI.Table.SORT_OPTION.MULTI && (
+        <>
+          <div className="flex w-full border-b border-brand-neutral" />
+          <p className="text-xs text-brand-neutral-2">
+            Hold <span className="font-mono">shift</span> when clicking on a
+            column header to add it as an additional sort level.
+          </p>
+        </>
+      )}
     </div>
   );
 }
@@ -145,12 +159,20 @@ function SortColumnsPanel({
 function SortColumnsPopover({
   sortingState,
   setSortingState,
+  resetSortingState,
   columns,
+  sortable,
 }: {
   sortingState: SortingState;
   setSortingState: (val: SortingState) => void;
+  resetSortingState: () => void;
   columns: TableColumnProp[];
+  sortable: UI.Table.SortOption;
 }) {
+  if (sortable === UI.Table.SORT_OPTION.DISABLED) {
+    return null;
+  }
+
   function getSortingTooltipContent() {
     if (sortingState.length > 1) {
       return `Sorting by ${sortingState.length} columns`;
@@ -186,6 +208,8 @@ function SortColumnsPopover({
           setSortingState={setSortingState}
           columns={columns}
           className="w-96"
+          sortable={sortable}
+          resetSortingState={resetSortingState}
         />
       </Popover.Panel>
     </Popover.Root>

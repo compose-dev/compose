@@ -5,12 +5,26 @@ export type TableDataRow = {
   [key: string]: string | number | boolean | null | Date | undefined | any;
 };
 
-interface TablePageChangeParams {
+const COLUMN_SORT_DIRECTION = {
+  ASC: "asc",
+  DESC: "desc",
+} as const;
+
+type ColumnSortDirection =
+  (typeof COLUMN_SORT_DIRECTION)[keyof typeof COLUMN_SORT_DIRECTION];
+
+interface ColumnSort<TData extends TableDataRow[]> {
+  key: StringOnlyKeys<TData[number]>;
+  direction: ColumnSortDirection;
+}
+
+interface TablePageChangeParams<TData extends TableDataRow[]> {
   offset: number;
   pageSize: number;
   searchQuery: string | null;
   prevSearchQuery: string | null;
   prevTotalRecords: number | null;
+  sortBy: ColumnSort<TData>[];
 }
 
 type TablePageChangeResponse<TData extends TableDataRow[]> = {
@@ -19,7 +33,7 @@ type TablePageChangeResponse<TData extends TableDataRow[]> = {
 };
 
 type OnPageChange<TData extends TableDataRow[]> = (
-  input: TablePageChangeParams
+  input: TablePageChangeParams<TData>
 ) => Promise<TablePageChangeResponse<TData>> | TablePageChangeResponse<TData>;
 
 const OVERFLOW_BEHAVIOR = {
@@ -203,6 +217,15 @@ function shouldSortDescendingFirst(format: TableColumnFormat | undefined) {
   );
 }
 
+const TABLE_SORT_OPTION = {
+  SINGLE: "single",
+  MULTI: true,
+  DISABLED: false,
+} as const;
+
+type TableSortOption =
+  (typeof TABLE_SORT_OPTION)[keyof typeof TABLE_SORT_OPTION];
+
 export {
   TableDataRow as DataRow,
   OnPageChange as OnPageChange,
@@ -225,4 +248,9 @@ export {
   OVERFLOW_BEHAVIOR as OVERFLOW_BEHAVIOR,
   OverflowBehavior as OverflowBehavior,
   shouldSortDescendingFirst as shouldSortDescendingFirst,
+  TABLE_SORT_OPTION as SORT_OPTION,
+  TableSortOption as SortOption,
+  COLUMN_SORT_DIRECTION as SORT_DIRECTION,
+  ColumnSortDirection as SortDirection,
+  ColumnSort as ColumnSort,
 };

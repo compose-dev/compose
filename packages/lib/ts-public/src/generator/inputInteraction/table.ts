@@ -107,6 +107,37 @@ interface TableProperties<TData extends UI.Table.DataRow[]>
    * @default `ellipsis`
    */
   overflow?: UI.Components.InputTable["model"]["properties"]["overflow"];
+  /**
+   * Whether to allow single-column, multi-column, or no sorting. Options:
+   *
+   * - `true`: Allow multi-column sorting.
+   * - `"single"`: Allow single-column sorting.
+   * - `false`: Disable sorting.
+   *
+   * @default `true` for normal tables, `false` for paginated tables
+   */
+  sortable?: UI.Components.InputTable["model"]["properties"]["sortable"];
+  /**
+   * An ordered list of columns to initially sort by. For example
+   *
+   * @example
+   * ```typescript
+   * page.add(() => ui.table("companies", companies, {
+   *   sortBy: [
+   *     { key: "planType", direction: "asc" },
+   *     { key: "revenue", direction: "desc" },
+   *   ],
+   * }));
+   * ```
+   *
+   * Each item in the list should have the following fields:
+   *
+   * - `key`: The key of the column to sort by.
+   * - `direction`: The direction to sort by. Either `asc` or `desc`.
+   *
+   * @default `[]`
+   */
+  sortBy?: UI.Table.ColumnSort<TData>[];
 }
 
 type RequiredTableFields = "id" | "data";
@@ -210,7 +241,14 @@ function getHookActions(
  * - `dynamic`: Expand the cell height to fit the content.
  *
  * Defaults to `ellipsis`.
+ * @param {UI.Components.InputTable["model"]["sortable"]} properties.sortable - Whether to allow multi-column, single-column, or no sorting. Options:
  *
+ * - `true`: Allow multi-column sorting.
+ * - `"single"`: Allow single-column sorting.
+ * - `false`: Disable sorting.
+ *
+ * Defaults to `true` for normal tables, `false` for paginated tables.
+ * @param {UI.Components.InputTable["model"]["sortBy"]} properties.sortBy - An ordered list of columns to initially sort by. Each item in the list should include `key` and `direction` (either `asc` or `desc`) fields.
  * @returns The configured table component.
  */
 function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
@@ -287,6 +325,16 @@ function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
 
   if (properties.overflow && properties.overflow !== "ellipsis") {
     modelProperties.overflow = properties.overflow;
+  }
+
+  if (properties.sortable !== undefined) {
+    modelProperties.sortable = properties.sortable;
+  }
+
+  if (properties.sortBy) {
+    modelProperties.sortBy = properties.sortBy as UI.Table.ColumnSort<
+      UI.Table.DataRow[]
+    >[];
   }
 
   return {

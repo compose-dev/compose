@@ -11,11 +11,39 @@ interface TableStateRecord {
   pageUpdateDebouncer: SmartDebounce;
   renderId: string;
   tableId: string;
+  initialSortBy: UI.Table.ColumnSort<UI.Table.DataRow[]>[];
+  activeSortBy: UI.Table.ColumnSort<UI.Table.DataRow[]>[];
 }
 
 const PAGE_UPDATE_DEBOUNCE_INTERVAL_MS = 250;
 
 const KEY_SEPARATOR = "__";
+
+function sortByDidChange(
+  oldSortBy: UI.Table.ColumnSort<UI.Table.DataRow[]>[] | undefined,
+  newSortBy: UI.Table.ColumnSort<UI.Table.DataRow[]>[] | undefined
+) {
+  if (oldSortBy === undefined && newSortBy === undefined) {
+    return false;
+  }
+
+  // If one is undefined, the sort by changed. (We know
+  // from the previous check that they are not both undefined.)
+  if (oldSortBy === undefined || newSortBy === undefined) {
+    return true;
+  }
+
+  if (oldSortBy.length !== newSortBy.length) {
+    return true;
+  }
+
+  return oldSortBy.some((sort, index) => {
+    return (
+      sort.key !== newSortBy[index].key ||
+      sort.direction !== newSortBy[index].direction
+    );
+  });
+}
 
 class TableState {
   state: Record<string, TableStateRecord>;
@@ -63,7 +91,11 @@ class TableState {
     tableId: string,
     state: Omit<
       TableStateRecord,
-      "pageUpdateDebouncer" | "renderId" | "tableId" | "updateCount"
+      | "pageUpdateDebouncer"
+      | "renderId"
+      | "tableId"
+      | "updateCount"
+      | "activeSortBy"
     >
   ) {
     const key = this.generateKey(renderId, tableId);
@@ -73,11 +105,22 @@ class TableState {
       pageUpdateDebouncer: new SmartDebounce(PAGE_UPDATE_DEBOUNCE_INTERVAL_MS),
       renderId,
       tableId,
+      activeSortBy: state.initialSortBy,
     };
   }
 
   update(renderId: string, tableId: string, state: Partial<TableStateRecord>) {
     const key = this.generateKey(renderId, tableId);
+
+    // Update the active sort if the initial sort changed. This overrides
+    // any changes on the browser side that were made to the active sort.
+    if (
+      state.initialSortBy !== undefined &&
+      sortByDidChange(state.initialSortBy, this.state[key].initialSortBy)
+    ) {
+      this.state[key].activeSortBy = state.initialSortBy || [];
+    }
+
     this.state[key] = { ...this.state[key], ...state };
   }
 

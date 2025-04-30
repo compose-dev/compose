@@ -58,6 +58,8 @@ from .ui import (
     TableSelectionReturn,
     Stale,
     NumberFormat,
+    TableSortOption,
+    TableColumnSort,
 )
 from .json import JSON
 from .compress import Compress
@@ -142,4 +144,6 @@ __all__ = [
     "validate_audit_log",
     "RateLimiter",
     "NumberFormat",
+    "TableSortOption",
+    "TableColumnSort",
 ]

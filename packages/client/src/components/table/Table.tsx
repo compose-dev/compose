@@ -4,10 +4,8 @@ import {
   flexRender,
   getFilteredRowModel,
   Updater,
-  FilterFn,
   Cell,
   getSortedRowModel,
-  SortingState,
   ColumnPinningState,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -23,17 +21,9 @@ import {
   type FormattedTableRow,
   type TableColumnProp,
   INTERNAL_COLUMN_ID,
+  useSortingState,
 } from "./utils";
 import { ColumnHeaderRow, FooterRow, ToolbarRow } from "./components";
-
-// Add our custom search function to the table type
-// https://tanstack.com/table/v8/docs/framework/react/examples/filters-fuzzy
-declare module "@tanstack/react-table" {
-  //add fuzzy filter to the filterFns
-  interface FilterFns {
-    fuzzy: FilterFn<unknown>;
-  }
-}
 
 function Table({
   id,
@@ -58,6 +48,8 @@ function Table({
   paginated = UI.Table.DEFAULT_PAGINATED,
   loading = false,
   height,
+  sortBy,
+  sortable = UI.Table.SORT_OPTION.MULTI,
 }: {
   id: string;
   data: UI.Components.InputTable["model"]["properties"]["data"];
@@ -67,7 +59,8 @@ function Table({
   onTablePageChangeHook: (
     searchQuery: string | null,
     offset: number,
-    pageSize: number
+    pageSize: number,
+    sortBy: UI.Table.PageChangeParams<UI.Table.DataRow[]>["sortBy"]
   ) => void;
   onTableRowActionHook: (rowIdx: number, actionIdx: number) => void;
   pageSize?: number;
@@ -85,12 +78,28 @@ function Table({
   paginated?: boolean;
   loading?: UI.Stale.Option;
   height?: string;
+  sortBy?: UI.Components.InputTable["model"]["properties"]["sortBy"];
+  sortable?: UI.Table.SortOption;
 }) {
   const fixedHeight = paginated || totalRecords > 35;
 
+  const [searchQuery, setSearchQuery] = useState(serverSearchQuery);
+  const { throttledCallback: setGlobalFilter } = useThrottledCallback(
+    (value: string) => {
+      table.setGlobalFilter(value);
+    },
+    300
+  );
+
   const customFilterFn = useSearch(columns);
   const formattedData = useFormattedData(data, columns);
-  const [sort, setSort] = useState<SortingState>([]);
+  const { sort, setSort, sortByForServer, resetSortingStateToInitial } =
+    useSortingState(columns, sortBy, sortable, (sortBy) => {
+      if (paginated) {
+        // Always reset offset to 0 when sorting changes.
+        onTablePageChangeHook(searchQuery, 0, pageSize, sortBy);
+      }
+    });
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
     left: enableRowSelection ? [INTERNAL_COLUMN_ID.SELECT] : [],
     right: [],
@@ -118,16 +127,20 @@ function Table({
   );
 
   const table = useReactTable({
+    // BASE SETUP
     data: formattedData,
     columns: formattedColumns,
+    getCoreRowModel: getCoreRowModel(),
+
+    // STATE
     state: {
       rowSelection: rowSelections,
       sorting: sort,
       columnPinning,
     },
-    // Setting initial state here allows us to leverage tanstack table's "resetColumnVisibility"
-    // which functionality to easily reset visibility to the initial state.
     initialState: {
+      // Set initial state to properly leverage tanstack table's "resetColumnVisibility"
+      // function, which will reset back to this initial state.
       columnVisibility: columns.reduce(
         (acc, column) => {
           acc[column.id] = !column.hidden;
@@ -136,19 +149,30 @@ function Table({
         {} as Record<string, boolean>
       ),
     },
-    onRowSelectionChange: handleRowSelectionChange,
-    getCoreRowModel: getCoreRowModel(),
-    enableRowSelection,
-    enableMultiRowSelection: allowMultiSelection,
+
+    // COLUMN PINNING
+    onColumnPinningChange: setColumnPinning,
+
+    // SEARCH
     filterFns: {
       fuzzy: customFilterFn,
     },
     globalFilterFn: "fuzzy",
     getFilteredRowModel: getFilteredRowModel(),
+
+    // ROW SELECTION
+    enableMultiRowSelection: allowMultiSelection,
+    enableRowSelection,
+    onRowSelectionChange: handleRowSelectionChange,
+
+    // SORTING
+    enableSorting:
+      sortable === UI.Table.SORT_OPTION.SINGLE ||
+      sortable === UI.Table.SORT_OPTION.MULTI,
+    enableMultiSort: sortable === UI.Table.SORT_OPTION.MULTI,
     getSortedRowModel: getSortedRowModel(),
-    enableSorting: !paginated,
+    manualSorting: paginated,
     onSortingChange: setSort,
-    onColumnPinningChange: setColumnPinning,
   });
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -166,14 +190,6 @@ function Table({
         : undefined,
     overscan: 15,
   });
-
-  const [searchQuery, setSearchQuery] = useState(serverSearchQuery);
-  const { throttledCallback: setGlobalFilter } = useThrottledCallback(
-    (value: string) => {
-      table.setGlobalFilter(value);
-    },
-    300
-  );
 
   const scrollToTop = useCallback(() => {
     rowVirtualizer.scrollToOffset(0, {
@@ -209,15 +225,21 @@ function Table({
             loading={loading}
             paginated={paginated}
             onTablePageChangeHook={() => {
-              onTablePageChangeHook(searchQuery, 0, pageSize);
+              onTablePageChangeHook(
+                searchQuery,
+                0, // reset to first page
+                pageSize,
+                sortByForServer.current
+              );
             }}
             table={table}
             columns={columns}
             disableSearch={disableSearch}
-            disableSort={paginated}
+            sortable={sortable}
             offset={offset}
             rowCount={rows.length}
             totalRecords={totalRecords}
+            resetSortingStateToInitial={resetSortingStateToInitial}
           />
           <div
             className="flex flex-col overflow-auto w-full h-full border-t border-brand-neutral"
@@ -283,7 +305,12 @@ function Table({
             pageSize={pageSize}
             totalRecords={totalRecords}
             onTablePageChangeHook={(offset, pageSize) => {
-              onTablePageChangeHook(searchQuery, offset, pageSize);
+              onTablePageChangeHook(
+                searchQuery,
+                offset,
+                pageSize,
+                sortByForServer.current
+              );
             }}
             scrollToTop={scrollToTop}
             rowCount={rows.length}

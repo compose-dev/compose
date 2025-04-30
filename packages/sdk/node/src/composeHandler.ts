@@ -451,7 +451,8 @@ class ComposeClient<TApps extends readonly app.Definition[]> {
         event.componentId,
         event.searchQuery,
         event.offset,
-        event.pageSize
+        event.pageSize,
+        event.sortBy
       );
       return;
     }

@@ -38,6 +38,8 @@ from .table import (
     TablePagination,
     TableSelectionReturn,
     TABLE_COLUMN_OVERFLOW,
+    TableSortOption,
+    TableColumnSort,
 )
 from .type import TYPE
 from .button_appearance import (
@@ -111,4 +113,6 @@ __all__ = [
     "Stale",
     "NumberFormat",
     "TABLE_COLUMN_OVERFLOW",
+    "TableSortOption",
+    "TableColumnSort",
 ]

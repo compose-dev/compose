@@ -110,6 +110,12 @@ export interface Table<
     hasOnSelectHook: boolean;
     /**
      * The table model version.
+     *
+     * 1 -> original
+     * 2 -> Added in 0.22 due to new row selection return where we return a
+     * list of row indices instead of the full rows.
+     * 3 -> Added in 0.27.0 due to the new cell overflow behavior where we
+     * shifted the default to "ellipsis" instead of "dynamic".
      */
     v?: 1 | 2 | 3;
     paged?: boolean;
@@ -120,6 +126,8 @@ export interface Table<
     searchQuery?: string | null;
     selectMode?: TTable.SelectionReturnType;
     overflow?: TTable.OverflowBehavior;
+    sortBy?: TTable.ColumnSort<TTable.DataRow[]>[];
+    sortable?: TTable.SortOption;
   };
 }
 

@@ -1,5 +1,14 @@
 import { UI } from "@composehq/ts-public";
-import { Table } from "@tanstack/react-table";
+import { FilterFn, Table } from "@tanstack/react-table";
+
+// Add our custom search function to the table type
+// https://tanstack.com/table/v8/docs/framework/react/examples/filters-fuzzy
+declare module "@tanstack/react-table" {
+  //add fuzzy filter to the filterFns
+  interface FilterFns {
+    fuzzy: FilterFn<unknown>;
+  }
+}
 
 /**
  * Column IDs that are applied by Compose to the table data to enable certain
@@ -85,6 +94,11 @@ interface TableColumnProp {
    * @default `false`
    */
   hidden?: boolean;
+  /**
+   * The original accessor key for the column, prior to any server-side
+   * optimizations to reduce the payload size.
+   */
+  original?: string;
 }
 
 type TanStackTable = Table<FormattedTableRow>;

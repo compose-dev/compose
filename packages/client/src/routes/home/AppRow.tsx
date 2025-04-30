@@ -1,6 +1,5 @@
 import { m } from "@compose/ts";
 import { Link } from "@tanstack/react-router";
-import { Tooltip } from "react-tooltip";
 
 import Icon from "~/components/icon";
 import DropdownMenu from "~/components/dropdown-menu";

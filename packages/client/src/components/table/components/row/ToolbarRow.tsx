@@ -78,7 +78,12 @@ function SearchWidget({
           </p>
         )}
       {loading === UI.Stale.OPTION.UPDATE_DISABLED && (
-        <Spinner size="sm" variant="neutral" />
+        <div className="flex flex-row items-center gap-x-2">
+          <Spinner size="sm" variant="neutral" />
+          <p className="text-brand-neutral-2 text-sm hidden md:block">
+            Fetching results...
+          </p>
+        </div>
       )}
     </form>
   );
@@ -98,8 +103,9 @@ function ToolbarRow({
   table,
   columns,
   disableSearch,
-  disableSort,
+  sortable,
   tableId,
+  resetSortingStateToInitial,
 }: {
   searchQuery: string | null;
   setSearchQuery: (val: string | null) => void;
@@ -114,8 +120,9 @@ function ToolbarRow({
   table: TanStackTable;
   columns: TableColumnProp[];
   disableSearch: boolean;
-  disableSort: boolean;
+  sortable: UI.Table.SortOption;
   tableId: string;
+  resetSortingStateToInitial: () => void;
 }) {
   return (
     <div
@@ -128,7 +135,11 @@ function ToolbarRow({
       )}
     >
       {disableSearch ? (
-        <div />
+        <div className="ml-2">
+          {loading === UI.Stale.OPTION.UPDATE_DISABLED && (
+            <Spinner size="sm" variant="neutral" />
+          )}
+        </div>
       ) : (
         <SearchWidget
           searchQuery={searchQuery}
@@ -141,13 +152,13 @@ function ToolbarRow({
         />
       )}
       <div className="flex flex-row space-x-4 items-center leading-none">
-        {!disableSort && (
-          <SortColumnsPopover
-            sortingState={table.getState().sorting}
-            setSortingState={table.setSorting}
-            columns={columns}
-          />
-        )}
+        <SortColumnsPopover
+          sortingState={table.getState().sorting}
+          setSortingState={table.setSorting}
+          resetSortingState={resetSortingStateToInitial}
+          columns={columns}
+          sortable={sortable}
+        />
         <PinAndHideColumnsPopover
           columns={columns}
           columnVisibility={table.getState().columnVisibility}

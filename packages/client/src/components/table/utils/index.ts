@@ -5,3 +5,4 @@ export * from "./useFormattedData";
 export * from "./constants";
 export * from "./useFormattedColumns";
 export * from "./downloadCSV";
+export * from "./useSortingState";
