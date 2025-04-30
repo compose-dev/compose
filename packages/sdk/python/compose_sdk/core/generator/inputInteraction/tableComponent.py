@@ -22,6 +22,7 @@ from ...ui import (
     TableSortOption,
     TableColumnSort,
     TABLE_COLUMN_OVERFLOW,
+    TableDensity,
 )
 from ..base import MULTI_SELECTION_MIN_DEFAULT, MULTI_SELECTION_MAX_DEFAULT
 
@@ -139,6 +140,7 @@ def _table(
     sort_by: Union[List[TableColumnSort], None] = None,
     sortable: Union[TableSortOption, None] = None,
     selectable: Union[bool, None] = None,
+    density: Union[TableDensity, None] = None,
     allow_select: Union[bool, None] = None,
 ) -> ComponentReturn:
 
@@ -195,12 +197,6 @@ def _table(
     if selection_return_type != TableSelectionReturn.FULL:
         model_properties["selectMode"] = selection_return_type
 
-    # Paged tables only support row selection by index.
-    if (
-        manually_paged or auto_paged
-    ) and selection_return_type != TableSelectionReturn.INDEX:
-        model_properties["allowSelect"] = False
-
     on_page_change_hook = (
         {
             "fn": data,
@@ -223,8 +219,8 @@ def _table(
     if sort_by is not None:
         model_properties["sortBy"] = sort_by
 
-    if sortable is not None:
-        model_properties["sortable"] = sortable
+    if density is not None:
+        model_properties["density"] = density
 
     return {
         "model": {
@@ -275,6 +271,7 @@ def table(
     sort_by: Union[List[TableColumnSort], None] = None,
     sortable: Union[TableSortOption.TYPE, None] = None,
     selectable: Union[bool, None] = None,
+    density: Union[TableDensity, None] = None,
     allow_select: Union[bool, None] = None,
 ) -> ComponentReturn:
     """A powerful and highly customizable table component. For example:
@@ -387,6 +384,15 @@ def table(
     #### selectable : `bool`. Optional.
         Whether to allow row selection. Defaults to `False`, or `True` if `on_change` is provided.
 
+    #### density : `compact` | `standard` | `comfortable`. Optional.
+        The density of the table rows. Options:
+
+        - `compact`: 32px row height
+        - `standard`: 40px row height
+        - `comfortable`: 48px row height
+
+        Defaults to `standard`.
+
     ## Returns
     The configured table component.
     """
@@ -418,6 +424,7 @@ def table(
         overflow=overflow,
         sort_by=sort_by,
         sortable=sortable,
+        density=density,
     )
 
 
@@ -448,6 +455,7 @@ def dataframe(
     sort_by: Union[List[TableColumnSort], None] = None,
     sortable: Union[TableSortOption.TYPE, None] = None,
     selectable: Union[bool, None] = None,
+    density: Union[TableDensity, None] = None,
     allow_select: Union[bool, None] = None,
 ) -> ComponentReturn:
     if allow_select is not None:
@@ -487,4 +495,5 @@ def dataframe(
         overflow=overflow,
         sort_by=sort_by,
         sortable=sortable,
+        density=density,
     )

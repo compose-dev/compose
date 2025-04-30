@@ -197,3 +197,10 @@ class TableSortOption:
     MULTI = True
     DISABLED = False
     TYPE = Literal["single", True, False]
+
+
+class TableDensity:
+    COMPACT = "compact"
+    STANDARD = "standard"
+    COMFORTABLE = "comfortable"
+    TYPE = Literal["compact", "standard", "comfortable"]

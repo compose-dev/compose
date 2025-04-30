@@ -128,6 +128,7 @@ export interface Table<
     overflow?: TTable.OverflowBehavior;
     sortBy?: TTable.ColumnSort<TTable.DataRow[]>[];
     sortable?: TTable.SortOption;
+    density?: TTable.Density;
   };
 }
 

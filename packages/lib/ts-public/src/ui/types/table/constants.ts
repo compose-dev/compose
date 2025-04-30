@@ -226,6 +226,14 @@ const TABLE_SORT_OPTION = {
 type TableSortOption =
   (typeof TABLE_SORT_OPTION)[keyof typeof TABLE_SORT_OPTION];
 
+const TABLE_DENSITY = {
+  COMPACT: "compact",
+  STANDARD: "standard",
+  COMFORTABLE: "comfortable",
+} as const;
+
+type TableDensity = (typeof TABLE_DENSITY)[keyof typeof TABLE_DENSITY];
+
 export {
   TableDataRow as DataRow,
   OnPageChange as OnPageChange,
@@ -253,4 +261,6 @@ export {
   COLUMN_SORT_DIRECTION as SORT_DIRECTION,
   ColumnSortDirection as SortDirection,
   ColumnSort as ColumnSort,
+  TABLE_DENSITY as DENSITY,
+  TableDensity as Density,
 };

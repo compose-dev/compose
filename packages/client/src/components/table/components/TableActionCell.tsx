@@ -8,12 +8,14 @@ function TableActionCell({
   actions,
   hidden = false,
   onClick,
+  density,
 }: {
   actions: NonNullable<
     UI.Components.InputTable["model"]["properties"]["actions"]
   >;
   hidden?: boolean;
   onClick: (actionIdx: number) => void;
+  density: UI.Table.Density;
 }) {
   const buttons = [];
   const menuItems = [];
@@ -42,7 +44,9 @@ function TableActionCell({
 
   return (
     <div
-      className={classNames("flex items-start h-[26px] gap-2", {
+      className={classNames("flex items-start gap-2", {
+        "h-[22px]": density === "compact",
+        "h-[26px]": density !== "compact",
         // Essentially a hack to make the header row have the same width as the data rows.
         // We render the actions in the header too but just make it invisible, so that the
         // header row has the same width as the data rows.
@@ -54,7 +58,7 @@ function TableActionCell({
           key={idx}
           onClick={() => onClick(button)}
           variant="outline"
-          size="sm"
+          size={density === "compact" ? "xs" : "sm"}
           // Need to set font-normal to override the font-medium set in the header column.
           className="!bg-brand-io hover:!bg-brand-page-inverted-5 whitespace-nowrap max-h-fit !font-normal"
         >
@@ -64,7 +68,11 @@ function TableActionCell({
       {menuItems.length > 0 && (
         <DropdownMenu
           label={
-            <Icon name="dots-vertical" color="brand-neutral-2" size="1.25" />
+            <Icon
+              name="dots-vertical"
+              color="brand-neutral-2"
+              size={density === "compact" ? "1" : "1.25"}
+            />
           }
           labelVariant="ghost"
           options={menuItems.map((item) => ({

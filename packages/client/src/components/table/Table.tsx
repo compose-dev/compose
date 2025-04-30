@@ -50,6 +50,7 @@ function Table({
   height,
   sortBy,
   sortable = UI.Table.SORT_OPTION.MULTI,
+  density = UI.Table.DENSITY.STANDARD,
 }: {
   id: string;
   data: UI.Components.InputTable["model"]["properties"]["data"];
@@ -80,6 +81,7 @@ function Table({
   height?: string;
   sortBy?: UI.Components.InputTable["model"]["properties"]["sortBy"];
   sortable?: UI.Table.SortOption;
+  density?: UI.Table.Density;
 }) {
   const fixedHeight = paginated || totalRecords > 35;
 
@@ -113,7 +115,8 @@ function Table({
     totalRecords,
     offset,
     actions,
-    onTableRowActionHook
+    onTableRowActionHook,
+    density
   );
 
   const handleRowSelectionChange = useCallback(
@@ -182,7 +185,17 @@ function Table({
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => tableContainerRef.current,
-    estimateSize: () => 41, // Adjust this value based on your row height
+    estimateSize: () => {
+      if (density === "comfortable") {
+        return 49;
+      }
+
+      if (density === "standard") {
+        return 41;
+      }
+
+      return 33;
+    }, // Adjust this value based on your row height
     measureElement:
       typeof window !== "undefined" &&
       navigator.userAgent.indexOf("Firefox") === -1
@@ -242,7 +255,13 @@ function Table({
             resetSortingStateToInitial={resetSortingStateToInitial}
           />
           <div
-            className="flex flex-col overflow-auto w-full h-full border-t border-brand-neutral"
+            className={classNames(
+              "flex flex-col overflow-auto w-full h-full border-t border-brand-neutral",
+              {
+                "text-xs": density === UI.Table.DENSITY.COMPACT,
+                "text-sm": density === UI.Table.DENSITY.STANDARD,
+              }
+            )}
             style={{
               scrollbarWidth: "thin",
             }}

@@ -55,6 +55,7 @@ from .types import (
     TABLE_COLUMN_OVERFLOW,
     TableSortOption,
     TableColumnSort,
+    TableDensity,
 )
 from .componentGenerators import ComponentReturn
 from .constants import Nullable
@@ -121,4 +122,5 @@ __all__ = [
     "TABLE_COLUMN_OVERFLOW",
     "TableSortOption",
     "TableColumnSort",
+    "TableDensity",
 ]

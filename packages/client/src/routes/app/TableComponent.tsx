@@ -314,6 +314,7 @@ export default function TableComponent({
           // searchable. Else, it'll explicitly return the searchable option
           // to use.
           disableSearch={component.model.properties.notSearchable}
+          density={component.model.properties.density}
         />
       </div>
     </div>

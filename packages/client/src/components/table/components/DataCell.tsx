@@ -5,18 +5,38 @@ import { TableColumnProp } from "../utils";
 import Icon from "~/components/icon";
 import { u } from "@compose/ts";
 
-function CircleCheck() {
+function CircleCheck({ density }: { density: UI.Table.Density }) {
   return (
-    <div className="h-[24px] flex items-center">
-      <Icon name="checkmark" color="brand-success" stroke="semi-bold" />
+    <div
+      className={classNames("flex items-center", {
+        "h-6": density !== "compact",
+        "h-4": density === "compact",
+      })}
+    >
+      <Icon
+        name="checkmark"
+        color="brand-success"
+        stroke="semi-bold"
+        size={density === "compact" ? "0.875" : "1"}
+      />
     </div>
   );
 }
 
-function CircleX() {
+function CircleX({ density }: { density: UI.Table.Density }) {
   return (
-    <div className="h-[24px] flex items-center">
-      <Icon name="x" color="brand-error" stroke="bold" size="0.75" />
+    <div
+      className={classNames("flex items-center", {
+        "h-6": density !== "compact",
+        "h-4": density === "compact",
+      })}
+    >
+      <Icon
+        name="x"
+        color="brand-error"
+        stroke="bold"
+        size={density === "compact" ? "0.625" : "0.75"}
+      />
     </div>
   );
 }
@@ -65,11 +85,13 @@ function DataCell({
   value,
   column,
   meta,
+  density,
   isLastRow,
 }: {
   value: unknown;
   column: TableColumnProp;
   meta: Record<string, string>;
+  density: UI.Table.Density;
   isLastRow: boolean;
 }) {
   if (value === null || value === undefined || value === "") {
@@ -85,8 +107,9 @@ function DataCell({
           isLastRow={isLastRow}
           expand={column.expand}
           overflow={column.overflow}
+          density={density}
         >
-          <CircleX />
+          <CircleX density={density} />
         </RowCell>
       );
     }
@@ -105,6 +128,7 @@ function DataCell({
           isLastRow={isLastRow}
           expand={column.expand}
           overflow={column.overflow}
+          density={density}
         >
           NULL
         </RowCell>
@@ -120,6 +144,7 @@ function DataCell({
         isLastRow={isLastRow}
         expand={column.expand}
         overflow={column.overflow}
+        density={density}
       >
         <></>
       </RowCell>
@@ -139,6 +164,7 @@ function DataCell({
           isLastRow={isLastRow}
           expand={column.expand}
           overflow={column.overflow}
+          density={density}
         >
           {meta[column.accessorKey]}
         </RowCell>
@@ -156,6 +182,7 @@ function DataCell({
           isLastRow={isLastRow}
           expand={column.expand}
           overflow={column.overflow}
+          density={density}
         >
           {meta[column.accessorKey]}
         </RowCell>
@@ -175,6 +202,7 @@ function DataCell({
           isLastRow={isLastRow}
           expand={column.expand}
           overflow={column.overflow}
+          density={density}
         >
           {currency}
         </RowCell>
@@ -194,6 +222,7 @@ function DataCell({
           isLastRow={isLastRow}
           expand={column.expand}
           overflow={column.overflow}
+          density={density}
         >
           {number}
         </RowCell>
@@ -213,8 +242,13 @@ function DataCell({
           isLastRow={isLastRow}
           expand={column.expand}
           overflow={column.overflow}
+          density={density}
         >
-          {isTrue ? <CircleCheck /> : <CircleX />}
+          {isTrue ? (
+            <CircleCheck density={density} />
+          ) : (
+            <CircleX density={density} />
+          )}
         </RowCell>
       );
     }
@@ -224,9 +258,10 @@ function DataCell({
       return (
         <RowCell
           className={classNames(
-            " flex flex-wrap gap-[.375rem] py-2.5 content-start",
+            "flex flex-wrap gap-[.375rem] content-start leading-none",
             {
               "flex-1 min-w-48": !column.width,
+              "!py-3.5": density === "comfortable",
             }
           )}
           style={
@@ -235,6 +270,7 @@ function DataCell({
           isLastRow={isLastRow}
           expand={column.expand}
           overflow={column.overflow}
+          density={density}
         >
           {arrayTags.map((value, idx) => {
             if (value === null) {
@@ -259,7 +295,7 @@ function DataCell({
               <div
                 key={idx}
                 className={classNames(
-                  "inline-flex items-center px-1.5 py-0.5 rounded-brand text-xs font-medium max-h-fit h-fit",
+                  "inline-flex items-center px-1.5 py-0.5 rounded-brand font-medium max-h-fit h-fit",
                   {
                     "red-tag": tagColor === UI.Table.TAG_COLOR.red,
                     "orange-tag": tagColor === UI.Table.TAG_COLOR.orange,
@@ -280,6 +316,8 @@ function DataCell({
                       idx > 0 &&
                       (column.overflow === "ellipsis" ||
                         column.overflow === "clip"),
+                    "text-[11px]": density === "compact",
+                    "text-xs": density !== "compact",
                   }
                 )}
               >
@@ -304,6 +342,7 @@ function DataCell({
           isLastRow={isLastRow}
           expand={column.expand}
           overflow={column.overflow}
+          density={density}
         >
           {formatted}
         </RowCell>

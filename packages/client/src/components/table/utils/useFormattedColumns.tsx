@@ -13,7 +13,10 @@ import { HeaderCell, DataCell, RowCell, TableActionCell } from "../components";
 
 type TanStackTableColumn = ColumnDef<FormattedTableRow>;
 
-function formatColumn(column: TableColumnProp): TanStackTableColumn {
+function formatColumn(
+  column: TableColumnProp,
+  density: UI.Table.Density
+): TanStackTableColumn {
   return {
     ...column,
     sortingFn: "basic",
@@ -32,6 +35,7 @@ function formatColumn(column: TableColumnProp): TanStackTableColumn {
             column.width ? { width: column.width, minWidth: column.width } : {}
           }
           onClick={header.column.getToggleSortingHandler()}
+          density={density}
         >
           {column.label}
         </HeaderCell>
@@ -50,6 +54,7 @@ function formatColumn(column: TableColumnProp): TanStackTableColumn {
           column={column}
           meta={row.original[INTERNAL_COLUMN_ID.META]}
           isLastRow={row.index === table.getRowModel().rows.length - 1}
+          density={density}
         />
       );
     },
@@ -61,7 +66,8 @@ function formatSelectColumn(
   disableRowSelection: boolean,
   allowMultiSelection: boolean,
   offset: number,
-  hasError: boolean
+  hasError: boolean,
+  density: UI.Table.Density
 ): TanStackTableColumn {
   return {
     id: INTERNAL_COLUMN_ID.SELECT,
@@ -73,7 +79,7 @@ function formatSelectColumn(
       }
 
       return (
-        <HeaderCell>
+        <HeaderCell density={density}>
           <CheckboxRaw
             enabled={
               Object.keys(table.getState().rowSelection).length >= totalRecords
@@ -105,6 +111,7 @@ function formatSelectColumn(
         className="pt-3"
         isLastRow={row.index === table.getRowModel().rows.length - 1}
         overflow="dynamic"
+        density={density}
       >
         <CheckboxRaw
           enabled={table.getState().rowSelection[row.index + offset] === true}
@@ -140,7 +147,8 @@ function formatActionColumn(
   actions: NonNullable<
     UI.Components.InputTable["model"]["properties"]["actions"]
   >,
-  onTableRowActionHook: (rowIdx: number, actionIdx: number) => void
+  onTableRowActionHook: (rowIdx: number, actionIdx: number) => void,
+  density: UI.Table.Density
 ): TanStackTableColumn {
   return {
     id: INTERNAL_COLUMN_ID.ACTION,
@@ -168,8 +176,14 @@ function formatActionColumn(
             contain: "paint",
             boxShadow: "1px 0 0 var(--brand-bg-overlay)",
           }}
+          density={density}
         >
-          <TableActionCell actions={actions} hidden={true} onClick={() => {}} />
+          <TableActionCell
+            actions={actions}
+            hidden={true}
+            onClick={() => {}}
+            density={density}
+          />
         </HeaderCell>
       );
     },
@@ -182,8 +196,16 @@ function formatActionColumn(
     }) => {
       return (
         <RowCell
-          className="sticky z-10 right-0 bg-brand-io border-l border-brand-neutral group-hover:bg-brand-overlay !py-[7px]"
+          className={classNames(
+            "sticky z-10 right-0 bg-brand-io border-l border-brand-neutral group-hover:bg-brand-overlay",
+            {
+              "py-[11px]": density === "comfortable",
+              "py-[7px]": density === "standard",
+              "py-[5px]": density === "compact",
+            }
+          )}
           isLastRow={row.index === table.getRowModel().rows.length - 1}
+          density={density}
           /* 
           Fixes a 1px visual gap that appears between the rightmost sticky column and the table edge 
           at 100% zoom in Chromium due to subpixel compositing issues with position: sticky. 
@@ -202,6 +224,7 @@ function formatActionColumn(
             onClick={(actionIdx) => {
               onTableRowActionHook(row.index, actionIdx);
             }}
+            density={density}
           />
         </RowCell>
       );
@@ -218,7 +241,8 @@ function useFormattedColumns(
   totalRecords: number,
   offset: number,
   actions: UI.Components.InputTable["model"]["properties"]["actions"],
-  onTableRowActionHook: (rowIdx: number, actionIdx: number) => void
+  onTableRowActionHook: (rowIdx: number, actionIdx: number) => void,
+  density: UI.Table.Density
 ) {
   const formattedColumns = useMemo(() => {
     const formatted: TanStackTableColumn[] = [];
@@ -231,7 +255,8 @@ function useFormattedColumns(
           disableRowSelection,
           allowMultiSelection,
           offset,
-          hasError
+          hasError,
+          density
         )
       );
     }
@@ -241,12 +266,14 @@ function useFormattedColumns(
       if (column.accessorKey === INTERNAL_COLUMN_ID.META) {
         return;
       }
-      formatted.push(formatColumn(column));
+      formatted.push(formatColumn(column, density));
     });
 
     // Finally, add the actions column
     if (actions && actions.length > 0) {
-      formatted.push(formatActionColumn(actions, onTableRowActionHook));
+      formatted.push(
+        formatActionColumn(actions, onTableRowActionHook, density)
+      );
     }
 
     return formatted;
@@ -260,6 +287,7 @@ function useFormattedColumns(
     offset,
     actions,
     onTableRowActionHook,
+    density,
   ]);
 
   return formattedColumns;

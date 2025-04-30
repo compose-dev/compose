@@ -142,6 +142,16 @@ interface TableProperties<TData extends UI.Table.DataRow[]>
    * @default `[]`
    */
   sortBy?: UI.Table.ColumnSort<TData>[];
+  /**
+   * The density of the table rows. Options:
+   *
+   * - `compact`: 32px row height
+   * - `standard`: 40px row height
+   * - `comfortable`: 48px row height
+   *
+   * @default `standard`
+   */
+  density?: UI.Table.Density;
 }
 
 type RequiredTableFields = "id" | "data";
@@ -160,7 +170,7 @@ const defaultTableProperties: OptionalTableProperties<UI.Table.DataRow[]> = {
   maxSelections: MULTI_SELECTION_MAX_DEFAULT,
   validate: null,
   style: null,
-  allowSelect: true,
+  allowSelect: false,
   onChange: null,
   initialSelectedRows: [],
   selectionReturnType: UI.Table.SELECTION_RETURN_TYPE.FULL,
@@ -313,6 +323,14 @@ function getSelectable(
  * @param {UI.Components.InputTable["model"]["searchable"]} properties.searchable - Whether the table should be searchable. Defaults to `true` for normal tables, `false` for paginated tables.
  * @param {boolean} properties.paginate - Whether the table should be paginated. Defaults to `false`. Tables with more than 2500 rows will be paginated by default.
  * @param {boolean} properties.selectable - Whether the table should allow row selection. Defaults to `false`, or `true` if `onChange` is provided.
+ * @param {UI.Components.InputTable["model"]["density"]} properties.density - The density of the table rows. Options:
+ *
+ * - `compact`: 32px row height
+ * - `standard`: 40px row height
+ * - `comfortable`: 48px row height
+ *
+ * Defaults to `standard`.
+ *
  * @param {UI.Components.InputTable["model"]["overflow"]} properties.overflow - The overflow behavior of table cells. Options:
  *
  * - `ellipsis`: Show ellipsis when the text overflows.
@@ -320,6 +338,7 @@ function getSelectable(
  * - `dynamic`: Expand the cell height to fit the content.
  *
  * Defaults to `ellipsis`.
+ *
  * @param {UI.Components.InputTable["model"]["sortable"]} properties.sortable - Whether to allow multi-column, single-column, or no sorting. Options:
  *
  * - `true`: Allow multi-column sorting.
@@ -327,6 +346,7 @@ function getSelectable(
  * - `false`: Disable sorting.
  *
  * Defaults to `true` for normal tables, `false` for paginated tables.
+ *
  * @param {UI.Components.InputTable["model"]["sortBy"]} properties.sortBy - An ordered list of columns to initially sort by. Each item in the list should include `key` and `direction` (either `asc` or `desc`) fields.
  * @returns The configured table component.
  */
@@ -415,6 +435,10 @@ function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
   const sortable = getSortable(properties.sortable, manuallyPaged, autoPaged);
   if (sortable !== UI.Table.SORT_OPTION.MULTI) {
     modelProperties.sortable = sortable;
+  }
+
+  if (properties.density) {
+    modelProperties.density = properties.density;
   }
 
   return {
