@@ -1,6 +1,7 @@
 # type: ignore
 
 import pandas
+import warnings
 from typing import Union, Callable, List
 
 from ...ui import (
@@ -96,6 +97,26 @@ def get_sortable(
     return TableSortOption.MULTI
 
 
+def get_selectable(
+    selectable: Union[bool, None],
+    allow_select: Union[bool, None],
+    on_change: Nullable.Callable,
+) -> bool:
+    # If explicitly set to true, then use the explicitly set value.
+    if selectable is True or allow_select is True:
+        return True
+
+    # If there is an on_change hook, default to `true`, unless explicitly set to false.
+    if on_change is not None:
+        if selectable is False or allow_select is False:
+            return False
+
+        return True
+
+    # Otherwise, default to `false`.
+    return False
+
+
 def _table(
     id: str,
     data: Union[TableData, TableOnPageChange],
@@ -111,13 +132,14 @@ def _table(
     style: Union[ComponentStyle, None] = None,
     min_selections: int = MULTI_SELECTION_MIN_DEFAULT,
     max_selections: int = MULTI_SELECTION_MAX_DEFAULT,
-    allow_select: bool = True,
     selection_return_type: TableSelectionReturn.TYPE = TableSelectionReturn.FULL,
     searchable: bool = True,
     paginate: bool = False,
     overflow: Union[TABLE_COLUMN_OVERFLOW, None] = None,
     sort_by: Union[List[TableColumnSort], None] = None,
     sortable: Union[TableSortOption, None] = None,
+    selectable: Union[bool, None] = None,
+    allow_select: Union[bool, None] = None,
 ) -> ComponentReturn:
 
     if not isinstance(initial_selected_rows, list):
@@ -154,7 +176,7 @@ def _table(
         "actions": get_model_actions(actions),
         "minSelections": min_selections,
         "maxSelections": max_selections,
-        "allowSelect": allow_select,
+        "allowSelect": get_selectable(selectable, allow_select, on_change),
         "v": 3,
     }
 
@@ -229,7 +251,6 @@ def table(
     id: str,
     data: Union[TableData, TableOnPageChange],
     *,
-    allow_select: bool = True,
     columns: Union[TableColumns, None] = None,
     actions: Union[TableActions, None] = None,
     label: Union[str, None] = None,
@@ -253,6 +274,8 @@ def table(
     paginate: bool = False,
     sort_by: Union[List[TableColumnSort], None] = None,
     sortable: Union[TableSortOption.TYPE, None] = None,
+    selectable: Union[bool, None] = None,
+    allow_select: Union[bool, None] = None,
 ) -> ComponentReturn:
     """A powerful and highly customizable table component. For example:
 
@@ -285,9 +308,6 @@ def table(
 
     #### data : `List[Dict[str, Any]]`
         Data to be displayed in the table. Should be a list of dictionaries, where each dictionary represents a row in the table.
-
-    #### allow_select : `bool`. Optional.
-        Whether to render a selectable checkbox column for each row. Defaults to `True`.
 
     #### columns : `List[TableColumns]`. Optional.
         Manually specify the columns to be displayed in the table. Each item in the list should be either a string that maps to a key in the data, or a dictionary with at least a `key` field and other optional fields. Learn more in the [docs](https://docs.composehq.com/components/input/table#columns).
@@ -364,9 +384,18 @@ def table(
 
         Defaults to `True` for normal tables, `False` for paginated tables.
 
+    #### selectable : `bool`. Optional.
+        Whether to allow row selection. Defaults to `False`, or `True` if `on_change` is provided.
+
     ## Returns
     The configured table component.
     """
+    if allow_select is not None:
+        warnings.warn(
+            "allow_select is deprecated. Use selectable instead.",
+            DeprecationWarning,
+        )
+
     return _table(
         id,
         data,
@@ -382,6 +411,7 @@ def table(
         min_selections=min_selections,
         max_selections=max_selections,
         allow_select=allow_select,
+        selectable=selectable,
         selection_return_type=selection_return_type,
         searchable=searchable,
         paginate=paginate,
@@ -411,14 +441,20 @@ def dataframe(
     style: Union[ComponentStyle, None] = None,
     min_selections: int = MULTI_SELECTION_MIN_DEFAULT,
     max_selections: int = MULTI_SELECTION_MAX_DEFAULT,
-    allow_select: bool = True,
     selection_return_type: TableSelectionReturn.TYPE = TableSelectionReturn.FULL,
     searchable: bool = True,
     paginate: bool = False,
     overflow: Union[TABLE_COLUMN_OVERFLOW, None] = None,
     sort_by: Union[List[TableColumnSort], None] = None,
     sortable: Union[TableSortOption.TYPE, None] = None,
+    selectable: Union[bool, None] = None,
+    allow_select: Union[bool, None] = None,
 ) -> ComponentReturn:
+    if allow_select is not None:
+        warnings.warn(
+            "allow_select is deprecated. Use selectable instead.",
+            DeprecationWarning,
+        )
 
     # Replace empty values in the dataframe with None
     df = df.replace({None: "", pandas.NA: "", float("nan"): ""})
@@ -444,6 +480,7 @@ def dataframe(
         min_selections=min_selections,
         max_selections=max_selections,
         allow_select=allow_select,
+        selectable=selectable,
         selection_return_type=selection_return_type,
         searchable=searchable,
         paginate=paginate,

@@ -69,7 +69,11 @@ interface TableProperties<TData extends UI.Table.DataRow[]>
   validate: UI.Components.InputTable["hooks"]["validate"];
   data: TData;
   /**
-   * Whether the table should allow row selection. Defaults to `true`.
+   * Whether the table should allow row selection. Defaults to `false`, or `true` if `onChange` is provided.
+   */
+  selectable?: boolean;
+  /**
+   * @deprecated use `selectable` instead
    */
   allowSelect: UI.Components.InputTable["model"]["properties"]["allowSelect"];
   /**
@@ -238,6 +242,29 @@ function getSortable(
   return UI.Table.SORT_OPTION.MULTI;
 }
 
+function getSelectable(
+  selectable: boolean | undefined,
+  allowSelect: boolean | undefined,
+  onChange: UI.Components.InputTable["hooks"]["onSelect"] | null | undefined
+) {
+  // If explicitly set to true, then use the explicitly set value.
+  if (selectable === true || allowSelect === true) {
+    return true;
+  }
+
+  // If there is an onChange hook, default to `true`, unless explicitly set to false.
+  if (onChange) {
+    if (selectable === false || allowSelect === false) {
+      return false;
+    }
+
+    return true;
+  }
+
+  // Otherwise, default to `false`.
+  return false;
+}
+
 /**
  * Generate a table component that allows users to view and interact with rows of data.
  *
@@ -271,7 +298,6 @@ function getSortable(
  * @param {string} id - Unique id to identify the table.
  * @param {TData | UI.Table.OnPageChange<TData>} data - Data to display in the table. Should be an array of objects, or a function that returns a subset of the data if paginating.
  * @param {Partial<OptionalTableProperties<TData>>} properties - Optional properties to configure the table.
- * @param {UI.Components.InputTable["model"]["properties"]["allowSelect"]} properties.allowSelect - Whether the table should allow row selection. Defaults to `true`.
  * @param {UI.Components.InputTable["model"]["properties"]["columns"]} properties.columns - Manually specify the columns to be displayed in the table. Each item in the list should be either a string that maps to a key in the data, or an object with at least a `key` field and other optional fields. Learn more in the {@link https://docs.composehq.com/components/input/table#columns Docs}
  * @param {UI.Components.InputTable["model"]["properties"]["actions"]} properties.actions - Actions that can be performed on table rows. Each action should be an object with at least a `label` field and an `on_click` handler. Learn more in the {@link https://docs.composehq.com/components/input/table#row-actions Docs}
  * @param {UI.Components.InputTable["model"]["label"]} properties.label - Label to display above the table.
@@ -286,6 +312,7 @@ function getSortable(
  * @param {UI.Components.InputTable["model"]["selectionReturnType"]} properties.selectionReturnType - How the table should return selected rows. Defaults to `full` (a list of rows). Must be `index` (a list of row indices) if the table is paginated.
  * @param {UI.Components.InputTable["model"]["searchable"]} properties.searchable - Whether the table should be searchable. Defaults to `true` for normal tables, `false` for paginated tables.
  * @param {boolean} properties.paginate - Whether the table should be paginated. Defaults to `false`. Tables with more than 2500 rows will be paginated by default.
+ * @param {boolean} properties.selectable - Whether the table should allow row selection. Defaults to `false`, or `true` if `onChange` is provided.
  * @param {UI.Components.InputTable["model"]["overflow"]} properties.overflow - The overflow behavior of table cells. Options:
  *
  * - `ellipsis`: Show ellipsis when the text overflows.
@@ -346,7 +373,11 @@ function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
     columns: mergedProperties.columns,
     minSelections: mergedProperties.minSelections,
     maxSelections: mergedProperties.maxSelections,
-    allowSelect: mergedProperties.allowSelect,
+    allowSelect: getSelectable(
+      mergedProperties.selectable,
+      mergedProperties.allowSelect,
+      mergedProperties.onChange
+    ),
     hasOnSelectHook: mergedProperties.onChange !== null,
     actions: getModelActions(mergedProperties.actions),
     initialSelectedRows: mergedProperties.initialSelectedRows,
