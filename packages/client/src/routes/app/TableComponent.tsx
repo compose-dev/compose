@@ -315,6 +315,7 @@ export default function TableComponent({
           // to use.
           disableSearch={component.model.properties.notSearchable}
           density={component.model.properties.density}
+          overflow={component.model.properties.overflow}
         />
       </div>
     </div>

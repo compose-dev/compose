@@ -62,7 +62,6 @@ function formatColumn(
 }
 
 function formatSelectColumn(
-  totalRecords: number,
   disableRowSelection: boolean,
   allowMultiSelection: boolean,
   offset: number,
@@ -82,16 +81,20 @@ function formatSelectColumn(
         <HeaderCell density={density}>
           <CheckboxRaw
             enabled={
-              Object.keys(table.getState().rowSelection).length >= totalRecords
+              Object.keys(table.getState().rowSelection).length >=
+              table.getRowCount()
             }
             setEnabled={(isChecked) => {
               if (!isChecked) {
                 table.setRowSelection({});
               } else {
+                const totalRecords = table.getRowCount();
+
                 const obj: Record<number, boolean> = {};
                 for (let i = 0; i < totalRecords; i++) {
                   obj[i] = true;
                 }
+
                 table.setRowSelection(obj);
               }
             }}
@@ -242,7 +245,6 @@ function useFormattedColumns(
   allowMultiSelection: boolean,
   hasError: boolean,
   disableRowSelection: boolean,
-  totalRecords: number,
   offset: number,
   actions: UI.Components.InputTable["model"]["properties"]["actions"],
   onTableRowActionHook: (rowIdx: number, actionIdx: number) => void,
@@ -255,7 +257,6 @@ function useFormattedColumns(
     if (enableRowSelection) {
       formatted.push(
         formatSelectColumn(
-          totalRecords,
           disableRowSelection,
           allowMultiSelection,
           offset,
@@ -287,7 +288,6 @@ function useFormattedColumns(
     allowMultiSelection,
     hasError,
     disableRowSelection,
-    totalRecords,
     offset,
     actions,
     onTableRowActionHook,

@@ -49,7 +49,7 @@ function formatSortByForServer(
   >["sortBy"];
 }
 
-function useSortingState(
+function useSorting(
   columns: TableColumnProp[],
   initialSortBy: UI.Components.InputTable["model"]["properties"]["sortBy"],
   sortable: UI.Table.SortOption,
@@ -141,4 +141,4 @@ function useSortingState(
   };
 }
 
-export { useSortingState };
+export { useSorting };

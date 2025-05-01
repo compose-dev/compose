@@ -1,4 +1,3 @@
-import { u } from "@compose/ts";
 import Icon from "~/components/icon";
 import { TextInput } from "~/components/input";
 import { TableColumnProp, TanStackTable } from "../../utils";
@@ -97,9 +96,6 @@ function ToolbarRow({
   loading,
   paginated,
   onTablePageChangeHook,
-  offset,
-  rowCount,
-  totalRecords,
   table,
   columns,
   disableSearch,
@@ -114,9 +110,6 @@ function ToolbarRow({
   loading: UI.Stale.Option;
   paginated: boolean;
   onTablePageChangeHook: (val: string | null) => void;
-  offset: number;
-  rowCount: number;
-  totalRecords: number;
   table: TanStackTable;
   columns: TableColumnProp[];
   disableSearch: boolean;
@@ -124,6 +117,12 @@ function ToolbarRow({
   tableId: string;
   resetSortingStateToInitial: () => void;
 }) {
+  const offset =
+    table.getState().pagination.pageIndex *
+    table.getState().pagination.pageSize;
+
+  const currentPageRowCount = table.getRowModel().rows.length;
+
   return (
     <div
       className={classNames(
@@ -174,8 +173,14 @@ function ToolbarRow({
         <div className="self-stretch w-1 border-r border-brand-neutral hidden sm:block" />
         <p className="text-brand-neutral-2 text-sm hidden sm:block">
           {paginated
-            ? `${u.string.formatNumber(offset + 1)} - ${u.string.formatNumber(offset + rowCount)} of ${totalRecords === Infinity ? "???" : u.string.formatNumber(totalRecords)} results`
-            : `${u.string.formatNumber(rowCount)} results`}
+            ? `${(offset + 1).toLocaleString()} - ${(
+                offset + currentPageRowCount
+              ).toLocaleString()} of ${
+                table.getRowCount() === Infinity
+                  ? "???"
+                  : table.getRowCount().toLocaleString()
+              } results`
+            : `${table.getRowCount().toLocaleString()} results`}
         </p>
       </div>
     </div>

@@ -1,27 +1,29 @@
 import { UI } from "@composehq/ts-public";
 import { PageSelector, TableLoading } from "./footer-components";
 import { useEffect, useRef } from "react";
-import { u } from "@compose/ts";
+import { TanStackTable } from "../../utils";
 
 function RowCountLabel({
+  table,
   paginated,
-  offset,
-  rowCount,
-  totalRecords,
 }: {
+  table: TanStackTable;
   paginated: boolean;
-  offset: number;
-  rowCount: number;
-  totalRecords: number;
 }) {
+  const offset =
+    table.getState().pagination.pageIndex *
+    table.getState().pagination.pageSize;
+
+  const currentPageRowCount = table.getRowModel().rows.length;
+
+  const totalRecords = table.getRowCount();
+
   if (paginated) {
     return (
       <p className="text-brand-neutral-2 text-sm">
-        {u.string.formatNumber(offset + 1)} -{" "}
-        {u.string.formatNumber(offset + rowCount)} of{" "}
-        {totalRecords === Infinity
-          ? "???"
-          : u.string.formatNumber(totalRecords)}{" "}
+        {(offset + 1).toLocaleString()} -{" "}
+        {(offset + currentPageRowCount).toLocaleString()} of{" "}
+        {totalRecords === Infinity ? "???" : totalRecords.toLocaleString()}{" "}
         <span className="hidden sm:inline">results</span>
       </p>
     );
@@ -29,29 +31,23 @@ function RowCountLabel({
 
   return (
     <p className="text-brand-neutral-2 text-sm">
-      {u.string.formatNumber(rowCount)} results
+      {totalRecords.toLocaleString()} results
     </p>
   );
 }
 
 function FooterRow({
+  table,
   paginated,
   loading,
-  offset,
-  pageSize,
-  totalRecords,
-  onTablePageChangeHook,
   scrollToTop,
-  rowCount,
+  offset,
 }: {
+  table: TanStackTable;
   paginated: boolean;
   loading: UI.Stale.Option;
-  offset: number;
-  pageSize: number;
-  totalRecords: number;
-  onTablePageChangeHook: (offset: number, pageSize: number) => void;
   scrollToTop: () => void;
-  rowCount: number;
+  offset: number;
 }) {
   const prevLoadingRef = useRef(loading);
 
@@ -74,12 +70,7 @@ function FooterRow({
   if (!paginated) {
     return (
       <div className="flex sm:hidden flex-row justify-center items-center p-2 w-full border-t border-brand-neutral bg-brand-io">
-        <RowCountLabel
-          paginated={paginated}
-          offset={offset}
-          rowCount={rowCount}
-          totalRecords={totalRecords}
-        />
+        <RowCountLabel table={table} paginated={paginated} />
       </div>
     );
   }
@@ -88,23 +79,14 @@ function FooterRow({
     <div className="flex flex-row items-center justify-between p-2 w-full border-t border-brand-neutral bg-brand-io">
       {!loading && (
         <div className="block sm:hidden">
-          <RowCountLabel
-            paginated={paginated}
-            offset={offset}
-            rowCount={rowCount}
-            totalRecords={totalRecords}
-          />
+          <RowCountLabel table={table} paginated={paginated} />
         </div>
       )}
       <TableLoading loading={loading} />
       <PageSelector
-        offset={offset}
-        pageSize={pageSize}
-        totalRecords={totalRecords}
-        onPageChange={(offset) => {
-          onTablePageChangeHook(offset, pageSize);
-        }}
+        table={table}
         disabled={loading === UI.Stale.OPTION.UPDATE_DISABLED}
+        offset={offset}
       />
     </div>
   );

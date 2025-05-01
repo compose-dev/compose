@@ -9,7 +9,13 @@ import {
   ColumnPinningState,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import React, { useCallback, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { classNames } from "~/utils/classNames";
 import { useThrottledCallback } from "~/utils/useThrottledCallback";
 import { IOComponent } from "~/components/io-component";
@@ -21,7 +27,9 @@ import {
   type FormattedTableRow,
   type TableColumnProp,
   INTERNAL_COLUMN_ID,
-  useSortingState,
+  useSorting,
+  usePagination,
+  TanStackTable,
 } from "./utils";
 import { ColumnHeaderRow, FooterRow, ToolbarRow } from "./components";
 
@@ -51,6 +59,7 @@ function Table({
   sortBy,
   sortable = UI.Table.SORT_OPTION.MULTI,
   density = UI.Table.DENSITY.STANDARD,
+  overflow = "ellipsis",
 }: {
   id: string;
   data: UI.Components.InputTable["model"]["properties"]["data"];
@@ -82,6 +91,7 @@ function Table({
   sortBy?: UI.Components.InputTable["model"]["properties"]["sortBy"];
   sortable?: UI.Table.SortOption;
   density?: UI.Table.Density;
+  overflow?: UI.Table.OverflowBehavior;
 }) {
   const fixedHeight = paginated || totalRecords > 35;
 
@@ -96,12 +106,24 @@ function Table({
   const customFilterFn = useSearch(columns);
   const formattedData = useFormattedData(data, columns);
   const { sort, setSort, sortByForServer, resetSortingStateToInitial } =
-    useSortingState(columns, sortBy, sortable, (sortBy) => {
+    useSorting(columns, sortBy, sortable, (sortBy) => {
       if (paginated) {
         // Always reset offset to 0 when sorting changes.
         onTablePageChangeHook(searchQuery, 0, pageSize, sortBy);
       }
     });
+  const { paginationState, setPaginationState } = usePagination(
+    offset,
+    pageSize,
+    (offset, pageSize) => {
+      onTablePageChangeHook(
+        searchQuery,
+        offset,
+        pageSize,
+        sortByForServer.current
+      );
+    }
+  );
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
     left: enableRowSelection ? [INTERNAL_COLUMN_ID.SELECT] : [],
     right: [],
@@ -112,12 +134,16 @@ function Table({
     allowMultiSelection,
     hasError,
     disableRowSelection,
-    totalRecords,
     offset,
     actions,
     onTableRowActionHook,
     density
   );
+
+  const scrollToTopRef = useRef<() => void>(() => {});
+  const setScrollToTopHandler = useCallback((scrollFn: () => void) => {
+    scrollToTopRef.current = scrollFn;
+  }, []);
 
   const handleRowSelectionChange = useCallback(
     (newRowSelections: Updater<Record<string, boolean>>) => {
@@ -140,6 +166,7 @@ function Table({
       rowSelection: rowSelections,
       sorting: sort,
       columnPinning,
+      pagination: paginationState,
     },
     initialState: {
       // Set initial state to properly leverage tanstack table's "resetColumnVisibility"
@@ -162,6 +189,8 @@ function Table({
     },
     globalFilterFn: "fuzzy",
     getFilteredRowModel: getFilteredRowModel(),
+    enableGlobalFilter: !disableSearch,
+    manualFiltering: paginated,
 
     // ROW SELECTION
     enableMultiRowSelection: allowMultiSelection,
@@ -176,39 +205,12 @@ function Table({
     getSortedRowModel: getSortedRowModel(),
     manualSorting: paginated,
     onSortingChange: setSort,
+
+    // PAGINATION
+    manualPagination: paginated,
+    rowCount: totalRecords,
+    onPaginationChange: setPaginationState,
   });
-
-  const tableContainerRef = useRef<HTMLDivElement>(null);
-
-  const { rows } = table.getRowModel();
-
-  const rowVirtualizer = useVirtualizer({
-    count: rows.length,
-    getScrollElement: () => tableContainerRef.current,
-    estimateSize: () => {
-      if (density === "comfortable") {
-        return 49;
-      }
-
-      if (density === "standard") {
-        return 41;
-      }
-
-      return 33;
-    }, // Adjust this value based on your row height
-    measureElement:
-      typeof window !== "undefined" &&
-      navigator.userAgent.indexOf("Firefox") === -1
-        ? (element) => element?.getBoundingClientRect().height
-        : undefined,
-    overscan: 15,
-  });
-
-  const scrollToTop = useCallback(() => {
-    rowVirtualizer.scrollToOffset(0, {
-      behavior: "auto",
-    });
-  }, [rowVirtualizer]);
 
   return (
     <div className="w-full">
@@ -249,90 +251,22 @@ function Table({
             columns={columns}
             disableSearch={disableSearch}
             sortable={sortable}
-            offset={offset}
-            rowCount={rows.length}
-            totalRecords={totalRecords}
             resetSortingStateToInitial={resetSortingStateToInitial}
           />
-          <div
-            className={classNames(
-              "flex flex-col overflow-auto w-full h-full border-t border-brand-neutral",
-              {
-                "text-xs": density === UI.Table.DENSITY.COMPACT,
-                "text-sm": density === UI.Table.DENSITY.STANDARD,
-              }
-            )}
-            style={{
-              scrollbarWidth: "thin",
-            }}
-            ref={tableContainerRef}
-          >
-            {/* 
-            - min-w-full: allows the table to expand to fill the full width
-            there aren't enough rows to naturally fill the width.
-            - w-max: allows the table row container to expand to fill the width
-            of the row when there is horizontal scroll and thus the row stretches
-            beyond the visible content area.
-            */}
-            <div className="border-brand-neutral w-max min-w-full">
-              <ColumnHeaderRow table={table} />
-              <div
-                className="w-full flex flex-col"
-                style={{
-                  height: `${rowVirtualizer.getTotalSize()}px`,
-                  position: "relative",
-                }}
-              >
-                {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-                  const row = rows[virtualRow.index];
-                  return (
-                    <div
-                      key={row.id}
-                      data-index={virtualRow.index}
-                      ref={(node) => rowVirtualizer.measureElement(node)}
-                      className="w-full flex border-b-brand border-brand-neutral bg-brand-io absolute hover:bg-brand-overlay group"
-                      style={{
-                        transform: `translateY(${virtualRow.start}px)`,
-                      }}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableRowsMemo
-                          key={cell.id}
-                          cell={cell}
-                          // Since we memoize the table row, we need to directly pass the selection state
-                          // so that the checkbox re-renders when the selection state changes!
-                          isSelected={
-                            table.getState().rowSelection[row.index + offset]
-                          }
-                        />
-                      ))}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            {rows.length === 0 && (
-              <p className="p-2 bg-brand-io text-brand-neutral-2">
-                {loading ? "Loading..." : "No data to display"}
-              </p>
-            )}
-          </div>
+          <TableBody
+            table={table}
+            density={density}
+            offset={offset}
+            loading={loading}
+            overflow={overflow}
+            setScrollToTopHandler={setScrollToTopHandler}
+          />
           <FooterRow
+            table={table}
             paginated={paginated}
             loading={loading}
+            scrollToTop={scrollToTopRef.current}
             offset={offset}
-            pageSize={pageSize}
-            totalRecords={totalRecords}
-            onTablePageChangeHook={(offset, pageSize) => {
-              onTablePageChangeHook(
-                searchQuery,
-                offset,
-                pageSize,
-                sortByForServer.current
-              );
-            }}
-            scrollToTop={scrollToTop}
-            rowCount={rows.length}
           />
           <div className="absolute bottom-0 left-0 w-full border-b border-brand-neutral rounded-brand pointer-events-none " />
         </div>
@@ -340,6 +274,129 @@ function Table({
           <IOComponent.Error>{errorMessage}</IOComponent.Error>
         )}
       </div>
+    </div>
+  );
+}
+
+function TableBody({
+  table,
+  density,
+  offset,
+  loading,
+  overflow,
+  setScrollToTopHandler,
+}: {
+  table: TanStackTable;
+  density: UI.Table.Density;
+  offset: number;
+  loading: UI.Stale.Option;
+  overflow: UI.Table.OverflowBehavior;
+  setScrollToTopHandler: (scrollFn: () => void) => void;
+}) {
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+
+  const { rows } = table.getRowModel();
+
+  const measureElement = useMemo(() => {
+    if (
+      overflow === UI.Table.OVERFLOW_BEHAVIOR.DYNAMIC &&
+      typeof window !== "undefined" &&
+      navigator.userAgent.indexOf("Firefox") === -1
+    ) {
+      return (element: HTMLDivElement) =>
+        element?.getBoundingClientRect().height;
+    }
+
+    return undefined;
+  }, [overflow]);
+
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => tableContainerRef.current,
+    estimateSize: () => {
+      if (density === "comfortable") {
+        return 49;
+      }
+
+      if (density === "standard") {
+        return 41;
+      }
+
+      return 33;
+    },
+    measureElement,
+    overscan: 8,
+  });
+
+  useEffect(() => {
+    setScrollToTopHandler(() => {
+      rowVirtualizer.scrollToIndex(0);
+    });
+  }, [rowVirtualizer, setScrollToTopHandler]);
+
+  return (
+    <div
+      className={classNames(
+        "flex flex-col overflow-auto w-full h-full border-t border-brand-neutral",
+        {
+          "text-xs": density === UI.Table.DENSITY.COMPACT,
+          "text-sm": density === UI.Table.DENSITY.STANDARD,
+        }
+      )}
+      style={{
+        scrollbarWidth: "thin",
+      }}
+      ref={tableContainerRef}
+    >
+      {/* 
+    - min-w-full: allows the table to expand to fill the full width
+    there aren't enough rows to naturally fill the width.
+    - w-max: allows the table row container to expand to fill the width
+    of the row when there is horizontal scroll and thus the row stretches
+    beyond the visible content area.
+    */}
+      <div className="border-brand-neutral w-max min-w-full">
+        <ColumnHeaderRow table={table} />
+        <div
+          className="w-full flex flex-col"
+          style={{
+            height: `${rowVirtualizer.getTotalSize()}px`,
+            position: "relative",
+          }}
+        >
+          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+            const row = rows[virtualRow.index];
+            return (
+              <div
+                key={row.id}
+                data-index={virtualRow.index}
+                ref={rowVirtualizer.measureElement}
+                className="w-full flex border-b-brand border-brand-neutral bg-brand-io absolute hover:bg-brand-overlay group"
+                style={{
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableRowsMemo
+                    key={cell.id}
+                    cell={cell}
+                    // Since we memoize the table row, we need to directly pass the selection state
+                    // so that the checkbox re-renders when the selection state changes!
+                    isSelected={
+                      table.getState().rowSelection[row.index + offset]
+                    }
+                  />
+                ))}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      {rows.length === 0 && (
+        <p className="p-2 bg-brand-io text-brand-neutral-2">
+          {loading ? "Loading..." : "No data to display"}
+        </p>
+      )}
     </div>
   );
 }

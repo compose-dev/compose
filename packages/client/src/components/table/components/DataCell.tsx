@@ -9,7 +9,8 @@ function CircleCheck({ density }: { density: UI.Table.Density }) {
   return (
     <div
       className={classNames("flex items-center", {
-        "h-6": density !== "compact",
+        "h-6": density === "comfortable",
+        "h-5": density === "standard",
         "h-4": density === "compact",
       })}
     >
@@ -27,7 +28,8 @@ function CircleX({ density }: { density: UI.Table.Density }) {
   return (
     <div
       className={classNames("flex items-center", {
-        "h-6": density !== "compact",
+        "h-6": density === "comfortable",
+        "h-5": density === "standard",
         "h-4": density === "compact",
       })}
     >
