@@ -74,6 +74,8 @@ TABLE_COLUMN_FORMAT = Literal[
     "tag",
     # Stringify the value and render as is
     "string",
+    # Render the value as formatted JSON
+    "json",
 ]
 
 TableTagColors = Dict[

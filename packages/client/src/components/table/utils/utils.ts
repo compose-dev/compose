@@ -14,9 +14,15 @@ function guessColumnFormat(
   }
 
   const type = typeof data[0][key];
+
   let isDate =
     typeof data[0][key] === "string" &&
     u.date.isValidISODateString(data[0][key]);
+
+  let isJson =
+    type === "object" &&
+    data[0][key] !== null &&
+    (Array.isArray(data[0][key]) || data[0][key].constructor === Object);
 
   for (let i = 0; i < rowsToCheck; i++) {
     const value = data[i][key];
@@ -34,6 +40,17 @@ function guessColumnFormat(
     ) {
       isDate = false;
     }
+
+    if (
+      isJson &&
+      (value === null ||
+        !(
+          Array.isArray(value) ||
+          (value as unknown as object).constructor === Object
+        ))
+    ) {
+      isJson = false;
+    }
   }
 
   if (type === "boolean") {
@@ -46,6 +63,10 @@ function guessColumnFormat(
 
   if (type === "number") {
     return "number";
+  }
+
+  if (isJson) {
+    return "json";
   }
 
   return undefined;

@@ -4,6 +4,7 @@ import { classNames } from "~/utils/classNames";
 import { TableColumnProp } from "../utils";
 import Icon from "~/components/icon";
 import { u } from "@compose/ts";
+import Json from "~/components/json";
 
 function CircleCheck({ density }: { density: UI.Table.Density }) {
   return (
@@ -96,12 +97,16 @@ function DataCell({
   density: UI.Table.Density;
   isLastRow: boolean;
 }) {
+  const minWidth =
+    column.format === UI.Table.COLUMN_FORMAT.json ? "min-w-72" : "min-w-48";
+
   if (value === null || value === undefined || value === "") {
     if (column.format === UI.Table.COLUMN_FORMAT.boolean) {
       return (
         <RowCell
           className={classNames({
-            "flex-1 min-w-48": !column.width,
+            "flex-1": !column.width,
+            [minWidth]: !column.width,
           })}
           style={
             column.width ? { width: column.width, minWidth: column.width } : {}
@@ -120,7 +125,8 @@ function DataCell({
       return (
         <RowCell
           className={classNames({
-            "flex-1 min-w-48": !column.width,
+            "flex-1": !column.width,
+            [minWidth]: !column.width,
             // If the format is string, we don't apply any special styling
             "!text-brand-error-heavy": column.format !== "string",
           })}
@@ -139,7 +145,10 @@ function DataCell({
 
     return (
       <RowCell
-        className={classNames({ "flex-1 min-w-48": !column.width })}
+        className={classNames({
+          "flex-1": !column.width,
+          [minWidth]: !column.width,
+        })}
         style={
           column.width ? { width: column.width, minWidth: column.width } : {}
         }
@@ -158,7 +167,8 @@ function DataCell({
       return (
         <RowCell
           className={classNames({
-            "flex-1 min-w-48": !column.width,
+            "flex-1": !column.width,
+            [minWidth]: !column.width,
           })}
           style={
             column.width ? { width: column.width, minWidth: column.width } : {}
@@ -176,7 +186,8 @@ function DataCell({
       return (
         <RowCell
           className={classNames({
-            "flex-1 min-w-48": !column.width,
+            "flex-1": !column.width,
+            [minWidth]: !column.width,
           })}
           style={
             column.width ? { width: column.width, minWidth: column.width } : {}
@@ -196,7 +207,8 @@ function DataCell({
       return (
         <RowCell
           className={classNames({
-            "flex-1 min-w-48": !column.width,
+            "flex-1": !column.width,
+            [minWidth]: !column.width,
           })}
           style={
             column.width ? { width: column.width, minWidth: column.width } : {}
@@ -216,7 +228,8 @@ function DataCell({
       return (
         <RowCell
           className={classNames({
-            "flex-1 min-w-48": !column.width,
+            "flex-1": !column.width,
+            [minWidth]: !column.width,
           })}
           style={
             column.width ? { width: column.width, minWidth: column.width } : {}
@@ -236,7 +249,8 @@ function DataCell({
       return (
         <RowCell
           className={classNames({
-            "flex-1 min-w-48": !column.width,
+            "flex-1": !column.width,
+            [minWidth]: !column.width,
           })}
           style={
             column.width ? { width: column.width, minWidth: column.width } : {}
@@ -262,7 +276,8 @@ function DataCell({
           className={classNames(
             "flex flex-wrap gap-[.375rem] content-start leading-none",
             {
-              "flex-1 min-w-48": !column.width,
+              "flex-1": !column.width,
+              [minWidth]: !column.width,
               "!py-3.5": density === "comfortable",
             }
           )}
@@ -330,13 +345,43 @@ function DataCell({
         </RowCell>
       );
     }
+    case UI.Table.COLUMN_FORMAT.json: {
+      return (
+        <RowCell
+          className={classNames("font-mono", {
+            "flex-1": !column.width,
+            [minWidth]: !column.width,
+          })}
+          style={
+            column.width ? { width: column.width, minWidth: column.width } : {}
+          }
+          isLastRow={isLastRow}
+          expand={column.expand}
+          overflow={column.overflow}
+          density={density}
+        >
+          {column.overflow === "dynamic" ? (
+            <Json
+              json={value}
+              label={null}
+              bare={true}
+              copyable={false}
+              size={density === "compact" ? "xs" : "sm"}
+            />
+          ) : (
+            JSON.stringify(value, null)
+          )}
+        </RowCell>
+      );
+    }
     default: {
       const formatted = formatStringCell(value);
 
       return (
         <RowCell
           className={classNames({
-            "flex-1 min-w-48": !column.width,
+            "flex-1": !column.width,
+            [minWidth]: !column.width,
           })}
           style={
             column.width ? { width: column.width, minWidth: column.width } : {}

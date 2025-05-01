@@ -19,7 +19,13 @@ function formatColumn(
 ): TanStackTableColumn {
   return {
     ...column,
-    sortingFn: "basic",
+    sortingFn:
+      column.format === "json"
+        ? (a, b, columnId) =>
+            JSON.stringify(a.original[columnId]).localeCompare(
+              JSON.stringify(b.original[columnId])
+            )
+        : "basic",
     sortDescFirst: UI.Table.shouldSortDescendingFirst(column.format),
     header: (header) => {
       return (
@@ -28,8 +34,9 @@ function formatColumn(
           nextSortDirection={header.column.getNextSortingOrder()}
           isSortable={header.column.getCanSort()}
           className={classNames({
-            "min-w-48 flex-1": !column.width,
-            "flex-1": column.expand === true,
+            "flex-1": column.expand === true || !column.width,
+            "min-w-48": !column.width && column.format !== "json",
+            "min-w-72": !column.width && column.format === "json",
           })}
           style={
             column.width ? { width: column.width, minWidth: column.width } : {}

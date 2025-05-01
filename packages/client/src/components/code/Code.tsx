@@ -4,17 +4,24 @@ import hljs from "highlight.js/lib/common";
 import { UI } from "@composehq/ts-public";
 
 import { CopyCodeButton } from "./CopyCodeButton";
+import { classNames } from "~/utils/classNames";
 
 function Code({
   code,
   label,
   description,
   lang,
+  bare = false,
+  copyable = true,
+  size = "sm",
 }: {
   code: string;
   label?: string;
   description?: string;
   lang?: UI.CodeLanguage.LanguageName;
+  bare?: boolean;
+  copyable?: boolean;
+  size?: "xs" | "sm" | "md";
 }) {
   const codeRef = useRef<HTMLElement>(null);
 
@@ -39,11 +46,19 @@ function Code({
       {description && (
         <IOComponent.Description as="p">{description}</IOComponent.Description>
       )}
-      <div className="rounded-brand overflow-clip relative group text-sm">
+      <div
+        className={classNames("rounded-brand overflow-clip relative group", {
+          "text-xs": size === "xs",
+          "text-sm": size === "sm",
+          "text-md": size === "md",
+        })}
+      >
         <pre>
           <code
             ref={codeRef}
-            className={language}
+            className={classNames(language ?? "", {
+              "!p-0 !bg-transparent": bare,
+            })}
             style={{
               scrollbarWidth: "thin",
             }}
@@ -51,7 +66,7 @@ function Code({
             {code}
           </code>
         </pre>
-        <CopyCodeButton code={code} />
+        {copyable && <CopyCodeButton code={code} />}
       </div>
     </div>
   );

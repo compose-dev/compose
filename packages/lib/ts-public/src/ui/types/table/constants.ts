@@ -60,6 +60,8 @@ type OverflowBehavior =
  *
  * @type `tag` Colored pills
  *
+ * @type `json` JSON object
+ *
  * @type `string` Stringify the value and render as is
  */
 const TABLE_COLUMN_FORMAT = {
@@ -80,6 +82,9 @@ const TABLE_COLUMN_FORMAT = {
 
   /** Colored pills */
   tag: "tag",
+
+  /** JSON object */
+  json: "json",
 
   /** Stringify the value and render as is */
   string: "string",

@@ -116,12 +116,14 @@ function Table({
     offset,
     pageSize,
     (offset, pageSize) => {
-      onTablePageChangeHook(
-        searchQuery,
-        offset,
-        pageSize,
-        sortByForServer.current
-      );
+      if (paginated) {
+        onTablePageChangeHook(
+          searchQuery,
+          offset,
+          pageSize,
+          sortByForServer.current
+        );
+      }
     }
   );
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
