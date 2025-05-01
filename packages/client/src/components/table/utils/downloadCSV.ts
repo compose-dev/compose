@@ -34,7 +34,10 @@ function generateAndDownloadCSV(
   table: TanStackTable,
   columns: TableColumnProp[],
   filename: string,
-  includeHiddenColumns: boolean
+  rowSelections: number[],
+  offset: number,
+  includeHiddenColumns: boolean,
+  includeUnselectedRows: boolean
 ) {
   const filteredColumns = columns.filter((column) => {
     if (includeHiddenColumns) {
@@ -47,11 +50,19 @@ function generateAndDownloadCSV(
   const headers = filteredColumns.map((column) => column.label);
   const headerIds = filteredColumns.map((column) => column.id);
 
-  const data = table.getRowModel().flatRows.map((row) => {
-    return headerIds
-      .map((headerId) => escapeCsvCell(row.getValue(headerId)))
-      .join(",");
-  });
+  const data = table
+    .getRowModel()
+    .flatRows.filter((_, idx) => {
+      if (includeUnselectedRows) {
+        return true;
+      }
+      return rowSelections.includes(idx + offset);
+    })
+    .map((row) => {
+      return headerIds
+        .map((headerId) => escapeCsvCell(row.getValue(headerId)))
+        .join(",");
+    });
 
   const csvContent = [headers, ...data].join("\n");
   const blob = new Blob([csvContent], { type: "text/csv" });

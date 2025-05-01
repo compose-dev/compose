@@ -27,19 +27,44 @@ function DownloadCSVPanel({
 }) {
   const [filename, setFilename] = useState<string | null>(defaultFileName);
   const [includeHiddenColumns, setIncludeHiddenColumns] = useState(false);
+  const [includeUnselectedRows, setIncludeUnselectedRows] = useState(false);
+
+  const rowSelections = Object.keys(table.getState().rowSelection).map((row) =>
+    parseInt(row)
+  );
+
+  const offset = paginated
+    ? table.getState().pagination.pageIndex *
+      table.getState().pagination.pageSize
+    : 0;
 
   function downloadCSV(filename?: string | null) {
     generateAndDownloadCSV(
       table,
       columns,
       filename ?? defaultFileName,
-      includeHiddenColumns
+      rowSelections,
+      offset,
+      includeHiddenColumns,
+      rowSelections.length > 0 ? includeUnselectedRows : true
     );
   }
 
   const hiddenColumnCount = Object.values(
     table.getState().columnVisibility
   ).filter((column) => column === false).length;
+
+  const currentPageSize = paginated
+    ? table.getState().pagination.pageSize
+    : table.getRowCount();
+
+  const currentPageRowSelections = paginated
+    ? rowSelections.filter(
+        (row) => row >= offset && row < offset + currentPageSize
+      )
+    : rowSelections;
+
+  const numUnselectedRows = currentPageSize - currentPageRowSelections.length;
 
   return (
     <div
@@ -64,6 +89,16 @@ function DownloadCSVPanel({
           label="Include hidden columns"
           description={`${hiddenColumnCount} hidden ${
             hiddenColumnCount === 1 ? "column" : "columns"
+          } will be included in the CSV download.`}
+        />
+      )}
+      {rowSelections.length > 0 && (
+        <Checkbox
+          checked={includeUnselectedRows}
+          setChecked={(val) => setIncludeUnselectedRows(val)}
+          label="Include unselected rows"
+          description={`${numUnselectedRows} unselected ${
+            numUnselectedRows === 1 ? "row" : "rows"
           } will be included in the CSV download.`}
         />
       )}
