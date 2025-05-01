@@ -102,20 +102,35 @@ def get_selectable(
     selectable: Union[bool, None],
     allow_select: Union[bool, None],
     on_change: Nullable.Callable,
+    paginated: bool,
+    selection_return_type: Union[TableSelectionReturn.TYPE, None],
+    table_id: str,
 ) -> bool:
-    # If explicitly set to true, then use the explicitly set value.
-    if selectable is True or allow_select is True:
-        return True
+    is_explicitly_true = selectable is True or allow_select is True
+    is_explicitly_false = selectable is False or allow_select is False
 
-    # If there is an on_change hook, default to `true`, unless explicitly set to false.
-    if on_change is not None:
-        if selectable is False or allow_select is False:
+    # If there is an on_change hook, default to `true`, unless explicitly set to
+    # `false`. Else, default to `false` unless explicitly set to `true`.
+    is_selectable = (
+        is_explicitly_true
+        if on_change is not None
+        else False if is_explicitly_false else True
+    )
+
+    # If paginated, add a secondary check to ensure that they have the correct
+    # selection mode.
+    if paginated:
+        if selection_return_type != TableSelectionReturn.INDEX:
+            # If it's selectable, we assume the user wants row selection and
+            # warn them on how to enable it.
+            if is_selectable:
+                warnings.warn(
+                    f"Paginated tables only support row selection by index. Set `selection_return_type: 'index'` to enable row selection for table with id: {table_id}."
+                )
+
             return False
 
-        return True
-
-    # Otherwise, default to `false`.
-    return False
+    return is_selectable
 
 
 def _table(
@@ -178,7 +193,14 @@ def _table(
         "actions": get_model_actions(actions),
         "minSelections": min_selections,
         "maxSelections": max_selections,
-        "allowSelect": get_selectable(selectable, allow_select, on_change),
+        "allowSelect": get_selectable(
+            selectable,
+            allow_select,
+            on_change,
+            manually_paged or auto_paged,
+            selection_return_type,
+            id,
+        ),
         "v": 3,
     }
 

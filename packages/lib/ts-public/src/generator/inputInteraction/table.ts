@@ -261,24 +261,39 @@ function getSortable(
 function getSelectable(
   selectable: boolean | undefined,
   allowSelect: boolean | undefined,
-  onChange: UI.Components.InputTable["hooks"]["onSelect"] | null | undefined
+  onChange: UI.Components.InputTable["hooks"]["onSelect"] | null | undefined,
+  paginated: boolean,
+  selectMode: UI.Table.SelectionReturnType | undefined,
+  tableId: UI.BaseGeneric.Id
 ) {
-  // If explicitly set to true, then use the explicitly set value.
-  if (selectable === true || allowSelect === true) {
-    return true;
-  }
+  const isExplicitlyTrue = selectable === true || allowSelect === true;
+  const isExplicitlyFalse = selectable === false || allowSelect === false;
 
-  // If there is an onChange hook, default to `true`, unless explicitly set to false.
-  if (onChange) {
-    if (selectable === false || allowSelect === false) {
+  // If there's an onChange hook, default to `true` unless explicitly set to
+  // `false`. Else, default to `false` unless explicitly set to `true`.
+  const isSelectable = onChange
+    ? isExplicitlyFalse
+      ? false
+      : true
+    : isExplicitlyTrue;
+
+  // If paginated, add a secondary check to ensure that they have the correct
+  // selection mode.
+  if (paginated) {
+    if (selectMode !== UI.Table.SELECTION_RETURN_TYPE.INDEX) {
+      // If it's selectable, we assume the user wants row selection and
+      // warn them on how to enable it.
+      if (isSelectable) {
+        console.warn(
+          `Paginated tables only support row selection by index. Set \`selectionReturnType: 'index'\` to enable row selection for table with id: ${tableId}.`
+        );
+      }
+
       return false;
     }
-
-    return true;
   }
 
-  // Otherwise, default to `false`.
-  return false;
+  return isSelectable;
 }
 
 /**
@@ -367,10 +382,9 @@ function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
   };
 
   if (
-    !Array.isArray(mergedProperties.initialSelectedRows) ||
-    !mergedProperties.initialSelectedRows.every(
-      (row) => typeof row === "number"
-    )
+    properties.initialSelectedRows !== undefined &&
+    (!Array.isArray(properties.initialSelectedRows) ||
+      !properties.initialSelectedRows.every((row) => typeof row === "number"))
   ) {
     throw new Error(
       "initialSelectedRows must be an array of numbers for table"
@@ -399,16 +413,24 @@ function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
     columns: mergedProperties.columns,
     minSelections: mergedProperties.minSelections,
     maxSelections: mergedProperties.maxSelections,
+    hasOnSelectHook: mergedProperties.onChange !== null,
+    actions: getModelActions(mergedProperties.actions),
+    v: 3,
     allowSelect: getSelectable(
       properties.selectable,
       properties.allowSelect,
-      properties.onChange
+      properties.onChange,
+      manuallyPaged || autoPaged,
+      properties.selectionReturnType,
+      id
     ),
-    hasOnSelectHook: mergedProperties.onChange !== null,
-    actions: getModelActions(mergedProperties.actions),
-    initialSelectedRows: mergedProperties.initialSelectedRows,
-    v: 3,
+    initialSelectedRows:
+      properties.initialSelectedRows === undefined
+        ? []
+        : properties.initialSelectedRows,
   };
+
+  console.log(modelProperties.initialSelectedRows);
 
   if (manuallyPaged || autoPaged) {
     modelProperties.paged = true;
@@ -418,14 +440,6 @@ function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
     mergedProperties.selectionReturnType !== UI.Table.SELECTION_RETURN_TYPE.FULL
   ) {
     modelProperties.selectMode = mergedProperties.selectionReturnType;
-  }
-
-  // Paged tables only support row selection by index.
-  if (
-    (manuallyPaged || autoPaged) &&
-    modelProperties.selectMode !== UI.Table.SELECTION_RETURN_TYPE.INDEX
-  ) {
-    modelProperties.allowSelect = false;
   }
 
   if (properties.overflow && properties.overflow !== "ellipsis") {

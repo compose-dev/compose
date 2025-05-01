@@ -6,7 +6,7 @@ import {
   TanStackTable,
 } from "./constants";
 import { UI } from "@composehq/ts-public";
-import { useMemo } from "react";
+import { MutableRefObject, useMemo, useRef } from "react";
 import { classNames } from "~/utils/classNames";
 import { CheckboxRaw } from "~/components/checkbox";
 import { HeaderCell, DataCell, RowCell, TableActionCell } from "../components";
@@ -44,7 +44,7 @@ function formatColumn(
           onClick={header.column.getToggleSortingHandler()}
           density={density}
         >
-          {column.label}
+          <p>{column.label}</p>
         </HeaderCell>
       );
     },
@@ -73,7 +73,8 @@ function formatSelectColumn(
   allowMultiSelection: boolean,
   offset: number,
   hasError: boolean,
-  density: UI.Table.Density
+  density: UI.Table.Density,
+  lastSelectedIndex: MutableRefObject<number | null>
 ): TanStackTableColumn {
   return {
     id: INTERNAL_COLUMN_ID.SELECT,
@@ -118,7 +119,7 @@ function formatSelectColumn(
       table: TanStackTable;
     }) => (
       <RowCell
-        className={classNames({
+        className={classNames("select-none", {
           "pt-2": density === "compact",
           "pt-3": density === "standard",
           "pt-4": density === "comfortable",
@@ -129,24 +130,50 @@ function formatSelectColumn(
       >
         <CheckboxRaw
           enabled={table.getState().rowSelection[row.index + offset] === true}
-          setEnabled={(enabled) => {
-            if (enabled) {
-              if (!row.getCanMultiSelect()) {
-                table.setRowSelection({
-                  [row.index + offset]: enabled,
-                });
-              } else {
-                table.setRowSelection({
-                  ...table.getState().rowSelection,
-                  [row.index + offset]: enabled,
-                });
+          setEnabled={(enabled, event) => {
+            const currentSelectedIndex = row.index + offset;
+            const isShiftClick =
+              event &&
+              event.nativeEvent &&
+              (event.nativeEvent as MouseEvent).shiftKey;
+
+            if (
+              allowMultiSelection &&
+              isShiftClick &&
+              lastSelectedIndex.current !== null &&
+              lastSelectedIndex.current !== currentSelectedIndex
+            ) {
+              const start = Math.min(
+                lastSelectedIndex.current,
+                currentSelectedIndex
+              );
+              const end = Math.max(
+                lastSelectedIndex.current,
+                currentSelectedIndex
+              );
+              const newSelection = { ...table.getState().rowSelection };
+              for (let i = start; i <= end; i++) {
+                newSelection[i] = true;
               }
+              table.setRowSelection(newSelection);
             } else {
-              const newRowSelections = {
-                ...table.getState().rowSelection,
-              };
-              delete newRowSelections[row.index + offset];
-              table.setRowSelection(newRowSelections);
+              if (enabled) {
+                const newSelection = allowMultiSelection
+                  ? {
+                      ...table.getState().rowSelection,
+                      [currentSelectedIndex]: true,
+                    }
+                  : { [currentSelectedIndex]: true };
+                table.setRowSelection(newSelection);
+                lastSelectedIndex.current = currentSelectedIndex;
+              } else {
+                const newRowSelections = {
+                  ...table.getState().rowSelection,
+                };
+                delete newRowSelections[currentSelectedIndex];
+                table.setRowSelection(newRowSelections);
+                lastSelectedIndex.current = null;
+              }
             }
           }}
           disabled={disableRowSelection}
@@ -257,6 +284,15 @@ function useFormattedColumns(
   onTableRowActionHook: (rowIdx: number, actionIdx: number) => void,
   density: UI.Table.Density
 ) {
+  // Note: our implementation here does not account for external changes to
+  // row selection state. e.g. select a row, selection state changes from
+  // SDK, shift click another row, the shift click will "work" and select
+  // all the rows between the last selected row and the current row, instead
+  // of having been reset when the external change occurred. In practice,
+  // this is quite a small issue and not worth the complexity of accounting
+  // for.
+  const lastSelectedIndex = useRef<number | null>(null);
+
   const formattedColumns = useMemo(() => {
     const formatted: TanStackTableColumn[] = [];
 
@@ -268,7 +304,8 @@ function useFormattedColumns(
           allowMultiSelection,
           offset,
           hasError,
-          density
+          density,
+          lastSelectedIndex
         )
       );
     }

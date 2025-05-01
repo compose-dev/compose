@@ -44,7 +44,7 @@ function HeaderCell({
       style={style}
       onClick={onClick}
     >
-      <p>{children}</p>
+      {children}
       {isSortable && !sortDirection && (
         <div
           className={classNames("hidden group-hover:block", {
