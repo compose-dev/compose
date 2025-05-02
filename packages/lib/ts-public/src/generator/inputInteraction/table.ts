@@ -217,8 +217,12 @@ function getSearchable(
   }
 
   // If manually paged, then it is searchable only if explicitly set to true.
-  if (manuallyPaged && searchable === true) {
-    return true;
+  if (manuallyPaged) {
+    if (searchable === true) {
+      return true;
+    }
+
+    return false;
   }
 
   // If not paged and explicitly set, then use the explicitly set value.

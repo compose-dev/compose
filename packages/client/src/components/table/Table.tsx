@@ -6,7 +6,6 @@ import {
   Updater,
   Cell,
   getSortedRowModel,
-  ColumnPinningState,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React, {
@@ -26,10 +25,11 @@ import {
   useFormattedColumns,
   type FormattedTableRow,
   type TableColumnProp,
-  INTERNAL_COLUMN_ID,
   useSorting,
   usePagination,
   TanStackTable,
+  useColumnPinning,
+  INTERNAL_COLUMN_ID,
 } from "./utils";
 import { ColumnHeaderRow, FooterRow, ToolbarRow } from "./components";
 
@@ -126,10 +126,13 @@ function Table({
       }
     }
   );
-  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
-    left: enableRowSelection ? [INTERNAL_COLUMN_ID.SELECT] : [],
-    right: [],
-  });
+  const { columnPinning, setColumnPinning, resetColumnPinningToInitial } =
+    useColumnPinning(
+      enableRowSelection,
+      columns,
+      !!actions && actions.length > 0
+    );
+
   const formattedColumns = useFormattedColumns(
     columns,
     enableRowSelection,
@@ -193,6 +196,16 @@ function Table({
     getFilteredRowModel: getFilteredRowModel(),
     enableGlobalFilter: !disableSearch,
     manualFiltering: paginated,
+    getColumnCanGlobalFilter: (column) => {
+      if (
+        column.id === INTERNAL_COLUMN_ID.ACTION ||
+        column.id === INTERNAL_COLUMN_ID.SELECT
+      ) {
+        return false;
+      }
+
+      return true;
+    },
 
     // ROW SELECTION
     enableMultiRowSelection: allowMultiSelection,
@@ -254,6 +267,7 @@ function Table({
             disableSearch={disableSearch}
             sortable={sortable}
             resetSortingStateToInitial={resetSortingStateToInitial}
+            resetColumnPinningToInitial={resetColumnPinningToInitial}
           />
           <TableBody
             table={table}
@@ -368,6 +382,11 @@ function TableBody({
         >
           {rowVirtualizer.getVirtualItems().map((virtualRow) => {
             const row = rows[virtualRow.index];
+
+            const leftVisibleCells = row.getLeftVisibleCells();
+            const centerVisibleCells = row.getCenterVisibleCells();
+            const rightVisibleCells = row.getRightVisibleCells();
+
             return (
               <div
                 key={row.id}
@@ -378,7 +397,23 @@ function TableBody({
                   transform: `translateY(${virtualRow.start}px)`,
                 }}
               >
-                {row.getVisibleCells().map((cell) => (
+                {leftVisibleCells.length > 0 && (
+                  // without z-10, json columns were rendering on top of the pinned columns when scrolled underneath.
+                  <div className="flex sticky left-0 border-r border-brand-neutral bg-brand-io group-hover:bg-brand-overlay z-10">
+                    {leftVisibleCells.map((cell) => (
+                      <TableRowsMemo
+                        key={cell.id}
+                        cell={cell}
+                        // Since we memoize the table row, we need to directly pass the selection state
+                        // so that the checkbox re-renders when the selection state changes!
+                        isSelected={
+                          table.getState().rowSelection[row.index + offset]
+                        }
+                      />
+                    ))}
+                  </div>
+                )}
+                {centerVisibleCells.map((cell) => (
                   <TableRowsMemo
                     key={cell.id}
                     cell={cell}
@@ -389,6 +424,24 @@ function TableBody({
                     }
                   />
                 ))}
+                {rightVisibleCells.length > 0 && (
+                  <div
+                    className="flex sticky right-0 border-l border-brand-neutral bg-brand-io group-hover:bg-brand-overlay"
+                    style={{ boxShadow: "1px 0 0 var(--brand-bg-overlay)" }}
+                  >
+                    {rightVisibleCells.map((cell) => (
+                      <TableRowsMemo
+                        key={cell.id}
+                        cell={cell}
+                        // Since we memoize the table row, we need to directly pass the selection state
+                        // so that the checkbox re-renders when the selection state changes!
+                        isSelected={
+                          table.getState().rowSelection[row.index + offset]
+                        }
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })}

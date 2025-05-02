@@ -1,9 +1,10 @@
-import { Row, ColumnDef } from "@tanstack/react-table";
+import { Row, ColumnDef, Column } from "@tanstack/react-table";
 import {
   FormattedTableRow,
   INTERNAL_COLUMN_ID,
   TableColumnProp,
   TanStackTable,
+  COLUMN_WIDTH_NUMERIC,
 } from "./constants";
 import { UI } from "@composehq/ts-public";
 import { MutableRefObject, useMemo, useRef } from "react";
@@ -28,19 +29,37 @@ function formatColumn(
         : "basic",
     sortDescFirst: UI.Table.shouldSortDescendingFirst(column.format),
     header: (header) => {
+      function getStyle() {
+        if (header.column.getIsPinned()) {
+          return {
+            width: header.column.getSize(),
+            maxWidth: header.column.getSize(),
+          };
+        }
+
+        if (column.width) {
+          return {
+            flex: column.expand ? "1 1 0%" : undefined,
+            width: column.width,
+            minWidth: column.width,
+          };
+        }
+
+        return {
+          flex: "1 1 0%",
+          minWidth:
+            column.format === "json"
+              ? COLUMN_WIDTH_NUMERIC.JSON
+              : COLUMN_WIDTH_NUMERIC.DEFAULT,
+        };
+      }
+
       return (
         <HeaderCell
           sortDirection={header.column.getIsSorted()}
           nextSortDirection={header.column.getNextSortingOrder()}
           isSortable={header.column.getCanSort()}
-          className={classNames({
-            "flex-1": column.expand === true || !column.width,
-            "min-w-48": !column.width && column.format !== "json",
-            "min-w-72": !column.width && column.format === "json",
-          })}
-          style={
-            column.width ? { width: column.width, minWidth: column.width } : {}
-          }
+          style={getStyle()}
           onClick={header.column.getToggleSortingHandler()}
           density={density}
         >
@@ -50,9 +69,11 @@ function formatColumn(
     },
     cell: ({
       row,
+      column: tanstackColumn,
       table,
     }: {
       row: Row<FormattedTableRow>;
+      column: Column<FormattedTableRow, unknown>;
       table: TanStackTable;
     }) => {
       return (
@@ -62,6 +83,7 @@ function formatColumn(
           meta={row.original[INTERNAL_COLUMN_ID.META]}
           isLastRow={row.index === table.getRowModel().rows.length - 1}
           density={density}
+          pinned={tanstackColumn.getIsPinned()}
         />
       );
     },
@@ -78,6 +100,7 @@ function formatSelectColumn(
 ): TanStackTableColumn {
   return {
     id: INTERNAL_COLUMN_ID.SELECT,
+    enableGlobalFilter: false,
     header: ({ table }: { table: TanStackTable }) => {
       const hasOneRow = table.getRowModel().rows.length >= 1;
 
@@ -193,6 +216,7 @@ function formatActionColumn(
 ): TanStackTableColumn {
   return {
     id: INTERNAL_COLUMN_ID.ACTION,
+    enableGlobalFilter: false,
     header: ({ table }: { table: TanStackTable }) => {
       const hasOneRow = table.getRowModel().rows.length >= 1;
 
@@ -201,24 +225,7 @@ function formatActionColumn(
       }
 
       return (
-        <HeaderCell
-          className="sticky z-10 right-0 border-l border-brand-neutral"
-          /* 
-          Fixes a 2px visual gap that appears between the rightmost sticky column and the table edge 
-          at arbritary screen widths/zooms in Chromium due to subpixel compositing issues with position: sticky. 
-
-          - `contain: paint` isolates each sticky cell into its own paint layer to reduce bleed-through.
-          - `box-shadow: 1px 0 0 white` overlays a solid line to visually mask the remaining gap 
-            without affecting layout or causing issues at other zoom levels.
-
-          This is a visual patch for a known rendering quirk — not a layout fix.
-          */
-          style={{
-            contain: "paint",
-            boxShadow: "1px 0 0 var(--brand-bg-overlay)",
-          }}
-          density={density}
-        >
+        <HeaderCell density={density}>
           <TableActionCell
             actions={actions}
             hidden={true}
@@ -237,27 +244,13 @@ function formatActionColumn(
     }) => {
       return (
         <RowCell
-          className={classNames(
-            "sticky z-10 right-0 bg-brand-io border-l border-brand-neutral group-hover:bg-brand-overlay",
-            {
-              "py-[11px]": density === "comfortable",
-              "py-[7px]": density === "standard",
-              "py-[5px]": density === "compact",
-            }
-          )}
+          className={classNames("bg-brand-io group-hover:bg-brand-overlay", {
+            "py-[11px]": density === "comfortable",
+            "py-[7px]": density === "standard",
+            "py-[5px]": density === "compact",
+          })}
           isLastRow={row.index === table.getRowModel().rows.length - 1}
           density={density}
-          /* 
-          Fixes a 1px visual gap that appears between the rightmost sticky column and the table edge 
-          at 100% zoom in Chromium due to subpixel compositing issues with position: sticky. 
-
-          - `contain: paint` isolates each sticky cell into its own paint layer to reduce bleed-through.
-
-          This is a visual patch for a known rendering quirk — not a layout fix.
-          */
-          style={{
-            contain: "paint",
-          }}
           overflow="dynamic"
         >
           <TableActionCell

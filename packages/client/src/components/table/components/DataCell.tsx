@@ -1,7 +1,7 @@
 import { UI } from "@composehq/ts-public";
 import RowCell from "./RowCell";
 import { classNames } from "~/utils/classNames";
-import { TableColumnProp } from "../utils";
+import { TableColumnProp, COLUMN_WIDTH } from "../utils";
 import Icon from "~/components/icon";
 import { u } from "@compose/ts";
 import Json from "~/components/json";
@@ -90,27 +90,64 @@ function DataCell({
   meta,
   density,
   isLastRow,
+  pinned,
 }: {
   value: unknown;
   column: TableColumnProp;
   meta: Record<string, string>;
   density: UI.Table.Density;
   isLastRow: boolean;
+  pinned: UI.Table.PinnedSide | false;
 }) {
-  const minWidth =
-    column.format === UI.Table.COLUMN_FORMAT.json ? "min-w-72" : "min-w-48";
+  function getStyle() {
+    if (pinned) {
+      if (column.pinnedWidth) {
+        return {
+          width: column.pinnedWidth,
+          maxWidth: column.pinnedWidth,
+        };
+      } else {
+        if (column.format === UI.Table.COLUMN_FORMAT.json) {
+          return {
+            width: COLUMN_WIDTH.JSON,
+            maxWidth: COLUMN_WIDTH.JSON,
+          };
+        } else {
+          return {
+            width: COLUMN_WIDTH.DEFAULT,
+            maxWidth: COLUMN_WIDTH.DEFAULT,
+          };
+        }
+      }
+    }
+
+    if (column.width) {
+      return {
+        width: column.width,
+        minWidth: column.width,
+      };
+    }
+
+    if (column.format === UI.Table.COLUMN_FORMAT.json) {
+      return {
+        flex: "1 1 0%",
+        minWidth: COLUMN_WIDTH.JSON,
+      };
+    }
+
+    return {
+      flex: "1 1 0%",
+      minWidth: COLUMN_WIDTH.DEFAULT,
+    };
+  }
+
+  const style = getStyle();
 
   if (value === null || value === undefined || value === "") {
     if (column.format === UI.Table.COLUMN_FORMAT.boolean) {
       return (
         <RowCell
-          className={classNames({
-            "flex-1": !column.width,
-            [minWidth]: !column.width,
-          })}
-          style={
-            column.width ? { width: column.width, minWidth: column.width } : {}
-          }
+          style={style}
           isLastRow={isLastRow}
           expand={column.expand}
           overflow={column.overflow}
@@ -125,14 +162,10 @@ function DataCell({
       return (
         <RowCell
           className={classNames({
-            "flex-1": !column.width,
-            [minWidth]: !column.width,
             // If the format is string, we don't apply any special styling
             "!text-brand-error-heavy": column.format !== "string",
           })}
-          style={
-            column.width ? { width: column.width, minWidth: column.width } : {}
-          }
+          style={style}
           isLastRow={isLastRow}
           expand={column.expand}
           overflow={column.overflow}
@@ -145,13 +178,7 @@ function DataCell({
 
     return (
       <RowCell
-        className={classNames({
-          "flex-1": !column.width,
-          [minWidth]: !column.width,
-        })}
-        style={
-          column.width ? { width: column.width, minWidth: column.width } : {}
-        }
+        style={style}
         isLastRow={isLastRow}
         expand={column.expand}
         overflow={column.overflow}
@@ -166,13 +193,7 @@ function DataCell({
     case UI.Table.COLUMN_FORMAT.date: {
       return (
         <RowCell
-          className={classNames({
-            "flex-1": !column.width,
-            [minWidth]: !column.width,
-          })}
-          style={
-            column.width ? { width: column.width, minWidth: column.width } : {}
-          }
+          style={style}
           isLastRow={isLastRow}
           expand={column.expand}
           overflow={column.overflow}
@@ -185,13 +206,7 @@ function DataCell({
     case UI.Table.COLUMN_FORMAT.datetime: {
       return (
         <RowCell
-          className={classNames({
-            "flex-1": !column.width,
-            [minWidth]: !column.width,
-          })}
-          style={
-            column.width ? { width: column.width, minWidth: column.width } : {}
-          }
+          style={style}
           isLastRow={isLastRow}
           expand={column.expand}
           overflow={column.overflow}
@@ -206,13 +221,7 @@ function DataCell({
 
       return (
         <RowCell
-          className={classNames({
-            "flex-1": !column.width,
-            [minWidth]: !column.width,
-          })}
-          style={
-            column.width ? { width: column.width, minWidth: column.width } : {}
-          }
+          style={style}
           isLastRow={isLastRow}
           expand={column.expand}
           overflow={column.overflow}
@@ -227,13 +236,7 @@ function DataCell({
 
       return (
         <RowCell
-          className={classNames({
-            "flex-1": !column.width,
-            [minWidth]: !column.width,
-          })}
-          style={
-            column.width ? { width: column.width, minWidth: column.width } : {}
-          }
+          style={style}
           isLastRow={isLastRow}
           expand={column.expand}
           overflow={column.overflow}
@@ -248,13 +251,7 @@ function DataCell({
 
       return (
         <RowCell
-          className={classNames({
-            "flex-1": !column.width,
-            [minWidth]: !column.width,
-          })}
-          style={
-            column.width ? { width: column.width, minWidth: column.width } : {}
-          }
+          style={style}
           isLastRow={isLastRow}
           expand={column.expand}
           overflow={column.overflow}
@@ -276,14 +273,10 @@ function DataCell({
           className={classNames(
             "flex flex-wrap gap-[.375rem] content-start leading-none",
             {
-              "flex-1": !column.width,
-              [minWidth]: !column.width,
               "!py-3.5": density === "comfortable",
             }
           )}
-          style={
-            column.width ? { width: column.width, minWidth: column.width } : {}
-          }
+          style={style}
           isLastRow={isLastRow}
           expand={column.expand}
           overflow={column.overflow}
@@ -348,13 +341,8 @@ function DataCell({
     case UI.Table.COLUMN_FORMAT.json: {
       return (
         <RowCell
-          className={classNames("font-mono", {
-            "flex-1": !column.width,
-            [minWidth]: !column.width,
-          })}
-          style={
-            column.width ? { width: column.width, minWidth: column.width } : {}
-          }
+          style={style}
+          className="font-mono"
           isLastRow={isLastRow}
           expand={column.expand}
           overflow={column.overflow}
@@ -379,13 +367,7 @@ function DataCell({
 
       return (
         <RowCell
-          className={classNames({
-            "flex-1": !column.width,
-            [minWidth]: !column.width,
-          })}
-          style={
-            column.width ? { width: column.width, minWidth: column.width } : {}
-          }
+          style={style}
           isLastRow={isLastRow}
           expand={column.expand}
           overflow={column.overflow}

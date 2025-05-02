@@ -4,7 +4,7 @@ import Table from "~/components/table";
 import { useCallback, useMemo } from "react";
 import { IOComponent } from "~/components/io-component";
 import { useWSContext } from "~/utils/wsContext";
-import { BrowserToServerEvent } from "@compose/ts";
+import { BrowserToServerEvent, u } from "@compose/ts";
 import { classNames } from "~/utils/classNames";
 
 function guessColumns(
@@ -61,12 +61,30 @@ function guessColumns(
       const hidden =
         typeof column === "string" ? false : (column.hidden ?? false);
 
+      let pinnedWidth: number | undefined = undefined;
+      if (typeof column !== "string" && column.width) {
+        try {
+          const convertedWidth = u.number.convertCssWidthToPixelsStrict(
+            column.width
+          );
+
+          pinnedWidth = convertedWidth;
+        } catch (e) {
+          // Ignore
+        }
+      }
+
+      const pinned =
+        typeof column === "string" ? undefined : (column.pinned ?? undefined);
+
       return {
         id: key,
         accessorKey: key,
         label,
         format,
         width,
+        pinned,
+        pinnedWidth,
         tagColors,
         overflow,
         hidden,
@@ -86,6 +104,8 @@ function guessColumns(
     overflow: defaultOverflow,
     hidden: false,
     original: key,
+    pinned: undefined,
+    pinnedWidth: undefined,
   }));
 }
 

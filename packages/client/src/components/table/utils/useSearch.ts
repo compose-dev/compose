@@ -29,6 +29,12 @@ function useSearch(columns: TableColumnProp[]) {
           ?.includes(filterValue.toLowerCase());
       }
 
+      if (keyToFormat[columnId] === UI.Table.COLUMN_FORMAT.json) {
+        return JSON.stringify(row.original[columnId])
+          ?.toLowerCase()
+          ?.includes(filterValue.toLowerCase());
+      }
+
       if (row.original[columnId]) {
         return row.original[columnId]
           ?.toString()

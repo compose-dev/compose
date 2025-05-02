@@ -65,8 +65,11 @@ def get_searchable(
         return False
 
     # If manually paged, then it is searchable only if explicitly set to true.
-    if manually_paged and searchable is True:
-        return True
+    if manually_paged:
+        if searchable is True:
+            return True
+
+        return False
 
     # If not paged and explicitly set, then use the explicitly set value.
     if searchable is not None:

@@ -45,6 +45,12 @@ const OVERFLOW_BEHAVIOR = {
 type OverflowBehavior =
   (typeof OVERFLOW_BEHAVIOR)[keyof typeof OVERFLOW_BEHAVIOR];
 
+const PINNED_SIDE = {
+  LEFT: "left",
+  RIGHT: "right",
+} as const;
+
+type PinnedSide = (typeof PINNED_SIDE)[keyof typeof PINNED_SIDE];
 /**
  * Convenience types to quickly format table data.
  *
@@ -166,6 +172,10 @@ type AdvancedTableColumn<TData extends TableDataRow[]> = {
    * @default `false`
    */
   hidden?: boolean;
+  /**
+   * Whether the column is pinned to the left or right of the table.
+   */
+  pinned?: PinnedSide;
 };
 
 // Omit the original field in the type that's shown to the user.
@@ -268,4 +278,6 @@ export {
   ColumnSort as ColumnSort,
   TABLE_DENSITY as DENSITY,
   TableDensity as Density,
+  PINNED_SIDE as PINNED_SIDE,
+  PinnedSide as PinnedSide,
 };

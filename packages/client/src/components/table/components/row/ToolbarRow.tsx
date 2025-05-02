@@ -102,6 +102,7 @@ function ToolbarRow({
   sortable,
   tableId,
   resetSortingStateToInitial,
+  resetColumnPinningToInitial,
 }: {
   searchQuery: string | null;
   setSearchQuery: (val: string | null) => void;
@@ -116,6 +117,7 @@ function ToolbarRow({
   sortable: UI.Table.SortOption;
   tableId: string;
   resetSortingStateToInitial: () => void;
+  resetColumnPinningToInitial: () => void;
 }) {
   const offset =
     table.getState().pagination.pageIndex *
@@ -160,9 +162,8 @@ function ToolbarRow({
         />
         <PinAndHideColumnsPopover
           columns={columns}
-          columnVisibility={table.getState().columnVisibility}
-          setColumnVisibility={table.setColumnVisibility}
-          resetColumnVisibility={table.resetColumnVisibility}
+          table={table}
+          resetColumnPinningToInitial={resetColumnPinningToInitial}
         />
         <DownloadCSVPopover
           table={table}
@@ -180,7 +181,7 @@ function ToolbarRow({
                   ? "???"
                   : table.getRowCount().toLocaleString()
               } results`
-            : `${table.getRowCount().toLocaleString()} results`}
+            : `${table.getFilteredRowModel().flatRows.length.toLocaleString()} results`}
         </p>
       </div>
     </div>

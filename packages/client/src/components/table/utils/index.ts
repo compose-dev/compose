@@ -7,3 +7,4 @@ export * from "./useFormattedColumns";
 export * from "./downloadCSV";
 export * from "./useSorting";
 export * from "./usePagination";
+export * from "./useColumnPinning";

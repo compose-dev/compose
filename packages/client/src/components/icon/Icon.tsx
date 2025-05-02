@@ -38,6 +38,7 @@ import {
   IconMenu2,
   IconAdjustments,
   IconPin,
+  IconPinned,
 } from "@tabler/icons-react";
 
 const ICON_NAME = {
@@ -98,6 +99,7 @@ const ICON_NAME = {
   "hamburger-menu": "hamburger-menu",
   "adjustments-vertical": "adjustments-vertical",
   pin: "pin",
+  "pin-vertical": "pin-vertical",
 } as const;
 
 const SIZE = {
@@ -108,6 +110,7 @@ const SIZE = {
   "1": "1",
   "1.125": "1.125",
   "1.25": "1.25",
+  "1.375": "1.375",
   "1.5": "1.5",
 } as const;
 
@@ -121,6 +124,7 @@ const SIZE_MULTIPLIER = {
   [SIZE["1"]]: 1,
   [SIZE["1.125"]]: 1.125,
   [SIZE["1.25"]]: 1.25,
+  [SIZE["1.375"]]: 1.375,
   [SIZE["1.5"]]: 1.5,
 } as const;
 
@@ -185,6 +189,16 @@ function Icon({
   if (name === ICON_NAME.pin) {
     return (
       <IconPin
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME["pin-vertical"]) {
+    return (
+      <IconPinned
         size={16 * SIZE_MULTIPLIER[size]}
         color={ICON_COLOR[color]}
         strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}

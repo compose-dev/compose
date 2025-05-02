@@ -79,6 +79,12 @@ interface TableColumnProp {
    */
   width?: string;
   /**
+   * Absolute width of the column in pixels when pinned.
+   *
+   * If not provided, will use the default width.
+   */
+  pinnedWidth?: number;
+  /**
    * The overflow behavior of the column.
    */
   overflow: NonNullable<
@@ -99,9 +105,23 @@ interface TableColumnProp {
    * optimizations to reduce the payload size.
    */
   original?: string;
+  /**
+   * Whether the column is pinned to the left or right of the table.
+   */
+  pinned?: UI.Table.PinnedSide;
 }
 
 type TanStackTable = Table<FormattedTableRow>;
 
-export { INTERNAL_COLUMN_ID };
+const COLUMN_WIDTH_NUMERIC = {
+  DEFAULT: 192,
+  JSON: 288,
+} as const;
+
+const COLUMN_WIDTH = {
+  DEFAULT: `${COLUMN_WIDTH_NUMERIC.DEFAULT}px`,
+  JSON: `${COLUMN_WIDTH_NUMERIC.JSON}px`,
+} as const;
+
+export { INTERNAL_COLUMN_ID, COLUMN_WIDTH, COLUMN_WIDTH_NUMERIC };
 export type { FormattedTableRow, TableColumnProp, TanStackTable };

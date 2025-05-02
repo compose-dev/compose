@@ -123,7 +123,6 @@ function convertFromString(num?: number | string): number {
  */
 function convertCssWidthToPixelsStrict(
   width: unknown,
-  fallbackValue: number,
   baseFontSizePx: number = 16
 ): number {
   // 1. Handle fundamentally invalid input types -> return fallbackValue
@@ -133,7 +132,9 @@ function convertCssWidthToPixelsStrict(
     (typeof width === "number" && !Number.isFinite(width)) || // Catches NaN, Infinity
     (typeof width !== "number" && typeof width !== "string") // Catches objects, arrays, etc.
   ) {
-    return fallbackValue;
+    throw new Error(
+      `Cannot convert CSS width value "${width}" to pixels: the value is not a valid CSS width value.`
+    );
   }
 
   // 2. Handle valid numbers (assume pixels)
@@ -144,7 +145,9 @@ function convertCssWidthToPixelsStrict(
   // 3. Process string input
   const trimmedWidth = width.trim();
   if (trimmedWidth === "") {
-    return fallbackValue;
+    throw new Error(
+      `Cannot convert CSS width value "${width}" to pixels: the value is not a valid CSS width value.`
+    );
   }
 
   const lowerCaseWidth = trimmedWidth.toLowerCase();
@@ -183,7 +186,9 @@ function convertCssWidthToPixelsStrict(
 
   if (!match) {
     // Doesn't match the expected 'valueUnit' format
-    return fallbackValue;
+    throw new Error(
+      `Cannot convert CSS width value "${width}" to pixels: the value is not a valid CSS width value.`
+    );
   }
 
   const [, valueStr, unit] = match;
@@ -191,7 +196,9 @@ function convertCssWidthToPixelsStrict(
 
   if (!Number.isFinite(value)) {
     // Failed to parse the numeric part
-    return fallbackValue;
+    throw new Error(
+      `Cannot convert CSS width value "${width}" to pixels: the numeric part is not a finite number.`
+    );
   }
 
   // 7. Unit Conversion Logic

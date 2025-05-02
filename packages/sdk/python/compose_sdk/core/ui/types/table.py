@@ -89,6 +89,8 @@ TableTagColors = Dict[
 
 TABLE_COLUMN_OVERFLOW = Literal["clip", "ellipsis", "dynamic"]
 
+PINNED_SIDE = Literal["left", "right"]
+
 
 class AdvancedTableColumn(TypedDict):
     key: str
@@ -143,6 +145,10 @@ class AdvancedTableColumn(TypedDict):
     hidden: NotRequired[bool]
     """
     Whether the column is initially hidden. By default, the column is visible.
+    """
+    pinned: NotRequired[PINNED_SIDE]
+    """
+    Whether the column is pinned to the left or right of the table.
     """
 
 
