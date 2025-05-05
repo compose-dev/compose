@@ -1,6 +1,6 @@
 import { types, UI } from "@composehq/ts-public";
 import { FormattedTableRow } from "../constants";
-
+import { v4 as uuid } from "uuid";
 interface EditableAdvancedFilterClause
   extends UI.Table.AdvancedFilterClauseBase {
   key: types.StringOnlyKeys<FormattedTableRow> | null;
@@ -110,9 +110,47 @@ function getValidFilterModel(
   };
 }
 
+function serverToBrowserFilterModelRecursive(
+  model: UI.Table.AdvancedFilterModel<FormattedTableRow[]>
+): EditableAdvancedFilterModel {
+  if (model === null) {
+    return null;
+  }
+
+  if ("logicOperator" in model) {
+    return {
+      ...model,
+      filters: model.filters.map(
+        serverToBrowserFilterModelRecursive
+      ) as NonNullable<EditableAdvancedFilterModel>[],
+      id: uuid(),
+    };
+  }
+
+  return {
+    ...model,
+    id: uuid(),
+  };
+}
+
+function serverToBrowserFilterModel(
+  model: UI.Table.AdvancedFilterModel<FormattedTableRow[]>
+): EditableAdvancedFilterModel {
+  try {
+    return serverToBrowserFilterModelRecursive(model);
+  } catch (error) {
+    return null;
+  }
+}
+
 export type {
   EditableAdvancedFilterClause,
   EditableAdvancedFilterGroup,
   EditableAdvancedFilterModel,
 };
-export { copyAdvancedFilterModel, findFilterModelNode, getValidFilterModel };
+export {
+  copyAdvancedFilterModel,
+  findFilterModelNode,
+  getValidFilterModel,
+  serverToBrowserFilterModel,
+};

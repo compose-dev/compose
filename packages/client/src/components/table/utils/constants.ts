@@ -115,5 +115,16 @@ const COLUMN_WIDTH = {
   JSON: `${COLUMN_WIDTH_NUMERIC.JSON}px`,
 } as const;
 
+interface PaginationOperators {
+  searchQuery: string | null;
+  sortBy: UI.Table.PageChangeParams<UI.Table.DataRow[]>["sortBy"];
+  filterBy: UI.Table.AdvancedFilterModel<FormattedTableRow[]>;
+}
+
 export { INTERNAL_COLUMN_ID, COLUMN_WIDTH, COLUMN_WIDTH_NUMERIC };
-export type { FormattedTableRow, TableColumnProp, TanStackTable };
+export type {
+  FormattedTableRow,
+  TableColumnProp,
+  TanStackTable,
+  PaginationOperators,
+};

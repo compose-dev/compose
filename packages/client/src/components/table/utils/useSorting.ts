@@ -1,7 +1,8 @@
 import { UI } from "@composehq/ts-public";
-import { SortingState, Updater } from "@tanstack/react-table";
-import { MutableRefObject, useEffect, useRef, useState } from "react";
-import { TableColumnProp } from "./constants";
+import { SortingState } from "@tanstack/react-table";
+import { MutableRefObject } from "react";
+import { PaginationOperators, TableColumnProp } from "./constants";
+import { useDataOperation } from "./useDataOperation";
 
 function formatSortByForBrowser(
   sortBy: UI.Components.InputTable["model"]["properties"]["sortBy"],
@@ -53,91 +54,40 @@ function useSorting(
   columns: TableColumnProp[],
   initialSortBy: UI.Components.InputTable["model"]["properties"]["sortBy"],
   sortable: UI.Table.SortOption,
-  serverSortByRef: MutableRefObject<
-    UI.Table.PageChangeParams<UI.Table.DataRow[]>["sortBy"]
-  >,
-  onSortChange: () => void
+  onSortChange: () => void,
+  paginationOperatorsRef: MutableRefObject<PaginationOperators>
 ) {
-  /**
-   * Store the previous `initialSortBy` to detect changes to the value. If
-   * a change is detected, the:
-   * - current sorting state is overriden to the new initial value
-   * - the initial sorting state is updated to the new value
-   */
-  const prevInitialSortBy = useRef(initialSortBy);
+  const {
+    value: sort,
+    setValue: setSort,
+    resetValue: resetSort,
+  } = useDataOperation({
+    // Initial Values
+    initialValue: initialSortBy ?? [],
+    serverValueDidChange: (oldValue, newValue) =>
+      JSON.stringify(oldValue) !== JSON.stringify(newValue),
 
-  /**
-   * The active sorting state. We control this ourselves instead of having
-   * tanstack table manage it.
-   */
-  const [sort, setSort] = useState<SortingState>(() => {
-    const browserSortBy = formatSortByForBrowser(
-      initialSortBy,
-      columns,
-      sortable
-    );
-    // hack: set the serverSortRef when we declare the sort state to keep
-    // it synced up.
-    serverSortByRef.current = formatSortByForServer(browserSortBy, columns);
-    return browserSortBy;
+    // Feature Flag
+    operationIsEnabled: sortable !== UI.Table.SORT_OPTION.DISABLED,
+    operationDisabledValue: [],
+
+    // Formatting
+    formatServerToBrowser: (sortBy) =>
+      formatSortByForBrowser(sortBy, columns, sortable),
+    formatBrowserToServer: (sortBy) => formatSortByForServer(sortBy, columns),
+
+    // Pagination Syncing
+    getCurrentServerValue: () => paginationOperatorsRef.current.sortBy,
+    onSyncServerValue: (serverValue) => {
+      paginationOperatorsRef.current.sortBy = serverValue;
+    },
+    onShouldRequestPageChange: onSortChange,
   });
-
-  useEffect(() => {
-    /**
-     * Listen for changes to the initial sorting state, and update the
-     * necessary state to reflect the change.
-     *
-     * Note: there's no reason to call `onSortChange` here since we
-     * expect the SDK to automatically refetch table data when the
-     * `sortBy` prop changes.
-     */
-    if (
-      JSON.stringify(prevInitialSortBy.current) !==
-      JSON.stringify(initialSortBy)
-    ) {
-      prevInitialSortBy.current = initialSortBy;
-
-      const browserSortBy = formatSortByForBrowser(
-        initialSortBy,
-        columns,
-        sortable
-      );
-
-      setSort(browserSortBy);
-      serverSortByRef.current = formatSortByForServer(browserSortBy, columns);
-    }
-  }, [initialSortBy, columns, sortable, serverSortByRef]);
-
-  /**
-   * Sorting state change handler that is passed to the tanstack table
-   * instance.
-   */
-  function handleSortChange(sortBy: Updater<SortingState>) {
-    if (sortable === UI.Table.SORT_OPTION.DISABLED) {
-      return;
-    }
-
-    if (typeof sortBy === "function") {
-      sortBy = sortBy(sort);
-    }
-
-    setSort(sortBy);
-    serverSortByRef.current = formatSortByForServer(sortBy, columns);
-
-    onSortChange();
-  }
-
-  /**
-   * Reset the sorting state to the initial value.
-   */
-  function resetSortingStateToInitial() {
-    handleSortChange(formatSortByForBrowser(initialSortBy, columns, sortable));
-  }
 
   return {
     sort,
-    setSort: handleSortChange,
-    resetSortingStateToInitial,
+    setSort,
+    resetSort,
   };
 }
 

@@ -149,6 +149,39 @@ interface TableProperties<TData extends UI.Table.DataRow[]>
    */
   sortBy?: UI.Table.ColumnSort<TData>[];
   /**
+   * Whether the table should be filterable. Defaults to `true` for normal tables, `false` for paginated tables.
+   */
+  filterable?: boolean;
+  /**
+   * Define a filtering model to initially filter the table. For example:
+   *
+   * @example
+   * ```typescript
+   * page.add(() => ui.table("companies", companies, {
+   *   filterable: true,
+   *   filterBy: {
+   *     "logicOperator": "AND",
+   *     "filters": [
+   *       {
+   *         "key": "name",
+   *         "operator": "includes",
+   *         "value": "John"
+   *       },
+   *       {
+   *         "key": "age",
+   *         "operator": "greaterThan",
+   *         "value": 30
+   *       }
+   *     ]
+   *   }
+   * }));
+   * ```
+   *
+   * @link
+   * Learn more in the {@link https://docs.composehq.com/components/input/table#filtering documentation}.
+   */
+  filterBy?: UI.Table.AdvancedFilterModel<TData>;
+  /**
    * The density of the table rows. Options:
    *
    * - `compact`: 32px row height
@@ -262,6 +295,33 @@ function getSortable(
   return UI.Table.SORT_OPTION.MULTI;
 }
 
+function getFilterable(
+  filterable: boolean | undefined,
+  manuallyPaged: boolean,
+  autoPaged: boolean
+) {
+  // If auto-paginated, then it is never filterable.
+  if (autoPaged) {
+    return false;
+  }
+
+  // If manually paged, then it is filterable only if explicitly set to true.
+  if (manuallyPaged) {
+    if (filterable === true) {
+      return true;
+    }
+
+    return false;
+  }
+
+  // In the normal case, it's filterable unless explicitly set to false.
+  if (filterable === false) {
+    return false;
+  }
+
+  return true;
+}
+
 function getSelectable(
   selectable: boolean | undefined,
   allowSelect: boolean | undefined,
@@ -346,6 +406,8 @@ function getSelectable(
  * @param {UI.Components.InputTable["model"]["maxSelections"]} properties.maxSelections - Maximum number of rows that can be selected. Defaults to `1`.
  * @param {UI.Components.InputTable["model"]["selectionReturnType"]} properties.selectionReturnType - How the table should return selected rows. Defaults to `full` (a list of rows). Must be `index` (a list of row indices) if the table is paginated.
  * @param {UI.Components.InputTable["model"]["searchable"]} properties.searchable - Whether the table should be searchable. Defaults to `true` for normal tables, `false` for paginated tables.
+ * @param {boolean} properties.filterable - Whether the table should be filterable. Defaults to `true` for normal tables, `false` for paginated tables.
+ * @param {UI.Table.AdvancedFilterModel<TData>} properties.filterBy - Define a filtering model to initially filter the table.
  * @param {boolean} properties.paginate - Whether the table should be paginated. Defaults to `false`. Tables with more than 2500 rows will be paginated by default.
  * @param {boolean} properties.selectable - Whether the table should allow row selection. Defaults to `false`, or `true` if `onChange` is provided.
  * @param {UI.Components.InputTable["model"]["density"]} properties.density - The density of the table rows. Options:
@@ -463,6 +525,20 @@ function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
     modelProperties.sortBy = properties.sortBy as UI.Table.ColumnSort<
       UI.Table.DataRow[]
     >[];
+  }
+
+  const filterable = getFilterable(
+    properties.filterable,
+    manuallyPaged,
+    autoPaged
+  );
+  if (filterable === false) {
+    modelProperties.filterable = false;
+  }
+
+  if (filterable && properties.filterBy) {
+    modelProperties.filterBy =
+      properties.filterBy as UI.Table.AdvancedFilterModel<UI.Table.DataRow[]>;
   }
 
   if (properties.density) {

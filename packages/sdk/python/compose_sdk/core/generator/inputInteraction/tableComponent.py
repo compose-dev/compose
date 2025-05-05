@@ -19,10 +19,9 @@ from ...ui import (
     TablePagination,
     TableSelectionReturn,
     ComponentStyle,
-    TableSortOption,
     TableColumnSort,
     TABLE_COLUMN_OVERFLOW,
-    TableDensity,
+    Table,
 )
 from ..base import MULTI_SELECTION_MIN_DEFAULT, MULTI_SELECTION_MAX_DEFAULT
 
@@ -80,16 +79,16 @@ def get_searchable(
 
 
 def get_sortable(
-    sortable: Union[TableSortOption, None], manually_paged: bool, auto_paged: bool
-) -> TableSortOption:
+    sortable: Union[Table.SortOption.TYPE, None], manually_paged: bool, auto_paged: bool
+) -> Table.SortOption.TYPE:
     # If auto-paginated, then it is never sortable.
     if auto_paged:
-        return TableSortOption.DISABLED
+        return Table.SortOption.DISABLED
 
     # If manually paged, then it is sortable only if explicitly set.
     if manually_paged:
         if sortable is None:
-            return TableSortOption.DISABLED
+            return Table.SortOption.DISABLED
 
         return sortable
 
@@ -98,7 +97,28 @@ def get_sortable(
         return sortable
 
     # Otherwise, if not paged, the table is default multi-column sortable.
-    return TableSortOption.MULTI
+    return Table.SortOption.MULTI
+
+
+def get_filterable(
+    filterable: Union[bool, None], manually_paged: bool, auto_paged: bool
+) -> bool:
+    # If auto-paginated, then it is never filterable.
+    if auto_paged:
+        return False
+
+    # If manually paged, then it is filterable only if explicitly set.
+    if manually_paged:
+        if filterable is True:
+            return True
+
+        return False
+
+    # In the normal case, the table is filterable unless explicitly set to false.
+    if filterable is False:
+        return False
+
+    return True
 
 
 def get_selectable(
@@ -156,10 +176,12 @@ def _table(
     paginate: bool = False,
     overflow: Union[TABLE_COLUMN_OVERFLOW, None] = None,
     sort_by: Union[List[TableColumnSort], None] = None,
-    sortable: Union[TableSortOption, None] = None,
+    sortable: Union[Table.SortOption.TYPE, None] = None,
     selectable: Union[bool, None] = None,
-    density: Union[TableDensity, None] = None,
+    density: Union[Table.Density.TYPE, None] = None,
     allow_select: Union[bool, None] = None,
+    filterable: Union[bool, None] = None,
+    filter_by: Union[Table.AdvancedFilterModel, None] = None,
 ) -> ComponentReturn:
 
     if not isinstance(initial_selected_rows, list):
@@ -213,11 +235,20 @@ def _table(
 
     # Only set `sortable` if the table is not multi-column sortable.
     sortable = get_sortable(sortable, manually_paged, auto_paged)
-    if sortable != TableSortOption.MULTI:
+    if sortable != Table.SortOption.MULTI:
         model_properties["sortable"] = sortable
 
-    if sortable != TableSortOption.DISABLED and sort_by is not None:
+    if sortable != Table.SortOption.DISABLED and sort_by is not None:
         model_properties["sortBy"] = sort_by
+
+    filterable = get_filterable(filterable, manually_paged, auto_paged)
+    if filterable is False:
+        model_properties["filterable"] = False
+
+    if filterable is True and filter_by is not None:
+        model_properties["filterBy"] = (
+            Table.transform_advanced_filter_model_to_camel_case(filter_by)
+        )
 
     if manually_paged or auto_paged:
         model_properties["paged"] = True
@@ -294,10 +325,12 @@ def table(
     searchable: bool = True,
     paginate: bool = False,
     sort_by: Union[List[TableColumnSort], None] = None,
-    sortable: Union[TableSortOption.TYPE, None] = None,
+    sortable: Union[Table.SortOption.TYPE, None] = None,
     selectable: Union[bool, None] = None,
-    density: Union[TableDensity, None] = None,
+    density: Union[Table.Density.TYPE, None] = None,
     allow_select: Union[bool, None] = None,
+    filterable: Union[bool, None] = None,
+    filter_by: Union[Table.AdvancedFilterModel, None] = None,
 ) -> ComponentReturn:
     """A powerful and highly customizable table component. For example:
 
@@ -377,7 +410,7 @@ def table(
         Whether to return a list of rows, or a list of row indices to callbacks like `on_change` and `on_submit`. Defaults to `full`. Must be `index` if the table is paginated.
 
     #### searchable : `bool`. Optional.
-        Whether to enable the table search bar. Defaults to `True`, except for auto-paginated tables, which do not support client-side search. You should manually handle pagination to enable search for paginated tables.
+        Whether to enable the table search bar. Defaults to `True` for normal tables, `False` for paginated tables.
 
     #### paginate : `bool`. Optional.
         Whether to paginate the table. Defaults to `False`. Tables with more than 2500 rows will be paginated by default.
@@ -405,6 +438,12 @@ def table(
         - `False`: Disable sorting.
 
         Defaults to `True` for normal tables, `False` for paginated tables.
+
+    #### filter_by : `Table.AdvancedFilterModel`. Optional.
+        A filter to initially apply to the table. Learn more in the [docs](https://docs.composehq.com/components/input/table#filtering).
+
+    #### filterable : `bool`. Optional.
+        Whether to allow filtering. Defaults to `True` for normal tables, `False` for paginated tables.
 
     #### selectable : `bool`. Optional.
         Whether to allow row selection. Defaults to `False`, or `True` if `on_change` is provided.
@@ -450,6 +489,8 @@ def table(
         sort_by=sort_by,
         sortable=sortable,
         density=density,
+        filterable=filterable,
+        filter_by=filter_by,
     )
 
 
@@ -478,9 +519,11 @@ def dataframe(
     paginate: bool = False,
     overflow: Union[TABLE_COLUMN_OVERFLOW, None] = None,
     sort_by: Union[List[TableColumnSort], None] = None,
-    sortable: Union[TableSortOption.TYPE, None] = None,
+    sortable: Union[Table.SortOption.TYPE, None] = None,
     selectable: Union[bool, None] = None,
-    density: Union[TableDensity, None] = None,
+    density: Union[Table.Density.TYPE, None] = None,
+    filterable: Union[bool, None] = None,
+    filter_by: Union[Table.AdvancedFilterModel, None] = None,
     allow_select: Union[bool, None] = None,
 ) -> ComponentReturn:
     if allow_select is not None:
@@ -521,4 +564,6 @@ def dataframe(
         sort_by=sort_by,
         sortable=sortable,
         density=density,
+        filterable=filterable,
+        filter_by=filter_by,
     )

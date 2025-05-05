@@ -333,9 +333,11 @@ export default function TableComponent({
           // We expect the SDK to return undefined if the table should be
           // searchable. Else, it'll explicitly return the searchable option
           // to use.
-          disableSearch={component.model.properties.notSearchable}
+          searchable={!component.model.properties.notSearchable}
           density={component.model.properties.density}
           overflow={component.model.properties.overflow}
+          filterable={component.model.properties.filterable}
+          filterBy={component.model.properties.filterBy}
         />
       </div>
     </div>

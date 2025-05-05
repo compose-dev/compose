@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import (
     Callable,
     Dict,
@@ -9,8 +10,12 @@ from typing import (
     Awaitable,
 )
 from typing_extensions import NotRequired
-from .validator_response import VoidResponse
-from .button_appearance import BUTTON_APPEARANCE
+from ..validator_response import VoidResponse
+from ..button_appearance import BUTTON_APPEARANCE
+from .advanced_filtering import (
+    TableAdvancedFilterModel,
+    transform_advanced_filter_model_to_camel_case,
+)
 
 TableValue = Any
 TableDataRow = Dict[str, TableValue]
@@ -216,15 +221,47 @@ class TableSelectionReturn:
     TYPE = Literal["full", "index"]
 
 
-class TableSortOption:
-    SINGLE = "single"
-    MULTI = True
-    DISABLED = False
-    TYPE = Literal["single", True, False]
+class TableAdvancedFilterClause(TypedDict):
+    operator: Literal[
+        "is",
+        "is_not",
+        "includes",
+        "not_includes",
+        "greater_than",
+        "greater_than_or_equal",
+        "less_than",
+        "less_than_or_equal",
+        "is_empty",
+        "is_not_empty",
+        "has_any",
+        "not_has_any",
+        "has_all",
+        "not_has_all",
+    ]
+    value: TableValue
+    key: str
 
 
-class TableDensity:
-    COMPACT = "compact"
-    STANDARD = "standard"
-    COMFORTABLE = "comfortable"
-    TYPE = Literal["compact", "standard", "comfortable"]
+class TableAdvancedFilterGroup(TypedDict):
+    logic_operator: Literal["and", "or"]
+    filters: List[Union[TableAdvancedFilterClause, TableAdvancedFilterGroup]]
+
+
+class Table:
+    class SortOption:
+        SINGLE = "single"
+        MULTI = True
+        DISABLED = False
+        TYPE = Literal["single", True, False]
+
+    class Density:
+        COMPACT = "compact"
+        STANDARD = "standard"
+        COMFORTABLE = "comfortable"
+        TYPE = Literal["compact", "standard", "comfortable"]
+
+    AdvancedFilterModel = TableAdvancedFilterModel
+
+    @property
+    def transform_advanced_filter_model_to_camel_case(self):
+        return transform_advanced_filter_model_to_camel_case

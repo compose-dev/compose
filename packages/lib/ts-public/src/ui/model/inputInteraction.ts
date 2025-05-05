@@ -150,6 +150,8 @@ export interface Table<
     overflow?: TTable.OverflowBehavior;
     sortBy?: TTable.ColumnSort<TTable.DataRow[]>[];
     sortable?: TTable.SortOption;
+    filterBy?: TTable.AdvancedFilterModel<TTable.DataRow[]>;
+    filterable?: boolean;
     density?: TTable.Density;
   };
 }

@@ -62,8 +62,9 @@ class WSClient {
   }
 
   connect() {
-    if (this.ws !== null) {
-      return;
+    if (this.ws) {
+      this.ws.terminate();
+      this.ws = null;
     }
 
     this.makeConnectionRequest();

@@ -10,20 +10,20 @@ type ColumnFilterLogicOperator =
   (typeof COLUMN_FILTER_LOGIC_OPERATOR)[keyof typeof COLUMN_FILTER_LOGIC_OPERATOR];
 
 const COLUMN_FILTER_OPERATOR = {
-  IS: "IS",
-  IS_NOT: "IS_NOT",
-  INCLUDES: "INCLUDES",
-  NOT_INCLUDES: "NOT_INCLUDES",
-  GREATER_THAN: "GREATER_THAN",
-  GREATER_THAN_OR_EQUAL: "GREATER_THAN_OR_EQUAL",
-  LESS_THAN: "LESS_THAN",
-  LESS_THAN_OR_EQUAL: "LESS_THAN_OR_EQUAL",
-  IS_EMPTY: "IS_EMPTY",
-  IS_NOT_EMPTY: "IS_NOT_EMPTY",
-  HAS_ANY: "HAS_ANY",
-  NOT_HAS_ANY: "NOT_HAS_ANY",
-  HAS_ALL: "HAS_ALL",
-  NOT_HAS_ALL: "NOT_HAS_ALL",
+  IS: "is",
+  IS_NOT: "isNot",
+  INCLUDES: "includes",
+  NOT_INCLUDES: "notIncludes",
+  GREATER_THAN: "greaterThan",
+  GREATER_THAN_OR_EQUAL: "greaterThanOrEqual",
+  LESS_THAN: "lessThan",
+  LESS_THAN_OR_EQUAL: "lessThanOrEqual",
+  IS_EMPTY: "isEmpty",
+  IS_NOT_EMPTY: "isNotEmpty",
+  HAS_ANY: "hasAny",
+  NOT_HAS_ANY: "notHasAny",
+  HAS_ALL: "hasAll",
+  NOT_HAS_ALL: "notHasAll",
 } as const;
 
 type ColumnFilterOperator =

@@ -1,4 +1,8 @@
-import { TableColumnProp, FormattedTableRow } from "../constants";
+import {
+  TableColumnProp,
+  FormattedTableRow,
+  PaginationOperators,
+} from "../constants";
 import {
   MutableRefObject,
   useCallback,
@@ -11,9 +15,11 @@ import { useThrottledCallback } from "~/utils/useThrottledCallback";
 import {
   EditableAdvancedFilterModel,
   getValidFilterModel,
+  serverToBrowserFilterModel,
 } from "./filterModel";
 import { filterTableRow } from "./filterTableRow";
 import { searchTableRow } from "./searchTableRow";
+import { useDataOperation } from "../useDataOperation";
 
 function filterTable(
   rows: FormattedTableRow[],
@@ -53,14 +59,64 @@ function useGlobalFiltering(
   rows: FormattedTableRow[],
   columns: TableColumnProp[],
   paginated: boolean,
-  disableSearch: boolean,
-  searchQueryRef: MutableRefObject<string | null>,
-  filterByRef: MutableRefObject<
-    UI.Table.AdvancedFilterModel<FormattedTableRow[]>
-  >
+  searchable: boolean,
+  searchBy: string | null,
+  filterable: boolean,
+  filterBy: UI.Table.AdvancedFilterModel<FormattedTableRow[]>,
+  paginationOperatorsRef: MutableRefObject<PaginationOperators>,
+  handleTablePageChange: () => void
 ) {
-  const [searchQuery, setSearchQuery] = useState<string | null>(null);
-  const [filters, setFilters] = useState<EditableAdvancedFilterModel>(null);
+  const { value: searchQuery, setValue: setSearchQuery } = useDataOperation<
+    string | null,
+    string | null
+  >({
+    // Initial Values
+    initialValue: searchBy,
+    serverValueDidChange: (oldValue, newValue) => oldValue !== newValue,
+
+    // Operation enabled state
+    operationIsEnabled: searchable,
+    operationDisabledValue: null,
+
+    // Formatting
+    formatServerToBrowser: (serverValue) => serverValue,
+    formatBrowserToServer: (browserValue) => browserValue,
+
+    // Pagination Syncing
+    getCurrentServerValue: () => paginationOperatorsRef.current.searchQuery,
+    onSyncServerValue: (serverValue) => {
+      paginationOperatorsRef.current.searchQuery = serverValue;
+    },
+    // Search query changes are triggered directly via the toolbar when
+    // the user presses enter.
+    onShouldRequestPageChange: null,
+  });
+
+  const {
+    value: filters,
+    setValue: setFilters,
+    resetValue: resetFilters,
+  } = useDataOperation({
+    // Initial Values
+    initialValue: filterBy,
+    serverValueDidChange: (oldValue, newValue) =>
+      JSON.stringify(oldValue) !== JSON.stringify(newValue),
+
+    // Operation enabled state
+    operationIsEnabled: filterable,
+    operationDisabledValue: null,
+
+    // Formatting
+    formatServerToBrowser: serverToBrowserFilterModel,
+    formatBrowserToServer: getValidFilterModel,
+
+    // Pagination Syncing
+    getCurrentServerValue: () => paginationOperatorsRef.current.filterBy,
+    onSyncServerValue: (serverValue) => {
+      paginationOperatorsRef.current.filterBy = serverValue;
+    },
+    onShouldRequestPageChange: handleTablePageChange,
+  });
 
   const columnFormatMap = useMemo(() => {
     return columns.reduce(
@@ -80,8 +136,8 @@ function useGlobalFiltering(
       : filterTable(
           rows,
           columns,
-          searchQueryRef.current,
-          filterByRef.current,
+          paginationOperatorsRef.current.searchQuery,
+          paginationOperatorsRef.current.filterBy,
           columnFormatMap
         )
   );
@@ -128,15 +184,19 @@ function useGlobalFiltering(
 
   // Recompute the filtered rows when the rows or columns change.
   useEffect(() => {
-    if (paginated || disableSearch) {
+    // If paginated, assume the rows are already filtered. Or,
+    // if the table is neither searchable nor filterable, then
+    // also just return early.
+    if (paginated || (!searchable && !filterable)) {
       setFilteredFormattedRows(rows);
+      return;
     }
 
     filterRows(
       rows,
       columns,
-      searchQueryRef.current,
-      filterByRef.current,
+      paginationOperatorsRef.current.searchQuery,
+      paginationOperatorsRef.current.filterBy,
       columnFormatMap
     );
   }, [
@@ -144,27 +204,22 @@ function useGlobalFiltering(
     columns,
     filterRows,
     paginated,
-    disableSearch,
-    searchQueryRef,
-    filterByRef,
+    searchable,
+    filterable,
+    paginationOperatorsRef,
     columnFormatMap,
   ]);
 
   const handleSearchQueryChange = useCallback(
     (value: string | null) => {
-      if (disableSearch) {
-        return;
-      }
-
       setSearchQuery(value);
-      searchQueryRef.current = value;
 
       if (!paginated) {
         filterRowsThrottled(
           rows,
           columns,
           value,
-          filterByRef.current,
+          paginationOperatorsRef.current.filterBy,
           columnFormatMap
         );
       }
@@ -173,10 +228,9 @@ function useGlobalFiltering(
       filterRowsThrottled,
       rows,
       columns,
-      disableSearch,
+      setSearchQuery,
       paginated,
-      searchQueryRef,
-      filterByRef,
+      paginationOperatorsRef,
       columnFormatMap,
     ]
   );
@@ -185,26 +239,23 @@ function useGlobalFiltering(
     (value: EditableAdvancedFilterModel) => {
       setFilters(value);
 
-      const validFilterModel = getValidFilterModel(value);
-      filterByRef.current = validFilterModel;
-
       if (!paginated) {
         filterRows(
           rows,
           columns,
-          searchQueryRef.current,
-          validFilterModel,
+          paginationOperatorsRef.current.searchQuery,
+          paginationOperatorsRef.current.filterBy,
           columnFormatMap
         );
       }
     },
     [
-      filterByRef,
       filterRows,
       paginated,
       rows,
       columns,
-      searchQueryRef,
+      setFilters,
+      paginationOperatorsRef,
       columnFormatMap,
     ]
   );
@@ -214,6 +265,7 @@ function useGlobalFiltering(
     setSearchQuery: handleSearchQueryChange,
     filters,
     setFilters: handleFilterChange,
+    resetFilters,
     filteredFormattedData: filteredFormattedRows,
   };
 }

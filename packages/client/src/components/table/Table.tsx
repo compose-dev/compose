@@ -21,6 +21,7 @@ import {
   TanStackTable,
   useColumnPinning,
   GlobalFiltering,
+  PaginationOperators,
 } from "./utils";
 import { ColumnHeaderRow, FooterRow, ToolbarRow } from "./components";
 
@@ -42,7 +43,8 @@ function Table({
   hasError = false,
   errorMessage = null,
   disableRowSelection = false,
-  disableSearch = false,
+  searchable = true,
+  searchBy = null,
   serverSearchQuery = UI.Table.DEFAULT_SEARCH_QUERY,
   paginated = UI.Table.DEFAULT_PAGINATED,
   loading = false,
@@ -51,6 +53,8 @@ function Table({
   sortable = UI.Table.SORT_OPTION.MULTI,
   density = UI.Table.DENSITY.STANDARD,
   overflow = "ellipsis",
+  filterable = true,
+  filterBy = null,
 }: {
   id: string;
   data: UI.Components.InputTable["model"]["properties"]["data"];
@@ -74,7 +78,8 @@ function Table({
   hasError?: boolean;
   errorMessage?: string | null;
   disableRowSelection?: boolean;
-  disableSearch?: boolean;
+  searchable?: boolean;
+  searchBy?: string | null;
   serverSearchQuery?: string | null;
   paginated?: boolean;
   loading?: UI.Stale.Option;
@@ -83,18 +88,17 @@ function Table({
   sortable?: UI.Table.SortOption;
   density?: UI.Table.Density;
   overflow?: UI.Table.OverflowBehavior;
+  filterable?: boolean;
+  filterBy?: UI.Table.AdvancedFilterModel<FormattedTableRow[]>;
 }) {
   const fixedHeight = paginated || totalRecords > 35;
   const formattedData = useFormattedData(data, columns);
 
-  // Table state variables that are necessary for pagination should be
-  // initialized here as refs.
-  const searchQueryRef = useRef<string | null>(null);
-  const serverSortByRef = useRef<
-    UI.Table.PageChangeParams<UI.Table.DataRow[]>["sortBy"]
-  >([]); // this is initialized with the correct value in the useSorting hook
-  const filterByRef =
-    useRef<UI.Table.AdvancedFilterModel<FormattedTableRow[]>>(null);
+  const paginationOperatorsRef = useRef<PaginationOperators>({
+    searchQuery: null,
+    sortBy: [],
+    filterBy: null,
+  });
 
   const handleTablePageChange = useCallback(
     (newOffset?: number, newPageSize?: number) => {
@@ -103,21 +107,21 @@ function Table({
       }
 
       onTablePageChangeHook(
-        searchQueryRef.current,
+        paginationOperatorsRef.current.searchQuery,
         newOffset ?? offset,
         newPageSize ?? pageSize,
-        serverSortByRef.current
+        paginationOperatorsRef.current.sortBy
       );
     },
     [onTablePageChangeHook, offset, pageSize, paginated]
   );
 
-  const { sort, setSort, resetSortingStateToInitial } = useSorting(
+  const { sort, setSort, resetSort } = useSorting(
     columns,
     sortBy,
     sortable,
-    serverSortByRef,
-    handleTablePageChange
+    handleTablePageChange,
+    paginationOperatorsRef
   );
 
   const {
@@ -130,9 +134,12 @@ function Table({
     formattedData,
     columns,
     paginated,
-    disableSearch,
-    searchQueryRef,
-    filterByRef
+    searchable,
+    searchBy,
+    filterable,
+    filterBy,
+    paginationOperatorsRef,
+    handleTablePageChange
   );
 
   const { paginationState, setPaginationState } = usePagination(
@@ -252,10 +259,11 @@ function Table({
             onTablePageChangeHook={handleTablePageChange}
             table={table}
             columns={columns}
-            disableSearch={disableSearch}
+            searchable={searchable}
             sortable={sortable}
-            resetSortingStateToInitial={resetSortingStateToInitial}
+            resetSort={resetSort}
             resetColumnPinningToInitial={resetColumnPinningToInitial}
+            filterable={filterable}
           />
           <TableBody
             table={table}

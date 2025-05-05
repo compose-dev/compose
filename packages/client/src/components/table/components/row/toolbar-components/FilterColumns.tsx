@@ -740,11 +740,13 @@ function FilterColumnsPopover({
   filterModel,
   setFilterModel,
   resetFilterModel,
+  filterable,
 }: {
   columns: TableColumnProp[];
   filterModel: GlobalFiltering.EditableAdvancedFilterModel;
   setFilterModel: (model: GlobalFiltering.EditableAdvancedFilterModel) => void;
   resetFilterModel: () => void;
+  filterable: boolean;
 }) {
   const filterTooltipContent = useMemo(() => {
     if (filterModel !== null) {
@@ -752,6 +754,10 @@ function FilterColumnsPopover({
     }
     return "Filter";
   }, [filterModel]);
+
+  if (!filterable) {
+    return null;
+  }
 
   return (
     <Popover.Root>

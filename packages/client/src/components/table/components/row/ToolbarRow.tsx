@@ -90,11 +90,12 @@ function ToolbarRow({
   onTablePageChangeHook,
   table,
   columns,
-  disableSearch,
+  searchable,
   sortable,
   tableId,
-  resetSortingStateToInitial,
+  resetSort,
   resetColumnPinningToInitial,
+  filterable,
 }: {
   searchQuery: string | null;
   setSearchQuery: (val: string | null) => void;
@@ -106,11 +107,12 @@ function ToolbarRow({
   onTablePageChangeHook: (offset?: number) => void;
   table: TanStackTable;
   columns: TableColumnProp[];
-  disableSearch: boolean;
+  searchable: boolean;
   sortable: UI.Table.SortOption;
   tableId: string;
-  resetSortingStateToInitial: () => void;
+  resetSort: () => void;
   resetColumnPinningToInitial: () => void;
+  filterable: boolean;
 }) {
   const offset =
     table.getState().pagination.pageIndex *
@@ -123,12 +125,12 @@ function ToolbarRow({
       className={classNames(
         "flex flex-row space-x-2 items-center justify-between mr-2",
         {
-          "my-2": disableSearch,
-          "my-1": !disableSearch,
+          "my-2": !searchable,
+          "my-1": searchable,
         }
       )}
     >
-      {disableSearch ? (
+      {!searchable ? (
         <div className="ml-2">
           {loading === UI.Stale.OPTION.UPDATE_DISABLED && (
             <Spinner size="sm" variant="neutral" />
@@ -148,7 +150,7 @@ function ToolbarRow({
         <SortColumnsPopover
           sortingState={table.getState().sorting}
           setSortingState={table.setSorting}
-          resetSortingState={resetSortingStateToInitial}
+          resetSortingState={resetSort}
           columns={columns}
           sortable={sortable}
         />
@@ -157,6 +159,7 @@ function ToolbarRow({
           filterModel={filters}
           setFilterModel={setFilters}
           resetFilterModel={() => setFilters(null)}
+          filterable={filterable}
         />
         <PinAndHideColumnsPopover
           columns={columns}
