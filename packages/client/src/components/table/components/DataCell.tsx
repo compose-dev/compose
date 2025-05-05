@@ -299,7 +299,7 @@ function DataCell({
               return <span key={idx}>{formatStringCell(value)}</span>;
             }
 
-            const tagColor = column.tagColors?.[value.toString()];
+            const tagColor = column.tagColors?.[value.toString()]?.color;
 
             return (
               <div

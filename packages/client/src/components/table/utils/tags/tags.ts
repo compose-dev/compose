@@ -1,39 +1,54 @@
 import { UI } from "@composehq/ts-public";
 
+/**
+ * Format tag colors for fast lookup.
+ *
+ * Since table tags support boolean values, we format
+ * as strings to include in the lookup, but preseve the
+ * original value for filtering.
+ */
+type FormattedTagColors = Record<
+  string,
+  {
+    color: UI.Table.TagColor;
+    originalValue: string | number | boolean;
+  }
+>;
+
 function getUniqueValues(
-  data: UI.Components.InputTable["model"]["properties"]["data"],
-  key: string
-): (string | number)[] {
+  tableData: UI.Components.InputTable["model"]["properties"]["data"],
+  columnKey: string
+): (string | number | boolean)[] {
   // Use Set for O(1) lookups and automatic deduplication
-  const uniqueValues = new Set<string | number>();
+  const uniqueValues = new Set<string | number | boolean>();
 
   // Single pass through the data
-  for (let i = 0; i < data.length; i++) {
-    const value = data[i][key];
+  for (let i = 0; i < tableData.length; i++) {
+    const value = tableData[i][columnKey];
 
     // Handle arrays
     if (Array.isArray(value)) {
       for (let j = 0; j < value.length; j++) {
         const item = value[j];
         // Only add primitives
-        if (typeof item === "string" || typeof item === "number") {
+        if (
+          typeof item === "string" ||
+          typeof item === "number" ||
+          typeof item === "boolean"
+        ) {
           uniqueValues.add(item);
-        }
-
-        if (typeof item === "boolean") {
-          uniqueValues.add(item.toString());
         }
       }
       continue;
     }
 
     // Handle primitive values
-    if (typeof value === "string" || typeof value === "number") {
+    if (
+      typeof value === "string" ||
+      typeof value === "number" ||
+      typeof value === "boolean"
+    ) {
       uniqueValues.add(value);
-    }
-
-    if (typeof value === "boolean") {
-      uniqueValues.add(value.toString());
     }
   }
 
@@ -48,8 +63,8 @@ function guessTagColors(
   >,
   data: UI.Components.InputTable["model"]["properties"]["data"],
   key: string
-): Record<string | number, UI.Table.TagColor> {
-  const result: Record<string | number, UI.Table.TagColor> = {};
+): FormattedTagColors {
+  const result: FormattedTagColors = {};
 
   const uniqueValues = getUniqueValues(data, key);
   const colorUsage = new Map<UI.Table.TagColor, number>();
@@ -70,11 +85,12 @@ function guessTagColors(
       : [cellValues];
 
     for (const value of cellValueArray) {
-      if (typeof value === "string" || typeof value === "number") {
-        result[value] = color;
-        colorUsage.set(color, (colorUsage.get(color) || 0) + 1);
-      } else if (typeof value === "boolean") {
-        result[value.toString()] = color;
+      if (
+        typeof value === "string" ||
+        typeof value === "number" ||
+        typeof value === "boolean"
+      ) {
+        result[value.toString()] = { color, originalValue: value };
         colorUsage.set(color, (colorUsage.get(color) || 0) + 1);
       }
     }
@@ -89,10 +105,15 @@ function guessTagColors(
 
   // Second pass: assign colors to unassigned values
   for (const value of uniqueValues) {
-    if (value in result) continue;
+    if (value.toString() in result) {
+      continue;
+    }
 
     if (defaultColor) {
-      result[value] = defaultColor;
+      result[value.toString()] = {
+        color: defaultColor,
+        originalValue: value,
+      };
       continue;
     }
 
@@ -101,7 +122,10 @@ function guessTagColors(
       UI.Table.SEMANTIC_COLOR[value.toString().toLowerCase()];
 
     if (semanticColor) {
-      result[value] = semanticColor;
+      result[value.toString()] = {
+        color: semanticColor,
+        originalValue: value,
+      };
       colorUsage.set(semanticColor, (colorUsage.get(semanticColor) || 0) + 1);
       continue;
     }
@@ -117,11 +141,15 @@ function guessTagColors(
       }
     }
 
-    result[value] = selectedColor;
+    result[value.toString()] = {
+      color: selectedColor,
+      originalValue: value,
+    };
     colorUsage.set(selectedColor, minUsage + 1);
   }
 
   return result;
 }
 
-export { guessTagColors };
+export type { FormattedTagColors };
+export { guessTagColors, getUniqueValues };

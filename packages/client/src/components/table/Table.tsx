@@ -2,25 +2,16 @@ import {
   useReactTable,
   getCoreRowModel,
   flexRender,
-  getFilteredRowModel,
   Updater,
   Cell,
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { classNames } from "~/utils/classNames";
-import { useThrottledCallback } from "~/utils/useThrottledCallback";
 import { IOComponent } from "~/components/io-component";
 import { UI } from "@composehq/ts-public";
 import {
-  useSearch,
   useFormattedData,
   useFormattedColumns,
   type FormattedTableRow,
@@ -29,7 +20,7 @@ import {
   usePagination,
   TanStackTable,
   useColumnPinning,
-  INTERNAL_COLUMN_ID,
+  GlobalFiltering,
 } from "./utils";
 import { ColumnHeaderRow, FooterRow, ToolbarRow } from "./components";
 
@@ -94,38 +85,62 @@ function Table({
   overflow?: UI.Table.OverflowBehavior;
 }) {
   const fixedHeight = paginated || totalRecords > 35;
+  const formattedData = useFormattedData(data, columns);
 
-  const [searchQuery, setSearchQuery] = useState(serverSearchQuery);
-  const { throttledCallback: setGlobalFilter } = useThrottledCallback(
-    (value: string) => {
-      table.setGlobalFilter(value);
+  // Table state variables that are necessary for pagination should be
+  // initialized here as refs.
+  const searchQueryRef = useRef<string | null>(null);
+  const serverSortByRef = useRef<
+    UI.Table.PageChangeParams<UI.Table.DataRow[]>["sortBy"]
+  >([]); // this is initialized with the correct value in the useSorting hook
+  const filterByRef =
+    useRef<UI.Table.AdvancedFilterModel<FormattedTableRow[]>>(null);
+
+  const handleTablePageChange = useCallback(
+    (newOffset?: number, newPageSize?: number) => {
+      if (!paginated) {
+        return;
+      }
+
+      onTablePageChangeHook(
+        searchQueryRef.current,
+        newOffset ?? offset,
+        newPageSize ?? pageSize,
+        serverSortByRef.current
+      );
     },
-    300
+    [onTablePageChangeHook, offset, pageSize, paginated]
   );
 
-  const customFilterFn = useSearch(columns);
-  const formattedData = useFormattedData(data, columns);
-  const { sort, setSort, sortByForServer, resetSortingStateToInitial } =
-    useSorting(columns, sortBy, sortable, (sortBy) => {
-      if (paginated) {
-        // Always reset offset to 0 when sorting changes.
-        onTablePageChangeHook(searchQuery, 0, pageSize, sortBy);
-      }
-    });
+  const { sort, setSort, resetSortingStateToInitial } = useSorting(
+    columns,
+    sortBy,
+    sortable,
+    serverSortByRef,
+    handleTablePageChange
+  );
+
+  const {
+    searchQuery,
+    setSearchQuery,
+    filters,
+    setFilters,
+    filteredFormattedData,
+  } = GlobalFiltering.use(
+    formattedData,
+    columns,
+    paginated,
+    disableSearch,
+    searchQueryRef,
+    filterByRef
+  );
+
   const { paginationState, setPaginationState } = usePagination(
     offset,
     pageSize,
-    (offset, pageSize) => {
-      if (paginated) {
-        onTablePageChangeHook(
-          searchQuery,
-          offset,
-          pageSize,
-          sortByForServer.current
-        );
-      }
-    }
+    handleTablePageChange
   );
+
   const { columnPinning, setColumnPinning, resetColumnPinningToInitial } =
     useColumnPinning(
       enableRowSelection,
@@ -162,7 +177,7 @@ function Table({
 
   const table = useReactTable({
     // BASE SETUP
-    data: formattedData,
+    data: filteredFormattedData,
     columns: formattedColumns,
     getCoreRowModel: getCoreRowModel(),
 
@@ -187,25 +202,6 @@ function Table({
 
     // COLUMN PINNING
     onColumnPinningChange: setColumnPinning,
-
-    // SEARCH
-    filterFns: {
-      fuzzy: customFilterFn,
-    },
-    globalFilterFn: "fuzzy",
-    getFilteredRowModel: getFilteredRowModel(),
-    enableGlobalFilter: !disableSearch,
-    manualFiltering: paginated,
-    getColumnCanGlobalFilter: (column) => {
-      if (
-        column.id === INTERNAL_COLUMN_ID.ACTION ||
-        column.id === INTERNAL_COLUMN_ID.SELECT
-      ) {
-        return false;
-      }
-
-      return true;
-    },
 
     // ROW SELECTION
     enableMultiRowSelection: allowMultiSelection,
@@ -248,20 +244,12 @@ function Table({
             tableId={id}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
-            setTableFilter={(val) => {
-              setGlobalFilter(val || "");
-            }}
             serverSearchQuery={serverSearchQuery}
+            filters={filters}
+            setFilters={setFilters}
             loading={loading}
             paginated={paginated}
-            onTablePageChangeHook={() => {
-              onTablePageChangeHook(
-                searchQuery,
-                0, // reset to first page
-                pageSize,
-                sortByForServer.current
-              );
-            }}
+            onTablePageChangeHook={handleTablePageChange}
             table={table}
             columns={columns}
             disableSearch={disableSearch}
@@ -313,19 +301,6 @@ function TableBody({
 
   const { rows } = table.getRowModel();
 
-  const measureElement = useMemo(() => {
-    if (
-      overflow === UI.Table.OVERFLOW_BEHAVIOR.DYNAMIC &&
-      typeof window !== "undefined" &&
-      navigator.userAgent.indexOf("Firefox") === -1
-    ) {
-      return (element: HTMLDivElement) =>
-        element?.getBoundingClientRect().height;
-    }
-
-    return undefined;
-  }, [overflow]);
-
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => tableContainerRef.current,
@@ -340,7 +315,12 @@ function TableBody({
 
       return 33;
     },
-    measureElement,
+    measureElement:
+      overflow === UI.Table.OVERFLOW_BEHAVIOR.DYNAMIC &&
+      typeof window !== "undefined" &&
+      navigator.userAgent.indexOf("Firefox") === -1
+        ? (element: HTMLDivElement) => element?.getBoundingClientRect().height
+        : undefined,
     overscan: 8,
   });
 

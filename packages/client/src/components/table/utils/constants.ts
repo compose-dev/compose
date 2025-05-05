@@ -1,14 +1,6 @@
 import { UI } from "@composehq/ts-public";
-import { FilterFn, Table } from "@tanstack/react-table";
-
-// Add our custom search function to the table type
-// https://tanstack.com/table/v8/docs/framework/react/examples/filters-fuzzy
-declare module "@tanstack/react-table" {
-  //add fuzzy filter to the filterFns
-  interface FilterFns {
-    fuzzy: FilterFn<unknown>;
-  }
-}
+import { Table } from "@tanstack/react-table";
+import { FormattedTagColors } from "./tags";
 
 /**
  * Column IDs that are applied by Compose to the table data to enable certain
@@ -73,7 +65,7 @@ interface TableColumnProp {
   /**
    * The colors to use for the column.
    */
-  tagColors?: Record<string | number, UI.Table.TagColor>;
+  tagColors?: FormattedTagColors;
   /**
    * Width of the column in pixels/rem/etc.
    */

@@ -434,8 +434,6 @@ function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
         : properties.initialSelectedRows,
   };
 
-  console.log(modelProperties.initialSelectedRows);
-
   if (manuallyPaged || autoPaged) {
     modelProperties.paged = true;
   }
@@ -459,6 +457,12 @@ function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
   const sortable = getSortable(properties.sortable, manuallyPaged, autoPaged);
   if (sortable !== UI.Table.SORT_OPTION.MULTI) {
     modelProperties.sortable = sortable;
+  }
+
+  if (sortable && properties.sortBy) {
+    modelProperties.sortBy = properties.sortBy as UI.Table.ColumnSort<
+      UI.Table.DataRow[]
+    >[];
   }
 
   if (properties.density) {

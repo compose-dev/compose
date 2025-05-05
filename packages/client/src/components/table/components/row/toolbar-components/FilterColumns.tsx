@@ -1,0 +1,782 @@
+import Button from "~/components/button";
+import Icon from "~/components/icon";
+import { TableColumnProp, GlobalFiltering } from "~/components/table/utils";
+import { classNames } from "~/utils/classNames";
+import { Popover } from "~/components/popover";
+import {
+  DateInput,
+  DateTimeInput,
+  NumberInput,
+  TextInput,
+} from "~/components/input";
+import { ComboboxSingle } from "~/components/combobox";
+import { UI } from "@composehq/ts-public";
+import { v4 as uuid } from "uuid";
+import DropdownMenu from "~/components/dropdown-menu";
+import { Listbox } from "~/components/listbox";
+import { u } from "@compose/ts";
+import { useCallback, useMemo } from "react";
+
+function getTagOptionsForColumn(column: TableColumnProp | undefined) {
+  if (!column || column.format !== UI.Table.COLUMN_FORMAT.tag) {
+    return [];
+  }
+
+  const tagColors = column.tagColors;
+
+  if (!tagColors) {
+    return [];
+  }
+
+  try {
+    return Object.values(tagColors).map((tagColor) => tagColor.originalValue);
+  } catch (e) {
+    return [];
+  }
+}
+
+const OPERATOR_INPUT_TYPE = {
+  NO_INPUT: "NO_INPUT",
+  TEXT: "TEXT",
+  NUMBER: "NUMBER",
+  BOOLEAN_SELECT: "BOOLEAN_SELECT",
+  MULTI_SELECT: "MULTI_SELECT",
+  DATE_INPUT: "DATE_INPUT",
+  DATE_TIME_INPUT: "DATE_TIME_INPUT",
+} as const;
+
+function getOperatorInputType(
+  clause: GlobalFiltering.EditableAdvancedFilterClause,
+  columnFormat: UI.Table.ColumnFormat | undefined
+) {
+  if (
+    clause.operator === UI.Table.COLUMN_FILTER_OPERATOR.IS_EMPTY ||
+    clause.operator === UI.Table.COLUMN_FILTER_OPERATOR.IS_NOT_EMPTY
+  ) {
+    return OPERATOR_INPUT_TYPE.NO_INPUT;
+  }
+
+  if (columnFormat === UI.Table.COLUMN_FORMAT.boolean) {
+    return OPERATOR_INPUT_TYPE.BOOLEAN_SELECT;
+  }
+
+  if (columnFormat === UI.Table.COLUMN_FORMAT.date) {
+    return OPERATOR_INPUT_TYPE.DATE_INPUT;
+  }
+
+  if (columnFormat === UI.Table.COLUMN_FORMAT.datetime) {
+    return OPERATOR_INPUT_TYPE.DATE_TIME_INPUT;
+  }
+
+  if (
+    columnFormat === UI.Table.COLUMN_FORMAT.number ||
+    columnFormat === UI.Table.COLUMN_FORMAT.currency
+  ) {
+    return OPERATOR_INPUT_TYPE.NUMBER;
+  }
+
+  if (columnFormat === UI.Table.COLUMN_FORMAT.tag) {
+    return OPERATOR_INPUT_TYPE.MULTI_SELECT;
+  }
+
+  return OPERATOR_INPUT_TYPE.TEXT;
+}
+
+function createDefaultClause(): GlobalFiltering.EditableAdvancedFilterClause {
+  return {
+    key: null,
+    operator: UI.Table.COLUMN_FILTER_OPERATOR.IS,
+    value: null,
+    id: uuid(),
+  };
+}
+
+function createDefaultGroup(): GlobalFiltering.EditableAdvancedFilterGroup {
+  return {
+    logicOperator: UI.Table.COLUMN_FILTER_LOGIC_OPERATOR.AND,
+    filters: [createDefaultClause()],
+    id: uuid(),
+  };
+}
+
+function FilterClauseRow({
+  clause,
+  path,
+  columns,
+  onUpdateFilterClauseOperator,
+  onUpdateFilterClauseValue,
+  onUpdateFilterClauseKey,
+  onRemoveFilterNode,
+}: {
+  clause: GlobalFiltering.EditableAdvancedFilterClause;
+  path: string[];
+  columns: TableColumnProp[];
+  onUpdateFilterClauseOperator: (
+    path: string[],
+    operator: UI.Table.ColumnFilterOperator
+  ) => void;
+  onUpdateFilterClauseValue: (path: string[], value: unknown) => void;
+  onUpdateFilterClauseKey: (path: string[], key: string | null) => void;
+  onRemoveFilterNode: (path: string[]) => void;
+}) {
+  const columnOptions = columns.map((col) => ({
+    label: col.label,
+    value: col.id,
+    format: col.format,
+  }));
+
+  const column = columns.find((col) => col.id === clause.key);
+
+  const columnFormat = column?.format;
+
+  const operatorOptions =
+    GlobalFiltering.COLUMN_FORMAT_TO_FILTER_OPERATORS[
+      columnFormat ?? UI.Table.COLUMN_FORMAT.string
+    ];
+
+  const operatorType = getOperatorInputType(clause, columnFormat);
+
+  const labelLength =
+    GlobalFiltering.COLUMN_FORMAT_TO_LABEL_LENGTH[
+      columnFormat ?? UI.Table.COLUMN_FORMAT.string
+    ];
+  const tagOptions = getTagOptionsForColumn(column);
+
+  return (
+    <div className="flex flex-row items-start space-x-2 w-full">
+      <ComboboxSingle
+        options={columnOptions}
+        value={clause.key}
+        setValue={(val) => {
+          onUpdateFilterClauseKey(path, val);
+        }}
+        id={`filter-col-${path.join("-")}`}
+        label={null}
+        disabled={false}
+        rootClassName="w-1/3 min-w-36 flex-1"
+        optionsBoxClassName="min-w-60"
+      />
+      <Listbox.Single
+        options={operatorOptions.map((op) => ({
+          label:
+            labelLength === "short"
+              ? GlobalFiltering.COLUMN_FILTER_OPERATOR_TO_SHORT_LABEL[op]
+              : GlobalFiltering.COLUMN_FILTER_OPERATOR_TO_LABEL[op],
+          value: op,
+        }))}
+        value={clause.operator}
+        setValue={(val) => {
+          if (val !== null) {
+            onUpdateFilterClauseOperator(path, val);
+          }
+        }}
+        id={`filter-op-${path.join("-")}`}
+        label={null}
+        disabled={!clause.key} // Disable if no column selected
+        rootClassName={classNames("w-1/4 min-w-32 flex-1", {
+          "w-2/3": operatorType === OPERATOR_INPUT_TYPE.NO_INPUT,
+        })}
+        optionsBoxClassName="min-w-56"
+      />
+      {operatorType === OPERATOR_INPUT_TYPE.TEXT && (
+        <TextInput
+          value={clause.value}
+          setValue={(val) => onUpdateFilterClauseValue(path, val)}
+          label={null}
+          disabled={false}
+          rootClassName="w-1/3 min-w-36 flex-1"
+          placeholder="Enter value"
+        />
+      )}
+      {operatorType === OPERATOR_INPUT_TYPE.NUMBER && (
+        <NumberInput
+          value={clause.value}
+          setValue={(val) => onUpdateFilterClauseValue(path, val)}
+          label={null}
+          disabled={false}
+          rootClassName="w-1/3 min-w-36 flex-1"
+          placeholder="Enter value"
+        />
+      )}
+      {operatorType === OPERATOR_INPUT_TYPE.DATE_INPUT && (
+        <DateInput
+          value={
+            clause.value === null ? null : u.date.toDateOnlyModel(clause.value)
+          }
+          setValue={(val) =>
+            onUpdateFilterClauseValue(
+              path,
+              val === null ? null : u.date.fromDateOnlyModel(val)
+            )
+          }
+          label={null}
+        />
+      )}
+      {operatorType === OPERATOR_INPUT_TYPE.DATE_TIME_INPUT && (
+        <DateTimeInput
+          value={
+            clause.value === null ? null : u.date.toDateTimeModel(clause.value)
+          }
+          setValue={(val) =>
+            onUpdateFilterClauseValue(
+              path,
+              val === null ? null : u.date.fromDateTimeModel(val)
+            )
+          }
+          label={null}
+        />
+      )}
+      {operatorType === OPERATOR_INPUT_TYPE.MULTI_SELECT && (
+        <Listbox.Multi
+          options={tagOptions.map((op) => ({
+            label: op.toString(),
+            value: op,
+          }))}
+          value={clause.value === null ? [] : clause.value}
+          setValue={(val) =>
+            onUpdateFilterClauseValue(path, val.length === 0 ? null : val)
+          }
+          id={`filter-op-${path.join("-")}`}
+          label={null}
+          disabled={false}
+          rootClassName="w-1/3 min-w-36 flex-1"
+          optionsBoxClassName="min-w-56"
+        />
+      )}
+      {operatorType === OPERATOR_INPUT_TYPE.BOOLEAN_SELECT && (
+        <Listbox.Single
+          options={[
+            { label: "True", value: true },
+            { label: "False", value: false },
+          ]}
+          value={clause.value}
+          setValue={(val) => onUpdateFilterClauseValue(path, val)}
+          id={`filter-op-${path.join("-")}`}
+          label={null}
+          disabled={false}
+          rootClassName="w-1/3 min-w-36 flex-1"
+          optionsBoxClassName="min-w-56"
+        />
+      )}
+      <div className="mt-1">
+        <Button variant="ghost" onClick={() => onRemoveFilterNode(path)}>
+          <Icon name="x" size="0.625" color="brand-neutral-2" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function FilterGroupSection({
+  group,
+  path,
+  columns,
+  onUpdateFilterGroupLogicOperator,
+  onAddFilterClauseToGroup,
+  onAddFilterGroupToGroup,
+  onUpdateFilterClauseOperator,
+  onUpdateFilterClauseValue,
+  onUpdateFilterClauseKey,
+  onRemoveFilterNode,
+}: {
+  group: GlobalFiltering.EditableAdvancedFilterGroup;
+  path: string[];
+  columns: TableColumnProp[];
+  onUpdateFilterGroupLogicOperator: (
+    path: string[],
+    logicOperator: UI.Table.ColumnFilterLogicOperator
+  ) => void;
+  onAddFilterClauseToGroup: (path: string[]) => void;
+  onAddFilterGroupToGroup: (path: string[]) => void;
+  onUpdateFilterClauseOperator: (
+    path: string[],
+    operator: UI.Table.ColumnFilterOperator
+  ) => void;
+  onUpdateFilterClauseValue: (path: string[], value: unknown) => void;
+  onUpdateFilterClauseKey: (path: string[], key: string | null) => void;
+  onRemoveFilterNode: (path: string[]) => void;
+}) {
+  return (
+    <div
+      className={classNames("min-w-fit w-full", {
+        "p-4 border border-brand-neutral rounded-brand bg-brand-page-inverted-5":
+          path.length > 1,
+      })}
+    >
+      <div
+        className={classNames(
+          "flex flex-col space-y-4 flex-1 overflow-x-visible min-w-[32rem] w-full"
+        )}
+      >
+        {group.filters.map((filter, index) => (
+          <div
+            key={index}
+            className={classNames(
+              "flex flex-row items-start gap-x-2 self-stretch"
+            )}
+          >
+            <div
+              className={"w-16 flex-shrink-0 flex items-center justify-center"}
+            >
+              {index === 0 && (
+                <p className="font-medium mt-1.5 text-sm">Where</p>
+              )}
+              {index === 1 && (
+                <DropdownMenu
+                  labelVariant="ghost"
+                  label={
+                    <div className="flex flex-row items-center justify-around border border-brand-neutral rounded-brand p-1.5 bg-brand-io w-16 relative">
+                      <p className="text-sm">
+                        {
+                          GlobalFiltering.COLUMN_FILTER_LOGIC_OPERATOR_TO_LABEL[
+                            group.logicOperator
+                          ]
+                        }
+                      </p>
+                      <Icon
+                        name="chevron-down"
+                        color="brand-neutral-2"
+                        size="0.75"
+                      />
+                    </div>
+                  }
+                  dropdownAnchor="bottom start"
+                  options={[
+                    {
+                      label:
+                        GlobalFiltering.COLUMN_FILTER_LOGIC_OPERATOR_TO_LABEL[
+                          UI.Table.COLUMN_FILTER_LOGIC_OPERATOR.AND
+                        ],
+                      onClick: () =>
+                        onUpdateFilterGroupLogicOperator(
+                          path,
+                          UI.Table.COLUMN_FILTER_LOGIC_OPERATOR.AND
+                        ),
+                    },
+                    {
+                      label:
+                        GlobalFiltering.COLUMN_FILTER_LOGIC_OPERATOR_TO_LABEL[
+                          UI.Table.COLUMN_FILTER_LOGIC_OPERATOR.OR
+                        ],
+                      onClick: () =>
+                        onUpdateFilterGroupLogicOperator(
+                          path,
+                          UI.Table.COLUMN_FILTER_LOGIC_OPERATOR.OR
+                        ),
+                    },
+                  ]}
+                />
+              )}
+              {index >= 2 && (
+                <p className="font-medium mt-1.5 text-sm">
+                  {group.logicOperator.toLocaleUpperCase()}
+                </p>
+              )}
+            </div>
+            <div className="flex-grow min-w-0">
+              <FilterNode
+                key={filter.id}
+                node={filter}
+                path={[...path, filter.id]}
+                columns={columns}
+                onUpdateFilterGroupLogicOperator={
+                  onUpdateFilterGroupLogicOperator
+                }
+                onAddFilterClauseToGroup={onAddFilterClauseToGroup}
+                onAddFilterGroupToGroup={onAddFilterGroupToGroup}
+                onUpdateFilterClauseOperator={onUpdateFilterClauseOperator}
+                onUpdateFilterClauseValue={onUpdateFilterClauseValue}
+                onUpdateFilterClauseKey={onUpdateFilterClauseKey}
+                onRemoveFilterNode={onRemoveFilterNode}
+              />
+            </div>
+          </div>
+        ))}
+        {path.length > 1 && (
+          <div>
+            <DropdownMenu
+              labelVariant="ghost"
+              label={
+                <div className="flex flex-row items-center space-x-1 border border-brand-neutral rounded-brand p-1.5 px-2 bg-brand-io">
+                  <Icon name="plus" />
+                  <p className="text-sm">Add filter</p>
+                </div>
+              }
+              dropdownAnchor="bottom start"
+              options={[
+                {
+                  label: "Add filter rule",
+                  onClick: () => onAddFilterClauseToGroup(path),
+                },
+                {
+                  label: "Add filter group",
+                  onClick: () => onAddFilterGroupToGroup(path),
+                },
+              ]}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Recursive component to render either a Clause or a Group
+function FilterNode({
+  node,
+  path,
+  columns,
+  onUpdateFilterClauseOperator,
+  onUpdateFilterClauseValue,
+  onUpdateFilterClauseKey,
+  onUpdateFilterGroupLogicOperator,
+  onAddFilterClauseToGroup,
+  onAddFilterGroupToGroup,
+  onRemoveFilterNode,
+}: {
+  node: NonNullable<GlobalFiltering.EditableAdvancedFilterModel>;
+  path: string[];
+  columns: TableColumnProp[];
+  onUpdateFilterClauseOperator: (
+    path: string[],
+    operator: UI.Table.ColumnFilterOperator
+  ) => void;
+  onUpdateFilterClauseValue: (path: string[], value: unknown) => void;
+  onUpdateFilterClauseKey: (path: string[], key: string | null) => void;
+  onUpdateFilterGroupLogicOperator: (
+    path: string[],
+    logicOperator: UI.Table.ColumnFilterLogicOperator
+  ) => void;
+  onAddFilterClauseToGroup: (path: string[]) => void;
+  onAddFilterGroupToGroup: (path: string[]) => void;
+  onRemoveFilterNode: (path: string[]) => void;
+}) {
+  if ("logicOperator" in node) {
+    return (
+      <FilterGroupSection
+        group={node}
+        path={path}
+        columns={columns}
+        onUpdateFilterGroupLogicOperator={onUpdateFilterGroupLogicOperator}
+        onAddFilterClauseToGroup={onAddFilterClauseToGroup}
+        onAddFilterGroupToGroup={onAddFilterGroupToGroup}
+        onUpdateFilterClauseOperator={onUpdateFilterClauseOperator}
+        onUpdateFilterClauseValue={onUpdateFilterClauseValue}
+        onUpdateFilterClauseKey={onUpdateFilterClauseKey}
+        onRemoveFilterNode={onRemoveFilterNode}
+      />
+    );
+  } else {
+    return (
+      <FilterClauseRow
+        clause={node}
+        path={path}
+        columns={columns}
+        onUpdateFilterClauseOperator={onUpdateFilterClauseOperator}
+        onUpdateFilterClauseValue={onUpdateFilterClauseValue}
+        onUpdateFilterClauseKey={onUpdateFilterClauseKey}
+        onRemoveFilterNode={onRemoveFilterNode}
+      />
+    );
+  }
+}
+
+// The main panel content inside the popover
+function FilterColumnsPanel({
+  columns,
+  filterModel,
+  setFilterModel,
+  resetFilterModel,
+  className = "",
+}: {
+  columns: TableColumnProp[];
+  filterModel: GlobalFiltering.EditableAdvancedFilterModel;
+  setFilterModel: (model: GlobalFiltering.EditableAdvancedFilterModel) => void;
+  resetFilterModel: () => void;
+  className?: string;
+}) {
+  const handleAddTopLevelFilter = useCallback(() => {
+    if (filterModel === null) {
+      setFilterModel(createDefaultGroup());
+    } else {
+      if ("logicOperator" in filterModel) {
+        setFilterModel({
+          ...filterModel,
+          filters: [...filterModel.filters, createDefaultClause()],
+        });
+      } else {
+        setFilterModel({
+          logicOperator: UI.Table.COLUMN_FILTER_LOGIC_OPERATOR.AND,
+          filters: [filterModel, createDefaultClause()],
+          id: uuid(),
+        });
+      }
+    }
+  }, [filterModel, setFilterModel]);
+
+  const handleAddTopLevelGroup = useCallback(() => {
+    if (filterModel === null) {
+      const group = createDefaultGroup();
+      group.filters = [createDefaultGroup()];
+      setFilterModel(group);
+    } else if ("logicOperator" in filterModel) {
+      setFilterModel({
+        ...filterModel,
+        filters: [...filterModel.filters, createDefaultGroup()],
+      });
+    } else {
+      setFilterModel({
+        logicOperator: UI.Table.COLUMN_FILTER_LOGIC_OPERATOR.AND,
+        filters: [filterModel, createDefaultGroup()],
+        id: uuid(),
+      });
+    }
+  }, [filterModel, setFilterModel]);
+
+  const updateFilterClauseOperator = useCallback(
+    (path: string[], operator: UI.Table.ColumnFilterOperator) => {
+      const copy = GlobalFiltering.copyAdvancedFilterModel(filterModel);
+      const node = GlobalFiltering.findFilterModelNode(copy, path);
+
+      if (node === null || "logicOperator" in node) {
+        return;
+      }
+
+      node.operator = operator;
+
+      if (
+        operator === UI.Table.COLUMN_FILTER_OPERATOR.IS_NOT_EMPTY ||
+        operator === UI.Table.COLUMN_FILTER_OPERATOR.IS_EMPTY
+      ) {
+        node.value = null;
+      }
+
+      setFilterModel(copy);
+    },
+    [filterModel, setFilterModel]
+  );
+
+  const updateFilterClauseValue = useCallback(
+    (path: string[], value: unknown) => {
+      const copy = GlobalFiltering.copyAdvancedFilterModel(filterModel);
+      const node = GlobalFiltering.findFilterModelNode(copy, path);
+
+      if (node === null || "logicOperator" in node) {
+        return;
+      }
+
+      node.value = value;
+
+      setFilterModel(copy);
+    },
+    [filterModel, setFilterModel]
+  );
+
+  const updateFilterClauseKey = useCallback(
+    (path: string[], key: string | null) => {
+      const copy = GlobalFiltering.copyAdvancedFilterModel(filterModel);
+      const node = GlobalFiltering.findFilterModelNode(copy, path);
+
+      if (node === null || "logicOperator" in node) {
+        return;
+      }
+
+      node.key = key;
+
+      const column = columns.find((col) => col.id === key);
+
+      const validOperatorsForColumn =
+        GlobalFiltering.COLUMN_FORMAT_TO_FILTER_OPERATORS[
+          column?.format ?? UI.Table.COLUMN_FORMAT.string
+        ];
+
+      if (!validOperatorsForColumn.includes(node.operator)) {
+        node.operator = validOperatorsForColumn[0];
+      }
+
+      setFilterModel(copy);
+    },
+    [columns, filterModel, setFilterModel]
+  );
+
+  const updateFilterGroupLogicOperator = useCallback(
+    (path: string[], logicOperator: UI.Table.ColumnFilterLogicOperator) => {
+      const copy = GlobalFiltering.copyAdvancedFilterModel(filterModel);
+      const node = GlobalFiltering.findFilterModelNode(copy, path);
+
+      if (node === null || "logicOperator" in node === false) {
+        return;
+      }
+
+      node.logicOperator = logicOperator;
+
+      setFilterModel(copy);
+    },
+    [filterModel, setFilterModel]
+  );
+
+  const addFilterClauseToGroup = useCallback(
+    (path: string[]) => {
+      const copy = GlobalFiltering.copyAdvancedFilterModel(filterModel);
+      const node = GlobalFiltering.findFilterModelNode(copy, path);
+
+      if (node === null || "logicOperator" in node === false) {
+        return;
+      }
+
+      node.filters.push(createDefaultClause());
+
+      setFilterModel(copy);
+    },
+    [filterModel, setFilterModel]
+  );
+
+  const addFilterGroupToGroup = useCallback(
+    (path: string[]) => {
+      const copy = GlobalFiltering.copyAdvancedFilterModel(filterModel);
+      const node = GlobalFiltering.findFilterModelNode(copy, path);
+
+      if (node === null || "logicOperator" in node === false) {
+        return;
+      }
+
+      node.filters.push(createDefaultGroup());
+      setFilterModel(copy);
+    },
+    [filterModel, setFilterModel]
+  );
+
+  const onRemoveFilterNode = useCallback(
+    (path: string[]) => {
+      if (path.length === 1) {
+        setFilterModel(null);
+      } else {
+        const copy = GlobalFiltering.copyAdvancedFilterModel(filterModel);
+        const parentNode = GlobalFiltering.findFilterModelNode(
+          copy,
+          path.slice(0, -1)
+        );
+
+        if (parentNode === null || "logicOperator" in parentNode === false) {
+          return;
+        }
+
+        parentNode.filters = parentNode.filters.filter(
+          (filter) => filter.id !== path[path.length - 1]
+        );
+
+        if (parentNode.filters.length === 0) {
+          onRemoveFilterNode(path.slice(0, -1));
+          return;
+        }
+
+        setFilterModel(copy);
+      }
+    },
+    [filterModel, setFilterModel]
+  );
+
+  return (
+    <div className={classNames("flex flex-col space-y-4", className)}>
+      <div className="flex justify-between items-center">
+        <h5>Filter by</h5>
+        <Button
+          variant="ghost"
+          className="text-sm text-brand-neutral-2 hover:text-brand-neutral"
+          onClick={resetFilterModel}
+        >
+          Reset filters
+        </Button>
+      </div>
+      {filterModel !== null && (
+        <div
+          className="flex flex-col space-y-4 overflow-x-auto pb-4 pt-1 -mt-1 -mx-4 px-4"
+          style={{
+            scrollbarWidth: "thin",
+          }}
+        >
+          <FilterNode
+            node={filterModel}
+            path={[filterModel.id]} // Root path
+            columns={columns}
+            onUpdateFilterClauseOperator={updateFilterClauseOperator}
+            onUpdateFilterClauseValue={updateFilterClauseValue}
+            onUpdateFilterClauseKey={updateFilterClauseKey}
+            onUpdateFilterGroupLogicOperator={updateFilterGroupLogicOperator}
+            onAddFilterClauseToGroup={addFilterClauseToGroup}
+            onAddFilterGroupToGroup={addFilterGroupToGroup}
+            onRemoveFilterNode={onRemoveFilterNode}
+          />
+        </div>
+      )}
+      <div>
+        <DropdownMenu
+          labelVariant="ghost"
+          label={
+            <div className="flex flex-row items-center space-x-1 border border-brand-neutral rounded-brand p-1.5 px-2 bg-brand-io">
+              <Icon name="plus" />
+              <p className="text-sm">Add filter</p>
+            </div>
+          }
+          dropdownAnchor="bottom start"
+          options={[
+            {
+              label: "Add filter rule",
+              onClick: () => handleAddTopLevelFilter(),
+            },
+            {
+              label: "Add filter group",
+              onClick: () => handleAddTopLevelGroup(),
+            },
+          ]}
+        />
+      </div>
+    </div>
+  );
+}
+
+function FilterColumnsPopover({
+  columns,
+  filterModel,
+  setFilterModel,
+  resetFilterModel,
+}: {
+  columns: TableColumnProp[];
+  filterModel: GlobalFiltering.EditableAdvancedFilterModel;
+  setFilterModel: (model: GlobalFiltering.EditableAdvancedFilterModel) => void;
+  resetFilterModel: () => void;
+}) {
+  const filterTooltipContent = useMemo(() => {
+    if (filterModel !== null) {
+      return "Filters active";
+    }
+    return "Filter";
+  }, [filterModel]);
+
+  return (
+    <Popover.Root>
+      <Popover.Trigger>
+        <div
+          data-tooltip-id="top-tooltip-offset4"
+          data-tooltip-content={filterTooltipContent}
+        >
+          <Icon
+            name="filter" // Using a generic filter icon
+            color={filterModel !== null ? "brand-primary" : "brand-neutral-2"}
+          />
+        </div>
+      </Popover.Trigger>
+      <Popover.Panel>
+        <FilterColumnsPanel
+          columns={columns}
+          filterModel={filterModel}
+          setFilterModel={setFilterModel}
+          resetFilterModel={resetFilterModel}
+          className="w-[40rem]" // Adjust width as needed
+        />
+      </Popover.Panel>
+    </Popover.Root>
+  );
+}
+
+export { FilterColumnsPopover, FilterColumnsPanel };

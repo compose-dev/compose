@@ -17,7 +17,7 @@
     "@compose/ts": "workspace:*",
     "@composehq/ts-public": "workspace:*",
     "@fontsource-variable/inter": "5.0.18",
-    "@headlessui/react": "2.1.4",
+    "@headlessui/react": "2.2.2",
     "@nivo/bar": "^0.88.0",
     "@nivo/core": "^0.88.0",
     "@nivo/line": "^0.88.0",

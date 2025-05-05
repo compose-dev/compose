@@ -1,6 +1,6 @@
 import { UI } from "@composehq/ts-public";
 import { SortingState, Updater } from "@tanstack/react-table";
-import { useEffect, useRef, useState } from "react";
+import { MutableRefObject, useEffect, useRef, useState } from "react";
 import { TableColumnProp } from "./constants";
 
 function formatSortByForBrowser(
@@ -53,9 +53,10 @@ function useSorting(
   columns: TableColumnProp[],
   initialSortBy: UI.Components.InputTable["model"]["properties"]["sortBy"],
   sortable: UI.Table.SortOption,
-  onSortChange: (
-    sortBy: UI.Table.PageChangeParams<UI.Table.DataRow[]>["sortBy"]
-  ) => void
+  serverSortByRef: MutableRefObject<
+    UI.Table.PageChangeParams<UI.Table.DataRow[]>["sortBy"]
+  >,
+  onSortChange: () => void
 ) {
   /**
    * Store the previous `initialSortBy` to detect changes to the value. If
@@ -69,17 +70,17 @@ function useSorting(
    * The active sorting state. We control this ourselves instead of having
    * tanstack table manage it.
    */
-  const [sort, setSort] = useState<SortingState>(
-    formatSortByForBrowser(initialSortBy, columns, sortable)
-  );
-
-  /**
-   * The active sorting state, but formatted for the SDK (i.e. the
-   * SDK pagination API expects this format).
-   */
-  const sortByForServer = useRef<
-    UI.Table.PageChangeParams<UI.Table.DataRow[]>["sortBy"]
-  >(formatSortByForServer(sort, columns));
+  const [sort, setSort] = useState<SortingState>(() => {
+    const browserSortBy = formatSortByForBrowser(
+      initialSortBy,
+      columns,
+      sortable
+    );
+    // hack: set the serverSortRef when we declare the sort state to keep
+    // it synced up.
+    serverSortByRef.current = formatSortByForServer(browserSortBy, columns);
+    return browserSortBy;
+  });
 
   useEffect(() => {
     /**
@@ -103,10 +104,9 @@ function useSorting(
       );
 
       setSort(browserSortBy);
-
-      sortByForServer.current = formatSortByForServer(browserSortBy, columns);
+      serverSortByRef.current = formatSortByForServer(browserSortBy, columns);
     }
-  }, [initialSortBy, columns, sortable]);
+  }, [initialSortBy, columns, sortable, serverSortByRef]);
 
   /**
    * Sorting state change handler that is passed to the tanstack table
@@ -122,8 +122,9 @@ function useSorting(
     }
 
     setSort(sortBy);
-    sortByForServer.current = formatSortByForServer(sortBy, columns);
-    onSortChange(sortByForServer.current);
+    serverSortByRef.current = formatSortByForServer(sortBy, columns);
+
+    onSortChange();
   }
 
   /**
@@ -136,7 +137,6 @@ function useSorting(
   return {
     sort,
     setSort: handleSortChange,
-    sortByForServer,
     resetSortingStateToInitial,
   };
 }

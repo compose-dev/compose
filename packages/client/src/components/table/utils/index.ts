@@ -1,6 +1,5 @@
 export * from "./utils";
 export * from "./tags";
-export * from "./useSearch";
 export * from "./useFormattedData";
 export * from "./constants";
 export * from "./useFormattedColumns";
@@ -8,3 +7,4 @@ export * from "./downloadCSV";
 export * from "./useSorting";
 export * from "./usePagination";
 export * from "./useColumnPinning";
+export * as GlobalFiltering from "./globalFiltering";

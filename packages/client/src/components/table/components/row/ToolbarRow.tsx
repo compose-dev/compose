@@ -1,8 +1,9 @@
 import Icon from "~/components/icon";
 import { TextInput } from "~/components/input";
-import { TableColumnProp, TanStackTable } from "../../utils";
+import { GlobalFiltering, TableColumnProp, TanStackTable } from "../../utils";
 import {
   DownloadCSVPopover,
+  FilterColumnsPopover,
   PinAndHideColumnsPopover,
   SortColumnsPopover,
 } from "./toolbar-components";
@@ -34,7 +35,6 @@ function SearchInput({
 function SearchWidget({
   searchQuery,
   setSearchQuery,
-  setTableFilter,
   serverSearchQuery,
   loading,
   paginated,
@@ -42,22 +42,13 @@ function SearchWidget({
 }: {
   searchQuery: string | null;
   setSearchQuery: (val: string | null) => void;
-  setTableFilter: (val: string | null) => void;
   serverSearchQuery: string | null;
   loading: UI.Stale.Option;
   paginated: boolean;
-  onTablePageChangeHook: (val: string | null) => void;
+  onTablePageChangeHook: (offset?: number) => void;
 }) {
   if (!paginated) {
-    return (
-      <SearchInput
-        value={searchQuery}
-        setValue={(val) => {
-          setSearchQuery(val);
-          setTableFilter(val);
-        }}
-      />
-    );
+    return <SearchInput value={searchQuery} setValue={setSearchQuery} />;
   }
 
   return (
@@ -65,7 +56,7 @@ function SearchWidget({
       className="flex flex-row gap-x-2 items-center sm:mr-2"
       onSubmit={(e) => {
         e.preventDefault();
-        onTablePageChangeHook(searchQuery);
+        onTablePageChangeHook();
       }}
     >
       <SearchInput value={searchQuery} setValue={setSearchQuery} />
@@ -91,8 +82,9 @@ function SearchWidget({
 function ToolbarRow({
   searchQuery,
   setSearchQuery,
-  setTableFilter,
   serverSearchQuery,
+  filters,
+  setFilters,
   loading,
   paginated,
   onTablePageChangeHook,
@@ -106,11 +98,12 @@ function ToolbarRow({
 }: {
   searchQuery: string | null;
   setSearchQuery: (val: string | null) => void;
-  setTableFilter: (val: string | null) => void;
+  filters: GlobalFiltering.EditableAdvancedFilterModel;
+  setFilters: (val: GlobalFiltering.EditableAdvancedFilterModel) => void;
   serverSearchQuery: string | null;
   loading: UI.Stale.Option;
   paginated: boolean;
-  onTablePageChangeHook: (val: string | null) => void;
+  onTablePageChangeHook: (offset?: number) => void;
   table: TanStackTable;
   columns: TableColumnProp[];
   disableSearch: boolean;
@@ -145,7 +138,6 @@ function ToolbarRow({
         <SearchWidget
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          setTableFilter={setTableFilter}
           serverSearchQuery={serverSearchQuery}
           loading={loading}
           paginated={paginated}
@@ -159,6 +151,12 @@ function ToolbarRow({
           resetSortingState={resetSortingStateToInitial}
           columns={columns}
           sortable={sortable}
+        />
+        <FilterColumnsPopover
+          columns={columns}
+          filterModel={filters}
+          setFilterModel={setFilters}
+          resetFilterModel={() => setFilters(null)}
         />
         <PinAndHideColumnsPopover
           columns={columns}

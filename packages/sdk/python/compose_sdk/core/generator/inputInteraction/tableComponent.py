@@ -216,6 +216,9 @@ def _table(
     if sortable != TableSortOption.MULTI:
         model_properties["sortable"] = sortable
 
+    if sortable != TableSortOption.DISABLED and sort_by is not None:
+        model_properties["sortBy"] = sort_by
+
     if manually_paged or auto_paged:
         model_properties["paged"] = True
 
@@ -240,9 +243,6 @@ def _table(
 
     if overflow is not None and overflow != "ellipsis":
         model_properties["overflow"] = overflow
-
-    if sort_by is not None:
-        model_properties["sortBy"] = sort_by
 
     if density is not None:
         model_properties["density"] = density

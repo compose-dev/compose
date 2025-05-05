@@ -12,7 +12,7 @@ import * as WSUtils from "./wsUtils";
 import * as compress from "./compress";
 import * as dateUtils from "./dateUtils";
 import * as u from "./utils";
-
+import * as types from "./types";
 export {
   SdkToServerEvent,
   ServerToSdkEvent,
@@ -26,4 +26,5 @@ export {
   compress,
   dateUtils,
   u,
+  types,
 };

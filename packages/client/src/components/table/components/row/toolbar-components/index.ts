@@ -4,6 +4,7 @@ import {
   PinAndHideColumnsPanel,
   PinAndHideColumnsPopover,
 } from "./PinAndHideColumns";
+import { FilterColumnsPanel, FilterColumnsPopover } from "./FilterColumns";
 
 export {
   SortColumnsPanel,
@@ -12,4 +13,6 @@ export {
   DownloadCSVPopover,
   PinAndHideColumnsPanel,
   PinAndHideColumnsPopover,
+  FilterColumnsPanel,
+  FilterColumnsPopover,
 };

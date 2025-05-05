@@ -1,9 +1,8 @@
 import { TagColor, TagValue } from "./tagColor";
 import { StringOnlyKeys } from "../../../types";
-
-export type TableDataRow = {
-  [key: string]: string | number | boolean | null | Date | undefined | any;
-};
+import type { DataRow as TableDataRow } from "./dataRow";
+import { AdvancedFilterModel } from "./advancedFiltering";
+import type { ColumnFormat } from "./columnFormat";
 
 const COLUMN_SORT_DIRECTION = {
   ASC: "asc",
@@ -25,6 +24,7 @@ interface TablePageChangeParams<TData extends TableDataRow[]> {
   prevSearchQuery: string | null;
   prevTotalRecords: number | null;
   sortBy: ColumnSort<TData>[];
+  filterBy: AdvancedFilterModel<TData> | null;
 }
 
 type TablePageChangeResponse<TData extends TableDataRow[]> = {
@@ -51,58 +51,6 @@ const PINNED_SIDE = {
 } as const;
 
 type PinnedSide = (typeof PINNED_SIDE)[keyof typeof PINNED_SIDE];
-/**
- * Convenience types to quickly format table data.
- *
- * @type `date` Oct 14, 1983
- *
- * @type `datetime` Oct 14, 1983, 10:14 AM
- *
- * @type `currency` $1000.00
- *
- * @type `number` 1,234
- *
- * @type `boolean` ✅ or ❌
- *
- * @type `tag` Colored pills
- *
- * @type `json` JSON object
- *
- * @type `string` Stringify the value and render as is
- */
-const TABLE_COLUMN_FORMAT = {
-  /** Oct 10, 2000 */
-  date: "date",
-
-  /** Oct 10, 2000, 10:14 AM */
-  datetime: "datetime",
-
-  /** 1,023,456 */
-  number: "number",
-
-  /** $1,023,456.00 */
-  currency: "currency",
-
-  /** ✅ or ❌ */
-  boolean: "boolean",
-
-  /** Colored pills */
-  tag: "tag",
-
-  /** JSON object */
-  json: "json",
-
-  /** Stringify the value and render as is */
-  string: "string",
-} as const;
-
-/**
- * The type of a table column.
- *
- * @see {@link TABLE_COLUMN_FORMAT}
- */
-type TableColumnFormat =
-  (typeof TABLE_COLUMN_FORMAT)[keyof typeof TABLE_COLUMN_FORMAT];
 
 type AdvancedTableColumn<TData extends TableDataRow[]> = {
   /**
@@ -126,7 +74,7 @@ type AdvancedTableColumn<TData extends TableDataRow[]> = {
    *
    * @see {@link TABLE_COLUMN_FORMAT Table column format options}
    */
-  format?: TableColumnFormat;
+  format?: ColumnFormat;
   /**
    * The width of the column, e.g. `100px`. By default, the width will be
    * set dynamically.
@@ -222,7 +170,7 @@ type SelectionReturnType =
 /**
  * Determine if a column should sort in descending order by default.
  */
-function shouldSortDescendingFirst(format: TableColumnFormat | undefined) {
+function shouldSortDescendingFirst(format: ColumnFormat | undefined) {
   return (
     format === "date" ||
     format === "datetime" ||
@@ -250,12 +198,9 @@ const TABLE_DENSITY = {
 type TableDensity = (typeof TABLE_DENSITY)[keyof typeof TABLE_DENSITY];
 
 export {
-  TableDataRow as DataRow,
   OnPageChange as OnPageChange,
   TablePageChangeParams as PageChangeParams,
   TablePageChangeResponse as PageChangeResponse,
-  TABLE_COLUMN_FORMAT as COLUMN_FORMAT,
-  TableColumnFormat as ColumnFormat,
   TableColumn as Column,
   AdvancedTableColumn as AdvancedColumn,
   TableColumnGenerator as ColumnGenerator,

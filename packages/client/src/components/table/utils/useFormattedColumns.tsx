@@ -31,9 +31,22 @@ function formatColumn(
     header: (header) => {
       function getStyle() {
         if (header.column.getIsPinned()) {
+          if (column.pinnedWidth) {
+            return {
+              width: column.pinnedWidth,
+              maxWidth: column.pinnedWidth,
+            };
+          }
+
           return {
-            width: header.column.getSize(),
-            maxWidth: header.column.getSize(),
+            width:
+              column.format === "json"
+                ? COLUMN_WIDTH_NUMERIC.JSON
+                : COLUMN_WIDTH_NUMERIC.DEFAULT,
+            maxWidth:
+              column.format === "json"
+                ? COLUMN_WIDTH_NUMERIC.JSON
+                : COLUMN_WIDTH_NUMERIC.DEFAULT,
           };
         }
 
