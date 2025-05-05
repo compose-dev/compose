@@ -416,14 +416,33 @@ function AuditLog() {
                   label: "Severity",
                   accessorKey: "severity",
                   width: "90px",
+                  pinnedWidth: 90,
                   format: "tag",
                   tagColors: {
-                    trace: "blue",
-                    debug: "pink",
-                    info: "gray",
-                    warn: "yellow",
-                    error: "orange",
-                    fatal: "red",
+                    trace: {
+                      color: "blue",
+                      originalValue: "trace",
+                    },
+                    debug: {
+                      color: "pink",
+                      originalValue: "debug",
+                    },
+                    info: {
+                      color: "gray",
+                      originalValue: "info",
+                    },
+                    warn: {
+                      color: "yellow",
+                      originalValue: "warn",
+                    },
+                    error: {
+                      color: "orange",
+                      originalValue: "error",
+                    },
+                    fatal: {
+                      color: "red",
+                      originalValue: "fatal",
+                    },
                   },
                   overflow: "ellipsis",
                 },
@@ -432,10 +451,17 @@ function AuditLog() {
                   label: "Source",
                   accessorKey: "type",
                   width: "100px",
+                  pinnedWidth: 100,
                   format: "tag",
                   tagColors: {
-                    system: "green",
-                    user: "orange",
+                    system: {
+                      color: "green",
+                      originalValue: "system",
+                    },
+                    user: {
+                      color: "orange",
+                      originalValue: "user",
+                    },
                   },
                   overflow: "ellipsis",
                 },
@@ -444,6 +470,7 @@ function AuditLog() {
                   label: "Timestamp (UTC)",
                   accessorKey: "createdAtUTC",
                   width: "210px",
+                  pinnedWidth: 210,
                   overflow: "ellipsis",
                 },
                 {
@@ -451,6 +478,7 @@ function AuditLog() {
                   label: "User Email",
                   accessorKey: "userEmail",
                   width: "240px",
+                  pinnedWidth: 240,
                   overflow: "ellipsis",
                 },
                 {
@@ -458,6 +486,7 @@ function AuditLog() {
                   label: "App Route",
                   accessorKey: "appRoute",
                   width: "200px",
+                  pinnedWidth: 200,
                   overflow: "ellipsis",
                 },
                 {
@@ -465,6 +494,7 @@ function AuditLog() {
                   label: "Message",
                   accessorKey: "message",
                   width: "1000px",
+                  pinnedWidth: 200,
                   overflow: "ellipsis",
                 },
               ]}

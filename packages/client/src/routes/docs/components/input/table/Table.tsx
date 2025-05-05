@@ -106,9 +106,18 @@ function TableComponent() {
             accessorKey: "tier",
             format: "tag",
             tagColors: {
-              Enterprise: UI.Table.SEMANTIC_COLOR["enterprise"],
-              Premium: UI.Table.SEMANTIC_COLOR["premium"],
-              Basic: UI.Table.SEMANTIC_COLOR["basic"],
+              Enterprise: {
+                color: UI.Table.SEMANTIC_COLOR["enterprise"],
+                originalValue: "Enterprise",
+              },
+              Premium: {
+                color: UI.Table.SEMANTIC_COLOR["premium"],
+                originalValue: "Premium",
+              },
+              Basic: {
+                color: UI.Table.SEMANTIC_COLOR["basic"],
+                originalValue: "Basic",
+              },
             },
             width: "150px",
             overflow: "ellipsis",
