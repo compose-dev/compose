@@ -2,7 +2,6 @@ import Button from "~/components/button";
 import Icon from "~/components/icon";
 import {
   generateAndDownloadCSV,
-  TableColumnProp,
   TanStackTable,
 } from "~/components/table/utils";
 import { classNames } from "~/utils/classNames";
@@ -14,13 +13,11 @@ import { Checkbox } from "~/components/checkbox";
 
 function DownloadCSVPanel({
   table,
-  columns,
   className = "",
   paginated,
   defaultFileName,
 }: {
   table: TanStackTable;
-  columns: TableColumnProp[];
   className?: string;
   paginated: boolean;
   defaultFileName: string;
@@ -53,7 +50,6 @@ function DownloadCSVPanel({
     generateAndDownloadCSV(
       table,
       rowsToDownload,
-      columns,
       filename ?? defaultFileName,
       includeHiddenColumns
     );
@@ -108,12 +104,10 @@ function DownloadCSVPanel({
 
 function DownloadCSVPopover({
   table,
-  columns,
   paginated,
   defaultFileName,
 }: {
   table: TanStackTable;
-  columns: TableColumnProp[];
   paginated: boolean;
   defaultFileName: string;
 }) {
@@ -130,7 +124,6 @@ function DownloadCSVPopover({
       <Popover.Panel>
         <DownloadCSVPanel
           table={table}
-          columns={columns}
           className="w-96"
           paginated={paginated}
           defaultFileName={defaultFileName}

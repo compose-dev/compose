@@ -94,7 +94,6 @@ function ToolbarRow({
   paginated,
   onTablePageChangeHook,
   table,
-  columns,
   searchable,
   sortable,
   tableId,
@@ -112,7 +111,6 @@ function ToolbarRow({
   paginated: boolean;
   onTablePageChangeHook: (offset?: number) => void;
   table: TanStackTable;
-  columns: TableColumnProp[];
   searchable: boolean;
   sortable: UI.Table.SortOption;
   tableId: string;
@@ -158,24 +156,22 @@ function ToolbarRow({
           sortingState={table.getState().sorting}
           setSortingState={table.setSorting}
           resetSortingState={resetSort}
-          columns={columns}
+          table={table}
           sortable={sortable}
         />
         <FilterColumnsPopover
-          columns={columns}
+          table={table}
           filterModel={filters}
           setFilterModel={setFilters}
           resetFilterModel={resetFilters}
           filterable={filterable}
         />
         <PinAndHideColumnsPopover
-          columns={columns}
           table={table}
           resetColumnPinningToInitial={resetColumnPinningToInitial}
         />
         <DownloadCSVPopover
           table={table}
-          columns={columns}
           paginated={paginated}
           defaultFileName={`${tableId}`}
         />

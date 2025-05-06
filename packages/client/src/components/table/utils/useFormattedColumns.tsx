@@ -20,9 +20,13 @@ function formatColumn(
   density: UI.Table.Density
 ): TanStackTableColumn {
   return {
-    ...column,
+    id: column.id,
+    accessorKey: column.accessorKey,
     meta: {
       format: column.format,
+      isDataColumn: true,
+      label: column.label,
+      tagColors: column.tagColors,
     },
     sortingFn:
       column.format === "json"
@@ -116,6 +120,12 @@ function formatSelectColumn(
 ): TanStackTableColumn {
   return {
     id: INTERNAL_COLUMN_ID.SELECT,
+    meta: {
+      isDataColumn: false,
+      format: undefined,
+      label: undefined,
+      tagColors: undefined,
+    },
     enableGlobalFilter: false,
     header: ({ table }: { table: TanStackTable }) => {
       const hasOneRow = table.getRowModel().rows.length >= 1;
@@ -186,6 +196,12 @@ function formatActionColumn(
 ): TanStackTableColumn {
   return {
     id: INTERNAL_COLUMN_ID.ACTION,
+    meta: {
+      isDataColumn: false,
+      format: undefined,
+      label: undefined,
+      tagColors: undefined,
+    },
     enableGlobalFilter: false,
     header: ({ table }: { table: TanStackTable }) => {
       const hasOneRow = table.getRowModel().rows.length >= 1;

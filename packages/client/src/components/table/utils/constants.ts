@@ -7,7 +7,14 @@ import "@tanstack/react-table"; //or vue, svelte, solid, qwik, etc.
 declare module "@tanstack/react-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ColumnMeta<TData, TValue> {
+    // The column format
     format: UI.Table.ColumnFormat | undefined;
+    // Whether this is a user data column or internal column
+    // (e.g. row selection, actions).
+    isDataColumn: boolean | undefined;
+    // The raw string value of the column label.
+    label: string | undefined;
+    tagColors: FormattedTagColors | undefined;
   }
 }
 

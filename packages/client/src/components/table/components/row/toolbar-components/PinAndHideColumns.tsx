@@ -1,12 +1,15 @@
 import Button from "~/components/button";
 import Icon from "~/components/icon";
-import { INTERNAL_COLUMN_ID, TableColumnProp } from "~/components/table/utils";
+import {
+  FormattedTableRow,
+  INTERNAL_COLUMN_ID,
+} from "~/components/table/utils";
 import { classNames } from "~/utils/classNames";
 import { Popover } from "~/components/popover";
 import { useState } from "react";
 import { TextInput } from "~/components/input";
 import { TanStackTable } from "~/components/table/utils";
-import { ColumnPinningPosition } from "@tanstack/react-table";
+import { Column, ColumnPinningPosition } from "@tanstack/react-table";
 
 function Tooltip({
   children,
@@ -37,7 +40,7 @@ function ColumnRow({
   pinned,
   onPinColumn,
 }: {
-  column: TableColumnProp;
+  column: Column<FormattedTableRow>;
   isVisible: boolean;
   onToggleVisibility: () => void;
   pinned: ColumnPinningPosition;
@@ -64,7 +67,7 @@ function ColumnRow({
             />
           </Button>
         </Tooltip>
-        <span>{column.label}</span>
+        <span>{column.columnDef.meta?.label}</span>
       </div>
       <div className="flex items-center gap-x-4">
         {pinned === "left" ? (
@@ -125,14 +128,12 @@ function ColumnRow({
 }
 
 function PinAndHideColumnsPanel({
-  columns,
   columnVisibility,
   setColumnVisibility,
   resetColumnVisibility,
   table,
   className = "",
 }: {
-  columns: TableColumnProp[];
   columnVisibility: Record<string, boolean>;
   setColumnVisibility: (visibility: Record<string, boolean>) => void;
   resetColumnVisibility: () => void;
@@ -141,11 +142,19 @@ function PinAndHideColumnsPanel({
 }) {
   const [searchTerm, setSearchTerm] = useState<string | null>(null);
 
-  const filteredColumns = searchTerm
-    ? columns.filter((col) =>
-        col.label.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : columns;
+  const filteredColumns = table.getAllColumns().filter((col) => {
+    if (!col.columnDef.meta?.isDataColumn) {
+      return false;
+    }
+
+    if (searchTerm) {
+      return col.columnDef.meta?.label
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase());
+    }
+
+    return true;
+  });
 
   function toggleColumnVisibility(columnId: string) {
     const isCurrentlyHidden = columnVisibility[columnId] === false;
@@ -208,11 +217,9 @@ function PinAndHideColumnsPanel({
 }
 
 function PinAndHideColumnsPopover({
-  columns,
   table,
   resetColumnPinningToInitial,
 }: {
-  columns: TableColumnProp[];
   table: TanStackTable;
   resetColumnPinningToInitial: () => void;
 }) {
@@ -286,7 +293,6 @@ function PinAndHideColumnsPopover({
       </Popover.Trigger>
       <Popover.Panel>
         <PinAndHideColumnsPanel
-          columns={columns}
           columnVisibility={columnVisibility}
           setColumnVisibility={table.setColumnVisibility}
           resetColumnVisibility={() => {

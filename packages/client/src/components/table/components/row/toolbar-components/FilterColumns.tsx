@@ -1,6 +1,10 @@
 import Button from "~/components/button";
 import Icon from "~/components/icon";
-import { TableColumnProp, GlobalFiltering } from "~/components/table/utils";
+import {
+  GlobalFiltering,
+  TanStackTable,
+  FormattedTableRow,
+} from "~/components/table/utils";
 import { classNames } from "~/utils/classNames";
 import { Popover } from "~/components/popover";
 import {
@@ -16,13 +20,14 @@ import DropdownMenu from "~/components/dropdown-menu";
 import { Listbox } from "~/components/listbox";
 import { u } from "@compose/ts";
 import { useCallback, useMemo } from "react";
+import { Column } from "@tanstack/react-table";
 
-function getTagOptionsForColumn(column: TableColumnProp | undefined) {
-  if (!column || column.format !== UI.Table.COLUMN_FORMAT.tag) {
+function getTagOptionsForColumn(column: Column<FormattedTableRow> | undefined) {
+  if (!column || column.columnDef.meta?.format !== UI.Table.COLUMN_FORMAT.tag) {
     return [];
   }
 
-  const tagColors = column.tagColors;
+  const tagColors = column.columnDef.meta?.tagColors;
 
   if (!tagColors) {
     return [];
@@ -102,7 +107,7 @@ function createDefaultGroup(): GlobalFiltering.EditableAdvancedFilterGroup {
 function FilterClauseRow({
   clause,
   path,
-  columns,
+  table,
   onUpdateFilterClauseOperator,
   onUpdateFilterClauseValue,
   onUpdateFilterClauseKey,
@@ -110,7 +115,7 @@ function FilterClauseRow({
 }: {
   clause: GlobalFiltering.EditableAdvancedFilterClause;
   path: string[];
-  columns: TableColumnProp[];
+  table: TanStackTable;
   onUpdateFilterClauseOperator: (
     path: string[],
     operator: UI.Table.ColumnFilterOperator
@@ -119,15 +124,18 @@ function FilterClauseRow({
   onUpdateFilterClauseKey: (path: string[], key: string | null) => void;
   onRemoveFilterNode: (path: string[]) => void;
 }) {
-  const columnOptions = columns.map((col) => ({
-    label: col.label,
-    value: col.id,
-    format: col.format,
-  }));
+  const columnOptions = table
+    .getAllColumns()
+    .filter((col) => col.columnDef.meta?.isDataColumn)
+    .map((col) => ({
+      label: col.columnDef.meta?.label ?? "Unknown",
+      value: col.id,
+      format: col.columnDef.meta?.format,
+    }));
 
-  const column = columns.find((col) => col.id === clause.key);
+  const column = table.getAllColumns().find((col) => col.id === clause.key);
 
-  const columnFormat = column?.format;
+  const columnFormat = column?.columnDef.meta?.format;
 
   const operatorOptions =
     GlobalFiltering.COLUMN_FORMAT_TO_FILTER_OPERATORS[
@@ -270,7 +278,7 @@ function FilterClauseRow({
 function FilterGroupSection({
   group,
   path,
-  columns,
+  table,
   onUpdateFilterGroupLogicOperator,
   onAddFilterClauseToGroup,
   onAddFilterGroupToGroup,
@@ -281,7 +289,7 @@ function FilterGroupSection({
 }: {
   group: GlobalFiltering.EditableAdvancedFilterGroup;
   path: string[];
-  columns: TableColumnProp[];
+  table: TanStackTable;
   onUpdateFilterGroupLogicOperator: (
     path: string[],
     logicOperator: UI.Table.ColumnFilterLogicOperator
@@ -378,7 +386,7 @@ function FilterGroupSection({
                 key={filter.id}
                 node={filter}
                 path={[...path, filter.id]}
-                columns={columns}
+                table={table}
                 onUpdateFilterGroupLogicOperator={
                   onUpdateFilterGroupLogicOperator
                 }
@@ -425,7 +433,7 @@ function FilterGroupSection({
 function FilterNode({
   node,
   path,
-  columns,
+  table,
   onUpdateFilterClauseOperator,
   onUpdateFilterClauseValue,
   onUpdateFilterClauseKey,
@@ -436,7 +444,7 @@ function FilterNode({
 }: {
   node: NonNullable<GlobalFiltering.EditableAdvancedFilterModel>;
   path: string[];
-  columns: TableColumnProp[];
+  table: TanStackTable;
   onUpdateFilterClauseOperator: (
     path: string[],
     operator: UI.Table.ColumnFilterOperator
@@ -456,7 +464,7 @@ function FilterNode({
       <FilterGroupSection
         group={node}
         path={path}
-        columns={columns}
+        table={table}
         onUpdateFilterGroupLogicOperator={onUpdateFilterGroupLogicOperator}
         onAddFilterClauseToGroup={onAddFilterClauseToGroup}
         onAddFilterGroupToGroup={onAddFilterGroupToGroup}
@@ -471,7 +479,7 @@ function FilterNode({
       <FilterClauseRow
         clause={node}
         path={path}
-        columns={columns}
+        table={table}
         onUpdateFilterClauseOperator={onUpdateFilterClauseOperator}
         onUpdateFilterClauseValue={onUpdateFilterClauseValue}
         onUpdateFilterClauseKey={onUpdateFilterClauseKey}
@@ -483,13 +491,13 @@ function FilterNode({
 
 // The main panel content inside the popover
 function FilterColumnsPanel({
-  columns,
+  table,
   filterModel,
   setFilterModel,
   resetFilterModel,
   className = "",
 }: {
-  columns: TableColumnProp[];
+  table: TanStackTable;
   filterModel: GlobalFiltering.EditableAdvancedFilterModel;
   setFilterModel: (model: GlobalFiltering.EditableAdvancedFilterModel) => void;
   resetFilterModel: () => void;
@@ -583,11 +591,11 @@ function FilterColumnsPanel({
 
       node.key = key;
 
-      const column = columns.find((col) => col.id === key);
+      const column = table.getAllColumns().find((col) => col.id === key);
 
       const validOperatorsForColumn =
         GlobalFiltering.COLUMN_FORMAT_TO_FILTER_OPERATORS[
-          column?.format ?? UI.Table.COLUMN_FORMAT.string
+          column?.columnDef.meta?.format ?? UI.Table.COLUMN_FORMAT.string
         ];
 
       if (!validOperatorsForColumn.includes(node.operator)) {
@@ -596,7 +604,7 @@ function FilterColumnsPanel({
 
       setFilterModel(copy);
     },
-    [columns, filterModel, setFilterModel]
+    [table, filterModel, setFilterModel]
   );
 
   const updateFilterGroupLogicOperator = useCallback(
@@ -698,7 +706,7 @@ function FilterColumnsPanel({
           <FilterNode
             node={filterModel}
             path={[filterModel.id]} // Root path
-            columns={columns}
+            table={table}
             onUpdateFilterClauseOperator={updateFilterClauseOperator}
             onUpdateFilterClauseValue={updateFilterClauseValue}
             onUpdateFilterClauseKey={updateFilterClauseKey}
@@ -736,13 +744,13 @@ function FilterColumnsPanel({
 }
 
 function FilterColumnsPopover({
-  columns,
+  table,
   filterModel,
   setFilterModel,
   resetFilterModel,
   filterable,
 }: {
-  columns: TableColumnProp[];
+  table: TanStackTable;
   filterModel: GlobalFiltering.EditableAdvancedFilterModel;
   setFilterModel: (model: GlobalFiltering.EditableAdvancedFilterModel) => void;
   resetFilterModel: () => void;
@@ -774,7 +782,7 @@ function FilterColumnsPopover({
       </Popover.Trigger>
       <Popover.Panel>
         <FilterColumnsPanel
-          columns={columns}
+          table={table}
           filterModel={filterModel}
           setFilterModel={setFilterModel}
           resetFilterModel={resetFilterModel}

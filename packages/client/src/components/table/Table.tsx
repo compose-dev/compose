@@ -234,8 +234,6 @@ function Table({
     manualPagination: paginated,
     rowCount: totalRecords,
     onPaginationChange: setPaginationState,
-
-    debugAll: true,
   });
 
   /**
@@ -292,7 +290,6 @@ function Table({
             paginated={paginated}
             onTablePageChangeHook={handleRequestServerDataRef.current}
             table={table}
-            columns={columns}
             searchable={searchable}
             sortable={sortable}
             resetSort={resetSort}

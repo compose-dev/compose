@@ -1,5 +1,5 @@
 import { Row } from "@tanstack/react-table";
-import { TanStackTable, TableColumnProp, FormattedTableRow } from "./constants";
+import { TanStackTable, FormattedTableRow } from "./constants";
 
 function escapeCsvCell(value: unknown): string {
   if (value === null || value === undefined) {
@@ -34,25 +34,28 @@ function escapeCsvCell(value: unknown): string {
 function generateAndDownloadCSV(
   table: TanStackTable,
   rowsToDownload: Row<FormattedTableRow>[],
-  columns: TableColumnProp[],
   filename: string,
   includeHiddenColumns: boolean
 ) {
-  const filteredColumns = columns.filter((column) => {
-    if (includeHiddenColumns) {
-      return true;
+  const filteredColumns = table.getAllLeafColumns().filter((col) => {
+    if (!col.columnDef.meta?.isDataColumn) {
+      return false;
     }
-    const hidden = table.getState().columnVisibility[column.id] === false;
-    return !hidden;
+
+    if (!includeHiddenColumns && !col.getIsVisible()) {
+      return false;
+    }
+
+    return true;
   });
 
-  const headers = filteredColumns.map((column) => column.label);
+  const headers = filteredColumns.map(
+    (column) => column.columnDef.meta?.label ?? "Unknown"
+  );
   const headerIds = filteredColumns.map((column) => column.id);
 
   const data = rowsToDownload.map((row) => {
-    return headerIds
-      .map((headerId) => escapeCsvCell(row.original[headerId]))
-      .join(",");
+    return headerIds.map((headerId) => escapeCsvCell(row.original[headerId]));
   });
 
   const csvContent = [headers, ...data].join("\n");

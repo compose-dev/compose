@@ -1,7 +1,7 @@
 import { ComboboxSingle } from "~/components/combobox";
 import Button from "~/components/button";
 import Icon from "~/components/icon";
-import { TableColumnProp } from "~/components/table/utils";
+import { TanStackTable } from "~/components/table/utils";
 import { SortingState } from "@tanstack/react-table";
 import DropdownMenu from "~/components/dropdown-menu";
 import { UI } from "@composehq/ts-public";
@@ -56,23 +56,26 @@ function SortRow({
 function SortColumnsPanel({
   sortingState,
   setSortingState,
-  columns,
+  table,
   sortable,
   resetSortingState,
   className = "",
 }: {
   sortingState: SortingState;
   setSortingState: (sortingState: SortingState) => void;
-  columns: TableColumnProp[];
+  table: TanStackTable;
   sortable: UI.Table.SortOption;
   className?: string;
   resetSortingState: () => void;
 }) {
-  const sortColumnOptions = columns.map((column) => ({
-    label: column.label,
-    value: column.id,
-    format: column.format,
-  }));
+  const sortColumnOptions = table
+    .getAllColumns()
+    .filter((column) => column.columnDef.meta?.isDataColumn)
+    .map((column) => ({
+      label: column.columnDef.meta?.label ?? "Unknown",
+      value: column.id,
+      format: column.columnDef.meta?.format,
+    }));
 
   return (
     <div
@@ -160,13 +163,13 @@ function SortColumnsPopover({
   sortingState,
   setSortingState,
   resetSortingState,
-  columns,
+  table,
   sortable,
 }: {
   sortingState: SortingState;
   setSortingState: (val: SortingState) => void;
   resetSortingState: () => void;
-  columns: TableColumnProp[];
+  table: TanStackTable;
   sortable: UI.Table.SortOption;
 }) {
   if (sortable === UI.Table.SORT_OPTION.DISABLED) {
@@ -179,9 +182,10 @@ function SortColumnsPopover({
     }
 
     if (sortingState.length === 1) {
-      return `Sorting by ${columns
+      return `Sorting by ${table
+        .getAllColumns()
         .find((column) => column.id === sortingState[0].id)
-        ?.label.toLowerCase()}`;
+        ?.columnDef.meta?.label?.toLowerCase()}`;
     }
 
     return "Sort";
@@ -206,7 +210,7 @@ function SortColumnsPopover({
         <SortColumnsPanel
           sortingState={sortingState}
           setSortingState={setSortingState}
-          columns={columns}
+          table={table}
           className="w-96"
           sortable={sortable}
           resetSortingState={resetSortingState}
