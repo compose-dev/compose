@@ -34,8 +34,6 @@ function generateAndDownloadCSV(
   table: TanStackTable,
   columns: TableColumnProp[],
   filename: string,
-  rowSelections: number[],
-  offset: number,
   includeHiddenColumns: boolean,
   includeUnselectedRows: boolean
 ) {
@@ -52,15 +50,15 @@ function generateAndDownloadCSV(
 
   const data = table
     .getRowModel()
-    .flatRows.filter((_, idx) => {
+    .rows.filter((row) => {
       if (includeUnselectedRows) {
         return true;
       }
-      return rowSelections.includes(idx + offset);
+      return row.getIsSelected();
     })
     .map((row) => {
       return headerIds
-        .map((headerId) => escapeCsvCell(row.getValue(headerId)))
+        .map((headerId) => escapeCsvCell(row.original[headerId]))
         .join(",");
     });
 

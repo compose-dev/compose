@@ -13,22 +13,13 @@ type Updater<T> = T | ((oldValue: T) => T);
  *   when the initial value changes.
  */
 function useDataOperation<TBrowserFormat, TServerFormat>({
-  // Initial value
   initialValue,
-
-  // Formatting
   formatServerToBrowser,
   formatBrowserToServer,
-
-  // Server value change detection
   getCurrentServerValue,
   serverValueDidChange,
-
-  // Pagination syncing
   onSyncServerValue,
   onShouldRequestPageChange,
-
-  // Operation enabled state
   operationIsEnabled,
   operationDisabledValue,
 }: {

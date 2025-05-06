@@ -1,6 +1,11 @@
 import Icon from "~/components/icon";
 import { TextInput } from "~/components/input";
-import { GlobalFiltering, TableColumnProp, TanStackTable } from "../../utils";
+import {
+  FormattedTableRow,
+  GlobalFiltering,
+  TableColumnProp,
+  TanStackTable,
+} from "../../utils";
 import {
   DownloadCSVPopover,
   FilterColumnsPopover,
@@ -96,6 +101,7 @@ function ToolbarRow({
   resetSort,
   resetColumnPinningToInitial,
   filterable,
+  preFilteredRows,
 }: {
   searchQuery: string | null;
   setSearchQuery: (val: string | null) => void;
@@ -113,6 +119,7 @@ function ToolbarRow({
   resetSort: () => void;
   resetColumnPinningToInitial: () => void;
   filterable: boolean;
+  preFilteredRows: FormattedTableRow[];
 }) {
   const offset =
     table.getState().pagination.pageIndex *
@@ -171,6 +178,7 @@ function ToolbarRow({
           columns={columns}
           paginated={paginated}
           defaultFileName={`${tableId}`}
+          preFilteredRows={preFilteredRows}
         />
         <div className="self-stretch w-1 border-r border-brand-neutral hidden sm:block" />
         <p className="text-brand-neutral-2 text-sm hidden sm:block">

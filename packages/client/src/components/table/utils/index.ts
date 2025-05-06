@@ -8,3 +8,4 @@ export * from "./useSorting";
 export * from "./usePagination";
 export * from "./useColumnPinning";
 export * as GlobalFiltering from "./globalFiltering";
+export * from "./rowSelections";

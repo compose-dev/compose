@@ -11,7 +11,8 @@ import { useMemo } from "react";
 
 function useFormattedData(
   data: UI.Components.InputTable["model"]["properties"]["data"],
-  columns: TableColumnProp[]
+  columns: TableColumnProp[],
+  offset: number
 ) {
   const formattedRows: FormattedTableRow[] = useMemo(() => {
     const metaColumns = columns.filter(
@@ -20,8 +21,10 @@ function useFormattedData(
         col.format === UI.Table.COLUMN_FORMAT.datetime
     );
 
-    const result = data.map((row) => {
-      const meta: Record<string, string> = {};
+    const result = data.map((row, rowIdx) => {
+      const meta: Record<string, string> = {
+        [INTERNAL_COLUMN_ID.ROW_SELECTION]: (rowIdx + offset).toString(),
+      };
 
       for (const col of metaColumns) {
         if (col.format === UI.Table.COLUMN_FORMAT.date) {
@@ -51,7 +54,7 @@ function useFormattedData(
     });
 
     return result;
-  }, [data, columns]);
+  }, [data, columns, offset]);
 
   return formattedRows;
 }

@@ -2,6 +2,8 @@ import { UI } from "@composehq/ts-public";
 import { Table } from "@tanstack/react-table";
 import { FormattedTagColors } from "./tags";
 
+const UNIQUE_SUFFIX = "-//&&wr@q%#jks*j~l-*A<+SS>..<||{^$@??.";
+
 /**
  * Column IDs that are applied by Compose to the table data to enable certain
  * table features.
@@ -11,18 +13,23 @@ const INTERNAL_COLUMN_ID = {
    * The ID applied to the actions column, which is added to table data to
    * enable actions buttons on table rows.
    */
-  ACTION: "a-//&&wreqa#jksejsl-*AFSS",
+  ACTION: `a${UNIQUE_SUFFIX}`,
   /**
    * The ID applied to the row selection checkboxes column, which is added
    * to table data to enable row selections.
    */
-  SELECT: "s-//&&wreqa#jksejsl-*!!AFSS",
+  SELECT: `s${UNIQUE_SUFFIX}`,
   /**
    * A hidden column that is added to every row that includes metadata about
    * that row. This enables features such as custom fuzzy search which we
    * use to search over date columns.
    */
-  META: "m-//&&wreqa#jksejsl-*!!AFSS",
+  META: `m${UNIQUE_SUFFIX}`,
+  /**
+   * A hidden key that is added to the meta object of every row that is used
+   * to track the selection state of the row.
+   */
+  ROW_SELECTION: `r${UNIQUE_SUFFIX}`,
 } as const;
 
 /**

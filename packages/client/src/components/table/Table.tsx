@@ -22,6 +22,8 @@ import {
   useColumnPinning,
   GlobalFiltering,
   PaginationOperators,
+  RowSelections,
+  INTERNAL_COLUMN_ID,
 } from "./utils";
 import { ColumnHeaderRow, FooterRow, ToolbarRow } from "./components";
 
@@ -92,7 +94,7 @@ function Table({
   filterBy?: UI.Table.AdvancedFilterModel<FormattedTableRow[]>;
 }) {
   const fixedHeight = paginated || totalRecords > 35;
-  const formattedData = useFormattedData(data, columns);
+  const formattedData = useFormattedData(data, columns, offset);
 
   const paginationOperatorsRef = useRef<PaginationOperators>({
     searchQuery: null,
@@ -155,16 +157,21 @@ function Table({
       !!actions && actions.length > 0
     );
 
+  const { toggleRowSelection } = RowSelections.use(
+    formattedData,
+    enableRowSelection ? (allowMultiSelection ? "multi" : "single") : false
+  );
+
   const formattedColumns = useFormattedColumns(
     columns,
     enableRowSelection,
     allowMultiSelection,
     hasError,
     disableRowSelection,
-    offset,
     actions,
     onTableRowActionHook,
-    density
+    density,
+    toggleRowSelection
   );
 
   const scrollToTopRef = useRef<() => void>(() => {});
@@ -194,6 +201,7 @@ function Table({
       sorting: sort,
       columnPinning,
       pagination: paginationState,
+      offset: offset,
     },
     initialState: {
       // Set initial state to properly leverage tanstack table's "resetColumnVisibility"
@@ -214,6 +222,8 @@ function Table({
     enableMultiRowSelection: allowMultiSelection,
     enableRowSelection,
     onRowSelectionChange: handleRowSelectionChange,
+    getRowId: (row) =>
+      row[INTERNAL_COLUMN_ID.META][INTERNAL_COLUMN_ID.ROW_SELECTION],
 
     // SORTING
     enableSorting:
@@ -264,11 +274,11 @@ function Table({
             resetSort={resetSort}
             resetColumnPinningToInitial={resetColumnPinningToInitial}
             filterable={filterable}
+            preFilteredRows={formattedData}
           />
           <TableBody
             table={table}
             density={density}
-            offset={offset}
             loading={loading}
             overflow={overflow}
             setScrollToTopHandler={setScrollToTopHandler}
@@ -293,14 +303,12 @@ function Table({
 function TableBody({
   table,
   density,
-  offset,
   loading,
   overflow,
   setScrollToTopHandler,
 }: {
   table: TanStackTable;
   density: UI.Table.Density;
-  offset: number;
   loading: UI.Stale.Option;
   overflow: UI.Table.OverflowBehavior;
   setScrollToTopHandler: (scrollFn: () => void) => void;
@@ -394,9 +402,7 @@ function TableBody({
                         cell={cell}
                         // Since we memoize the table row, we need to directly pass the selection state
                         // so that the checkbox re-renders when the selection state changes!
-                        isSelected={
-                          table.getState().rowSelection[row.index + offset]
-                        }
+                        isSelected={row.getIsSelected()}
                       />
                     ))}
                   </div>
@@ -407,9 +413,7 @@ function TableBody({
                     cell={cell}
                     // Since we memoize the table row, we need to directly pass the selection state
                     // so that the checkbox re-renders when the selection state changes!
-                    isSelected={
-                      table.getState().rowSelection[row.index + offset]
-                    }
+                    isSelected={row.getIsSelected()}
                   />
                 ))}
                 {rightVisibleCells.length > 0 && (
@@ -423,9 +427,7 @@ function TableBody({
                         cell={cell}
                         // Since we memoize the table row, we need to directly pass the selection state
                         // so that the checkbox re-renders when the selection state changes!
-                        isSelected={
-                          table.getState().rowSelection[row.index + offset]
-                        }
+                        isSelected={row.getIsSelected()}
                       />
                     ))}
                   </div>
