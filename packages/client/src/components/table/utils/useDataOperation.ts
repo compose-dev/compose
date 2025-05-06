@@ -12,142 +12,155 @@ type Updater<T> = T | ((oldValue: T) => T);
  * - Is responsive to changes in whether the data operation is enabled and
  *   when the initial value changes.
  */
-function useDataOperation<TBrowserFormat, TServerFormat>({
-  initialValue,
-  formatServerToBrowser,
-  formatBrowserToServer,
-  getCurrentServerValue,
+function useDataOperation<TDisplayFormat, TValidatedFormat, TServerFormat>({
+  initialValueFromServer,
+  formatServerToDisplay,
+  formatDisplayToValidated,
+  formatValidatedToServer,
   serverValueDidChange,
-  onSyncServerValue,
-  onShouldRequestPageChange,
   operationIsEnabled,
   operationDisabledValue,
+  onShouldRequestServerData,
+  onShouldRequestBrowserData,
 }: {
   // Initial value
-  initialValue: TServerFormat;
+  initialValueFromServer: TServerFormat;
 
   // Formatting
-  formatServerToBrowser: (value: TServerFormat) => TBrowserFormat;
-  formatBrowserToServer: (value: TBrowserFormat) => TServerFormat;
+  formatServerToDisplay: (value: TServerFormat) => TDisplayFormat;
+  formatDisplayToValidated: (value: TDisplayFormat) => TValidatedFormat;
+  formatValidatedToServer: (value: TValidatedFormat) => TServerFormat;
 
   // Server value change detection
-  getCurrentServerValue: () => TServerFormat;
   serverValueDidChange: (
     oldValue: TServerFormat,
     newValue: TServerFormat
   ) => boolean;
 
-  // Pagination syncing
-  onSyncServerValue: (value: TServerFormat) => void | null;
-  onShouldRequestPageChange: (() => void) | null;
-
   // Operation enabled state
   operationIsEnabled: boolean;
-  operationDisabledValue: TBrowserFormat;
+  operationDisabledValue: TDisplayFormat;
+
+  // Syncing
+  onShouldRequestServerData: (() => void) | null;
+  onShouldRequestBrowserData: (() => void) | null;
 }) {
-  const [value, setValue] = useState<TBrowserFormat>(() => {
+  const [displayValue, setDisplayValue] = useState<TDisplayFormat>(() =>
+    operationIsEnabled
+      ? formatServerToDisplay(initialValueFromServer)
+      : operationDisabledValue
+  );
+  const validatedValueRef = useRef<TValidatedFormat>(
+    formatDisplayToValidated(displayValue)
+  );
+
+  const prevInitialValueFromServer = useRef(initialValueFromServer);
+  const currentServerValueRef = useRef(prevInitialValueFromServer.current);
+
+  useEffect(() => {
     if (!operationIsEnabled) {
-      if (onSyncServerValue) {
-        onSyncServerValue(formatBrowserToServer(operationDisabledValue));
+      setDisplayValue(operationDisabledValue);
+      validatedValueRef.current = formatDisplayToValidated(
+        operationDisabledValue
+      );
+      currentServerValueRef.current = initialValueFromServer;
+
+      if (onShouldRequestBrowserData) {
+        onShouldRequestBrowserData();
       }
 
-      return operationDisabledValue;
+      return;
     }
 
-    const browserValue = formatServerToBrowser(initialValue);
+    if (
+      serverValueDidChange(
+        prevInitialValueFromServer.current,
+        initialValueFromServer
+      )
+    ) {
+      prevInitialValueFromServer.current = initialValueFromServer;
+      currentServerValueRef.current = initialValueFromServer;
 
-    if (onSyncServerValue) {
-      onSyncServerValue(formatBrowserToServer(browserValue));
-    }
+      const newDisplayValue = formatServerToDisplay(initialValueFromServer);
+      const newValidatedValue = formatDisplayToValidated(newDisplayValue);
 
-    return browserValue;
-  });
-  const prevInitialBrowserValue = useRef(value);
+      setDisplayValue(newDisplayValue);
+      validatedValueRef.current = newValidatedValue;
 
-  /**
-   * Store the previous `initialValue` to detect external changes that should
-   * override the internal state.
-   */
-  const prevInitialValue = useRef(initialValue);
-
-  /**
-   * Listen for changes to the external `initialValue` and `operationIsEnabled`
-   * props.
-   *
-   * If the operation is disabled, the internal state is set to the
-   * `operationDisabledValue`.
-   *
-   * Otherwise, the internal state is set to the formatted `initialValue`.
-   */
-  useEffect(() => {
-    // If the operation is disabled, set the internal state to the
-    // `operationDisabledValue` and sync the value to the server.
-    if (!operationIsEnabled) {
-      onSyncServerValue(formatBrowserToServer(operationDisabledValue));
-      setValue(operationDisabledValue);
-    }
-
-    // If the initial value has changed, set the internal ref.
-    if (serverValueDidChange(prevInitialValue.current, initialValue)) {
-      // Update the initial value ref if it changed, even in the case where
-      // the operation is disabled, since we may have a case where the operation
-      // is disabled and the initial state is changed in the same render.
-      prevInitialValue.current = initialValue;
-
-      // If the operation is enabled, also update the internal state and
-      // sync the value to the server.
-      if (operationIsEnabled) {
-        const browserValue = formatServerToBrowser(initialValue);
-
-        setValue(browserValue);
-        prevInitialBrowserValue.current = browserValue;
-
-        if (onSyncServerValue) {
-          onSyncServerValue(formatBrowserToServer(browserValue));
-        }
+      if (onShouldRequestBrowserData) {
+        onShouldRequestBrowserData();
       }
     }
   }, [
-    initialValue,
+    initialValueFromServer,
     serverValueDidChange,
-    formatServerToBrowser,
-    onSyncServerValue,
-    formatBrowserToServer,
+    formatServerToDisplay,
+    formatDisplayToValidated,
     operationIsEnabled,
     operationDisabledValue,
+    onShouldRequestBrowserData,
   ]);
 
-  function resetValue() {
-    setValue(prevInitialBrowserValue.current);
-  }
-
-  function handleValueChange(newValue: Updater<TBrowserFormat>) {
+  function handleDisplayValueChange(newValue: Updater<TDisplayFormat>) {
     if (!operationIsEnabled) {
       return;
     }
 
-    const resolvedValue =
+    const newDisplayValue: TDisplayFormat =
       // @ts-expect-error ignore the type error for now
-      typeof newValue === "function" ? newValue(value) : newValue;
+      typeof newValue === "function" ? newValue(displayValue) : newValue;
 
-    setValue(resolvedValue);
+    const newValidatedValue = formatDisplayToValidated(newDisplayValue);
+    const newServerValue = formatValidatedToServer(newValidatedValue);
 
-    const serverValue = formatBrowserToServer(resolvedValue);
+    setDisplayValue(newDisplayValue);
+    validatedValueRef.current = newValidatedValue;
+    currentServerValueRef.current = newServerValue;
 
-    if (onSyncServerValue || onShouldRequestPageChange) {
-      if (serverValueDidChange(getCurrentServerValue(), serverValue)) {
-        if (onSyncServerValue) {
-          onSyncServerValue(serverValue);
-        }
+    if (
+      onShouldRequestServerData &&
+      serverValueDidChange(currentServerValueRef.current, newServerValue)
+    ) {
+      onShouldRequestServerData();
+    }
 
-        if (onShouldRequestPageChange) {
-          onShouldRequestPageChange();
-        }
-      }
+    if (onShouldRequestBrowserData) {
+      onShouldRequestBrowserData();
     }
   }
 
-  return { value, setValue: handleValueChange, resetValue };
+  function resetValue() {
+    if (!operationIsEnabled) {
+      return;
+    }
+
+    const newServerValue = prevInitialValueFromServer.current;
+    const newDisplayValue = formatServerToDisplay(newServerValue);
+    const newValidatedValue = formatDisplayToValidated(newDisplayValue);
+
+    setDisplayValue(newDisplayValue);
+    validatedValueRef.current = newValidatedValue;
+    currentServerValueRef.current = newServerValue;
+
+    if (
+      onShouldRequestServerData &&
+      serverValueDidChange(currentServerValueRef.current, newServerValue)
+    ) {
+      onShouldRequestServerData();
+    }
+
+    if (onShouldRequestBrowserData) {
+      onShouldRequestBrowserData();
+    }
+  }
+
+  return {
+    displayValue,
+    validatedValueRef,
+    serverValueRef: currentServerValueRef,
+    setDisplayValue: handleDisplayValueChange,
+    resetValue,
+  };
 }
 
 export { useDataOperation };

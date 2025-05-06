@@ -1,13 +1,9 @@
-import {
-  FormattedTableRow,
-  TableColumnProp,
-  INTERNAL_COLUMN_ID,
-} from "../constants";
+import { FormattedTableRow, INTERNAL_COLUMN_ID } from "../constants";
 import { UI } from "@composehq/ts-public";
 
 function searchTableRow(
   row: FormattedTableRow,
-  columns: TableColumnProp[],
+  columns: { id: string; format: UI.Table.ColumnFormat | undefined }[],
   formattedSearchQuery: string
 ) {
   for (let i = 0; i < columns.length; i++) {

@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 function usePagination(
   offset: number,
   pageSize: number,
-  onPageChange: (offset: number, pageSize: number) => void
+  paginated: boolean,
+  onPageChange: ((offset: number, pageSize: number) => void) | null
 ) {
   const [paginationState, setPaginationState] = useState<PaginationState>({
     pageIndex: Math.floor(offset / pageSize),
@@ -22,10 +23,12 @@ function usePagination(
     const newPageState =
       typeof newState === "function" ? newState(paginationState) : newState;
 
-    onPageChange(
-      newPageState.pageIndex * newPageState.pageSize,
-      newPageState.pageSize
-    );
+    if (onPageChange && paginated) {
+      onPageChange(
+        newPageState.pageIndex * newPageState.pageSize,
+        newPageState.pageSize
+      );
+    }
   }
 
   return {

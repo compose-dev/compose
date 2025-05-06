@@ -21,6 +21,9 @@ function formatColumn(
 ): TanStackTableColumn {
   return {
     ...column,
+    meta: {
+      format: column.format,
+    },
     sortingFn:
       column.format === "json"
         ? (a, b, columnId) =>

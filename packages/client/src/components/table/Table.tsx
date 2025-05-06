@@ -21,7 +21,6 @@ import {
   TanStackTable,
   useColumnPinning,
   GlobalFiltering,
-  PaginationOperators,
   RowSelections,
   INTERNAL_COLUMN_ID,
 } from "./utils";
@@ -96,58 +95,49 @@ function Table({
   const fixedHeight = paginated || totalRecords > 35;
   const formattedData = useFormattedData(data, columns, offset);
 
-  const paginationOperatorsRef = useRef<PaginationOperators>({
-    searchQuery: null,
-    sortBy: [],
-    filterBy: null,
-  });
-
-  const handleTablePageChange = useCallback(
-    (newOffset?: number, newPageSize?: number) => {
-      if (!paginated) {
-        return;
-      }
-
-      onTablePageChangeHook(
-        paginationOperatorsRef.current.searchQuery,
-        newOffset ?? offset,
-        newPageSize ?? pageSize,
-        paginationOperatorsRef.current.sortBy
-      );
-    },
-    [onTablePageChangeHook, offset, pageSize, paginated]
-  );
-
-  const { sort, setSort, resetSort } = useSorting(
-    columns,
-    sortBy,
-    sortable,
-    handleTablePageChange,
-    paginationOperatorsRef
-  );
+  const handleRequestServerDataRef = useRef<(() => void) | null>(null);
+  const handleRequestBrowserDataRef = useRef<(() => void) | null>(null);
 
   const {
-    searchQuery,
-    setSearchQuery,
-    filters,
-    setFilters,
-    filteredFormattedData,
-  } = GlobalFiltering.use(
-    formattedData,
+    displayValue: sort,
+    setDisplayValue: setSort,
+    resetValue: resetSort,
+    serverValueRef: serverSortRef,
+  } = useSorting({
     columns,
-    paginated,
+    initialValueFromServer: sortBy,
+    sortable,
+    onShouldRequestServerData: handleRequestServerDataRef.current,
+  });
+
+  const {
+    displayValue: searchQuery,
+    setDisplayValue: setSearchQuery,
+    validatedValueRef: validatedSearchQueryRef,
+    serverValueRef: serverSearchQueryRef,
+  } = GlobalFiltering.useSearch({
+    initialValue: searchBy,
     searchable,
-    searchBy,
+    onShouldRequestBrowserData: handleRequestBrowserDataRef.current,
+  });
+
+  const {
+    displayValue: filters,
+    setDisplayValue: setFilters,
+    resetValue: resetFilters,
+    validatedValueRef: validatedFiltersRef,
+  } = GlobalFiltering.useAdvancedFiltering({
+    initialValue: filterBy,
     filterable,
-    filterBy,
-    paginationOperatorsRef,
-    handleTablePageChange
-  );
+    onShouldRequestBrowserData: handleRequestBrowserDataRef.current,
+    onShouldRequestServerData: handleRequestServerDataRef.current,
+  });
 
   const { paginationState, setPaginationState } = usePagination(
     offset,
     pageSize,
-    handleTablePageChange
+    paginated,
+    handleRequestServerDataRef.current
   );
 
   const { columnPinning, setColumnPinning, resetColumnPinningToInitial } =
@@ -191,7 +181,7 @@ function Table({
 
   const table = useReactTable({
     // BASE SETUP
-    data: filteredFormattedData,
+    data: formattedData,
     columns: formattedColumns,
     getCoreRowModel: getCoreRowModel(),
 
@@ -201,7 +191,6 @@ function Table({
       sorting: sort,
       columnPinning,
       pagination: paginationState,
-      offset: offset,
     },
     initialState: {
       // Set initial state to properly leverage tanstack table's "resetColumnVisibility"
@@ -217,6 +206,13 @@ function Table({
 
     // COLUMN PINNING
     onColumnPinningChange: setColumnPinning,
+
+    // GLOBAL FILTERING
+    getFilteredRowModel: GlobalFiltering.getFilteredRowModel({
+      getSearchQuery: () => validatedSearchQueryRef.current,
+      getAdvancedFilter: () => validatedFiltersRef.current,
+    }),
+    manualFiltering: paginated,
 
     // ROW SELECTION
     enableMultiRowSelection: allowMultiSelection,
@@ -238,7 +234,35 @@ function Table({
     manualPagination: paginated,
     rowCount: totalRecords,
     onPaginationChange: setPaginationState,
+
+    debugAll: true,
   });
+
+  /**
+   * Request a new page of data from the server based on the newest dependencies.
+   */
+  handleRequestServerDataRef.current = (
+    newOffset?: number,
+    newPageSize?: number
+  ) => {
+    if (!paginated) {
+      return;
+    }
+
+    onTablePageChangeHook(
+      serverSearchQueryRef.current,
+      newOffset ?? offset,
+      newPageSize ?? pageSize,
+      serverSortRef.current
+    );
+  };
+
+  /**
+   * Force a recomputation of the tanstack table instance
+   */
+  handleRequestBrowserDataRef.current = () => {
+    table.setOptions({ ...table.options });
+  };
 
   return (
     <div className="w-full">
@@ -266,7 +290,7 @@ function Table({
             setFilters={setFilters}
             loading={loading}
             paginated={paginated}
-            onTablePageChangeHook={handleTablePageChange}
+            onTablePageChangeHook={handleRequestServerDataRef.current}
             table={table}
             columns={columns}
             searchable={searchable}
@@ -274,7 +298,7 @@ function Table({
             resetSort={resetSort}
             resetColumnPinningToInitial={resetColumnPinningToInitial}
             filterable={filterable}
-            preFilteredRows={formattedData}
+            resetFilters={resetFilters}
           />
           <TableBody
             table={table}

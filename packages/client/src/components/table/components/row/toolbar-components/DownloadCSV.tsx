@@ -1,9 +1,7 @@
 import Button from "~/components/button";
 import Icon from "~/components/icon";
 import {
-  FormattedTableRow,
   generateAndDownloadCSV,
-  RowSelections,
   TableColumnProp,
   TanStackTable,
 } from "~/components/table/utils";
@@ -20,41 +18,50 @@ function DownloadCSVPanel({
   className = "",
   paginated,
   defaultFileName,
-  preFilteredRows,
 }: {
   table: TanStackTable;
   columns: TableColumnProp[];
   className?: string;
   paginated: boolean;
   defaultFileName: string;
-  preFilteredRows: FormattedTableRow[];
 }) {
   const [filename, setFilename] = useState<string | null>(defaultFileName);
   const [includeHiddenColumns, setIncludeHiddenColumns] = useState(false);
-  const [includeUnselectedRows, setIncludeUnselectedRows] = useState(false);
+  const [
+    includeUnselectedRowsUserSelection,
+    setIncludeUnselectedRowsUserSelection,
+  ] = useState(false);
 
-  const rowSelections = table.getState().rowSelection;
+  const rowSelectionsCount = table
+    .getFilteredRowModel()
+    .rows.filter((row) => row.getIsSelected()).length;
+
+  const numUnselectedRows =
+    table.getFilteredRowModel().rows.length - rowSelectionsCount;
+
+  const includeUnselectedRows =
+    rowSelectionsCount > 0 ? includeUnselectedRowsUserSelection : true;
+
+  const rowsToDownload = table.getFilteredRowModel().rows.filter((row) => {
+    if (includeUnselectedRows) {
+      return true;
+    }
+    return row.getIsSelected();
+  });
 
   function downloadCSV(filename?: string | null) {
     generateAndDownloadCSV(
       table,
+      rowsToDownload,
       columns,
       filename ?? defaultFileName,
-      includeHiddenColumns,
-      table.getIsSomeRowsSelected() ? includeUnselectedRows : true
+      includeHiddenColumns
     );
   }
 
   const hiddenColumnCount = Object.values(
     table.getState().columnVisibility
   ).filter((column) => column === false).length;
-
-  const rowSelectionsCount = RowSelections.getSelectedRows(
-    rowSelections,
-    preFilteredRows
-  ).length;
-
-  const numUnselectedRows = preFilteredRows.length - rowSelectionsCount;
 
   return (
     <div
@@ -84,8 +91,8 @@ function DownloadCSVPanel({
       )}
       {rowSelectionsCount > 0 && (
         <Checkbox
-          checked={includeUnselectedRows}
-          setChecked={(val) => setIncludeUnselectedRows(val)}
+          checked={includeUnselectedRowsUserSelection}
+          setChecked={(val) => setIncludeUnselectedRowsUserSelection(val)}
           label="Include unselected rows"
           description={`${numUnselectedRows} unselected ${
             numUnselectedRows === 1 ? "row" : "rows"
@@ -93,7 +100,7 @@ function DownloadCSVPanel({
         />
       )}
       <Button variant="primary" onClick={() => downloadCSV(filename)}>
-        Download CSV
+        Download {rowsToDownload.length} rows to CSV
       </Button>
     </div>
   );
@@ -104,13 +111,11 @@ function DownloadCSVPopover({
   columns,
   paginated,
   defaultFileName,
-  preFilteredRows,
 }: {
   table: TanStackTable;
   columns: TableColumnProp[];
   paginated: boolean;
   defaultFileName: string;
-  preFilteredRows: FormattedTableRow[];
 }) {
   return (
     <Popover.Root>
@@ -129,7 +134,6 @@ function DownloadCSVPopover({
           className="w-96"
           paginated={paginated}
           defaultFileName={defaultFileName}
-          preFilteredRows={preFilteredRows}
         />
       </Popover.Panel>
     </Popover.Root>

@@ -1,4 +1,5 @@
-import { TanStackTable, TableColumnProp } from "./constants";
+import { Row } from "@tanstack/react-table";
+import { TanStackTable, TableColumnProp, FormattedTableRow } from "./constants";
 
 function escapeCsvCell(value: unknown): string {
   if (value === null || value === undefined) {
@@ -32,10 +33,10 @@ function escapeCsvCell(value: unknown): string {
 
 function generateAndDownloadCSV(
   table: TanStackTable,
+  rowsToDownload: Row<FormattedTableRow>[],
   columns: TableColumnProp[],
   filename: string,
-  includeHiddenColumns: boolean,
-  includeUnselectedRows: boolean
+  includeHiddenColumns: boolean
 ) {
   const filteredColumns = columns.filter((column) => {
     if (includeHiddenColumns) {
@@ -48,19 +49,11 @@ function generateAndDownloadCSV(
   const headers = filteredColumns.map((column) => column.label);
   const headerIds = filteredColumns.map((column) => column.id);
 
-  const data = table
-    .getRowModel()
-    .rows.filter((row) => {
-      if (includeUnselectedRows) {
-        return true;
-      }
-      return row.getIsSelected();
-    })
-    .map((row) => {
-      return headerIds
-        .map((headerId) => escapeCsvCell(row.original[headerId]))
-        .join(",");
-    });
+  const data = rowsToDownload.map((row) => {
+    return headerIds
+      .map((headerId) => escapeCsvCell(row.original[headerId]))
+      .join(",");
+  });
 
   const csvContent = [headers, ...data].join("\n");
   const blob = new Blob([csvContent], { type: "text/csv" });

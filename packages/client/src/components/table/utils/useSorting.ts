@@ -62,13 +62,17 @@ function sortByDidChange(
   return JSON.stringify(a) !== JSON.stringify(b);
 }
 
-function useSorting(
-  columns: TableColumnProp[],
-  initialSortBy: UI.Components.InputTable["model"]["properties"]["sortBy"],
-  sortable: UI.Table.SortOption,
-  onSortChange: () => void,
-  paginationOperatorsRef: MutableRefObject<PaginationOperators>
-) {
+function useSorting({
+  columns,
+  initialValueFromServer,
+  sortable,
+  onShouldRequestServerData,
+}: {
+  columns: TableColumnProp[];
+  initialValueFromServer: UI.Components.InputTable["model"]["properties"]["sortBy"];
+  sortable: UI.Table.SortOption;
+  onShouldRequestServerData: (() => void) | null;
+}) {
   const formatSortByForBrowser = useCallback(
     (sortBy: UI.Components.InputTable["model"]["properties"]["sortBy"]) =>
       formatForBrowser(sortBy, columns, sortable),
@@ -80,48 +84,26 @@ function useSorting(
     [columns]
   );
 
-  const syncServerValue = useCallback(
-    (serverValue: UI.Table.ColumnSort<UI.Table.DataRow[]>[]) => {
-      paginationOperatorsRef.current.sortBy = serverValue;
-    },
-    [paginationOperatorsRef]
-  );
-
-  const getCurrentServerValue = useCallback(
-    () => paginationOperatorsRef.current.sortBy,
-    [paginationOperatorsRef]
-  );
-
-  const {
-    value: sort,
-    setValue: setSort,
-    resetValue: resetSort,
-  } = useDataOperation({
+  return useDataOperation({
     // Initial Values
-    initialValue: initialSortBy ?? FALLBACK_INITIAL_SORT_BY,
+    initialValueFromServer: initialValueFromServer ?? FALLBACK_INITIAL_SORT_BY,
 
     // Formatting
-    formatServerToBrowser: formatSortByForBrowser,
-    formatBrowserToServer: formatSortByForServer,
+    formatServerToDisplay: formatSortByForBrowser,
+    formatDisplayToValidated: formatSortByForServer,
+    formatValidatedToServer: (validated) => validated,
 
     // Server value change detection
-    getCurrentServerValue,
     serverValueDidChange: sortByDidChange,
 
     // Pagination Syncing
-    onSyncServerValue: syncServerValue,
-    onShouldRequestPageChange: onSortChange,
+    onShouldRequestServerData,
+    onShouldRequestBrowserData: null,
 
     // Feature Flag
     operationIsEnabled: sortable !== UI.Table.SORT_OPTION.DISABLED,
     operationDisabledValue: SORTING_DISABLED_VALUE,
   });
-
-  return {
-    sort,
-    setSort,
-    resetSort,
-  };
 }
 
 export { useSorting };

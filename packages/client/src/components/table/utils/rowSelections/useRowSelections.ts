@@ -61,14 +61,12 @@ function useRowSelections(
       rowSelections: Record<string, boolean>,
       setRowSelections: (rowSelections: Record<string, boolean>) => void
     ) => {
-      console.log(row);
       const targetRowId = getRowSelectionId(row);
 
       function toggleSingleRow() {
         if (enabled) {
           anchorRowId.current = targetRowId;
         }
-        console.log("toggling...");
         toggleCurrentRow();
       }
 

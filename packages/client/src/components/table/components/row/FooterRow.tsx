@@ -14,7 +14,7 @@ function RowCountLabel({
     table.getState().pagination.pageIndex *
     table.getState().pagination.pageSize;
 
-  const currentPageRowCount = table.getRowModel().rows.length;
+  const currentPageRowCount = table.getPaginationRowModel().rows.length;
 
   const totalRecords = table.getRowCount();
 
@@ -31,7 +31,7 @@ function RowCountLabel({
 
   return (
     <p className="text-brand-neutral-2 text-sm">
-      {totalRecords.toLocaleString()} results
+      {table.getFilteredRowModel().rows.length.toLocaleString()} results
     </p>
   );
 }

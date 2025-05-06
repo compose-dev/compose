@@ -9,3 +9,4 @@ export * from "./usePagination";
 export * from "./useColumnPinning";
 export * as GlobalFiltering from "./globalFiltering";
 export * from "./rowSelections";
+export * from "./useDataOperation";

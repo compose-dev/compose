@@ -101,7 +101,7 @@ function ToolbarRow({
   resetSort,
   resetColumnPinningToInitial,
   filterable,
-  preFilteredRows,
+  resetFilters,
 }: {
   searchQuery: string | null;
   setSearchQuery: (val: string | null) => void;
@@ -119,13 +119,13 @@ function ToolbarRow({
   resetSort: () => void;
   resetColumnPinningToInitial: () => void;
   filterable: boolean;
-  preFilteredRows: FormattedTableRow[];
+  resetFilters: () => void;
 }) {
   const offset =
     table.getState().pagination.pageIndex *
     table.getState().pagination.pageSize;
 
-  const currentPageRowCount = table.getRowModel().rows.length;
+  const currentPageRowCount = table.getPaginationRowModel().rows.length;
 
   return (
     <div
@@ -165,7 +165,7 @@ function ToolbarRow({
           columns={columns}
           filterModel={filters}
           setFilterModel={setFilters}
-          resetFilterModel={() => setFilters(null)}
+          resetFilterModel={resetFilters}
           filterable={filterable}
         />
         <PinAndHideColumnsPopover
@@ -178,7 +178,6 @@ function ToolbarRow({
           columns={columns}
           paginated={paginated}
           defaultFileName={`${tableId}`}
-          preFilteredRows={preFilteredRows}
         />
         <div className="self-stretch w-1 border-r border-brand-neutral hidden sm:block" />
         <p className="text-brand-neutral-2 text-sm hidden sm:block">

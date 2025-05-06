@@ -2,6 +2,15 @@ import { UI } from "@composehq/ts-public";
 import { Table } from "@tanstack/react-table";
 import { FormattedTagColors } from "./tags";
 
+import "@tanstack/react-table"; //or vue, svelte, solid, qwik, etc.
+
+declare module "@tanstack/react-table" {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface ColumnMeta<TData, TValue> {
+    format: UI.Table.ColumnFormat | undefined;
+  }
+}
+
 const UNIQUE_SUFFIX = "-//&&wr@q%#jks*j~l-*A<+SS>..<||{^$@??.";
 
 /**
