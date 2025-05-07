@@ -36,7 +36,9 @@ from .table import (
     TableOnPageChange,
     TableDefault,
     TablePagination,
-    TableSelectionReturn,
+    TABLE_COLUMN_OVERFLOW,
+    TableColumnSort,
+    Table,
 )
 from .type import TYPE
 from .button_appearance import (
@@ -106,7 +108,9 @@ __all__ = [
     "TableOnPageChange",
     "TableDefault",
     "TablePagination",
-    "TableSelectionReturn",
     "Stale",
     "NumberFormat",
+    "TABLE_COLUMN_OVERFLOW",
+    "TableColumnSort",
+    "Table",
 ]

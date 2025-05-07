@@ -15,15 +15,15 @@ function shouldResetOutput(
     return false;
   }
 
-  // For tables, just reset the value no matter what. It's too
-  // complicated to try to match up old selections with new data.
-  if (oldModel.type === UI.TYPE.INPUT_TABLE) {
-    return true;
-  }
-
-  const oldValue = oldModel.model.properties.initialValue;
-  // @ts-expect-error don't want to deal with typescript here
-  const newValue = newModel.model.properties.initialValue;
+  const oldValue =
+    oldModel.type === UI.TYPE.INPUT_TABLE
+      ? oldModel.model.properties.initialSelectedRows
+      : oldModel.model.properties.initialValue;
+  const newValue =
+    newModel.type === UI.TYPE.INPUT_TABLE
+      ? newModel.model.properties.initialSelectedRows
+      : // @ts-expect-error don't want to deal with typescript here
+        newModel.model.properties.initialValue;
 
   // Stringify is a good catch all way for checking if two values
   // have changed (e.g. comparing initial values for multiselect).

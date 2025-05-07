@@ -37,7 +37,7 @@ function SignUp() {
           size="lg"
           className="w-80"
         >
-          <Icon name="google-with-color" size="lg" />
+          <Icon name="google-with-color" size="1.5" />
           <p>Continue with Google</p>
         </Button>
         <div className="flex flex-col items-center justify-center space-y-4 text-sm text-center text-brand-neutral-2">

@@ -43,8 +43,8 @@
   --LIGHT--brand-success-border: #22c55e; /* green 500 */
   --DARK--brand-success-border: #4ade80; /* green 400 */
 
-  --LIGHT--brand-warning-border: #a16207; /* yellow 700 */
-  --DARK--brand-warning-border: #facc15; /* yellow 400 */
+  --LIGHT--brand-warning-border: #fad49c; /* yellow 700, lightened 70% */
+  --DARK--brand-warning-border: #854d0e; /* yellow 800 */
 
   --LIGHT--brand-primary: #0056bb; /* custom */
   --DARK--brand-primary: #7dd3fc; /* sky 300 */
@@ -340,7 +340,15 @@
   }
 
   .tooltip {
-    @apply !bg-gray-700 !text-white/95 rounded-brand !p-2 !text-sm;
+    background-color: var(--brand-bg-page) !important;
+    color: var(--brand-neutral-text) !important;
+    opacity: 1 !important;
+    border: 1px solid var(--brand-neutral-border) !important;
+    @apply rounded-brand !p-2 !text-sm !shadow !animate-tooltip-in;
+  }
+
+  .tooltip-sm {
+    @apply !text-xs !p-1.5;
   }
 
   .theme-dark .red-tag {
@@ -379,7 +387,7 @@
   }
 
   .theme-dark .tooltip {
-    @apply !bg-gray-200 !text-black/90 rounded-brand !p-2 !text-sm;
+    background-color: var(--brand-bg-overlay) !important;
   }
 
   .c-row > .c-container:not(.c-manual-width),

@@ -98,7 +98,7 @@ function FileDrop(props: FileUploadProps) {
                   props.setValue(props.value.filter((f) => f !== file));
                 }}
               >
-                <Icon name="x" size="sm" />
+                <Icon name="x" size="0.75" />
               </Button>
             </div>
           ))}

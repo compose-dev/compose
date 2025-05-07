@@ -4,7 +4,7 @@ import asyncio
 import inspect
 import io
 import traceback
-from typing import Any, TypedDict, Callable, Union, Dict, Literal, Mapping
+from typing import Any, TypedDict, Callable, Union, Dict, Literal, Mapping, List
 import time
 
 from ..scheduler import Scheduler
@@ -39,6 +39,8 @@ from ..core import (
     Debug,
     RateLimiter,
     validate_audit_log,
+    TableColumnSort,
+    Table,
 )
 
 from .appDefinition import AppDefinition
@@ -235,6 +237,8 @@ class AppRunner:
                             table["search_query"],
                             table["offset"],
                             table["page_size"],
+                            table["active_sort_by"],
+                            table["active_filter_by"],
                         )
                     )
 
@@ -506,6 +510,7 @@ class AppRunner:
                     {
                         "type": EventType.SdkToServer.RERENDER_UI_V3,
                         "diff": updated_renders,
+                        "v": 2,
                     },
                     self.browserSessionId,
                     self.executionId,
@@ -537,6 +542,8 @@ class AppRunner:
                                 table["search_query"],
                                 table["offset"],
                                 table["page_size"],
+                                table["active_sort_by"],
+                                table["active_filter_by"],
                                 True,
                             )
                         )
@@ -1017,6 +1024,8 @@ class AppRunner:
         search_query: Union[str, None],
         offset: int,
         page_size: int,
+        sort_by: List[TableColumnSort],
+        filter_by: Table.AdvancedFilterModel,
         refresh_total_records: bool = False,
     ):
         try:
@@ -1088,6 +1097,8 @@ class AppRunner:
                     "prev_total_records": (
                         None if refresh_total_records else table_state["total_records"]
                     ),
+                    "sort_by": sort_by,
+                    "filter_by": filter_by,
                 }
 
                 response = await Render.run_hook_function(
@@ -1111,6 +1122,8 @@ class AppRunner:
                         "total_records": table_state["total_records"],
                         "data": table_state["data"],
                         "page_size": table_state["page_size"],
+                        "sort_by": table_state["active_sort_by"],
+                        "filter_by": table_state["active_filter_by"],
                     }
                 )
 
@@ -1121,6 +1134,8 @@ class AppRunner:
                         "total_records": total_records,
                         "data": data,
                         "page_size": page_size,
+                        "sort_by": sort_by,
+                        "filter_by": filter_by,
                     }
                 )
 
@@ -1163,6 +1178,8 @@ class AppRunner:
                     "data": data,
                     "stale": Stale.FALSE,
                     "page_size": page_size,
+                    "active_sort_by": sort_by,
+                    "active_filter_by": filter_by,
                 },
             )
 

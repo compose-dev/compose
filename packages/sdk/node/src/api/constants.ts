@@ -10,6 +10,7 @@ export const WS_CLIENT = {
   RECONNECTION_INTERVAL: {
     BASE_IN_SECONDS: 5,
     BACKOFF_MULTIPLIER: 1.7,
+    MAX_IN_SECONDS: 60 * 60, // 1 hour
   },
   CONNECTION_HEADERS: {
     API_KEY: "x-compose-api-key",

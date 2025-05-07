@@ -1,7 +1,8 @@
 from typing import Dict, TypedDict, Any, Union, Tuple, List
 from ..scheduler import Scheduler  # type: ignore[attr-defined]
-from .ui import Stale
+from .ui import Stale, TableColumnSort, Table
 from .smart_debounce import SmartDebounce
+from .json import JSON
 
 
 class TableStateRecordInput(TypedDict):
@@ -10,6 +11,8 @@ class TableStateRecordInput(TypedDict):
     search_query: Union[str, None]
     offset: int
     page_size: int
+    initial_sort_by: List[TableColumnSort]
+    initial_filter_by: Table.AdvancedFilterModel
     stale: Stale.TYPE
 
 
@@ -17,10 +20,36 @@ class TableStateRecord(TableStateRecordInput):
     page_update_debouncer: SmartDebounce
     render_id: str
     table_id: str
+    active_sort_by: List[TableColumnSort]
+    active_filter_by: Table.AdvancedFilterModel
 
 
 PAGE_UPDATE_DEBOUNCE_INTERVAL_MS = 250
 KEY_SEPARATOR = "__"
+
+
+def sort_by_did_change(
+    old_sort_by: List[TableColumnSort],
+    new_sort_by: List[TableColumnSort],
+) -> bool:
+    if len(old_sort_by) != len(new_sort_by):
+        return True
+
+    for old_sort, new_sort in zip(old_sort_by, new_sort_by):
+        if (
+            old_sort["key"] != new_sort["key"]
+            or old_sort["direction"] != new_sort["direction"]
+        ):
+            return True
+
+    return False
+
+
+def filter_by_did_change(
+    old_filter_by: Table.AdvancedFilterModel,
+    new_filter_by: Table.AdvancedFilterModel,
+) -> bool:
+    return JSON.stringify(old_filter_by) != JSON.stringify(new_filter_by)
 
 
 class TableState:
@@ -59,10 +88,27 @@ class TableState:
             ),
             "render_id": render_id,
             "table_id": table_id,
+            "initial_sort_by": state["initial_sort_by"],
+            "active_sort_by": state["initial_sort_by"],
+            "initial_filter_by": state["initial_filter_by"],
+            "active_filter_by": state["initial_filter_by"],
         }
 
     def update(self, render_id: str, table_id: str, state: Dict[str, Any]) -> None:
         key = self.generate_key(render_id, table_id)
+
+        # Update the active sort if the initial sort changed. This overrides
+        # any changes on the browser side that were made to the active sort.
+        if "initial_sort_by" in state and sort_by_did_change(
+            state["initial_sort_by"], self.state[key]["initial_sort_by"]
+        ):
+            self.state[key]["active_sort_by"] = state["initial_sort_by"] or []
+
+        if "initial_filter_by" in state and filter_by_did_change(
+            state["initial_filter_by"], self.state[key]["initial_filter_by"]
+        ):
+            self.state[key]["active_filter_by"] = state["initial_filter_by"] or None
+
         self.state[key] = {**self.state[key], **state}  # type: ignore
 
     def delete(self, render_id: str, table_id: str) -> None:

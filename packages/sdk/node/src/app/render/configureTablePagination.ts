@@ -26,6 +26,8 @@ async function configureTablePagination(
 
     const currentState = tableState.get(renderId, component.model.id);
 
+    // If the component is no longer paginated, and it was previously paginated,
+    // delete the table state for the component.
     if (component.hooks.onPageChange === null) {
       if (currentState) {
         tableState.delete(renderId, component.model.id);
@@ -52,6 +54,8 @@ async function configureTablePagination(
 
         tableState.update(renderId, component.model.id, {
           stale: UI.Stale.OPTION.UPDATE_NOT_DISABLED,
+          initialSortBy: component.model.properties.sortBy || [],
+          initialFilterBy: component.model.properties.filterBy || null,
         });
       } else {
         data = [];
@@ -64,6 +68,8 @@ async function configureTablePagination(
           offset,
           pageSize,
           searchQuery,
+          initialSortBy: component.model.properties.sortBy || [],
+          initialFilterBy: component.model.properties.filterBy || null,
         });
       }
     } else {
@@ -79,6 +85,13 @@ async function configureTablePagination(
           pageSize,
           data,
           stale: UI.Stale.OPTION.FALSE,
+          initialSortBy: component.model.properties.sortBy || [],
+          initialFilterBy: component.model.properties.filterBy || null,
+        });
+      } else {
+        tableState.update(renderId, component.model.id, {
+          initialSortBy: component.model.properties.sortBy || [],
+          initialFilterBy: component.model.properties.filterBy || null,
         });
       }
     }

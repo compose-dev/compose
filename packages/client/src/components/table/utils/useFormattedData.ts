@@ -1,14 +1,19 @@
-import { FormattedTableRow, TableColumn } from "../constants";
+import {
+  FormattedTableRow,
+  TableColumnProp,
+  INTERNAL_COLUMN_ID,
+} from "./constants";
 
 import { u } from "@compose/ts";
 import { UI } from "@composehq/ts-public";
 
-import { INTERNAL_COLUMN_ID } from "../constants";
 import { useMemo } from "react";
 
 function useFormattedData(
   data: UI.Components.InputTable["model"]["properties"]["data"],
-  columns: TableColumn[]
+  columns: TableColumnProp[],
+  offset: number,
+  primaryKey: string | number | undefined
 ) {
   const formattedRows: FormattedTableRow[] = useMemo(() => {
     const metaColumns = columns.filter(
@@ -17,8 +22,24 @@ function useFormattedData(
         col.format === UI.Table.COLUMN_FORMAT.datetime
     );
 
-    const result = data.map((row) => {
-      const meta: Record<string, string> = {};
+    const result = data.map((row, rowIdx) => {
+      let rowId: string;
+
+      try {
+        rowId = primaryKey
+          ? row[primaryKey].toString()
+          : (rowIdx + offset).toString();
+      } catch (e) {
+        alert(
+          `Error assigning a row ID to table row. Received error: ${e}. Returning a fallback row ID.`
+        );
+
+        rowId = (rowIdx + offset).toString();
+      }
+
+      const meta: Record<string, string> = {
+        [INTERNAL_COLUMN_ID.ROW_SELECTION]: rowId,
+      };
 
       for (const col of metaColumns) {
         if (col.format === UI.Table.COLUMN_FORMAT.date) {
@@ -48,7 +69,7 @@ function useFormattedData(
     });
 
     return result;
-  }, [data, columns]);
+  }, [data, columns, offset, primaryKey]);
 
   return formattedRows;
 }

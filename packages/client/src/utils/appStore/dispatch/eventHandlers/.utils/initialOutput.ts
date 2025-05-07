@@ -28,7 +28,13 @@ function getInputTableDefaultOutput(
         type: UI.TYPE.INPUT_TABLE,
       };
     } else {
-      networkTransferValue = initialSelectedRows.map((row) => data[row]);
+      try {
+        networkTransferValue = initialSelectedRows.map(
+          (row) => data[row as number]
+        );
+      } catch (e) {
+        // ignore any errors as this is a fallback
+      }
     }
   }
 

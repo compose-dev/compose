@@ -127,6 +127,10 @@ export default {
           "0%": { opacity: 0 },
           "100%": { opacity: 1 },
         },
+        "tooltip-in": {
+          "0%": { transform: "translateY(0.15rem)", opacity: 0 },
+          "100%": { transform: "translateY(0)", opacity: 1 },
+        },
       },
       animation: {
         "pulse-75": "pulse-75 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
@@ -140,6 +144,7 @@ export default {
           "slide-fade-in-modal 0.15s cubic-bezier(0.4, 0, 0.6, 1) forwards",
         "grow-in": "grow-in 0.15s cubic-bezier(0.4, 0, 0.6, 1) forwards",
         "opacity-in": "opacity-in 0.1s cubic-bezier(0.4, 0, 0.6, 1) forwards",
+        "tooltip-in": "tooltip-in 0.075s cubic-bezier(0.4, 0, 0.6, 1) forwards",
       },
     },
   },

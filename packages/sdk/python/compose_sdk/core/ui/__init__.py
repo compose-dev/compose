@@ -49,9 +49,11 @@ from .types import (
     TableOnPageChange,
     TableDefault,
     TablePagination,
-    TableSelectionReturn,
     Stale,
     NumberFormat,
+    TABLE_COLUMN_OVERFLOW,
+    TableColumnSort,
+    Table,
 )
 from .componentGenerators import ComponentReturn
 from .constants import Nullable
@@ -111,8 +113,10 @@ __all__ = [
     "TableOnPageChange",
     "TableDefault",
     "TablePagination",
-    "TableSelectionReturn",
     "Stale",
     "ComponentReturn",
     "NumberFormat",
+    "TABLE_COLUMN_OVERFLOW",
+    "TableColumnSort",
+    "Table",
 ]

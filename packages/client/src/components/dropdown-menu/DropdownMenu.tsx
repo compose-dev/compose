@@ -28,7 +28,7 @@ function DropdownMenu({
     label: string;
     left?: React.ReactNode;
     onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
-    variant?: "neutral" | "error" | "warning" | "success";
+    variant?: "neutral" | "error" | "warning" | "success" | "primary";
   }[];
   labelVariant?: LabelVariant;
   dropdownAnchor?: "bottom end" | "bottom start";
@@ -76,6 +76,7 @@ function DropdownMenu({
                     "text-brand-error": option.variant === "error",
                     "text-brand-warning": option.variant === "warning",
                     "text-brand-success": option.variant === "success",
+                    "text-brand-primary": option.variant === "primary",
                   }
                 )}
                 onClick={option.onClick}

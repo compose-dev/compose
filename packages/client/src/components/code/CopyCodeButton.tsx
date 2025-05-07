@@ -19,11 +19,11 @@ function CopyCodeButton({ code }: { code: string }) {
         }}
       >
         <div className="opacity-0">
-          <Icon name="copy" color="brand-neutral-2" size="md" />
+          <Icon name="copy" color="brand-neutral-2" size="1" />
         </div>
       </Button>
       <div className="absolute top-2.5 right-2.5 invisible duration-150 transition-opacity opacity-0 group-hover:visible group-hover:opacity-100 p-2 pointer-events-none border border-brand-neutral rounded-brand">
-        <Icon name="copy" color="brand-neutral-2" size="md" />
+        <Icon name="copy" color="brand-neutral-2" size="1" />
       </div>
     </>
   );

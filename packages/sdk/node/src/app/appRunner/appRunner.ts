@@ -464,7 +464,9 @@ class AppRunner {
             table.tableId,
             table.searchQuery,
             table.offset,
-            table.pageSize
+            table.pageSize,
+            table.activeSortBy,
+            table.activeFilterBy
           );
         }
       }
@@ -723,6 +725,7 @@ class AppRunner {
         {
           type: SdkToServerEvent.TYPE.RERENDER_UI_V3,
           diff: updatedRenders,
+          v: 2,
         },
         this.browserSessionId,
         this.executionId
@@ -759,6 +762,8 @@ class AppRunner {
             newTable.searchQuery,
             newTable.offset,
             newTable.pageSize,
+            newTable.activeSortBy,
+            newTable.activeFilterBy,
             true
           );
         });
@@ -1320,6 +1325,8 @@ class AppRunner {
     searchQuery: string | null,
     offset: number,
     pageSize: number,
+    sortBy: UI.Table.ColumnSort<UI.Table.DataRow[]>[],
+    filterBy: UI.Table.AdvancedFilterModel<UI.Table.DataRow[]> | null,
     refreshTotalRecords: boolean = false
   ) {
     try {
@@ -1391,6 +1398,8 @@ class AppRunner {
           offset,
           pageSize,
           searchQuery,
+          sortBy,
+          filterBy,
           prevSearchQuery: tableState.searchQuery,
           prevTotalRecords: refreshTotalRecords
             ? null
@@ -1406,6 +1415,11 @@ class AppRunner {
         return;
       }
 
+      // Check for the case where the table state is stale (e.g. due to a page.update() call
+      // or when the table is first rendered). If it's stale, we check if any of the data actually
+      // changed. If not, we just update the client that the table is not stale and nothing
+      // changed. This is mostly for the case where the user is running page.update() calls
+      // that are unrelated to the table.
       if (tableState.stale !== UI.Stale.OPTION.FALSE) {
         const oldStringified = JSON.stringify({
           offset: tableState.offset,
@@ -1413,6 +1427,8 @@ class AppRunner {
           totalRecords: tableState.totalRecords,
           data: tableState.data,
           pageSize: tableState.pageSize,
+          sortBy: tableState.activeSortBy,
+          filterBy: tableState.activeFilterBy,
         });
 
         const newStringified = JSON.stringify({
@@ -1421,6 +1437,8 @@ class AppRunner {
           totalRecords,
           data,
           pageSize,
+          sortBy,
+          filterBy,
         });
 
         if (oldStringified === newStringified) {
@@ -1453,6 +1471,8 @@ class AppRunner {
         data,
         stale: UI.Stale.OPTION.FALSE,
         pageSize,
+        activeSortBy: sortBy,
+        activeFilterBy: filterBy,
       });
 
       component.model.properties = {

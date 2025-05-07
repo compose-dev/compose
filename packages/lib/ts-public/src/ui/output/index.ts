@@ -56,13 +56,13 @@ export interface InputMultiSelectDropdown extends Base {
 }
 
 export interface InputTable extends Base {
-  internalValue: Record<number, boolean>;
+  internalValue: Record<string | number, boolean>;
   // v2 of the table model switched to only sending the row indices
   // and hydrating on the SDK side.
   networkTransferValue:
     | Table.DataRow[]
     | {
-        value: number[];
+        value: (string | number)[];
         type: typeof TYPE.INPUT_TABLE;
       };
   customerReturnedValue: BaseInputValue.Table;

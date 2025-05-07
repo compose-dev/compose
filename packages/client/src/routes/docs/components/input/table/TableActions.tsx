@@ -15,11 +15,22 @@ function TableActions() {
   return (
     <div className="p-4">
       <Table.Root
+        id="users"
         data={data}
         columns={[
-          { id: "name", label: "Name", accessorKey: "name" },
-          { id: "age", label: "Age", accessorKey: "age" },
-          { id: "city", label: "City", accessorKey: "city" },
+          {
+            id: "name",
+            label: "Name",
+            accessorKey: "name",
+            overflow: "ellipsis",
+          },
+          { id: "age", label: "Age", accessorKey: "age", overflow: "ellipsis" },
+          {
+            id: "city",
+            label: "City",
+            accessorKey: "city",
+            overflow: "ellipsis",
+          },
         ]}
         actions={[
           {

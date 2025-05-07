@@ -9,6 +9,6 @@ export interface Data {
   offset: number;
   pageSize: number;
   searchQuery: string | null;
-  sortKey: string | null;
-  sortDirection: "asc" | "desc" | null;
+  sortBy: UI.Table.ColumnSort<UI.Table.DataRow[]>[];
+  filterBy: UI.Table.AdvancedFilterModel<UI.Table.DataRow[]> | null;
 }

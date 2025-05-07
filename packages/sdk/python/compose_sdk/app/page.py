@@ -67,7 +67,6 @@ class Page:
     - `reload`: Reload the page.
     - `confirm`: Quickly confirm an action with a confirmation dialog.
     - `toast`: Provide feedback to the user with an unobtrusive toast notification.
-    - `set_inputs`: Set the values of one or more input components.
     - `loading`: Display a loading indicator on the page.
     - `update`: Rerender the UI to reflect the latest data.
     - `params`: Access any URL params that were passed to the app.
@@ -517,6 +516,8 @@ class Page:
 
     def set_inputs(self, values: Dict[str, Any]) -> None:
         """
+        DEPRECATED! Simply update the initial value of the input component then call page.update().
+
         Set the values of one or more inputs.
 
         Documentation

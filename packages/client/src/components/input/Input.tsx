@@ -30,6 +30,8 @@ function Input({
   onEnter = null,
   type = TYPE.TEXT,
   testId,
+  postFix = null,
+  showFocusRing = true,
 }: {
   label: string | null;
   value: string | null;
@@ -46,6 +48,8 @@ function Input({
   onEnter?: (() => void) | null;
   type?: Type;
   testId?: string;
+  postFix?: React.ReactNode;
+  showFocusRing?: boolean;
 }) {
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -70,39 +74,54 @@ function Input({
         {left !== null && (
           <div className="absolute left-2 top-1/2 -translate-y-1/2">{left}</div>
         )}
-        <HeadlessInput
-          value={value === null ? "" : value}
-          placeholder={placeholder ?? undefined}
-          onChange={(e) =>
-            setValue(e.target.value === "" ? null : e.target.value)
-          }
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+        <div
           className={classNames(
-            // text-base on mobile prevents zooming when focusing on the input
-            "rounded-brand border px-2 py-1 text-base/6 sm:text-sm/6 text-brand-neutral w-full bg-brand-io outline-none focus:ring-brand-primary-heavy focus:ring-2 focus:ring-offset-0",
+            "flex w-full rounded-brand focus-within:ring-brand-primary-heavy",
             {
-              "border-brand-error": hasError,
-              "border-brand-neutral": !hasError,
-              "pr-8": right !== null,
-              "pl-8": left !== null,
-              "bg-brand-io-disabled": disabled,
-            },
-            inputClassName
-          )}
-          onKeyDown={(e) => {
-            if (
-              (e.key === "Enter" || e.key === "NumpadEnter") &&
-              onEnter !== null
-            ) {
-              setAttemptedSubmit(true);
-              onEnter();
+              "focus-within:ring-2": showFocusRing,
             }
-          }}
-          type={type}
-          data-testid={testId}
-        ></HeadlessInput>
-        {right !== null && (
+          )}
+        >
+          <HeadlessInput
+            value={value === null ? "" : value}
+            placeholder={placeholder ?? undefined}
+            onChange={(e) =>
+              setValue(e.target.value === "" ? null : e.target.value)
+            }
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            className={classNames(
+              "rounded-l-brand border px-2 py-1 text-base/6 sm:text-sm/6 text-brand-neutral w-full bg-brand-io outline-none",
+              {
+                "border-brand-error": hasError,
+                "border-brand-neutral": !hasError,
+                "pr-8": right !== null && postFix === null,
+                "pl-8": left !== null,
+                "bg-brand-io-disabled": disabled,
+                "rounded-r-brand": postFix === null,
+                "rounded-r-none border-r-0": postFix !== null,
+              },
+              inputClassName
+            )}
+            onKeyDown={(e) => {
+              if (
+                (e.key === "Enter" || e.key === "NumpadEnter") &&
+                onEnter !== null
+              ) {
+                setAttemptedSubmit(true);
+                onEnter();
+              }
+            }}
+            type={type}
+            data-testid={testId}
+          ></HeadlessInput>
+          {postFix !== null && (
+            <div className="flex items-center px-3 border border-brand-neutral rounded-r-brand bg-brand-io-disabled text-brand-neutral-2 text-sm">
+              {postFix}
+            </div>
+          )}
+        </div>
+        {right !== null && postFix === null && (
           <div className="absolute right-2 top-1/2 -translate-y-1/2">
             {right}
           </div>

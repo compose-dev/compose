@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useCallback } from "react";
 
 /**
  * Custom hook that throttles a value with a specified delay
@@ -15,24 +15,27 @@ function useThrottledCallback<T extends unknown[]>(
   const lastExecutionRef = useRef<number>(Date.now());
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  function updateThrottledCallback(...args: T) {
-    const now = Date.now();
-    const timeSinceLastExecution = now - lastExecutionRef.current;
+  const updateThrottledCallback = useCallback(
+    (...args: T) => {
+      const now = Date.now();
+      const timeSinceLastExecution = now - lastExecutionRef.current;
 
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
 
-    if (timeSinceLastExecution >= throttleDelay) {
-      callback(...args);
-      lastExecutionRef.current = now;
-    } else {
-      timerRef.current = setTimeout(() => {
+      if (timeSinceLastExecution >= throttleDelay) {
         callback(...args);
-        lastExecutionRef.current = Date.now();
-      }, throttleDelay - timeSinceLastExecution);
-    }
-  }
+        lastExecutionRef.current = now;
+      } else {
+        timerRef.current = setTimeout(() => {
+          callback(...args);
+          lastExecutionRef.current = Date.now();
+        }, throttleDelay - timeSinceLastExecution);
+      }
+    },
+    [callback, throttleDelay]
+  );
 
   // Cleanup on unmount
   useEffect(() => {

@@ -66,7 +66,7 @@ function NavLink({
       <Icon
         name="bolt"
         color={itemRoute === currentRoute ? "brand-neutral" : "brand-neutral-2"}
-        size="mlg"
+        size="1.25"
       />
       <p key={itemRoute} className="truncate">
         {itemLabel}
@@ -92,7 +92,7 @@ function MobileNavBar({
         className="w-auto p-1 -m-1"
       />
       <Button variant="ghost" onClick={toggleSidebar}>
-        <Icon name="sidebar-right" color="brand-neutral" size="mlg" />
+        <Icon name="sidebar-right" color="brand-neutral" size="1.25" />
       </Button>
     </div>
   );
@@ -185,7 +185,7 @@ function AppNavigationDocs({
           <div className="flex justify-between items-center mb-4 pt-4 sticky top-0 bg-brand-overlay">
             <h2 className="text-lg font-semibold text-brand-neutral">Apps</h2>
             <Button variant="ghost" onClick={() => setIsSidebarOpen(false)}>
-              <Icon name="x" color="brand-neutral" size="sm" />
+              <Icon name="x" color="brand-neutral" size="0.75" />
             </Button>
           </div>
           <div className="flex flex-col gap-1 text-brand-neutral-2 overflow-y-auto">

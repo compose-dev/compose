@@ -62,8 +62,9 @@ class WSClient {
   }
 
   connect() {
-    if (this.ws !== null) {
-      return;
+    if (this.ws) {
+      this.ws.terminate();
+      this.ws = null;
     }
 
     this.makeConnectionRequest();
@@ -228,9 +229,12 @@ class WSClient {
       );
     }
 
-    this.reconnectionInterval = Math.ceil(
-      this.reconnectionInterval *
-        WS_CLIENT.RECONNECTION_INTERVAL.BACKOFF_MULTIPLIER
+    this.reconnectionInterval = Math.min(
+      Math.ceil(
+        this.reconnectionInterval *
+          WS_CLIENT.RECONNECTION_INTERVAL.BACKOFF_MULTIPLIER
+      ),
+      WS_CLIENT.RECONNECTION_INTERVAL.MAX_IN_SECONDS
     );
 
     // Try connecting again after 5 seconds

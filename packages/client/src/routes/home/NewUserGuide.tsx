@@ -17,7 +17,7 @@ export default function NewUserGuide({
       <div className="flex flex-row items-center justify-between">
         <h3>Welcome to Compose!</h3>
         <Button variant="ghost" onClick={onClose}>
-          <Icon name="x" size="sm" color="brand-neutral-2" />
+          <Icon name="x" size="0.75" color="brand-neutral-2" />
         </Button>
       </div>
       <p>

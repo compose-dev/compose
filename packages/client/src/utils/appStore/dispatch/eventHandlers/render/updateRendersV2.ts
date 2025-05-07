@@ -7,6 +7,7 @@ import {
 import { type AppStore, DELETED_RENDER } from "../../../types";
 import { ServerToBrowserEvent } from "@compose/ts";
 import { UI } from "@composehq/ts-public";
+import { shouldResetOutput } from "./utils";
 
 interface UpdateRendersV2Event extends AppRunnerBaseEvent {
   type: typeof APP_RUNNER_EVENT_TYPE.UPDATE_RENDERS_V2;
@@ -124,15 +125,15 @@ function updateRendersV2(
         diff.metadata
       );
 
-      // if (
-      //   shouldResetOutput(
-      //     state.flattenedModel[renderId][updatedComponentId],
-      //     hydrated
-      //   )
-      // ) {
-      //   flattenedOutput[renderId][updatedComponentId] =
-      //     generatorToFrontendOutput(hydrated);
-      // }
+      if (
+        shouldResetOutput(
+          state.flattenedModel[renderId][updatedComponentId],
+          hydrated
+        )
+      ) {
+        flattenedOutput[renderId][updatedComponentId] =
+          generatorToFrontendOutput(hydrated);
+      }
     }
   }
 

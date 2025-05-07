@@ -1,6 +1,12 @@
-import { SelectOption, Table as TTable, BaseGeneric } from "../types";
+import {
+  SelectOption,
+  Table as TTable,
+  BaseGeneric,
+  ButtonAppearance,
+} from "../types";
 import { BaseWithInputInteraction } from "./base";
 import * as Components from "../components";
+import { StringOrNumberOnlyKeys } from "../../types";
 
 export interface Text<
   TId extends BaseGeneric.Id,
@@ -95,13 +101,30 @@ export interface Table<
   TRequired extends BaseGeneric.Required,
 > extends BaseWithInputInteraction<TId, TRequired> {
   properties: {
-    initialSelectedRows: number[];
+    initialSelectedRows: (number | string)[];
     data: TTable.DataRow[];
     columns: TTable.Column<TTable.DataRow[]>[] | null;
     actions:
       | {
+          /**
+           * The label of the action.
+           */
           label: string;
+          /**
+           * Whether the action should be displayed as a button, or inside a dropdown menu.
+           */
           surface?: boolean;
+          /**
+           * The appearance of the action. Options:
+           *
+           * - `primary`
+           * - `outline`
+           * - `warning`
+           * - `danger`
+           *
+           * Defaults to `outline`.
+           */
+          appearance?: ButtonAppearance.Type;
         }[]
       | null;
     allowSelect: boolean;
@@ -110,8 +133,14 @@ export interface Table<
     hasOnSelectHook: boolean;
     /**
      * The table model version.
+     *
+     * 1 -> original
+     * 2 -> Added in 0.22 due to new row selection return where we return a
+     * list of row indices instead of the full rows.
+     * 3 -> Added in 0.27.0 due to the new cell overflow behavior where we
+     * shifted the default to "ellipsis" instead of "dynamic".
      */
-    v?: 1 | 2;
+    v?: 1 | 2 | 3;
     paged?: boolean;
     notSearchable?: boolean;
     totalRecords?: number;
@@ -119,6 +148,13 @@ export interface Table<
     pageSize?: number;
     searchQuery?: string | null;
     selectMode?: TTable.SelectionReturnType;
+    overflow?: TTable.OverflowBehavior;
+    sortBy?: TTable.ColumnSort<TTable.DataRow[]>[];
+    sortable?: TTable.SortOption;
+    filterBy?: TTable.AdvancedFilterModel<TTable.DataRow[]>;
+    filterable?: boolean;
+    density?: TTable.Density;
+    primaryKey?: StringOrNumberOnlyKeys<TTable.DataRow[number]>;
   };
 }
 

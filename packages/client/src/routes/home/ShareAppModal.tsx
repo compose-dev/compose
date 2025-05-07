@@ -367,7 +367,7 @@ export default function ShareAppModal({
             {publicPermission && (
               <div className="flex flex-row p-4 rounded bg-brand-overlay space-x-2">
                 <div>
-                  <Icon name="world" color="brand-primary" size="lg" />
+                  <Icon name="world" color="brand-primary" size="1.5" />
                 </div>
                 <div className="flex flex-col space-y-6">
                   <p>
@@ -400,7 +400,7 @@ export default function ShareAppModal({
             {inheritingFrom && (
               <div className="flex flex-row p-4 rounded bg-brand-overlay space-x-2">
                 <div>
-                  <Icon name="stack" color="brand-success" size="lg" />
+                  <Icon name="stack" color="brand-success" size="1.5" />
                 </div>
                 <p>
                   This app is inheriting permissions from the following app:{" "}
@@ -469,7 +469,7 @@ export default function ShareAppModal({
                     onClick={() => onClickRemoveEmailUser(user.id)}
                     disabled={submittingDeleteExternalUser}
                   >
-                    <Icon name="x" color="brand-neutral-2" size="sm" />
+                    <Icon name="x" color="brand-neutral-2" size="0.75" />
                   </Button>
                 </div>
               ))}

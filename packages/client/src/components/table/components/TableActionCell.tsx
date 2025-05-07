@@ -8,12 +8,14 @@ function TableActionCell({
   actions,
   hidden = false,
   onClick,
+  density,
 }: {
   actions: NonNullable<
     UI.Components.InputTable["model"]["properties"]["actions"]
   >;
   hidden?: boolean;
   onClick: (actionIdx: number) => void;
+  density: UI.Table.Density;
 }) {
   const buttons = [];
   const menuItems = [];
@@ -42,7 +44,9 @@ function TableActionCell({
 
   return (
     <div
-      className={classNames("flex items-start h-[26px] gap-2", {
+      className={classNames("flex items-start gap-2", {
+        "h-[22px]": density === "compact",
+        "h-[26px]": density !== "compact",
         // Essentially a hack to make the header row have the same width as the data rows.
         // We render the actions in the header too but just make it invisible, so that the
         // header row has the same width as the data rows.
@@ -53,10 +57,17 @@ function TableActionCell({
         <Button
           key={idx}
           onClick={() => onClick(button)}
-          variant="outline"
-          size="sm"
-          // Need to set font-normal to override the font-medium set in the header column.
-          className="!bg-brand-io hover:!bg-brand-page-inverted-5 whitespace-nowrap max-h-fit !font-normal"
+          variant={actions[button].appearance || "outline"}
+          size={density === "compact" ? "xs" : "sm"}
+          className={classNames("whitespace-nowrap max-h-fit", {
+            // Need to set font-normal to override the font-medium set in the header column.
+            "!bg-brand-io hover:!bg-brand-page-inverted-5 !font-normal":
+              actions[button].appearance === "outline" ||
+              !actions[button].appearance,
+            "border-transparent border":
+              !!actions[button].appearance &&
+              actions[button].appearance !== "outline",
+          })}
         >
           {actions[button].label}
         </Button>
@@ -64,12 +75,23 @@ function TableActionCell({
       {menuItems.length > 0 && (
         <DropdownMenu
           label={
-            <Icon name="dots-vertical" color="brand-neutral-2" size="mlg" />
+            <Icon
+              name="dots-vertical"
+              color="brand-neutral-2"
+              size={density === "compact" ? "1" : "1.25"}
+            />
           }
           labelVariant="ghost"
           options={menuItems.map((item) => ({
             label: actions[item].label,
             onClick: () => onClick(item),
+            variant: actions[item].appearance
+              ? actions[item].appearance === "outline"
+                ? "neutral"
+                : actions[item].appearance === "danger"
+                  ? "error"
+                  : actions[item].appearance
+              : "neutral",
           }))}
           className="h-full items-center"
         />

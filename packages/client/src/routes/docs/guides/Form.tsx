@@ -238,11 +238,27 @@ function Form() {
         </Modal.RawBody>
       </Modal.Root>
       <Table.Root
+        id="users"
         data={users}
         columns={[
-          { id: "name", label: "Name", accessorKey: "name" },
-          { id: "email", label: "Email", accessorKey: "email" },
-          { id: "role", label: "Role", accessorKey: "role" },
+          {
+            id: "name",
+            label: "Name",
+            accessorKey: "name",
+            overflow: "ellipsis",
+          },
+          {
+            id: "email",
+            label: "Email",
+            accessorKey: "email",
+            overflow: "ellipsis",
+          },
+          {
+            id: "role",
+            label: "Role",
+            accessorKey: "role",
+            overflow: "ellipsis",
+          },
         ]}
         actions={null}
         onTableRowActionHook={() => {}}

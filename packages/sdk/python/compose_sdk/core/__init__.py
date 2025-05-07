@@ -55,9 +55,10 @@ from .ui import (
     TableOnPageChange,
     TableDefault,
     TablePagination,
-    TableSelectionReturn,
     Stale,
     NumberFormat,
+    TableColumnSort,
+    Table,
 )
 from .json import JSON
 from .compress import Compress
@@ -134,7 +135,6 @@ __all__ = [
     "TableOnPageChange",
     "TableDefault",
     "TablePagination",
-    "TableSelectionReturn",
     "TableState",
     "Stale",
     "Debug",
@@ -142,4 +142,6 @@ __all__ = [
     "validate_audit_log",
     "RateLimiter",
     "NumberFormat",
+    "TableColumnSort",
+    "Table",
 ]

@@ -65,7 +65,15 @@ def configure_table_pagination(
                 table_state.update(
                     render_id,
                     component["model"]["id"],
-                    {"stale": Stale.UPDATE_NOT_DISABLED},
+                    {
+                        "stale": Stale.UPDATE_NOT_DISABLED,
+                        "initial_sort_by": component["model"]["properties"].get(
+                            "sortBy", []
+                        ),
+                        "initial_filter_by": component["model"]["properties"].get(
+                            "filterBy", None
+                        ),
+                    },
                 )
             else:
                 data = []
@@ -81,6 +89,12 @@ def configure_table_pagination(
                         "search_query": search_query,
                         "total_records": None,
                         "stale": "INITIALLY_STALE",
+                        "initial_sort_by": component["model"]["properties"].get(
+                            "sortBy", []
+                        ),
+                        "initial_filter_by": component["model"]["properties"].get(
+                            "filterBy", None
+                        ),
                     },
                 )
         else:
@@ -99,6 +113,25 @@ def configure_table_pagination(
                         "search_query": search_query,
                         "total_records": total_records,
                         "stale": False,
+                        "initial_sort_by": component["model"]["properties"].get(
+                            "sortBy", []
+                        ),
+                        "initial_filter_by": component["model"]["properties"].get(
+                            "filterBy", None
+                        ),
+                    },
+                )
+            else:
+                table_state.update(
+                    render_id,
+                    component["model"]["id"],
+                    {
+                        "initial_sort_by": component["model"]["properties"].get(
+                            "sortBy", []
+                        ),
+                        "initial_filter_by": component["model"]["properties"].get(
+                            "filterBy", None
+                        ),
                     },
                 )
 

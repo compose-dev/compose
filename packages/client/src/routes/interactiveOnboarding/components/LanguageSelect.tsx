@@ -18,9 +18,9 @@ function MobileDeviceCallout() {
   return (
     <div className="border border-brand-error shadow-sm p-4 rounded-brand flex flex-col gap-4 sm:hidden">
       <div className="flex flex-row items-center justify-between">
-        <Icon name="exclamation-circle" color="brand-error" size="lg" />
+        <Icon name="exclamation-circle" color="brand-error" size="1.5" />
         <Button variant="ghost" onClick={() => setIgnoreWarning(true)}>
-          <Icon name="x" color="brand-neutral-2" size="sm" />
+          <Icon name="x" color="brand-neutral-2" size="0.75" />
         </Button>
       </div>
       <p>
