@@ -17,8 +17,9 @@ from .advanced_filtering import (
     transform_advanced_filter_model_to_camel_case,
 )
 
+TableDataKey = Union[str, int, float]
 TableValue = Any
-TableDataRow = Dict[str, TableValue]
+TableDataRow = Dict[TableDataKey, TableValue]
 TableData = List[TableDataRow]
 
 
@@ -26,7 +27,7 @@ TABLE_COLUMN_SORT_DIRECTION = Literal["asc", "desc"]
 
 
 class TableColumnSort(TypedDict):
-    key: str
+    key: TableDataKey
     direction: TABLE_COLUMN_SORT_DIRECTION
 
 
@@ -99,7 +100,7 @@ PINNED_SIDE = Literal["left", "right"]
 
 
 class AdvancedTableColumn(TypedDict):
-    key: str
+    key: TableDataKey
     """
     A key that maps to a value in the table data.
     """
@@ -158,7 +159,7 @@ class AdvancedTableColumn(TypedDict):
     """
 
 
-TableColumn = Union[str, AdvancedTableColumn]
+TableColumn = Union[TableDataKey, AdvancedTableColumn]
 TableColumns = List[TableColumn]
 
 
@@ -216,12 +217,6 @@ class TablePagination:
     TYPE = Literal["manual", "auto"]
 
 
-class TableSelectionReturn:
-    FULL = "full"
-    INDEX = "index"
-    TYPE = Literal["full", "index"]
-
-
 class TableAdvancedFilterClause(TypedDict):
     operator: Literal[
         "is",
@@ -240,7 +235,7 @@ class TableAdvancedFilterClause(TypedDict):
         "not_has_all",
     ]
     value: TableValue
-    key: str
+    key: TableDataKey
 
 
 class TableAdvancedFilterGroup(TypedDict):
@@ -261,7 +256,15 @@ class Table:
         COMFORTABLE = "comfortable"
         TYPE = Literal["compact", "standard", "comfortable"]
 
+    class SelectionReturn:
+        FULL = "full"
+        ID = "id"
+        INDEX = "index"  # deprecated
+        TYPE = Literal["full", "id", "index"]
+
     AdvancedFilterModel = TableAdvancedFilterModel
+
+    DataKey = TableDataKey
 
     @property
     def transform_advanced_filter_model_to_camel_case(self):

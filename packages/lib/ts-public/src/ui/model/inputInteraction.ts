@@ -6,6 +6,7 @@ import {
 } from "../types";
 import { BaseWithInputInteraction } from "./base";
 import * as Components from "../components";
+import { StringOrNumberOnlyKeys } from "../../types";
 
 export interface Text<
   TId extends BaseGeneric.Id,
@@ -100,7 +101,7 @@ export interface Table<
   TRequired extends BaseGeneric.Required,
 > extends BaseWithInputInteraction<TId, TRequired> {
   properties: {
-    initialSelectedRows: number[];
+    initialSelectedRows: (number | string)[];
     data: TTable.DataRow[];
     columns: TTable.Column<TTable.DataRow[]>[] | null;
     actions:
@@ -153,6 +154,7 @@ export interface Table<
     filterBy?: TTable.AdvancedFilterModel<TTable.DataRow[]>;
     filterable?: boolean;
     density?: TTable.Density;
+    primaryKey?: StringOrNumberOnlyKeys<TTable.DataRow[number]>;
   };
 }
 

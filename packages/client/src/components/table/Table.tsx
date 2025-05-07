@@ -56,6 +56,7 @@ function Table({
   overflow = "ellipsis",
   filterable = true,
   filterBy = null,
+  primaryKey = undefined,
 }: {
   id: string;
   data: UI.Components.InputTable["model"]["properties"]["data"];
@@ -92,9 +93,10 @@ function Table({
   overflow?: UI.Table.OverflowBehavior;
   filterable?: boolean;
   filterBy?: UI.Table.AdvancedFilterModel<FormattedTableRow[]>;
+  primaryKey?: string | number | undefined;
 }) {
   const fixedHeight = paginated || totalRecords > 35;
-  const formattedData = useFormattedData(data, columns, offset);
+  const formattedData = useFormattedData(data, columns, offset, primaryKey);
 
   const handleRequestServerDataRef = useRef<(() => void) | null>(null);
   const handleRequestBrowserDataRef = useRef<(() => void) | null>(null);

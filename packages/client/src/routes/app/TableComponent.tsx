@@ -340,6 +340,12 @@ export default function TableComponent({
           overflow={component.model.properties.overflow}
           filterable={component.model.properties.filterable}
           filterBy={component.model.properties.filterBy}
+          primaryKey={
+            component.model.properties.selectMode ===
+            UI.Table.SELECTION_RETURN_TYPE.INDEX
+              ? undefined
+              : component.model.properties.primaryKey
+          }
         />
       </div>
     </div>

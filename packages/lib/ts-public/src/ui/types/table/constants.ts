@@ -1,5 +1,5 @@
 import { TagColor, TagValue } from "./tagColor";
-import { StringOnlyKeys } from "../../../types";
+import { StringOrNumberOnlyKeys } from "../../../types";
 import type { DataRow as TableDataRow } from "./dataRow";
 import { AdvancedFilterModel } from "./advancedFiltering";
 import type { ColumnFormat } from "./columnFormat";
@@ -13,7 +13,7 @@ type ColumnSortDirection =
   (typeof COLUMN_SORT_DIRECTION)[keyof typeof COLUMN_SORT_DIRECTION];
 
 interface ColumnSort<TData extends TableDataRow[]> {
-  key: StringOnlyKeys<TData[number]>;
+  key: StringOrNumberOnlyKeys<TData[number]>;
   direction: ColumnSortDirection;
 }
 
@@ -57,7 +57,7 @@ type AdvancedTableColumn<TData extends TableDataRow[]> = {
    * The key that will be used to access the column data from
    * the passed in data.
    */
-  key: StringOnlyKeys<TData[number]>;
+  key: StringOrNumberOnlyKeys<TData[number]>;
   /**
    * The original key of the column. Now that we compress key names
    * to single digits, we need to keep track of the original key
@@ -133,10 +133,10 @@ type AdvancedTableColumnGenerator<TData extends TableDataRow[]> = Omit<
 >;
 
 type TableColumn<TData extends TableDataRow[]> =
-  | StringOnlyKeys<TData[number]>
+  | StringOrNumberOnlyKeys<TData[number]>
   | AdvancedTableColumn<TData>;
 type TableColumnGenerator<TData extends TableDataRow[]> =
-  | StringOnlyKeys<TData[number]>
+  | StringOrNumberOnlyKeys<TData[number]>
   | AdvancedTableColumnGenerator<TData>;
 
 const PAGINATION_THRESHOLD = 2500;
@@ -159,9 +159,19 @@ const SELECTION_RETURN_TYPE = {
   FULL: "full",
 
   /**
+   * @deprecated Use `id` instead.
+   *
    * Return the index of the row.
    */
   INDEX: "index",
+
+  /**
+   * Return the primary key of the row. Set the `primaryKey` property
+   * on the table model to specify the id field.
+   *
+   * If a primary key is not set, the row index will be used instead.
+   */
+  ID: "id",
 } as const;
 
 type SelectionReturnType =

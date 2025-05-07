@@ -1,3 +1,4 @@
+import { StringOrNumberOnlyKeys } from "../../types";
 import * as UI from "../../ui";
 import {
   BaseWithInputInteraction,
@@ -83,20 +84,28 @@ interface TableProperties<TData extends UI.Table.DataRow[]>
    */
   allowSelect: UI.Components.InputTable["model"]["properties"]["allowSelect"];
   /**
-   * A function that is called when the user selects or deselects rows. It receives the selected rows as an argument, or the selected row indices if the `selectionReturnType` parameter is set to `index`.
+   * A function that is called when the user selects or deselects rows. It receives the selected rows as an argument, or the selected row IDs if the `selectionReturnType` parameter is set to `id`.
    */
   onChange: UI.Components.InputTable["hooks"]["onSelect"];
   /**
-   * A list of row indices (e.g. `[0, 1, 2]`) to pre-select when the table is first rendered. Defaults to empty list.
+   * A list of row IDs to pre-select when the table is first rendered. Defaults to empty list.
    */
   initialSelectedRows: UI.Components.InputTable["model"]["properties"]["initialSelectedRows"];
+  /**
+   * The primary key of the table. This should map to a unique, stable identifier field in the table data.
+   *
+   * Setting this property enables Compose to properly track row selections.
+   *
+   * Defaults to the row index.
+   */
+  primaryKey?: StringOrNumberOnlyKeys<TData[number]>;
   /**
    * How the table should return selected rows to hooks such as `onChange`. Options:
    *
    * - `full`: A list of rows.
-   * - `index`: A list of row indices.
+   * - `id`: A list of row ids.
    *
-   * Defaults to `full`. Must be set to `index` if the table is paginated to enable row selection.
+   * Defaults to `full`. Must be set to `id` if the table is paginated to enable row selection.
    */
   selectionReturnType: UI.Components.InputTable["model"]["properties"]["selectMode"];
   /**
@@ -344,12 +353,15 @@ function getSelectable(
   // If paginated, add a secondary check to ensure that they have the correct
   // selection mode.
   if (paginated) {
-    if (selectMode !== UI.Table.SELECTION_RETURN_TYPE.INDEX) {
+    if (
+      selectMode !== UI.Table.SELECTION_RETURN_TYPE.INDEX &&
+      selectMode !== UI.Table.SELECTION_RETURN_TYPE.ID
+    ) {
       // If it's selectable, we assume the user wants row selection and
       // warn them on how to enable it.
       if (isSelectable) {
         console.warn(
-          `Paginated tables only support row selection by index. Set \`selectionReturnType: 'index'\` to enable row selection for table with id: ${tableId}.`
+          `Paginated tables only support row selection by id. Set a \`primaryKey\` and specify \`selectionReturnType: 'id'\` to enable row selection for table with id: ${tableId}.`
         );
       }
 
@@ -358,6 +370,33 @@ function getSelectable(
   }
 
   return isSelectable;
+}
+
+function warnAboutSelectMode(
+  primaryKey: UI.Components.InputTable["model"]["properties"]["primaryKey"],
+  selectMode: UI.Table.SelectionReturnType | undefined,
+  tableId: UI.BaseGeneric.Id
+) {
+  if (
+    primaryKey === undefined &&
+    selectMode === UI.Table.SELECTION_RETURN_TYPE.ID
+  ) {
+    console.warn(
+      `Selection return type is set to \`id\` but no \`primaryKey\` is set for table with id: ${tableId}. `
+    );
+  }
+
+  if (selectMode === UI.Table.SELECTION_RETURN_TYPE.INDEX) {
+    if (primaryKey !== undefined) {
+      console.warn(
+        `The \`primaryKey\` property does nothing when the selection return type is \`index\` for table with id: ${tableId}. Set \`selectionReturnType: 'id'\` instead (index is deprecated and may be removed in a future version).`
+      );
+    } else {
+      console.warn(
+        `Selection return type of \`index\` is deprecated for table with id: ${tableId}. Set \`selectionReturnType: 'id'\` and specify a \`primaryKey\` to use instead. While index selection is supported for now, it may be removed in a future version. Additionally, ID selection enables proper row selection tracking!`
+      );
+    }
+  }
 }
 
 /**
@@ -398,13 +437,14 @@ function getSelectable(
  * @param {UI.Components.InputTable["model"]["label"]} properties.label - Label to display above the table.
  * @param {UI.Components.InputTable["model"]["description"]} properties.description - Description to display below the label.
  * @param {UI.Components.InputTable["model"]["required"]} properties.required - Whether the table requires at least one row selection (e.g. if part of a form). Defaults to `true`.
- * @param {UI.Components.InputTable["model"]["properties"]["initialSelectedRows"]} properties.initialSelectedRows - List of row indices to select by default. Defaults to empty list.
+ * @param {UI.Components.InputTable["model"]["properties"]["initialSelectedRows"]} properties.initialSelectedRows - List of row IDs to select by default. Defaults to empty list.
  * @param {UI.Components.InputTable["hooks"]["validate"]} properties.validate - Custom validation function that is called on selected rows. Return nothing if valid, or a string error message if invalid.
  * @param {UI.Components.InputTable["hooks"]["onSelect"]} properties.onChange - Function to be called when row selection changes.
  * @param {UI.Components.InputTable["model"]["style"]} properties.style - CSS styles object to directly style the table HTML element.
  * @param {UI.Components.InputTable["model"]["minSelections"]} properties.minSelections - Minimum number of rows that must be selected. Defaults to `1`.
  * @param {UI.Components.InputTable["model"]["maxSelections"]} properties.maxSelections - Maximum number of rows that can be selected. Defaults to `1`.
- * @param {UI.Components.InputTable["model"]["selectionReturnType"]} properties.selectionReturnType - How the table should return selected rows. Defaults to `full` (a list of rows). Must be `index` (a list of row indices) if the table is paginated.
+ * @param {UI.Components.InputTable["model"]["primaryKey"]} properties.primaryKey - The primary key of the table. Setting this property enables Compose to properly track row selections using the `id` field. Defaults to the row index.
+ * @param {UI.Components.InputTable["model"]["selectionReturnType"]} properties.selectionReturnType - How the table should return selected rows. Defaults to `full` (a list of rows). Must be `id` (a list of row ids) if the table is paginated.
  * @param {UI.Components.InputTable["model"]["searchable"]} properties.searchable - Whether the table should be searchable. Defaults to `true` for normal tables, `false` for paginated tables.
  * @param {boolean} properties.filterable - Whether the table should be filterable. Defaults to `true` for normal tables, `false` for paginated tables.
  * @param {UI.Table.AdvancedFilterModel<TData>} properties.filterBy - Define a filtering model to initially filter the table.
@@ -527,6 +567,10 @@ function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
     >[];
   }
 
+  if (properties.primaryKey !== undefined) {
+    modelProperties.primaryKey = properties.primaryKey;
+  }
+
   const filterable = getFilterable(
     properties.filterable,
     manuallyPaged,
@@ -544,6 +588,12 @@ function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
   if (properties.density) {
     modelProperties.density = properties.density;
   }
+
+  warnAboutSelectMode(
+    properties.primaryKey,
+    properties.selectionReturnType,
+    id
+  );
 
   return {
     model: {

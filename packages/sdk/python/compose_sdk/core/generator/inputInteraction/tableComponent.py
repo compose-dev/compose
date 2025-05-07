@@ -17,7 +17,6 @@ from ...ui import (
     TableOnPageChange,
     TableDefault,
     TablePagination,
-    TableSelectionReturn,
     ComponentStyle,
     TableColumnSort,
     TABLE_COLUMN_OVERFLOW,
@@ -126,7 +125,7 @@ def get_selectable(
     allow_select: Union[bool, None],
     on_change: Nullable.Callable,
     paginated: bool,
-    selection_return_type: Union[TableSelectionReturn.TYPE, None],
+    selection_return_type: Union[Table.SelectionReturn.TYPE, None],
     table_id: str,
 ) -> bool:
     is_explicitly_true = selectable is True or allow_select is True
@@ -143,17 +142,38 @@ def get_selectable(
     # If paginated, add a secondary check to ensure that they have the correct
     # selection mode.
     if paginated:
-        if selection_return_type != TableSelectionReturn.INDEX:
+        if selection_return_type != Table.SelectionReturn.INDEX:
             # If it's selectable, we assume the user wants row selection and
             # warn them on how to enable it.
             if is_selectable:
                 warnings.warn(
-                    f"Paginated tables only support row selection by index. Set `selection_return_type: 'index'` to enable row selection for table with id: {table_id}."
+                    f"Paginated tables only support row selection by id. Set a `primary_key` and specify `selection_return_type: 'id'` to enable row selection for table with id: {table_id}."
                 )
 
             return False
 
     return is_selectable
+
+
+def warn_about_select_mode(
+    primary_key: Union[Table.DataKey, None],
+    select_mode: Union[Table.SelectionReturn.TYPE, None],
+    table_id: str,
+) -> None:
+    if primary_key is None and select_mode == Table.SelectionReturn.ID:
+        warnings.warn(
+            f"Selection return type is set to `id` but no `primary_key` is set for table with id: {table_id}. "
+        )
+
+    if select_mode == Table.SelectionReturn.INDEX:
+        if primary_key is not None:
+            warnings.warn(
+                f"The `primary_key` property does nothing when the selection return type is `index` for table with id: {table_id}. Set `selection_return_type: 'id'` instead (index is deprecated and may be removed in a future version)."
+            )
+        else:
+            warnings.warn(
+                f"Selection return type of `index` is deprecated for table with id: {table_id}. Set `selection_return_type: 'id'` and specify a `primary_key` to use instead. While index selection is supported for now, it may be removed in a future version. Additionally, ID selection enables proper row selection tracking!"
+            )
 
 
 def _table(
@@ -171,7 +191,7 @@ def _table(
     style: Union[ComponentStyle, None] = None,
     min_selections: int = MULTI_SELECTION_MIN_DEFAULT,
     max_selections: int = MULTI_SELECTION_MAX_DEFAULT,
-    selection_return_type: TableSelectionReturn.TYPE = TableSelectionReturn.FULL,
+    selection_return_type: Table.SelectionReturn.TYPE = Table.SelectionReturn.FULL,
     searchable: bool = True,
     paginate: bool = False,
     overflow: Union[TABLE_COLUMN_OVERFLOW, None] = None,
@@ -182,6 +202,7 @@ def _table(
     allow_select: Union[bool, None] = None,
     filterable: Union[bool, None] = None,
     filter_by: Union[Table.AdvancedFilterModel, None] = None,
+    primary_key: Union[Table.DataKey, None] = None,
 ) -> ComponentReturn:
 
     if not isinstance(initial_selected_rows, list):
@@ -241,6 +262,9 @@ def _table(
     if sortable != Table.SortOption.DISABLED and sort_by is not None:
         model_properties["sortBy"] = sort_by
 
+    if primary_key is not None:
+        model_properties["primaryKey"] = primary_key
+
     filterable = get_filterable(filterable, manually_paged, auto_paged)
     if filterable is False:
         model_properties["filterable"] = False
@@ -253,7 +277,7 @@ def _table(
     if manually_paged or auto_paged:
         model_properties["paged"] = True
 
-    if selection_return_type != TableSelectionReturn.FULL:
+    if selection_return_type != Table.SelectionReturn.FULL:
         model_properties["selectMode"] = selection_return_type
 
     on_page_change_hook = (
@@ -277,6 +301,8 @@ def _table(
 
     if density is not None:
         model_properties["density"] = density
+
+    warn_about_select_mode(primary_key, selection_return_type, id)
 
     return {
         "model": {
@@ -321,7 +347,7 @@ def table(
     style: Union[ComponentStyle, None] = None,
     min_selections: int = MULTI_SELECTION_MIN_DEFAULT,
     max_selections: int = MULTI_SELECTION_MAX_DEFAULT,
-    selection_return_type: TableSelectionReturn.TYPE = TableSelectionReturn.FULL,
+    selection_return_type: Table.SelectionReturn.TYPE = Table.SelectionReturn.FULL,
     searchable: bool = True,
     paginate: bool = False,
     sort_by: Union[List[TableColumnSort], None] = None,
@@ -331,6 +357,7 @@ def table(
     allow_select: Union[bool, None] = None,
     filterable: Union[bool, None] = None,
     filter_by: Union[Table.AdvancedFilterModel, None] = None,
+    primary_key: Union[Table.DataKey, None] = None,
 ) -> ComponentReturn:
     """A powerful and highly customizable table component. For example:
 
@@ -388,14 +415,14 @@ def table(
     #### description : `str`. Optional.
         Description text to display below the table label.
 
-    #### initial_selected_rows : `List[int]`. Optional.
-        List of row indices to be selected when the table first renders. Defaults to empty list.
+    #### initial_selected_rows : `List[str | int | float]`. Optional.
+        List of row ids to be selected when the table first renders. Defaults to empty list.
 
     #### validate : `Callable[[], str | None]` | `Callable[[TableData], str | None]`. Optional.
         Custom validation function that is called on selected rows. Return `None` if valid, or a string error message if invalid.
 
     #### on_change : `Callable[[], None]` | `Callable[[TableData], None]`. Optional.
-        Function to be called when row selection changes.
+        Function to be called when row selection changes. Will return a list of rows, or a list of row ids if the `selection_return_type` parameter is `id`.
 
     #### style : `dict`. Optional.
         CSS styles object to directly style the table HTML element.
@@ -406,8 +433,8 @@ def table(
     #### max_selections : `int`. Optional.
         Maximum number of rows that can be selected. Defaults to unlimited.
 
-    #### selection_return_type : `full` | `index`. Optional.
-        Whether to return a list of rows, or a list of row indices to callbacks like `on_change` and `on_submit`. Defaults to `full`. Must be `index` if the table is paginated.
+    #### selection_return_type : `full` | `id`. Optional.
+        Whether to return a list of rows, or a list of row ids to callbacks like `on_change` and `on_submit`. Defaults to `full`. Must be `id` if the table is paginated.
 
     #### searchable : `bool`. Optional.
         Whether to enable the table search bar. Defaults to `True` for normal tables, `False` for paginated tables.
@@ -447,6 +474,9 @@ def table(
 
     #### selectable : `bool`. Optional.
         Whether to allow row selection. Defaults to `False`, or `True` if `on_change` is provided.
+
+    #### primary_key : `str | int | float`. Optional.
+        The primary key of the table. This should map to a unique, stable identifier field in the table data. Setting this property enables proper row selection tracking. If not set, the row index will be used.
 
     #### density : `compact` | `standard` | `comfortable`. Optional.
         The density of the table rows. Options:
@@ -491,6 +521,7 @@ def table(
         density=density,
         filterable=filterable,
         filter_by=filter_by,
+        primary_key=primary_key,
     )
 
 
@@ -514,7 +545,7 @@ def dataframe(
     style: Union[ComponentStyle, None] = None,
     min_selections: int = MULTI_SELECTION_MIN_DEFAULT,
     max_selections: int = MULTI_SELECTION_MAX_DEFAULT,
-    selection_return_type: TableSelectionReturn.TYPE = TableSelectionReturn.FULL,
+    selection_return_type: Table.SelectionReturn.TYPE = Table.SelectionReturn.FULL,
     searchable: bool = True,
     paginate: bool = False,
     overflow: Union[TABLE_COLUMN_OVERFLOW, None] = None,
@@ -525,6 +556,7 @@ def dataframe(
     filterable: Union[bool, None] = None,
     filter_by: Union[Table.AdvancedFilterModel, None] = None,
     allow_select: Union[bool, None] = None,
+    primary_key: Union[Table.DataKey, None] = None,
 ) -> ComponentReturn:
     if allow_select is not None:
         warnings.warn(
@@ -566,4 +598,5 @@ def dataframe(
         density=density,
         filterable=filterable,
         filter_by=filter_by,
+        primary_key=primary_key,
     )

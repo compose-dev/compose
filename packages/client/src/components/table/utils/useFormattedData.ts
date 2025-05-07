@@ -12,7 +12,8 @@ import { useMemo } from "react";
 function useFormattedData(
   data: UI.Components.InputTable["model"]["properties"]["data"],
   columns: TableColumnProp[],
-  offset: number
+  offset: number,
+  primaryKey: string | number | undefined
 ) {
   const formattedRows: FormattedTableRow[] = useMemo(() => {
     const metaColumns = columns.filter(
@@ -22,8 +23,22 @@ function useFormattedData(
     );
 
     const result = data.map((row, rowIdx) => {
+      let rowId: string;
+
+      try {
+        rowId = primaryKey
+          ? row[primaryKey].toString()
+          : (rowIdx + offset).toString();
+      } catch (e) {
+        alert(
+          `Error assigning a row ID to table row. Received error: ${e}. Returning a fallback row ID.`
+        );
+
+        rowId = (rowIdx + offset).toString();
+      }
+
       const meta: Record<string, string> = {
-        [INTERNAL_COLUMN_ID.ROW_SELECTION]: (rowIdx + offset).toString(),
+        [INTERNAL_COLUMN_ID.ROW_SELECTION]: rowId,
       };
 
       for (const col of metaColumns) {
@@ -54,7 +69,7 @@ function useFormattedData(
     });
 
     return result;
-  }, [data, columns, offset]);
+  }, [data, columns, offset, primaryKey]);
 
   return formattedRows;
 }
