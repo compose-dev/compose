@@ -176,7 +176,16 @@ function PinAndHideColumnsPanel({
     <div
       className={classNames("flex flex-col space-y-4 max-w-full", className)}
     >
-      <h5>Column settings</h5>
+      <div className="flex flex-row items-center justify-between">
+        <h5>Column settings</h5>
+        <Button
+          variant="ghost"
+          className="text-sm text-brand-neutral-2 hover:text-brand-neutral"
+          onClick={resetAllSettings}
+        >
+          Reset to default
+        </Button>
+      </div>
 
       <TextInput
         value={searchTerm}
@@ -199,18 +208,6 @@ function PinAndHideColumnsPanel({
             />
           );
         })}
-      </div>
-
-      <div className="flex w-full border-b border-brand-neutral" />
-
-      <div>
-        <Button
-          variant="ghost"
-          className="text-sm text-brand-neutral-2 hover:text-brand-neutral"
-          onClick={resetAllSettings}
-        >
-          Reset to default
-        </Button>
       </div>
     </div>
   );
@@ -244,11 +241,11 @@ function PinAndHideColumnsPopover({
 
   const pinnedCount = getPinnedCount();
 
-  function getTooltipContent() {
-    const hiddenCount = Object.values(columnVisibility).filter(
-      (v) => v === false
-    ).length;
+  const hiddenCount = Object.values(columnVisibility).filter(
+    (v) => v === false
+  ).length;
 
+  function getTooltipContent() {
     const pinnedString =
       pinnedCount > 0
         ? `${pinnedCount} pinned ${pinnedCount > 1 ? "columns" : "column"}`
@@ -274,9 +271,7 @@ function PinAndHideColumnsPopover({
     return "Pin and hide columns";
   }
 
-  const hasActiveSettings = Object.values(columnVisibility).some(
-    (v) => v === false
-  );
+  const hasActiveSettings = pinnedCount > 0 || hiddenCount > 0;
 
   return (
     <Popover.Root>

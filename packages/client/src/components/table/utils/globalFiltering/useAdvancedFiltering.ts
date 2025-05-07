@@ -1,8 +1,13 @@
 import { UI } from "@composehq/ts-public";
 import { useDataOperation } from "../useDataOperation";
 import { EditableAdvancedFilterModel } from "./filterModel";
-import { FormattedTableRow } from "../constants";
+import {
+  FormattedTableRow,
+  TableColumnProp,
+  TanStackTable,
+} from "../constants";
 import { v4 as uuid } from "uuid";
+import { useMemo } from "react";
 
 function serverToDisplayFilterModelRecursive(
   model: UI.Table.AdvancedFilterModel<FormattedTableRow[]>
@@ -45,7 +50,10 @@ function isEmptyOperator(operator: UI.Table.ColumnFilterOperator): boolean {
 }
 
 function getValidFilterModel(
-  model: EditableAdvancedFilterModel
+  model:
+    | EditableAdvancedFilterModel
+    | UI.Table.AdvancedFilterModel<FormattedTableRow[]>,
+  getKey: (key: string) => string
 ): UI.Table.AdvancedFilterModel<FormattedTableRow[]> {
   if (model === null) {
     return null;
@@ -64,7 +72,7 @@ function getValidFilterModel(
     }
 
     return {
-      key: model.key,
+      key: getKey(model.key),
       operator: model.operator,
       value: model.value,
     };
@@ -72,7 +80,7 @@ function getValidFilterModel(
 
   // Handle filter group
   const validFilters = model.filters
-    .map(getValidFilterModel)
+    .map((filter) => getValidFilterModel(filter, getKey))
     .filter((filter): filter is NonNullable<typeof filter> => filter !== null);
 
   // If no valid filters remain, the group is invalid
@@ -89,14 +97,28 @@ function getValidFilterModel(
 function useAdvancedFiltering({
   initialValue,
   filterable,
+  columns,
   onShouldRequestBrowserData,
   onShouldRequestServerData,
 }: {
   initialValue: UI.Table.AdvancedFilterModel<FormattedTableRow[]>;
   filterable: boolean;
+  columns: TableColumnProp[];
   onShouldRequestBrowserData: (() => void) | null;
   onShouldRequestServerData: (() => void) | null;
 }) {
+  const columnIdToName = useMemo(
+    () =>
+      columns.reduce(
+        (acc, column) => {
+          acc[column.id] = column.original ?? column.id;
+          return acc;
+        },
+        {} as Record<string, string>
+      ),
+    [columns]
+  );
+
   return useDataOperation({
     // Initial Values
     initialValueFromServer: initialValue,
@@ -109,8 +131,10 @@ function useAdvancedFiltering({
 
     // Formatting
     formatServerToDisplay: serverToDisplayFilterModel,
-    formatDisplayToValidated: getValidFilterModel,
-    formatValidatedToServer: (validatedValue) => validatedValue,
+    formatDisplayToValidated: (model) =>
+      getValidFilterModel(model, (key) => key),
+    formatValidatedToServer: (validatedModel) =>
+      getValidFilterModel(validatedModel, (key) => columnIdToName[key]),
 
     // Pagination Syncing
     onShouldRequestBrowserData,

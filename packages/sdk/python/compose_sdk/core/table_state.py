@@ -1,7 +1,8 @@
 from typing import Dict, TypedDict, Any, Union, Tuple, List
 from ..scheduler import Scheduler  # type: ignore[attr-defined]
-from .ui import Stale, TableColumnSort
+from .ui import Stale, TableColumnSort, Table
 from .smart_debounce import SmartDebounce
+from .json import JSON
 
 
 class TableStateRecordInput(TypedDict):
@@ -11,6 +12,7 @@ class TableStateRecordInput(TypedDict):
     offset: int
     page_size: int
     initial_sort_by: List[TableColumnSort]
+    initial_filter_by: Table.AdvancedFilterModel
     stale: Stale.TYPE
 
 
@@ -19,6 +21,7 @@ class TableStateRecord(TableStateRecordInput):
     render_id: str
     table_id: str
     active_sort_by: List[TableColumnSort]
+    active_filter_by: Table.AdvancedFilterModel
 
 
 PAGE_UPDATE_DEBOUNCE_INTERVAL_MS = 250
@@ -40,6 +43,13 @@ def sort_by_did_change(
             return True
 
     return False
+
+
+def filter_by_did_change(
+    old_filter_by: Table.AdvancedFilterModel,
+    new_filter_by: Table.AdvancedFilterModel,
+) -> bool:
+    return JSON.stringify(old_filter_by) != JSON.stringify(new_filter_by)
 
 
 class TableState:
@@ -80,6 +90,8 @@ class TableState:
             "table_id": table_id,
             "initial_sort_by": state["initial_sort_by"],
             "active_sort_by": state["initial_sort_by"],
+            "initial_filter_by": state["initial_filter_by"],
+            "active_filter_by": state["initial_filter_by"],
         }
 
     def update(self, render_id: str, table_id: str, state: Dict[str, Any]) -> None:
@@ -91,6 +103,11 @@ class TableState:
             state["initial_sort_by"], self.state[key]["initial_sort_by"]
         ):
             self.state[key]["active_sort_by"] = state["initial_sort_by"] or []
+
+        if "initial_filter_by" in state and filter_by_did_change(
+            state["initial_filter_by"], self.state[key]["initial_filter_by"]
+        ):
+            self.state[key]["active_filter_by"] = state["initial_filter_by"] or None
 
         self.state[key] = {**self.state[key], **state}  # type: ignore
 

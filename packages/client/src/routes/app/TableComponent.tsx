@@ -201,7 +201,8 @@ export default function TableComponent({
       searchQuery: string | null,
       offset: number,
       pageSize: number,
-      sortBy: UI.Table.ColumnSort<UI.Table.DataRow[]>[]
+      sortBy: UI.Table.ColumnSort<UI.Table.DataRow[]>[],
+      filterBy: UI.Table.AdvancedFilterModel<UI.Table.DataRow[]> | null
     ) => {
       if (!executionId || !environmentId) {
         return;
@@ -217,6 +218,7 @@ export default function TableComponent({
           searchQuery,
           sortBy,
           pageSize,
+          filterBy,
         },
         environmentId
       );

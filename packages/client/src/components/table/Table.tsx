@@ -66,7 +66,8 @@ function Table({
     searchQuery: string | null,
     offset: number,
     pageSize: number,
-    sortBy: UI.Table.PageChangeParams<UI.Table.DataRow[]>["sortBy"]
+    sortBy: UI.Table.PageChangeParams<UI.Table.DataRow[]>["sortBy"],
+    filterBy: UI.Table.PageChangeParams<UI.Table.DataRow[]>["filterBy"]
   ) => void;
   onTableRowActionHook: (rowIdx: number, actionIdx: number) => void;
   pageSize?: number;
@@ -126,9 +127,11 @@ function Table({
     setDisplayValue: setFilters,
     resetValue: resetFilters,
     validatedValueRef: validatedFiltersRef,
+    serverValueRef: serverFilterByRef,
   } = GlobalFiltering.useAdvancedFiltering({
     initialValue: filterBy,
     filterable,
+    columns,
     onShouldRequestBrowserData: handleRequestBrowserDataRef.current,
     onShouldRequestServerData: handleRequestServerDataRef.current,
   });
@@ -251,7 +254,10 @@ function Table({
       serverSearchQueryRef.current,
       newOffset ?? offset,
       newPageSize ?? pageSize,
-      serverSortRef.current
+      serverSortRef.current,
+      serverFilterByRef.current as UI.Table.AdvancedFilterModel<
+        UI.Table.DataRow[]
+      >
     );
   };
 

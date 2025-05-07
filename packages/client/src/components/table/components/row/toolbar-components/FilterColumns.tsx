@@ -693,7 +693,7 @@ function FilterColumnsPanel({
           className="text-sm text-brand-neutral-2 hover:text-brand-neutral"
           onClick={resetFilterModel}
         >
-          Reset filters
+          Reset to default
         </Button>
       </div>
       {filterModel !== null && (

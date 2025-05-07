@@ -55,6 +55,7 @@ async function configureTablePagination(
         tableState.update(renderId, component.model.id, {
           stale: UI.Stale.OPTION.UPDATE_NOT_DISABLED,
           initialSortBy: component.model.properties.sortBy || [],
+          initialFilterBy: component.model.properties.filterBy || null,
         });
       } else {
         data = [];
@@ -68,6 +69,7 @@ async function configureTablePagination(
           pageSize,
           searchQuery,
           initialSortBy: component.model.properties.sortBy || [],
+          initialFilterBy: component.model.properties.filterBy || null,
         });
       }
     } else {
@@ -84,10 +86,12 @@ async function configureTablePagination(
           data,
           stale: UI.Stale.OPTION.FALSE,
           initialSortBy: component.model.properties.sortBy || [],
+          initialFilterBy: component.model.properties.filterBy || null,
         });
       } else {
         tableState.update(renderId, component.model.id, {
           initialSortBy: component.model.properties.sortBy || [],
+          initialFilterBy: component.model.properties.filterBy || null,
         });
       }
     }

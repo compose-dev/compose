@@ -70,6 +70,9 @@ def configure_table_pagination(
                         "initial_sort_by": component["model"]["properties"].get(
                             "sortBy", []
                         ),
+                        "initial_filter_by": component["model"]["properties"].get(
+                            "filterBy", None
+                        ),
                     },
                 )
             else:
@@ -88,6 +91,9 @@ def configure_table_pagination(
                         "stale": "INITIALLY_STALE",
                         "initial_sort_by": component["model"]["properties"].get(
                             "sortBy", []
+                        ),
+                        "initial_filter_by": component["model"]["properties"].get(
+                            "filterBy", None
                         ),
                     },
                 )
@@ -110,6 +116,9 @@ def configure_table_pagination(
                         "initial_sort_by": component["model"]["properties"].get(
                             "sortBy", []
                         ),
+                        "initial_filter_by": component["model"]["properties"].get(
+                            "filterBy", None
+                        ),
                     },
                 )
             else:
@@ -119,6 +128,9 @@ def configure_table_pagination(
                     {
                         "initial_sort_by": component["model"]["properties"].get(
                             "sortBy", []
+                        ),
+                        "initial_filter_by": component["model"]["properties"].get(
+                            "filterBy", None
                         ),
                     },
                 )

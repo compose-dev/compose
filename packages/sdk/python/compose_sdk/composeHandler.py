@@ -329,6 +329,7 @@ class ComposeClient:
                 event["offset"],
                 event["pageSize"],
                 event["sortBy"],
+                event["filterBy"],
             )
 
     async def execute_app(

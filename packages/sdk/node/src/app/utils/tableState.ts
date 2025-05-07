@@ -13,6 +13,8 @@ interface TableStateRecord {
   tableId: string;
   initialSortBy: UI.Table.ColumnSort<UI.Table.DataRow[]>[];
   activeSortBy: UI.Table.ColumnSort<UI.Table.DataRow[]>[];
+  initialFilterBy: UI.Table.AdvancedFilterModel<UI.Table.DataRow[]> | null;
+  activeFilterBy: UI.Table.AdvancedFilterModel<UI.Table.DataRow[]> | null;
 }
 
 const PAGE_UPDATE_DEBOUNCE_INTERVAL_MS = 250;
@@ -43,6 +45,13 @@ function sortByDidChange(
       sort.direction !== newSortBy[index].direction
     );
   });
+}
+
+function filterByDidChange(
+  oldFilterBy: UI.Table.AdvancedFilterModel<UI.Table.DataRow[]> | null,
+  newFilterBy: UI.Table.AdvancedFilterModel<UI.Table.DataRow[]> | null
+) {
+  return JSON.stringify(oldFilterBy) !== JSON.stringify(newFilterBy);
 }
 
 class TableState {
@@ -96,6 +105,7 @@ class TableState {
       | "tableId"
       | "updateCount"
       | "activeSortBy"
+      | "activeFilterBy"
     >
   ) {
     const key = this.generateKey(renderId, tableId);
@@ -106,6 +116,7 @@ class TableState {
       renderId,
       tableId,
       activeSortBy: state.initialSortBy,
+      activeFilterBy: state.initialFilterBy,
     };
   }
 
@@ -119,6 +130,13 @@ class TableState {
       sortByDidChange(state.initialSortBy, this.state[key].initialSortBy)
     ) {
       this.state[key].activeSortBy = state.initialSortBy || [];
+    }
+
+    if (
+      state.initialFilterBy !== undefined &&
+      filterByDidChange(state.initialFilterBy, this.state[key].initialFilterBy)
+    ) {
+      this.state[key].activeFilterBy = state.initialFilterBy || null;
     }
 
     this.state[key] = { ...this.state[key], ...state };

@@ -81,7 +81,12 @@ function SortColumnsPanel({
     <div
       className={classNames("flex flex-col space-y-4 max-w-full", className)}
     >
-      <h5>Sort by</h5>
+      <div className="flex flex-row items-center justify-between">
+        <h5>Sort by</h5>
+        <Button variant="ghost" onClick={resetSortingState}>
+          <p className="text-sm text-brand-neutral-2">Reset to default</p>
+        </Button>
+      </div>
       {sortingState.length > 0 && (
         <div className="flex flex-col space-y-2">
           {sortingState.map((sort) => (
@@ -116,9 +121,9 @@ function SortColumnsPanel({
           ))}
         </div>
       )}
-      <div className="flex flex-row gap-x-4">
-        {(sortable !== UI.Table.SORT_OPTION.SINGLE ||
-          sortingState.length < 1) && (
+      {(sortable !== UI.Table.SORT_OPTION.SINGLE ||
+        sortingState.length < 1) && (
+        <div>
           <DropdownMenu
             labelVariant="ghost"
             label={
@@ -141,11 +146,8 @@ function SortColumnsPanel({
               },
             }))}
           />
-        )}
-        <Button variant="ghost" onClick={resetSortingState}>
-          <p className="text-sm text-brand-neutral-2">Reset to default</p>
-        </Button>
-      </div>
+        </div>
+      )}
       {sortable === UI.Table.SORT_OPTION.MULTI && (
         <>
           <div className="flex w-full border-b border-brand-neutral" />

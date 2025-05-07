@@ -139,17 +139,22 @@ function ListboxButtonContent<T extends SelectValue>({
                 )}
               >
                 {option.label}
-                <Button
-                  variant="ghost"
-                  size="sm" // Adjust size if needed
-                  className="ml-1 -mr-1 p-0.5" // Adjust spacing
+                <span
+                  role="button"
+                  tabIndex={disabled ? undefined : 0} // Makes it focusable only when not disabled
+                  className={classNames("ml-1 -mr-1 p-0.5")}
                   onClick={() => {
+                    if (disabled) {
+                      return;
+                    }
+
                     onRemoveOption?.(option);
                   }}
-                  disabled={disabled}
+                  aria-disabled={disabled}
+                  aria-label={`Remove ${option.label}`}
                 >
                   <Icon name="x" size="0.5" />
-                </Button>
+                </span>
               </span>
             ))}
           </div>

@@ -115,13 +115,17 @@ function useDataOperation<TDisplayFormat, TValidatedFormat, TServerFormat>({
 
     setDisplayValue(newDisplayValue);
     validatedValueRef.current = newValidatedValue;
-    currentServerValueRef.current = newServerValue;
 
     if (
       onShouldRequestServerData &&
       serverValueDidChange(currentServerValueRef.current, newServerValue)
     ) {
+      // update ref prior to calling listener since there may be side effects
+      // that depend on the ref value
+      currentServerValueRef.current = newServerValue;
       onShouldRequestServerData();
+    } else {
+      currentServerValueRef.current = newServerValue;
     }
 
     if (onShouldRequestBrowserData) {

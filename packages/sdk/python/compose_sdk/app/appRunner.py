@@ -40,6 +40,7 @@ from ..core import (
     RateLimiter,
     validate_audit_log,
     TableColumnSort,
+    Table,
 )
 
 from .appDefinition import AppDefinition
@@ -237,6 +238,7 @@ class AppRunner:
                             table["offset"],
                             table["page_size"],
                             table["active_sort_by"],
+                            table["active_filter_by"],
                         )
                     )
 
@@ -540,6 +542,7 @@ class AppRunner:
                                 table["offset"],
                                 table["page_size"],
                                 table["active_sort_by"],
+                                table["active_filter_by"],
                                 True,
                             )
                         )
@@ -1021,6 +1024,7 @@ class AppRunner:
         offset: int,
         page_size: int,
         sort_by: List[TableColumnSort],
+        filter_by: Table.AdvancedFilterModel,
         refresh_total_records: bool = False,
     ):
         try:
@@ -1093,6 +1097,7 @@ class AppRunner:
                         None if refresh_total_records else table_state["total_records"]
                     ),
                     "sort_by": sort_by,
+                    "filter_by": filter_by,
                 }
 
                 response = await Render.run_hook_function(
@@ -1117,6 +1122,7 @@ class AppRunner:
                         "data": table_state["data"],
                         "page_size": table_state["page_size"],
                         "sort_by": table_state["active_sort_by"],
+                        "filter_by": table_state["active_filter_by"],
                     }
                 )
 
@@ -1128,6 +1134,7 @@ class AppRunner:
                         "data": data,
                         "page_size": page_size,
                         "sort_by": sort_by,
+                        "filter_by": filter_by,
                     }
                 )
 
@@ -1171,6 +1178,7 @@ class AppRunner:
                     "stale": Stale.FALSE,
                     "page_size": page_size,
                     "active_sort_by": sort_by,
+                    "active_filter_by": filter_by,
                 },
             )
 

@@ -37,6 +37,7 @@ class TablePageChangeArgs(TypedDict):
     prev_search_query: Union[str, None]
     prev_total_records: Union[int, None]
     sort_by: List[TableColumnSort]
+    filter_by: TableAdvancedFilterModel
 
 
 class TablePageChangeResponse(TypedDict):

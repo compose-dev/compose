@@ -465,7 +465,8 @@ class AppRunner {
             table.searchQuery,
             table.offset,
             table.pageSize,
-            table.activeSortBy
+            table.activeSortBy,
+            table.activeFilterBy
           );
         }
       }
@@ -761,6 +762,7 @@ class AppRunner {
             newTable.offset,
             newTable.pageSize,
             newTable.activeSortBy,
+            newTable.activeFilterBy,
             true
           );
         });
@@ -1323,6 +1325,7 @@ class AppRunner {
     offset: number,
     pageSize: number,
     sortBy: UI.Table.ColumnSort<UI.Table.DataRow[]>[],
+    filterBy: UI.Table.AdvancedFilterModel<UI.Table.DataRow[]> | null,
     refreshTotalRecords: boolean = false
   ) {
     try {
@@ -1395,6 +1398,7 @@ class AppRunner {
           pageSize,
           searchQuery,
           sortBy,
+          filterBy,
           prevSearchQuery: tableState.searchQuery,
           prevTotalRecords: refreshTotalRecords
             ? null
@@ -1423,6 +1427,7 @@ class AppRunner {
           data: tableState.data,
           pageSize: tableState.pageSize,
           sortBy: tableState.activeSortBy,
+          filterBy: tableState.activeFilterBy,
         });
 
         const newStringified = JSON.stringify({
@@ -1432,6 +1437,7 @@ class AppRunner {
           data,
           pageSize,
           sortBy,
+          filterBy,
         });
 
         if (oldStringified === newStringified) {
@@ -1465,6 +1471,7 @@ class AppRunner {
         stale: UI.Stale.OPTION.FALSE,
         pageSize,
         activeSortBy: sortBy,
+        activeFilterBy: filterBy,
       });
 
       component.model.properties = {
