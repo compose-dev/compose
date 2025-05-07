@@ -510,6 +510,7 @@ class AppRunner:
                     {
                         "type": EventType.SdkToServer.RERENDER_UI_V3,
                         "diff": updated_renders,
+                        "v": 2,
                     },
                     self.browserSessionId,
                     self.executionId,
