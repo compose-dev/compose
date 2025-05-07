@@ -22,6 +22,7 @@ function useDataOperation<TDisplayFormat, TValidatedFormat, TServerFormat>({
   operationDisabledValue,
   onShouldRequestServerData,
   onShouldRequestBrowserData,
+  shouldManuallySyncServerValue,
 }: {
   // Initial value
   initialValueFromServer: TServerFormat;
@@ -36,6 +37,7 @@ function useDataOperation<TDisplayFormat, TValidatedFormat, TServerFormat>({
     oldValue: TServerFormat,
     newValue: TServerFormat
   ) => boolean;
+  shouldManuallySyncServerValue: boolean;
 
   // Operation enabled state
   operationIsEnabled: boolean;
@@ -53,6 +55,7 @@ function useDataOperation<TDisplayFormat, TValidatedFormat, TServerFormat>({
   const validatedValueRef = useRef<TValidatedFormat>(
     formatDisplayToValidated(displayValue)
   );
+  const [serverValueIsSynced, setServerValueIsSynced] = useState(false);
 
   const prevInitialValueFromServer = useRef(initialValueFromServer);
   const currentServerValueRef = useRef(prevInitialValueFromServer.current);
@@ -64,6 +67,7 @@ function useDataOperation<TDisplayFormat, TValidatedFormat, TServerFormat>({
         operationDisabledValue
       );
       currentServerValueRef.current = initialValueFromServer;
+      setServerValueIsSynced(true);
 
       if (onShouldRequestBrowserData) {
         onShouldRequestBrowserData();
@@ -80,6 +84,7 @@ function useDataOperation<TDisplayFormat, TValidatedFormat, TServerFormat>({
     ) {
       prevInitialValueFromServer.current = initialValueFromServer;
       currentServerValueRef.current = initialValueFromServer;
+      setServerValueIsSynced(true);
 
       const newDisplayValue = formatServerToDisplay(initialValueFromServer);
       const newValidatedValue = formatDisplayToValidated(newDisplayValue);
@@ -101,20 +106,12 @@ function useDataOperation<TDisplayFormat, TValidatedFormat, TServerFormat>({
     onShouldRequestBrowserData,
   ]);
 
-  function handleDisplayValueChange(newValue: Updater<TDisplayFormat>) {
+  function syncServerValue() {
     if (!operationIsEnabled) {
       return;
     }
 
-    const newDisplayValue: TDisplayFormat =
-      // @ts-expect-error ignore the type error for now
-      typeof newValue === "function" ? newValue(displayValue) : newValue;
-
-    const newValidatedValue = formatDisplayToValidated(newDisplayValue);
-    const newServerValue = formatValidatedToServer(newValidatedValue);
-
-    setDisplayValue(newDisplayValue);
-    validatedValueRef.current = newValidatedValue;
+    const newServerValue = formatValidatedToServer(validatedValueRef.current);
 
     if (
       onShouldRequestServerData &&
@@ -126,6 +123,29 @@ function useDataOperation<TDisplayFormat, TValidatedFormat, TServerFormat>({
       onShouldRequestServerData();
     } else {
       currentServerValueRef.current = newServerValue;
+    }
+
+    setServerValueIsSynced(true);
+  }
+
+  function handleDisplayValueChange(newValue: Updater<TDisplayFormat>) {
+    if (!operationIsEnabled) {
+      return;
+    }
+
+    const newDisplayValue: TDisplayFormat =
+      // @ts-expect-error ignore the type error for now
+      typeof newValue === "function" ? newValue(displayValue) : newValue;
+
+    const newValidatedValue = formatDisplayToValidated(newDisplayValue);
+
+    setDisplayValue(newDisplayValue);
+    validatedValueRef.current = newValidatedValue;
+
+    if (!shouldManuallySyncServerValue) {
+      syncServerValue();
+    } else {
+      setServerValueIsSynced(false);
     }
 
     if (onShouldRequestBrowserData) {
@@ -145,6 +165,7 @@ function useDataOperation<TDisplayFormat, TValidatedFormat, TServerFormat>({
     setDisplayValue(newDisplayValue);
     validatedValueRef.current = newValidatedValue;
     currentServerValueRef.current = newServerValue;
+    setServerValueIsSynced(true);
 
     if (
       onShouldRequestServerData &&
@@ -164,6 +185,8 @@ function useDataOperation<TDisplayFormat, TValidatedFormat, TServerFormat>({
     serverValueRef: currentServerValueRef,
     setDisplayValue: handleDisplayValueChange,
     resetValue,
+    manuallySyncServerValue: syncServerValue,
+    serverValueIsSynced,
   };
 }
 

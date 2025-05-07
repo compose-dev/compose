@@ -100,12 +100,14 @@ function useAdvancedFiltering({
   columns,
   onShouldRequestBrowserData,
   onShouldRequestServerData,
+  paginated,
 }: {
   initialValue: UI.Table.AdvancedFilterModel<FormattedTableRow[]>;
   filterable: boolean;
   columns: TableColumnProp[];
   onShouldRequestBrowserData: (() => void) | null;
   onShouldRequestServerData: (() => void) | null;
+  paginated: boolean;
 }) {
   const columnIdToName = useMemo(
     () =>
@@ -128,6 +130,7 @@ function useAdvancedFiltering({
     // Operation enabled state
     operationIsEnabled: filterable,
     operationDisabledValue: null,
+    shouldManuallySyncServerValue: paginated,
 
     // Formatting
     formatServerToDisplay: serverToDisplayFilterModel,

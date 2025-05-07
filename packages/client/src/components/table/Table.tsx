@@ -130,12 +130,15 @@ function Table({
     resetValue: resetFilters,
     validatedValueRef: validatedFiltersRef,
     serverValueRef: serverFilterByRef,
+    manuallySyncServerValue: manuallySyncServerFilters,
+    serverValueIsSynced: serverFiltersAreSynced,
   } = GlobalFiltering.useAdvancedFiltering({
     initialValue: filterBy,
     filterable,
     columns,
     onShouldRequestBrowserData: handleRequestBrowserDataRef.current,
     onShouldRequestServerData: handleRequestServerDataRef.current,
+    paginated,
   });
 
   const { paginationState, setPaginationState } = usePagination(
@@ -304,6 +307,8 @@ function Table({
             resetColumnPinningToInitial={resetColumnPinningToInitial}
             filterable={filterable}
             resetFilters={resetFilters}
+            manuallySyncServerFilters={manuallySyncServerFilters}
+            serverFiltersAreSynced={serverFiltersAreSynced}
           />
           <TableBody
             table={table}

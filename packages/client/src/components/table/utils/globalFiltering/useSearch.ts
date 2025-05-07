@@ -17,6 +17,7 @@ function useSearch({
     // Operation enabled state
     operationIsEnabled: searchable,
     operationDisabledValue: null,
+    shouldManuallySyncServerValue: false,
 
     // Formatting
     formatServerToDisplay: (serverValue) => serverValue,

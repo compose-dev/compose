@@ -101,6 +101,8 @@ function ToolbarRow({
   resetColumnPinningToInitial,
   filterable,
   resetFilters,
+  manuallySyncServerFilters,
+  serverFiltersAreSynced,
 }: {
   searchQuery: string | null;
   setSearchQuery: (val: string | null) => void;
@@ -118,6 +120,8 @@ function ToolbarRow({
   resetColumnPinningToInitial: () => void;
   filterable: boolean;
   resetFilters: () => void;
+  manuallySyncServerFilters: () => void;
+  serverFiltersAreSynced: boolean;
 }) {
   const offset =
     table.getState().pagination.pageIndex *
@@ -165,6 +169,9 @@ function ToolbarRow({
           setFilterModel={setFilters}
           resetFilterModel={resetFilters}
           filterable={filterable}
+          paginated={paginated}
+          manuallySyncServerFilters={manuallySyncServerFilters}
+          serverFiltersAreSynced={serverFiltersAreSynced}
         />
         <PinAndHideColumnsPopover
           table={table}

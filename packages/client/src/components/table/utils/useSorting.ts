@@ -95,6 +95,7 @@ function useSorting({
 
     // Server value change detection
     serverValueDidChange: sortByDidChange,
+    shouldManuallySyncServerValue: false,
 
     // Pagination Syncing
     onShouldRequestServerData,

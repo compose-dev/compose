@@ -496,12 +496,18 @@ function FilterColumnsPanel({
   setFilterModel,
   resetFilterModel,
   className = "",
+  paginated,
+  manuallySyncServerFilters,
+  serverFiltersAreSynced,
 }: {
   table: TanStackTable;
   filterModel: GlobalFiltering.EditableAdvancedFilterModel;
   setFilterModel: (model: GlobalFiltering.EditableAdvancedFilterModel) => void;
   resetFilterModel: () => void;
   className?: string;
+  paginated: boolean;
+  manuallySyncServerFilters: () => void;
+  serverFiltersAreSynced: boolean;
 }) {
   const handleAddTopLevelFilter = useCallback(() => {
     if (filterModel === null) {
@@ -688,13 +694,27 @@ function FilterColumnsPanel({
     <div className={classNames("flex flex-col space-y-4", className)}>
       <div className="flex justify-between items-center">
         <h5>Filter by</h5>
-        <Button
-          variant="ghost"
-          className="text-sm text-brand-neutral-2 hover:text-brand-neutral"
-          onClick={resetFilterModel}
-        >
-          Reset to default
-        </Button>
+        <div className="flex flex-row gap-x-2">
+          <Button
+            variant="ghost"
+            className="text-sm text-brand-neutral-2 hover:text-brand-neutral"
+            onClick={resetFilterModel}
+            disabled={paginated && serverFiltersAreSynced}
+          >
+            Reset to default
+          </Button>
+          {paginated && (
+            <Button
+              variant="primary"
+              onClick={manuallySyncServerFilters}
+              size="sm"
+              className="py-1"
+              disabled={serverFiltersAreSynced}
+            >
+              Apply filters
+            </Button>
+          )}
+        </div>
       </div>
       {filterModel !== null && (
         <div
@@ -749,12 +769,18 @@ function FilterColumnsPopover({
   setFilterModel,
   resetFilterModel,
   filterable,
+  paginated,
+  manuallySyncServerFilters,
+  serverFiltersAreSynced,
 }: {
   table: TanStackTable;
   filterModel: GlobalFiltering.EditableAdvancedFilterModel;
   setFilterModel: (model: GlobalFiltering.EditableAdvancedFilterModel) => void;
   resetFilterModel: () => void;
   filterable: boolean;
+  paginated: boolean;
+  manuallySyncServerFilters: () => void;
+  serverFiltersAreSynced: boolean;
 }) {
   const filterTooltipContent = useMemo(() => {
     if (filterModel !== null) {
@@ -787,6 +813,9 @@ function FilterColumnsPopover({
           setFilterModel={setFilterModel}
           resetFilterModel={resetFilterModel}
           className="w-[40rem]" // Adjust width as needed
+          paginated={paginated}
+          manuallySyncServerFilters={manuallySyncServerFilters}
+          serverFiltersAreSynced={serverFiltersAreSynced}
         />
       </Popover.Panel>
     </Popover.Root>
