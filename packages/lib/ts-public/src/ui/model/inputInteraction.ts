@@ -6,7 +6,7 @@ import {
 } from "../types";
 import { BaseWithInputInteraction } from "./base";
 import * as Components from "../components";
-import { StringOrNumberOnlyKeys } from "../../types";
+import { StringOnlyKeys } from "../../types";
 
 export interface Text<
   TId extends BaseGeneric.Id,
@@ -147,14 +147,16 @@ export interface Table<
     offset?: number;
     pageSize?: number;
     searchQuery?: string | null;
+    sortBy?: TTable.ColumnSort<TTable.DataRow[]>[];
+    filterBy?: TTable.AdvancedFilterModel<TTable.DataRow[]>;
+    viewBy?: string;
     selectMode?: TTable.SelectionReturnType;
     overflow?: TTable.OverflowBehavior;
-    sortBy?: TTable.ColumnSort<TTable.DataRow[]>[];
     sortable?: TTable.SortOption;
-    filterBy?: TTable.AdvancedFilterModel<TTable.DataRow[]>;
     filterable?: boolean;
     density?: TTable.Density;
-    primaryKey?: StringOrNumberOnlyKeys<TTable.DataRow[number]>;
+    primaryKey?: StringOnlyKeys<TTable.DataRow[number]>;
+    views?: TTable.ViewInternal<TTable.DataRow[]>[];
   };
 }
 

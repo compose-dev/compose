@@ -21,6 +21,7 @@ import { Listbox } from "~/components/listbox";
 import { u } from "@compose/ts";
 import { useCallback, useMemo } from "react";
 import { Column } from "@tanstack/react-table";
+import * as Toolbar from "./Toolbar";
 
 function getTagOptionsForColumn(column: Column<FormattedTableRow> | undefined) {
   if (!column || column.columnDef.meta?.format !== UI.Table.COLUMN_FORMAT.tag) {
@@ -40,53 +41,6 @@ function getTagOptionsForColumn(column: Column<FormattedTableRow> | undefined) {
   }
 }
 
-const OPERATOR_INPUT_TYPE = {
-  NO_INPUT: "NO_INPUT",
-  TEXT: "TEXT",
-  NUMBER: "NUMBER",
-  BOOLEAN_SELECT: "BOOLEAN_SELECT",
-  MULTI_SELECT: "MULTI_SELECT",
-  DATE_INPUT: "DATE_INPUT",
-  DATE_TIME_INPUT: "DATE_TIME_INPUT",
-} as const;
-
-function getOperatorInputType(
-  clause: GlobalFiltering.EditableAdvancedFilterClause,
-  columnFormat: UI.Table.ColumnFormat | undefined
-) {
-  if (
-    clause.operator === UI.Table.COLUMN_FILTER_OPERATOR.IS_EMPTY ||
-    clause.operator === UI.Table.COLUMN_FILTER_OPERATOR.IS_NOT_EMPTY
-  ) {
-    return OPERATOR_INPUT_TYPE.NO_INPUT;
-  }
-
-  if (columnFormat === UI.Table.COLUMN_FORMAT.boolean) {
-    return OPERATOR_INPUT_TYPE.BOOLEAN_SELECT;
-  }
-
-  if (columnFormat === UI.Table.COLUMN_FORMAT.date) {
-    return OPERATOR_INPUT_TYPE.DATE_INPUT;
-  }
-
-  if (columnFormat === UI.Table.COLUMN_FORMAT.datetime) {
-    return OPERATOR_INPUT_TYPE.DATE_TIME_INPUT;
-  }
-
-  if (
-    columnFormat === UI.Table.COLUMN_FORMAT.number ||
-    columnFormat === UI.Table.COLUMN_FORMAT.currency
-  ) {
-    return OPERATOR_INPUT_TYPE.NUMBER;
-  }
-
-  if (columnFormat === UI.Table.COLUMN_FORMAT.tag) {
-    return OPERATOR_INPUT_TYPE.MULTI_SELECT;
-  }
-
-  return OPERATOR_INPUT_TYPE.TEXT;
-}
-
 function createDefaultClause(): GlobalFiltering.EditableAdvancedFilterClause {
   return {
     key: null,
@@ -104,6 +58,20 @@ function createDefaultGroup(): GlobalFiltering.EditableAdvancedFilterGroup {
   };
 }
 
+function stringToNumber(internalValue: string | null) {
+  if (internalValue === null) {
+    return null;
+  }
+
+  const numericValue = Number.parseFloat(internalValue);
+
+  if (Number.isNaN(numericValue)) {
+    return null;
+  }
+
+  return numericValue;
+}
+
 function FilterClauseRow({
   clause,
   path,
@@ -112,6 +80,7 @@ function FilterClauseRow({
   onUpdateFilterClauseValue,
   onUpdateFilterClauseKey,
   onRemoveFilterNode,
+  disabled,
 }: {
   clause: GlobalFiltering.EditableAdvancedFilterClause;
   path: string[];
@@ -123,6 +92,7 @@ function FilterClauseRow({
   onUpdateFilterClauseValue: (path: string[], value: unknown) => void;
   onUpdateFilterClauseKey: (path: string[], key: string | null) => void;
   onRemoveFilterNode: (path: string[]) => void;
+  disabled: boolean;
 }) {
   const columnOptions = table
     .getAllColumns()
@@ -142,7 +112,10 @@ function FilterClauseRow({
       columnFormat ?? UI.Table.COLUMN_FORMAT.string
     ];
 
-  const operatorType = getOperatorInputType(clause, columnFormat);
+  const operatorType = GlobalFiltering.getOperatorInputType(
+    clause.operator,
+    columnFormat
+  );
 
   const labelLength =
     GlobalFiltering.COLUMN_FORMAT_TO_LABEL_LENGTH[
@@ -160,7 +133,7 @@ function FilterClauseRow({
         }}
         id={`filter-col-${path.join("-")}`}
         label={null}
-        disabled={false}
+        disabled={disabled}
         rootClassName="w-1/3 min-w-36 flex-1"
         optionsBoxClassName="min-w-60"
       />
@@ -180,33 +153,36 @@ function FilterClauseRow({
         }}
         id={`filter-op-${path.join("-")}`}
         label={null}
-        disabled={!clause.key} // Disable if no column selected
+        disabled={!clause.key || disabled} // Disable if no column selected
         rootClassName={classNames("w-1/4 min-w-32 flex-1", {
-          "w-2/3": operatorType === OPERATOR_INPUT_TYPE.NO_INPUT,
+          "w-2/3":
+            operatorType === GlobalFiltering.OPERATOR_INPUT_TYPE.NO_INPUT,
         })}
         optionsBoxClassName="min-w-56"
       />
-      {operatorType === OPERATOR_INPUT_TYPE.TEXT && (
+      {operatorType === GlobalFiltering.OPERATOR_INPUT_TYPE.TEXT && (
         <TextInput
           value={clause.value}
           setValue={(val) => onUpdateFilterClauseValue(path, val)}
           label={null}
-          disabled={false}
+          disabled={disabled}
           rootClassName="w-1/3 min-w-36 flex-1"
           placeholder="Enter value"
         />
       )}
-      {operatorType === OPERATOR_INPUT_TYPE.NUMBER && (
+      {operatorType === GlobalFiltering.OPERATOR_INPUT_TYPE.NUMBER && (
         <NumberInput
           value={clause.value}
-          setValue={(val) => onUpdateFilterClauseValue(path, val)}
+          setValue={(val) =>
+            onUpdateFilterClauseValue(path, stringToNumber(val))
+          }
           label={null}
-          disabled={false}
+          disabled={disabled}
           rootClassName="w-1/3 min-w-36 flex-1"
           placeholder="Enter value"
         />
       )}
-      {operatorType === OPERATOR_INPUT_TYPE.DATE_INPUT && (
+      {operatorType === GlobalFiltering.OPERATOR_INPUT_TYPE.DATE_INPUT && (
         <DateInput
           value={
             clause.value === null ? null : u.date.toDateOnlyModel(clause.value)
@@ -218,9 +194,10 @@ function FilterClauseRow({
             )
           }
           label={null}
+          disabled={disabled}
         />
       )}
-      {operatorType === OPERATOR_INPUT_TYPE.DATE_TIME_INPUT && (
+      {operatorType === GlobalFiltering.OPERATOR_INPUT_TYPE.DATE_TIME_INPUT && (
         <DateTimeInput
           value={
             clause.value === null ? null : u.date.toDateTimeModel(clause.value)
@@ -232,9 +209,10 @@ function FilterClauseRow({
             )
           }
           label={null}
+          disabled={disabled}
         />
       )}
-      {operatorType === OPERATOR_INPUT_TYPE.MULTI_SELECT && (
+      {operatorType === GlobalFiltering.OPERATOR_INPUT_TYPE.MULTI_SELECT && (
         <Listbox.Multi
           options={tagOptions.map((op) => ({
             label: op.toString(),
@@ -246,12 +224,12 @@ function FilterClauseRow({
           }
           id={`filter-op-${path.join("-")}`}
           label={null}
-          disabled={false}
+          disabled={disabled}
           rootClassName="w-1/3 min-w-36 flex-1"
           optionsBoxClassName="min-w-56"
         />
       )}
-      {operatorType === OPERATOR_INPUT_TYPE.BOOLEAN_SELECT && (
+      {operatorType === GlobalFiltering.OPERATOR_INPUT_TYPE.BOOLEAN_SELECT && (
         <Listbox.Single
           options={[
             { label: "True", value: true },
@@ -261,13 +239,17 @@ function FilterClauseRow({
           setValue={(val) => onUpdateFilterClauseValue(path, val)}
           id={`filter-op-${path.join("-")}`}
           label={null}
-          disabled={false}
+          disabled={disabled}
           rootClassName="w-1/3 min-w-36 flex-1"
           optionsBoxClassName="min-w-56"
         />
       )}
       <div className="mt-1">
-        <Button variant="ghost" onClick={() => onRemoveFilterNode(path)}>
+        <Button
+          variant="ghost"
+          onClick={() => onRemoveFilterNode(path)}
+          disabled={disabled}
+        >
           <Icon name="x" size="0.625" color="brand-neutral-2" />
         </Button>
       </div>
@@ -286,6 +268,7 @@ function FilterGroupSection({
   onUpdateFilterClauseValue,
   onUpdateFilterClauseKey,
   onRemoveFilterNode,
+  disabled,
 }: {
   group: GlobalFiltering.EditableAdvancedFilterGroup;
   path: string[];
@@ -303,6 +286,7 @@ function FilterGroupSection({
   onUpdateFilterClauseValue: (path: string[], value: unknown) => void;
   onUpdateFilterClauseKey: (path: string[], key: string | null) => void;
   onRemoveFilterNode: (path: string[]) => void;
+  disabled: boolean;
 }) {
   return (
     <div
@@ -333,7 +317,15 @@ function FilterGroupSection({
                 <DropdownMenu
                   labelVariant="ghost"
                   label={
-                    <div className="flex flex-row items-center justify-around border border-brand-neutral rounded-brand p-1.5 bg-brand-io w-16 relative">
+                    <div
+                      className={classNames(
+                        "flex flex-row items-center justify-around border border-brand-neutral rounded-brand p-1.5 bg-brand-io w-16 relative",
+                        {
+                          "opacity-50 cursor-not-allowed pointer-events-none":
+                            disabled,
+                        }
+                      )}
+                    >
                       <p className="text-sm">
                         {
                           GlobalFiltering.COLUMN_FILTER_LOGIC_OPERATOR_TO_LABEL[
@@ -396,6 +388,7 @@ function FilterGroupSection({
                 onUpdateFilterClauseValue={onUpdateFilterClauseValue}
                 onUpdateFilterClauseKey={onUpdateFilterClauseKey}
                 onRemoveFilterNode={onRemoveFilterNode}
+                disabled={disabled}
               />
             </div>
           </div>
@@ -405,7 +398,15 @@ function FilterGroupSection({
             <DropdownMenu
               labelVariant="ghost"
               label={
-                <div className="flex flex-row items-center space-x-1 border border-brand-neutral rounded-brand p-1.5 px-2 bg-brand-io">
+                <div
+                  className={classNames(
+                    "flex flex-row items-center space-x-1 border border-brand-neutral rounded-brand p-1.5 px-2 bg-brand-io",
+                    {
+                      "opacity-50 cursor-not-allowed pointer-events-none":
+                        disabled,
+                    }
+                  )}
+                >
                   <Icon name="plus" />
                   <p className="text-sm">Add filter</p>
                 </div>
@@ -441,6 +442,7 @@ function FilterNode({
   onAddFilterClauseToGroup,
   onAddFilterGroupToGroup,
   onRemoveFilterNode,
+  disabled,
 }: {
   node: NonNullable<GlobalFiltering.EditableAdvancedFilterModel>;
   path: string[];
@@ -458,6 +460,7 @@ function FilterNode({
   onAddFilterClauseToGroup: (path: string[]) => void;
   onAddFilterGroupToGroup: (path: string[]) => void;
   onRemoveFilterNode: (path: string[]) => void;
+  disabled: boolean;
 }) {
   if ("logicOperator" in node) {
     return (
@@ -472,6 +475,7 @@ function FilterNode({
         onUpdateFilterClauseValue={onUpdateFilterClauseValue}
         onUpdateFilterClauseKey={onUpdateFilterClauseKey}
         onRemoveFilterNode={onRemoveFilterNode}
+        disabled={disabled}
       />
     );
   } else {
@@ -484,6 +488,7 @@ function FilterNode({
         onUpdateFilterClauseValue={onUpdateFilterClauseValue}
         onUpdateFilterClauseKey={onUpdateFilterClauseKey}
         onRemoveFilterNode={onRemoveFilterNode}
+        disabled={disabled}
       />
     );
   }
@@ -497,17 +502,25 @@ function FilterColumnsPanel({
   resetFilterModel,
   className = "",
   paginated,
-  manuallySyncServerFilters,
-  serverFiltersAreSynced,
+  isServerValueStale,
+  loading,
+  onTablePageChangeHook,
+  appliedAndDisplayFilterModelsAreEqual,
 }: {
   table: TanStackTable;
-  filterModel: GlobalFiltering.EditableAdvancedFilterModel;
-  setFilterModel: (model: GlobalFiltering.EditableAdvancedFilterModel) => void;
-  resetFilterModel: () => void;
+  filterModel: ReturnType<typeof GlobalFiltering.useAdvancedFiltering>["draft"];
+  setFilterModel: ReturnType<
+    typeof GlobalFiltering.useAdvancedFiltering
+  >["set"];
+  resetFilterModel: ReturnType<
+    typeof GlobalFiltering.useAdvancedFiltering
+  >["reset"];
   className?: string;
   paginated: boolean;
-  manuallySyncServerFilters: () => void;
-  serverFiltersAreSynced: boolean;
+  isServerValueStale: boolean;
+  loading: UI.Stale.Option;
+  onTablePageChangeHook: () => void;
+  appliedAndDisplayFilterModelsAreEqual: boolean;
 }) {
   const handleAddTopLevelFilter = useCallback(() => {
     if (filterModel === null) {
@@ -595,19 +608,46 @@ function FilterColumnsPanel({
         return;
       }
 
-      node.key = key;
-
-      const column = table.getAllColumns().find((col) => col.id === key);
+      const allColumns = table.getAllColumns();
+      const column = allColumns.find((col) => col.id === key);
+      const oldColumn = allColumns.find((col) => col.id === node.key);
 
       const validOperatorsForColumn =
         GlobalFiltering.COLUMN_FORMAT_TO_FILTER_OPERATORS[
           column?.columnDef.meta?.format ?? UI.Table.COLUMN_FORMAT.string
         ];
 
+      let newOperator = node.operator;
       if (!validOperatorsForColumn.includes(node.operator)) {
-        node.operator = validOperatorsForColumn[0];
+        newOperator = validOperatorsForColumn[0];
       }
 
+      const oldOperatorInputType = GlobalFiltering.getOperatorInputType(
+        node.operator,
+        oldColumn?.columnDef.meta?.format
+      );
+      const newOperatorInputType = GlobalFiltering.getOperatorInputType(
+        node.operator,
+        column?.columnDef.meta?.format
+      );
+
+      let newValue = node.value;
+      // Wipe the value in the following cases:
+      // - The operator input type has changed.
+      // - The column format is tag, since it's likely the new column
+      // has different tag options than the old column.
+      if (oldOperatorInputType !== newOperatorInputType) {
+        newValue = null;
+      } else if (
+        newOperatorInputType ===
+        GlobalFiltering.OPERATOR_INPUT_TYPE.MULTI_SELECT
+      ) {
+        newValue = null;
+      }
+
+      node.key = key;
+      node.operator = newOperator;
+      node.value = newValue;
       setFilterModel(copy);
     },
     [table, filterModel, setFilterModel]
@@ -693,23 +733,38 @@ function FilterColumnsPanel({
   return (
     <div className={classNames("flex flex-col space-y-4", className)}>
       <div className="flex justify-between items-center">
-        <h5>Filter by</h5>
+        <Toolbar.Header loading={loading}>Filter by</Toolbar.Header>
         <div className="flex flex-row gap-x-2">
           <Button
             variant="ghost"
             className="text-sm text-brand-neutral-2 hover:text-brand-neutral"
-            onClick={resetFilterModel}
-            disabled={paginated && serverFiltersAreSynced}
+            onClick={() => {
+              resetFilterModel();
+              if (paginated) {
+                onTablePageChangeHook();
+              }
+            }}
+            disabled={
+              !isServerValueStale || loading === UI.Stale.OPTION.UPDATE_DISABLED
+            }
           >
             Reset to default
           </Button>
           {paginated && (
             <Button
               variant="primary"
-              onClick={manuallySyncServerFilters}
+              onClick={() => {
+                if (paginated) {
+                  onTablePageChangeHook();
+                }
+              }}
               size="sm"
               className="py-1"
-              disabled={serverFiltersAreSynced}
+              disabled={
+                !isServerValueStale ||
+                loading === UI.Stale.OPTION.UPDATE_DISABLED ||
+                !appliedAndDisplayFilterModelsAreEqual
+              }
             >
               Apply filters
             </Button>
@@ -734,6 +789,7 @@ function FilterColumnsPanel({
             onAddFilterClauseToGroup={addFilterClauseToGroup}
             onAddFilterGroupToGroup={addFilterGroupToGroup}
             onRemoveFilterNode={onRemoveFilterNode}
+            disabled={loading === UI.Stale.OPTION.UPDATE_DISABLED}
           />
         </div>
       )}
@@ -741,7 +797,15 @@ function FilterColumnsPanel({
         <DropdownMenu
           labelVariant="ghost"
           label={
-            <div className="flex flex-row items-center space-x-1 border border-brand-neutral rounded-brand p-1.5 px-2 bg-brand-io">
+            <div
+              className={classNames(
+                "flex flex-row items-center space-x-1 border border-brand-neutral rounded-brand p-1.5 px-2 bg-brand-io",
+                {
+                  "opacity-50 cursor-not-allowed pointer-events-none":
+                    loading === UI.Stale.OPTION.UPDATE_DISABLED,
+                }
+              )}
+            >
               <Icon name="plus" />
               <p className="text-sm">Add filter</p>
             </div>
@@ -770,17 +834,27 @@ function FilterColumnsPopover({
   resetFilterModel,
   filterable,
   paginated,
-  manuallySyncServerFilters,
-  serverFiltersAreSynced,
+  isServerValueStale,
+  onTablePageChangeHook,
+  loading,
+  appliedFilterModel,
 }: {
   table: TanStackTable;
-  filterModel: GlobalFiltering.EditableAdvancedFilterModel;
-  setFilterModel: (model: GlobalFiltering.EditableAdvancedFilterModel) => void;
-  resetFilterModel: () => void;
+  filterModel: ReturnType<typeof GlobalFiltering.useAdvancedFiltering>["draft"];
+  setFilterModel: ReturnType<
+    typeof GlobalFiltering.useAdvancedFiltering
+  >["set"];
+  resetFilterModel: ReturnType<
+    typeof GlobalFiltering.useAdvancedFiltering
+  >["reset"];
   filterable: boolean;
   paginated: boolean;
-  manuallySyncServerFilters: () => void;
-  serverFiltersAreSynced: boolean;
+  isServerValueStale: boolean;
+  loading: UI.Stale.Option;
+  onTablePageChangeHook: () => void;
+  appliedFilterModel: ReturnType<
+    typeof GlobalFiltering.useAdvancedFiltering
+  >["applied"];
 }) {
   const filterTooltipContent = useMemo(() => {
     if (filterModel !== null) {
@@ -788,6 +862,20 @@ function FilterColumnsPopover({
     }
     return "Filter";
   }, [filterModel]);
+
+  const appliedAndDisplayFilterModelsAreEqual = useMemo(() => {
+    // If not paginated, always just return true since we only
+    // use this variable to disable the "apply filters" button
+    // when the two are not equal.
+    if (!paginated) {
+      return true;
+    }
+
+    return GlobalFiltering.advancedFilterModelValuesAreEqual(
+      appliedFilterModel,
+      filterModel
+    );
+  }, [appliedFilterModel, filterModel, paginated]);
 
   if (!filterable) {
     return null;
@@ -799,6 +887,7 @@ function FilterColumnsPopover({
         <div
           data-tooltip-id="top-tooltip-offset4"
           data-tooltip-content={filterTooltipContent}
+          data-tooltip-class-name="hidden sm:block"
         >
           <Icon
             name="filter" // Using a generic filter icon
@@ -814,8 +903,12 @@ function FilterColumnsPopover({
           resetFilterModel={resetFilterModel}
           className="w-[40rem]" // Adjust width as needed
           paginated={paginated}
-          manuallySyncServerFilters={manuallySyncServerFilters}
-          serverFiltersAreSynced={serverFiltersAreSynced}
+          isServerValueStale={isServerValueStale}
+          loading={loading}
+          onTablePageChangeHook={onTablePageChangeHook}
+          appliedAndDisplayFilterModelsAreEqual={
+            appliedAndDisplayFilterModelsAreEqual
+          }
         />
       </Popover.Panel>
     </Popover.Root>

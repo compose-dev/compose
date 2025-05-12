@@ -2,7 +2,7 @@ import { classNames } from "~/utils/classNames";
 
 function RowCell({
   children,
-  overflow,
+  overflow = "ellipsis",
   density,
   isLastRow = false,
   className = "",
@@ -10,7 +10,7 @@ function RowCell({
   expand = false,
 }: {
   children: React.ReactNode;
-  overflow: "clip" | "ellipsis" | "dynamic";
+  overflow?: "clip" | "ellipsis" | "dynamic";
   density: "compact" | "standard" | "comfortable";
   isLastRow?: boolean;
   className?: string;

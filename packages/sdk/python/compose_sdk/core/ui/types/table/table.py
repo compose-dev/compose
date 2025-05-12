@@ -15,9 +15,10 @@ from ..button_appearance import BUTTON_APPEARANCE
 from .advanced_filtering import (
     TableAdvancedFilterModel,
     transform_advanced_filter_model_to_camel_case,
+    transform_advanced_filter_model_to_snake_case,
 )
 
-TableDataKey = Union[str, int, float]
+TableDataKey = str
 TableValue = Any
 TableDataRow = Dict[TableDataKey, TableValue]
 TableData = List[TableDataRow]
@@ -96,7 +97,7 @@ TableTagColors = Dict[
 
 TABLE_COLUMN_OVERFLOW = Literal["clip", "ellipsis", "dynamic"]
 
-PINNED_SIDE = Literal["left", "right"]
+PINNED_SIDE = Literal["left", "right", False]
 
 
 class AdvancedTableColumn(TypedDict):
@@ -217,30 +218,35 @@ class TablePagination:
     TYPE = Literal["manual", "auto"]
 
 
-class TableAdvancedFilterClause(TypedDict):
-    operator: Literal[
-        "is",
-        "is_not",
-        "includes",
-        "not_includes",
-        "greater_than",
-        "greater_than_or_equal",
-        "less_than",
-        "less_than_or_equal",
-        "is_empty",
-        "is_not_empty",
-        "has_any",
-        "not_has_any",
-        "has_all",
-        "not_has_all",
-    ]
-    value: TableValue
-    key: TableDataKey
+class TableDensity:
+    COMPACT = "compact"
+    STANDARD = "standard"
+    COMFORTABLE = "comfortable"
+    TYPE = Literal["compact", "standard", "comfortable"]
 
 
-class TableAdvancedFilterGroup(TypedDict):
-    logic_operator: Literal["and", "or"]
-    filters: List[Union[TableAdvancedFilterClause, TableAdvancedFilterGroup]]
+class TableViewColumn(TypedDict):
+    pinned: NotRequired[PINNED_SIDE]
+    hidden: NotRequired[bool]
+
+
+class TableView(TypedDict):
+    label: str
+    description: NotRequired[str]
+    is_default: NotRequired[bool]
+    filter_by: NotRequired[TableAdvancedFilterModel]
+    search_query: NotRequired[Union[str, None]]
+    sort_by: NotRequired[List[TableColumnSort]]
+    density: NotRequired[TableDensity]
+    overflow: NotRequired[TABLE_COLUMN_OVERFLOW]
+    columns: NotRequired[Dict[str, TableViewColumn]]
+
+
+class TablePaginationView(TypedDict):
+    filter_by: TableAdvancedFilterModel
+    search_query: Union[str, None]
+    sort_by: List[TableColumnSort]
+    view_by: Union[str, None]
 
 
 class Table:
@@ -250,11 +256,7 @@ class Table:
         DISABLED = False
         TYPE = Literal["single", True, False]
 
-    class Density:
-        COMPACT = "compact"
-        STANDARD = "standard"
-        COMFORTABLE = "comfortable"
-        TYPE = Literal["compact", "standard", "comfortable"]
+    Density = TableDensity
 
     class SelectionReturn:
         FULL = "full"
@@ -263,9 +265,17 @@ class Table:
         TYPE = Literal["full", "id", "index"]
 
     AdvancedFilterModel = TableAdvancedFilterModel
+    View = TableView
+    PaginationView = TablePaginationView
 
     DataKey = TableDataKey
+
+    ColumnSort = TableColumnSort
 
     @property
     def transform_advanced_filter_model_to_camel_case(self):
         return transform_advanced_filter_model_to_camel_case
+
+    @property
+    def transform_advanced_filter_model_to_snake_case(self):
+        return transform_advanced_filter_model_to_snake_case

@@ -1,16 +1,28 @@
 import { UI } from "@composehq/ts-public";
-import { useDataOperation } from "../useDataOperation";
-import { EditableAdvancedFilterModel } from "./filterModel";
 import {
-  FormattedTableRow,
-  TableColumnProp,
-  TanStackTable,
-} from "../constants";
+  advancedFilterModelValuesAreEqual,
+  DisplayAdvancedFilterModel,
+  EditableAdvancedFilterModel,
+  ServerAdvancedFilterModel,
+  ValidatedAdvancedFilterModel,
+} from "./filterModel";
+import { FormattedTableRow, TableColumnProp } from "../constants";
 import { v4 as uuid } from "uuid";
-import { useMemo } from "react";
+import { useMemo, useCallback, useEffect } from "react";
+import {
+  COLUMN_FORMAT_TO_FILTER_OPERATORS,
+  getOperatorInputType,
+  OPERATOR_INPUT_TYPE,
+} from "./filterOperators";
+import { useDataControl } from "../useDataControl";
+import * as Views from "../views";
 
 function serverToDisplayFilterModelRecursive(
-  model: UI.Table.AdvancedFilterModel<FormattedTableRow[]>
+  model: UI.Table.AdvancedFilterModel<FormattedTableRow[]>,
+  getMetadata: (key: string) => {
+    id: string;
+    format: UI.Table.ColumnFormat | undefined;
+  }
 ): EditableAdvancedFilterModel {
   if (model === null) {
     return null;
@@ -19,24 +31,110 @@ function serverToDisplayFilterModelRecursive(
   if ("logicOperator" in model) {
     return {
       ...model,
-      filters: model.filters.map(
-        serverToDisplayFilterModelRecursive
+      filters: model.filters.map((filter) =>
+        serverToDisplayFilterModelRecursive(filter, getMetadata)
       ) as NonNullable<EditableAdvancedFilterModel>[],
       id: uuid(),
     };
   }
 
+  const metadata = getMetadata(model.key);
+
+  const validOperators =
+    COLUMN_FORMAT_TO_FILTER_OPERATORS[
+      metadata.format ?? UI.Table.COLUMN_FORMAT.string
+    ];
+
+  const isValidOperator = validOperators.includes(model.operator);
+
+  let modelValue = model.value;
+
+  if (!isValidOperator) {
+    alert(
+      `Received invalid filter operator from server for column with id: ${model.key}.\n\nReceived: ${model.operator}.\n\nValid operators for column with format ${metadata.format}: ${validOperators.join(
+        ", "
+      )}\n\nNote: Certain SDKs may use different operator names. For example, the Python SDK uses snake_case for operator names. Check the SDK documentation for the correct operator names.`
+    );
+  }
+
+  const operatorInputType = getOperatorInputType(
+    model.operator,
+    metadata.format
+  );
+
+  if (operatorInputType === OPERATOR_INPUT_TYPE.BOOLEAN_SELECT) {
+    if (typeof modelValue !== "boolean") {
+      alert(
+        `Received invalid filter from server for boolean column with id: ${model.key}. Received: ${modelValue} with type ${typeof modelValue}. Should be a boolean.`
+      );
+    }
+  } else if (operatorInputType === OPERATOR_INPUT_TYPE.MULTI_SELECT) {
+    if (!Array.isArray(modelValue)) {
+      alert(
+        `Received invalid filter from server for multi-select column with id: ${model.key}. Received: ${modelValue} with type ${typeof modelValue}. Should be a list of values, instead of a single value.\n\nIf you want to filter for a single value, pass a list with only that value.`
+      );
+    } else if (
+      modelValue.some(
+        (value) =>
+          typeof value !== "string" &&
+          typeof value !== "number" &&
+          typeof value !== "boolean"
+      )
+    ) {
+      alert(
+        `Received invalid filter from server for multi-select column with id: ${model.key}. Received: ${JSON.stringify(
+          modelValue
+        )}. Should be an array of strings, numbers, or booleans.`
+      );
+    }
+  } else if (operatorInputType === OPERATOR_INPUT_TYPE.NUMBER) {
+    if (typeof modelValue !== "number") {
+      alert(
+        `Received invalid filter from server for number column with id: ${model.key}. Received: ${modelValue} with type ${typeof modelValue}. Should be a number.`
+      );
+    }
+  } else if (
+    operatorInputType === OPERATOR_INPUT_TYPE.DATE_INPUT ||
+    operatorInputType === OPERATOR_INPUT_TYPE.DATE_TIME_INPUT
+  ) {
+    try {
+      modelValue = new Date(modelValue);
+
+      if (isNaN(modelValue.getTime())) {
+        throw new Error("Invalid date");
+      }
+    } catch (error) {
+      alert(
+        `Received invalid filter from server for date column with id: ${model.key}. Received: ${modelValue}, which could not be parsed as a date. Should be a value that can be parsed into a JS Date object.`
+      );
+    }
+  } else if (operatorInputType === OPERATOR_INPUT_TYPE.TEXT) {
+    if (typeof modelValue !== "string") {
+      alert(
+        `Received invalid filter from server for text column with id: ${model.key}. Received: ${modelValue} with type ${typeof modelValue}. Should be a string.`
+      );
+    }
+  } else {
+    modelValue = "";
+  }
+
   return {
-    ...model,
+    value: modelValue,
+    key: metadata.id,
+    operator: isValidOperator ? model.operator : validOperators[0],
     id: uuid(),
   };
 }
 
 function serverToDisplayFilterModel(
-  model: UI.Table.AdvancedFilterModel<FormattedTableRow[]>
-): EditableAdvancedFilterModel {
+  model: ServerAdvancedFilterModel,
+  getMetadata: (key: string) => {
+    id: string;
+    format: UI.Table.ColumnFormat | undefined;
+  }
+): DisplayAdvancedFilterModel {
   try {
-    return serverToDisplayFilterModelRecursive(model);
+    return serverToDisplayFilterModelRecursive(model, getMetadata);
   } catch (error) {
     return null;
   }
@@ -95,20 +193,26 @@ function getValidFilterModel(
 }
 
 function useAdvancedFiltering({
-  initialValue,
+  serverFilterBy,
   filterable,
   columns,
-  onShouldRequestBrowserData,
-  onShouldRequestServerData,
   paginated,
+  viewsHook,
 }: {
-  initialValue: UI.Table.AdvancedFilterModel<FormattedTableRow[]>;
+  serverFilterBy: ServerAdvancedFilterModel | undefined;
   filterable: boolean;
   columns: TableColumnProp[];
-  onShouldRequestBrowserData: (() => void) | null;
-  onShouldRequestServerData: (() => void) | null;
   paginated: boolean;
+  viewsHook: ReturnType<typeof Views.use>;
 }) {
+  const getCurrentServerValue = useCallback(() => {
+    if (paginated) {
+      return serverFilterBy ?? null;
+    }
+
+    return viewsHook.appliedRef.current.filterBy;
+  }, [paginated, serverFilterBy, viewsHook.appliedRef]);
+
   const columnIdToName = useMemo(
     () =>
       columns.reduce(
@@ -121,28 +225,63 @@ function useAdvancedFiltering({
     [columns]
   );
 
-  return useDataOperation({
-    // Initial Values
-    initialValueFromServer: initialValue,
-    serverValueDidChange: (oldValue, newValue) =>
-      JSON.stringify(oldValue) !== JSON.stringify(newValue),
+  const columnNameToMetadata = useMemo(
+    () =>
+      columns.reduce(
+        (acc, column) => {
+          acc[column.original ?? column.id] = {
+            id: column.id,
+            format: column.format,
+          };
+          return acc;
+        },
+        {} as Record<
+          string,
+          { id: string; format: UI.Table.ColumnFormat | undefined }
+        >
+      ),
+    [columns]
+  );
 
-    // Operation enabled state
-    operationIsEnabled: filterable,
-    operationDisabledValue: null,
-    shouldManuallySyncServerValue: paginated,
+  const serverToDraft = useCallback(
+    (model: ServerAdvancedFilterModel) =>
+      serverToDisplayFilterModel(model, (key) => columnNameToMetadata[key]),
+    [columnNameToMetadata]
+  );
 
-    // Formatting
-    formatServerToDisplay: serverToDisplayFilterModel,
-    formatDisplayToValidated: (model) =>
+  const draftToApplied = useCallback(
+    (model: DisplayAdvancedFilterModel) =>
       getValidFilterModel(model, (key) => key),
-    formatValidatedToServer: (validatedModel) =>
-      getValidFilterModel(validatedModel, (key) => columnIdToName[key]),
+    []
+  );
 
-    // Pagination Syncing
-    onShouldRequestBrowserData,
-    onShouldRequestServerData,
+  const appliedToServer = useCallback(
+    (model: ValidatedAdvancedFilterModel) =>
+      getValidFilterModel(model, (key) => columnIdToName[key]),
+    [columnIdToName]
+  );
+
+  const getResetValue = useCallback(() => {
+    return viewsHook.appliedRef.current.filterBy;
+  }, [viewsHook.appliedRef]);
+
+  const dataControl = useDataControl({
+    getCurrentServerValue,
+    draftToApplied,
+    appliedToServer,
+    serverToDraft,
+    serverValuesAreEqual: advancedFilterModelValuesAreEqual,
+    isEnabled: filterable,
+    disabledValue: null,
+    paginated,
+    getResetValue,
   });
+
+  useEffect(() => {
+    dataControl.setIsEnabled(filterable);
+  }, [filterable, dataControl]);
+
+  return dataControl;
 }
 
 export { useAdvancedFiltering };

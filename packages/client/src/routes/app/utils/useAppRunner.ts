@@ -408,6 +408,7 @@ function useAppRunner() {
           type: appStore.EVENT_TYPE.UPDATE_RENDERS_V2,
           properties: {
             diff: data["diff"],
+            version: data["v"],
           },
         });
 

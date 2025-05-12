@@ -89,6 +89,7 @@ function DataCell({
   column,
   meta,
   density,
+  tableOverflow,
   isLastRow,
   pinned,
 }: {
@@ -96,9 +97,12 @@ function DataCell({
   column: TableColumnProp;
   meta: Record<string, string>;
   density: UI.Table.Density;
+  tableOverflow: UI.Table.OverflowBehavior;
   isLastRow: boolean;
   pinned: UI.Table.PinnedSide | false;
 }) {
+  const overflow = column.overflow ?? tableOverflow;
+
   function getStyle() {
     if (pinned) {
       if (column.pinnedWidth) {
@@ -150,7 +154,7 @@ function DataCell({
           style={style}
           isLastRow={isLastRow}
           expand={column.expand}
-          overflow={column.overflow}
+          overflow={overflow}
           density={density}
         >
           <CircleX density={density} />
@@ -168,7 +172,7 @@ function DataCell({
           style={style}
           isLastRow={isLastRow}
           expand={column.expand}
-          overflow={column.overflow}
+          overflow={overflow}
           density={density}
         >
           NULL
@@ -181,7 +185,7 @@ function DataCell({
         style={style}
         isLastRow={isLastRow}
         expand={column.expand}
-        overflow={column.overflow}
+        overflow={overflow}
         density={density}
       >
         <></>
@@ -196,7 +200,7 @@ function DataCell({
           style={style}
           isLastRow={isLastRow}
           expand={column.expand}
-          overflow={column.overflow}
+          overflow={overflow}
           density={density}
         >
           {meta[column.accessorKey]}
@@ -209,7 +213,7 @@ function DataCell({
           style={style}
           isLastRow={isLastRow}
           expand={column.expand}
-          overflow={column.overflow}
+          overflow={overflow}
           density={density}
         >
           {meta[column.accessorKey]}
@@ -224,7 +228,7 @@ function DataCell({
           style={style}
           isLastRow={isLastRow}
           expand={column.expand}
-          overflow={column.overflow}
+          overflow={overflow}
           density={density}
         >
           {currency}
@@ -239,7 +243,7 @@ function DataCell({
           style={style}
           isLastRow={isLastRow}
           expand={column.expand}
-          overflow={column.overflow}
+          overflow={overflow}
           density={density}
         >
           {number}
@@ -254,7 +258,7 @@ function DataCell({
           style={style}
           isLastRow={isLastRow}
           expand={column.expand}
-          overflow={column.overflow}
+          overflow={overflow}
           density={density}
         >
           {isTrue ? (
@@ -279,7 +283,7 @@ function DataCell({
           style={style}
           isLastRow={isLastRow}
           expand={column.expand}
-          overflow={column.overflow}
+          overflow={overflow}
           density={density}
         >
           {arrayTags.map((value, idx) => {
@@ -324,8 +328,7 @@ function DataCell({
                     // ellipsis/clip already truncate the cell to one line).
                     "ml-[0.375rem]":
                       idx > 0 &&
-                      (column.overflow === "ellipsis" ||
-                        column.overflow === "clip"),
+                      (overflow === "ellipsis" || overflow === "clip"),
                     "text-[11px]": density === "compact",
                     "text-xs": density !== "compact",
                   }
@@ -345,10 +348,10 @@ function DataCell({
           className="font-mono"
           isLastRow={isLastRow}
           expand={column.expand}
-          overflow={column.overflow}
+          overflow={overflow}
           density={density}
         >
-          {column.overflow === "dynamic" ? (
+          {overflow === "dynamic" ? (
             <Json
               json={value}
               label={null}
@@ -370,7 +373,7 @@ function DataCell({
           style={style}
           isLastRow={isLastRow}
           expand={column.expand}
-          overflow={column.overflow}
+          overflow={overflow}
           density={density}
         >
           {formatted}

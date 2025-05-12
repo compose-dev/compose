@@ -104,6 +104,53 @@ const COLUMN_FORMAT_TO_LABEL_LENGTH: Record<
   [UI.Table.COLUMN_FORMAT.tag]: "standard",
 };
 
+const OPERATOR_INPUT_TYPE = {
+  NO_INPUT: "NO_INPUT",
+  TEXT: "TEXT",
+  NUMBER: "NUMBER",
+  BOOLEAN_SELECT: "BOOLEAN_SELECT",
+  MULTI_SELECT: "MULTI_SELECT",
+  DATE_INPUT: "DATE_INPUT",
+  DATE_TIME_INPUT: "DATE_TIME_INPUT",
+} as const;
+
+function getOperatorInputType(
+  operator: UI.Table.ColumnFilterOperator,
+  columnFormat: UI.Table.ColumnFormat | undefined
+) {
+  if (
+    operator === UI.Table.COLUMN_FILTER_OPERATOR.IS_EMPTY ||
+    operator === UI.Table.COLUMN_FILTER_OPERATOR.IS_NOT_EMPTY
+  ) {
+    return OPERATOR_INPUT_TYPE.NO_INPUT;
+  }
+
+  if (columnFormat === UI.Table.COLUMN_FORMAT.boolean) {
+    return OPERATOR_INPUT_TYPE.BOOLEAN_SELECT;
+  }
+
+  if (columnFormat === UI.Table.COLUMN_FORMAT.date) {
+    return OPERATOR_INPUT_TYPE.DATE_INPUT;
+  }
+
+  if (columnFormat === UI.Table.COLUMN_FORMAT.datetime) {
+    return OPERATOR_INPUT_TYPE.DATE_TIME_INPUT;
+  }
+
+  if (
+    columnFormat === UI.Table.COLUMN_FORMAT.number ||
+    columnFormat === UI.Table.COLUMN_FORMAT.currency
+  ) {
+    return OPERATOR_INPUT_TYPE.NUMBER;
+  }
+
+  if (columnFormat === UI.Table.COLUMN_FORMAT.tag) {
+    return OPERATOR_INPUT_TYPE.MULTI_SELECT;
+  }
+
+  return OPERATOR_INPUT_TYPE.TEXT;
+}
+
 export {
   COLUMN_FILTER_LOGIC_OPERATOR_TO_LABEL,
   COLUMN_FILTER_OPERATOR_TO_LABEL,
@@ -114,4 +161,6 @@ export {
   NUMERIC_COLUMN_FILTER_OPERATORS,
   BOOLEAN_COLUMN_FILTER_OPERATORS,
   TAG_COLUMN_FILTER_OPERATORS,
+  OPERATOR_INPUT_TYPE,
+  getOperatorInputType,
 };

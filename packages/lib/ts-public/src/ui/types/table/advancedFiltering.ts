@@ -1,5 +1,5 @@
 import type { DataRow as TableDataRow } from "./dataRow";
-import { StringOrNumberOnlyKeys } from "../../../types";
+import { StringOnlyKeys } from "../../../types";
 
 const COLUMN_FILTER_LOGIC_OPERATOR = {
   AND: "and",
@@ -40,7 +40,7 @@ interface AdvancedFilterGroupBase {
 
 interface AdvancedFilterClause<TData extends TableDataRow[]>
   extends AdvancedFilterClauseBase {
-  key: StringOrNumberOnlyKeys<TData[number]>;
+  key: StringOnlyKeys<TData[number]>;
 }
 
 interface AdvancedFilterGroup<TData extends TableDataRow[]>

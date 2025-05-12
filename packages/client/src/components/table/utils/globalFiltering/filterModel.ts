@@ -61,9 +61,96 @@ function findFilterModelNode(
   return null;
 }
 
+type ServerAdvancedFilterModel = UI.Table.AdvancedFilterModel<
+  FormattedTableRow[]
+>;
+type DisplayAdvancedFilterModel = EditableAdvancedFilterModel;
+type ValidatedAdvancedFilterModel = UI.Table.AdvancedFilterModel<
+  FormattedTableRow[]
+>;
+
+function advancedFilterModelValuesAreEqual(
+  oldValue: ServerAdvancedFilterModel | EditableAdvancedFilterModel,
+  newValue: ServerAdvancedFilterModel | EditableAdvancedFilterModel
+) {
+  if (oldValue === null && newValue === null) {
+    return true;
+  }
+
+  if (oldValue === null || newValue === null) {
+    return false;
+  }
+
+  if ("logicOperator" in oldValue) {
+    if (!("logicOperator" in newValue)) {
+      return false;
+    }
+
+    if (oldValue.logicOperator !== newValue.logicOperator) {
+      return false;
+    }
+
+    if (oldValue.filters.length !== newValue.filters.length) {
+      return false;
+    }
+
+    for (let i = 0; i < oldValue.filters.length; i++) {
+      if (
+        !advancedFilterModelValuesAreEqual(
+          oldValue.filters[i],
+          newValue.filters[i]
+        )
+      ) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  if ("logicOperator" in newValue) {
+    return false;
+  }
+
+  if (oldValue.key !== newValue.key) {
+    return false;
+  }
+
+  if (oldValue.operator !== newValue.operator) {
+    return false;
+  }
+
+  if (Array.isArray(oldValue.value)) {
+    if (!Array.isArray(newValue.value)) {
+      return false;
+    }
+
+    if (oldValue.value.length !== newValue.value.length) {
+      return false;
+    }
+
+    for (let i = 0; i < oldValue.value.length; i++) {
+      if (oldValue.value[i] !== newValue.value[i]) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  return oldValue.value === newValue.value;
+}
+
 export type {
   EditableAdvancedFilterClause,
   EditableAdvancedFilterGroup,
   EditableAdvancedFilterModel,
+  ServerAdvancedFilterModel,
+  DisplayAdvancedFilterModel,
+  ValidatedAdvancedFilterModel,
 };
-export { copyAdvancedFilterModel, findFilterModelNode };
+export {
+  copyAdvancedFilterModel,
+  findFilterModelNode,
+  advancedFilterModelValuesAreEqual,
+};

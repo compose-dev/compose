@@ -1,6 +1,6 @@
 import { AppRunnerBaseEvent, APP_RUNNER_EVENT_TYPE } from "../../types";
 import { type AppStore } from "../../../types";
-import { UI } from "@composehq/ts-public";
+import { ServerToBrowserEvent, UI } from "@composehq/ts-public";
 import { getStaleStateKey } from "../../../utils";
 
 interface TablePageChangeResponseEvent extends AppRunnerBaseEvent {
@@ -11,7 +11,10 @@ interface TablePageChangeResponseEvent extends AppRunnerBaseEvent {
     data: UI.Table.DataRow[];
     totalRecords: number;
     offset: number;
-    searchQuery: string | null;
+    searchQuery: ServerToBrowserEvent.TablePageChangeResponseV2.Data["searchQuery"];
+    sortBy?: ServerToBrowserEvent.TablePageChangeResponseV2.Data["sortBy"];
+    filterBy?: ServerToBrowserEvent.TablePageChangeResponseV2.Data["filterBy"];
+    viewBy?: ServerToBrowserEvent.TablePageChangeResponseV2.Data["viewBy"];
     stale: UI.Stale.Option;
   };
 }
@@ -63,6 +66,9 @@ function tablePageChangeResponse(
               offset: event.properties.offset,
               totalRecords: event.properties.totalRecords,
               searchQuery: event.properties.searchQuery,
+              sortBy: event.properties.sortBy,
+              filterBy: event.properties.filterBy,
+              viewBy: event.properties.viewBy,
             },
           },
         },

@@ -1,33 +1,67 @@
-import { useDataOperation } from "../useDataOperation";
+import { useCallback, useEffect } from "react";
+import {
+  DisplaySearchModel,
+  ValidatedSearchModel,
+  ServerSearchModel,
+} from "./searchModel";
+import { useDataControl } from "../useDataControl";
+import * as Views from "../views";
+
+function serverValuesAreEqual(
+  oldValue: string | null,
+  newValue: string | null
+) {
+  return oldValue === newValue;
+}
+
+function noop<T>(value: T) {
+  return value;
+}
 
 function useSearch({
-  initialValue,
+  serverSearchQuery,
   searchable,
-  onShouldRequestBrowserData,
+  paginated,
+  viewsHook,
 }: {
-  initialValue: string | null;
+  serverSearchQuery: ServerSearchModel | undefined;
   searchable: boolean;
-  onShouldRequestBrowserData: (() => void) | null;
+  paginated: boolean;
+  viewsHook: ReturnType<typeof Views.use>;
 }) {
-  return useDataOperation({
-    // Initial Values
-    initialValueFromServer: initialValue,
-    serverValueDidChange: (oldValue, newValue) => oldValue !== newValue,
+  const getCurrentServerValue = useCallback(() => {
+    if (paginated) {
+      return serverSearchQuery ?? null;
+    }
 
-    // Operation enabled state
-    operationIsEnabled: searchable,
-    operationDisabledValue: null,
-    shouldManuallySyncServerValue: false,
+    return viewsHook.appliedRef.current.searchQuery;
+  }, [paginated, serverSearchQuery, viewsHook.appliedRef]);
 
-    // Formatting
-    formatServerToDisplay: (serverValue) => serverValue,
-    formatDisplayToValidated: (displayValue) => displayValue,
-    formatValidatedToServer: (validatedValue) => validatedValue,
+  const getResetValue = useCallback(() => {
+    return viewsHook.appliedRef.current.searchQuery;
+  }, [viewsHook.appliedRef]);
 
-    // Pagination Syncing
-    onShouldRequestBrowserData,
-    onShouldRequestServerData: null,
+  const dataControl = useDataControl<
+    DisplaySearchModel,
+    ValidatedSearchModel,
+    ServerSearchModel
+  >({
+    getCurrentServerValue,
+    draftToApplied: noop,
+    appliedToServer: noop,
+    serverToDraft: noop,
+    serverValuesAreEqual,
+    isEnabled: searchable,
+    disabledValue: null,
+    paginated,
+    getResetValue,
   });
+
+  useEffect(() => {
+    dataControl.setIsEnabled(searchable);
+  }, [searchable, dataControl]);
+
+  return dataControl;
 }
 
 export { useSearch };

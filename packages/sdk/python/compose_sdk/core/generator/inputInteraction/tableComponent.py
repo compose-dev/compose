@@ -55,6 +55,49 @@ def camel_case_columns(columns: TableColumns) -> TableColumns:
     ]
 
 
+def camel_case_and_add_key_to_views(views: List[Table.View]) -> List[Table.View]:
+    return_views: List[Table.View] = []
+
+    for idx, view in enumerate(views):
+        return_view: Table.View = {}
+
+        if "label" in view:
+            return_view["label"] = view["label"]
+            return_view["key"] = f"${idx}_${view["label"]}"
+
+        if "description" in view:
+            return_view["description"] = view["description"]
+
+        if "is_default" in view:
+            return_view["isDefault"] = view["is_default"]
+
+        if "filter_by" in view:
+            # The transform_advanced_filter_model_to_camel_case method
+            # on Table handles cases where view["filter_by"] is None.
+            return_view["filterBy"] = (
+                Table().transform_advanced_filter_model_to_camel_case(view["filter_by"])
+            )
+
+        if "search_query" in view:
+            return_view["searchQuery"] = view["search_query"]
+
+        if "sort_by" in view:
+            return_view["sortBy"] = view["sort_by"]
+
+        if "density" in view:
+            return_view["density"] = view["density"]
+
+        if "overflow" in view:
+            return_view["overflow"] = view["overflow"]
+
+        if "columns" in view:
+            return_view["columns"] = view["columns"]
+
+        return_views.append(return_view)
+
+    return return_views
+
+
 def get_searchable(
     searchable: Union[bool, None], manually_paged: bool, auto_paged: bool
 ) -> bool:
@@ -195,13 +238,12 @@ def _table(
     searchable: bool = True,
     paginate: bool = False,
     overflow: Union[TABLE_COLUMN_OVERFLOW, None] = None,
-    sort_by: Union[List[TableColumnSort], None] = None,
     sortable: Union[Table.SortOption.TYPE, None] = None,
     selectable: Union[bool, None] = None,
     density: Union[Table.Density.TYPE, None] = None,
     allow_select: Union[bool, None] = None,
     filterable: Union[bool, None] = None,
-    filter_by: Union[Table.AdvancedFilterModel, None] = None,
+    views: Union[List[Table.View], None] = None,
     primary_key: Union[Table.DataKey, None] = None,
 ) -> ComponentReturn:
 
@@ -259,20 +301,12 @@ def _table(
     if sortable != Table.SortOption.MULTI:
         model_properties["sortable"] = sortable
 
-    if sortable != Table.SortOption.DISABLED and sort_by is not None:
-        model_properties["sortBy"] = sort_by
-
     if primary_key is not None:
         model_properties["primaryKey"] = primary_key
 
     filterable = get_filterable(filterable, manually_paged, auto_paged)
     if filterable is False:
         model_properties["filterable"] = False
-
-    if filterable is True and filter_by is not None:
-        model_properties["filterBy"] = (
-            Table.transform_advanced_filter_model_to_camel_case(filter_by)
-        )
 
     if manually_paged or auto_paged:
         model_properties["paged"] = True
@@ -301,6 +335,14 @@ def _table(
 
     if density is not None:
         model_properties["density"] = density
+
+    if views is not None:
+        if not isinstance(views, list):
+            raise ValueError(
+                f"views parameter must be a list of view objects for table component, got {type(views).__name__}"
+            )
+        elif len(views) > 0:
+            model_properties["views"] = camel_case_and_add_key_to_views(views)
 
     warn_about_select_mode(primary_key, selection_return_type, id)
 

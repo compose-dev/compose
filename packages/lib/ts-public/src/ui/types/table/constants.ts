@@ -1,5 +1,5 @@
 import { TagColor, TagValue } from "./tagColor";
-import { StringOrNumberOnlyKeys } from "../../../types";
+import { StringOnlyKeys } from "../../../types";
 import type { DataRow as TableDataRow } from "./dataRow";
 import { AdvancedFilterModel } from "./advancedFiltering";
 import type { ColumnFormat } from "./columnFormat";
@@ -13,7 +13,7 @@ type ColumnSortDirection =
   (typeof COLUMN_SORT_DIRECTION)[keyof typeof COLUMN_SORT_DIRECTION];
 
 interface ColumnSort<TData extends TableDataRow[]> {
-  key: StringOrNumberOnlyKeys<TData[number]>;
+  key: StringOnlyKeys<TData[number]>;
   direction: ColumnSortDirection;
 }
 
@@ -21,10 +21,16 @@ interface TablePageChangeParams<TData extends TableDataRow[]> {
   offset: number;
   pageSize: number;
   searchQuery: string | null;
-  prevSearchQuery: string | null;
-  prevTotalRecords: number | null;
   sortBy: ColumnSort<TData>[];
   filterBy: AdvancedFilterModel<TData> | null;
+  refreshTotalRecords: boolean;
+  prevTotalRecords: number | null;
+  /**
+   * @deprecated Use the `refreshTotalRecords` parameter to check if the
+   * total records needs to be refreshed, instead of comparing the previous
+   * and current search queries.
+   */
+  prevSearchQuery: string | null;
 }
 
 type TablePageChangeResponse<TData extends TableDataRow[]> = {
@@ -48,6 +54,7 @@ type OverflowBehavior =
 const PINNED_SIDE = {
   LEFT: "left",
   RIGHT: "right",
+  NONE: false,
 } as const;
 
 type PinnedSide = (typeof PINNED_SIDE)[keyof typeof PINNED_SIDE];
@@ -57,7 +64,7 @@ type AdvancedTableColumn<TData extends TableDataRow[]> = {
    * The key that will be used to access the column data from
    * the passed in data.
    */
-  key: StringOrNumberOnlyKeys<TData[number]>;
+  key: StringOnlyKeys<TData[number]>;
   /**
    * The original key of the column. Now that we compress key names
    * to single digits, we need to keep track of the original key
@@ -133,16 +140,21 @@ type AdvancedTableColumnGenerator<TData extends TableDataRow[]> = Omit<
 >;
 
 type TableColumn<TData extends TableDataRow[]> =
-  | StringOrNumberOnlyKeys<TData[number]>
+  | StringOnlyKeys<TData[number]>
   | AdvancedTableColumn<TData>;
 type TableColumnGenerator<TData extends TableDataRow[]> =
-  | StringOrNumberOnlyKeys<TData[number]>
+  | StringOnlyKeys<TData[number]>
   | AdvancedTableColumnGenerator<TData>;
 
 const PAGINATION_THRESHOLD = 2500;
 const DEFAULT_PAGE_SIZE = 100;
 const DEFAULT_OFFSET = 0;
-const DEFAULT_SEARCH_QUERY = null;
+const DEFAULT_VIEW = {
+  searchQuery: null,
+  sortBy: [],
+  filterBy: null,
+  viewBy: undefined,
+};
 const DEFAULT_PAGINATED = false;
 
 const PAGINATION_TYPE = {
@@ -207,6 +219,90 @@ const TABLE_DENSITY = {
 
 type TableDensity = (typeof TABLE_DENSITY)[keyof typeof TABLE_DENSITY];
 
+interface TableViewInternal<TData extends TableDataRow[]> {
+  /**
+   * A label to identify the view in the UI.
+   */
+  label: string;
+  /**
+   * A unique key to identify the view.
+   */
+  key: string;
+  /**
+   * A description of the view to help explain what it does.
+   */
+  description?: string;
+  /**
+   * Whether the table should show this view by default.
+   */
+  isDefault?: boolean;
+
+  /**
+   * The filter model to apply to the table.
+   */
+  filterBy?: AdvancedFilterModel<TData>;
+  /**
+   * The columns to sort the table by.
+   */
+  sortBy?: ColumnSort<TData>[];
+  /**
+   * The search query to apply to the table.
+   */
+  searchQuery?: string | null;
+  /**
+   * The density of the table rows.
+   */
+  density?: TableDensity;
+  /**
+   * The overflow behavior of cells in the table.
+   */
+  overflow?: OverflowBehavior;
+  /**
+   * A map of column keys to configuration options. For example:
+   *
+   * ```ts
+   * {
+   *   views: [{
+   *     label: "Hide Name",
+   *     columns: {
+   *       name: {
+   *         hidden: true,
+   *       },
+   *     },
+   *   }],
+   * }
+   * ```
+   *
+   * Currently, the following properties can be configured:
+   *
+   * - `hidden`: Whether the column is hidden from the table.
+   * - `pinned`: Whether the column is pinned to the left or right of the table.
+   */
+  columns?: Partial<
+    Record<
+      StringOnlyKeys<TData[number]>,
+      {
+        /**
+         * Whether the column is pinned. Options:
+         *
+         * - `left`: Pin the column to the left of the table.
+         * - `right`: Pin the column to the right of the table.
+         */
+        pinned?: PinnedSide;
+        /**
+         * Whether the column is hidden from the table.
+         */
+        hidden?: boolean;
+      }
+    >
+  >;
+}
+
+type TableView<TData extends TableDataRow[]> = Omit<
+  TableViewInternal<TData>,
+  "key"
+>;
+
 export {
   OnPageChange as OnPageChange,
   TablePageChangeParams as PageChangeParams,
@@ -221,7 +317,7 @@ export {
   SELECTION_RETURN_TYPE as SELECTION_RETURN_TYPE,
   SelectionReturnType as SelectionReturnType,
   DEFAULT_OFFSET as DEFAULT_OFFSET,
-  DEFAULT_SEARCH_QUERY as DEFAULT_SEARCH_QUERY,
+  DEFAULT_VIEW as DEFAULT_VIEW,
   DEFAULT_PAGINATED as DEFAULT_PAGINATED,
   OVERFLOW_BEHAVIOR as OVERFLOW_BEHAVIOR,
   OverflowBehavior as OverflowBehavior,
@@ -235,4 +331,6 @@ export {
   TableDensity as Density,
   PINNED_SIDE as PINNED_SIDE,
   PinnedSide as PinnedSide,
+  TableView as View,
+  TableViewInternal as ViewInternal,
 };

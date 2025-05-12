@@ -1,14 +1,61 @@
-from typing import Any, List, Union, Literal
+from typing import Any, List, Union, Literal, Dict
 
-from ..ui import (
-    TYPE,
-    ComponentReturn,
-    TableDefault,
-    TablePagination,
-    Stale,
-)
+from compose_sdk.core.ui.types.table.table import TableColumnSort
+
+from ..ui import TYPE, ComponentReturn, TableDefault, TablePagination, Stale, Table
 from ..table_state import TableState
 from .find_component import FindComponent  # type: ignore[attr-defined]
+
+DEFAULT_VIEW: Table.PaginationView = {
+    "search_query": None,
+    "sort_by": [],
+    "filter_by": None,
+    "view_by": None,
+}
+
+
+def get_default_view(
+    views: Union[List[Dict[str, Any]], None],
+    filterable: bool,
+    searchable: bool,
+    sortable: Table.SortOption.TYPE,
+) -> Table.PaginationView:
+    try:
+        if views is None or len(views) == 0:
+            return {**DEFAULT_VIEW}
+
+        default_view = None
+
+        for view in views:
+            if view.get("isDefault", False) == True:
+                default_view = view
+                break
+
+        if default_view is None:
+            return {**DEFAULT_VIEW}
+
+        filter_by = (
+            default_view.get("filterBy", None) if filterable is not False else None
+        )
+        search_query = (
+            default_view.get("searchQuery", None) if searchable is not False else None
+        )
+        sort_by: List[TableColumnSort] = (
+            [] if sortable is False else default_view.get("sortBy", [])
+        )
+
+        if sortable == Table.SortOption.SINGLE and len(sort_by) > 1:
+            sort_by = sort_by[0:1]
+
+        return {
+            "filter_by": filter_by,
+            "search_query": search_query,
+            "sort_by": sort_by,
+            "view_by": default_view.get("key", None),
+        }
+
+    except Exception:
+        return {**DEFAULT_VIEW}
 
 
 def configure_table_pagination(
@@ -39,6 +86,19 @@ def configure_table_pagination(
                 table_state.delete(render_id, component["model"]["id"])
             return False
 
+        searchable = (
+            False
+            if component["model"]["properties"].get("notSearchable", None) == True
+            else True
+        )
+
+        default_view = get_default_view(
+            component["model"]["properties"].get("views", None),
+            component["model"]["properties"].get("filterable", True),
+            searchable,
+            component["model"]["properties"].get("sortable", Table.SortOption.MULTI),
+        )
+
         offset = current_state["offset"] if current_state else TableDefault.OFFSET
         page_size = (
             current_state["page_size"]
@@ -48,9 +108,24 @@ def configure_table_pagination(
             )
         )
         search_query = (
-            current_state["search_query"]
+            current_state["active_view"]["search_query"]
             if current_state
-            else TableDefault.SEARCH_QUERY
+            else default_view["search_query"]
+        )
+        filter_by = (
+            current_state["active_view"]["filter_by"]
+            if current_state
+            else default_view["filter_by"]
+        )
+        sort_by = (
+            current_state["active_view"]["sort_by"]
+            if current_state
+            else default_view["sort_by"]
+        )
+        view_by = (
+            current_state["active_view"]["view_by"]
+            if current_state
+            else default_view["view_by"]
         )
 
         if component["hooks"]["onPageChange"]["type"] == TablePagination.MANUAL:
@@ -67,12 +142,7 @@ def configure_table_pagination(
                     component["model"]["id"],
                     {
                         "stale": Stale.UPDATE_NOT_DISABLED,
-                        "initial_sort_by": component["model"]["properties"].get(
-                            "sortBy", []
-                        ),
-                        "initial_filter_by": component["model"]["properties"].get(
-                            "filterBy", None
-                        ),
+                        "initial_view": default_view,
                     },
                 )
             else:
@@ -86,15 +156,9 @@ def configure_table_pagination(
                         "data": data,
                         "offset": offset,
                         "page_size": page_size,
-                        "search_query": search_query,
                         "total_records": None,
                         "stale": "INITIALLY_STALE",
-                        "initial_sort_by": component["model"]["properties"].get(
-                            "sortBy", []
-                        ),
-                        "initial_filter_by": component["model"]["properties"].get(
-                            "filterBy", None
-                        ),
+                        "initial_view": default_view,
                     },
                 )
         else:
@@ -110,29 +174,16 @@ def configure_table_pagination(
                         "data": data,
                         "offset": offset,
                         "page_size": page_size,
-                        "search_query": search_query,
                         "total_records": total_records,
                         "stale": False,
-                        "initial_sort_by": component["model"]["properties"].get(
-                            "sortBy", []
-                        ),
-                        "initial_filter_by": component["model"]["properties"].get(
-                            "filterBy", None
-                        ),
+                        "initial_view": default_view,
                     },
                 )
             else:
                 table_state.update(
                     render_id,
                     component["model"]["id"],
-                    {
-                        "initial_sort_by": component["model"]["properties"].get(
-                            "sortBy", []
-                        ),
-                        "initial_filter_by": component["model"]["properties"].get(
-                            "filterBy", None
-                        ),
-                    },
+                    {"initial_view": default_view},
                 )
 
         return {
@@ -145,6 +196,9 @@ def configure_table_pagination(
                     "totalRecords": total_records,
                     "offset": offset,
                     "searchQuery": search_query,
+                    "filterBy": filter_by,
+                    "sortBy": sort_by,
+                    "viewBy": view_by,
                     "pageSize": page_size,
                 },
             },

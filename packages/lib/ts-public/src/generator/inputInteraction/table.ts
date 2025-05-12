@@ -1,4 +1,4 @@
-import { StringOrNumberOnlyKeys } from "../../types";
+import { StringOnlyKeys } from "../../types";
 import * as UI from "../../ui";
 import {
   BaseWithInputInteraction,
@@ -74,6 +74,9 @@ interface TableProperties<TData extends UI.Table.DataRow[]>
    * A custom validation function that is called on selected rows. Return nothing if valid, or a string error message if invalid.
    */
   validate: UI.Components.InputTable["hooks"]["validate"];
+  /**
+   * The data to display in the table.
+   */
   data: TData;
   /**
    * Whether the table should allow row selection. Defaults to `false`, or `true` if `onChange` is provided.
@@ -98,7 +101,7 @@ interface TableProperties<TData extends UI.Table.DataRow[]>
    *
    * Defaults to the row index.
    */
-  primaryKey?: StringOrNumberOnlyKeys<TData[number]>;
+  primaryKey?: StringOnlyKeys<TData[number]>;
   /**
    * How the table should return selected rows to hooks such as `onChange`. Options:
    *
@@ -137,59 +140,9 @@ interface TableProperties<TData extends UI.Table.DataRow[]>
    */
   sortable?: UI.Components.InputTable["model"]["properties"]["sortable"];
   /**
-   * An ordered list of columns to initially sort by. For example
-   *
-   * @example
-   * ```typescript
-   * page.add(() => ui.table("companies", companies, {
-   *   sortBy: [
-   *     { key: "planType", direction: "asc" },
-   *     { key: "revenue", direction: "desc" },
-   *   ],
-   * }));
-   * ```
-   *
-   * Each item in the list should have the following fields:
-   *
-   * - `key`: The key of the column to sort by.
-   * - `direction`: The direction to sort by. Either `asc` or `desc`.
-   *
-   * @default `[]`
-   */
-  sortBy?: UI.Table.ColumnSort<TData>[];
-  /**
    * Whether the table should be filterable. Defaults to `true` for normal tables, `false` for paginated tables.
    */
   filterable?: boolean;
-  /**
-   * Define a filtering model to initially filter the table. For example:
-   *
-   * @example
-   * ```typescript
-   * page.add(() => ui.table("companies", companies, {
-   *   filterable: true,
-   *   filterBy: {
-   *     "logicOperator": "AND",
-   *     "filters": [
-   *       {
-   *         "key": "name",
-   *         "operator": "includes",
-   *         "value": "John"
-   *       },
-   *       {
-   *         "key": "age",
-   *         "operator": "greaterThan",
-   *         "value": 30
-   *       }
-   *     ]
-   *   }
-   * }));
-   * ```
-   *
-   * @link
-   * Learn more in the {@link https://docs.composehq.com/components/input/table#filtering documentation}.
-   */
-  filterBy?: UI.Table.AdvancedFilterModel<TData>;
   /**
    * The density of the table rows. Options:
    *
@@ -200,6 +153,47 @@ interface TableProperties<TData extends UI.Table.DataRow[]>
    * @default `standard`
    */
   density?: UI.Table.Density;
+  /**
+   * A list of views that enable the user to quickly switch between different
+   * table configurations, such as different column filters, sorting, column
+   * pinning, etc.
+   *
+   * @example
+   * ```typescript
+   * page.add(() => ui.table("companies", companies, {
+   *   views: [
+   *     {
+   *       label: "Enterprise companies",
+   *       filterBy: {
+   *         key: "tier",
+   *         operator: "is",
+   *         value: "enterprise",
+   *       },
+   *       sortBy: [
+   *         { key: "revenue", direction: "desc" },
+   *       ],
+   *       columns: {
+   *         name: {
+   *           pinned: "left",
+   *         },
+   *       },
+   *     },
+   *   ],
+   * }));
+   * ```
+   *
+   * The following properties are configurable for each view:
+   *
+   * - `label`: The label of the view.
+   * - `isDefault`: Whether the table should show this view by default.
+   * - `filterBy`: A filtering model to initially filter the table.
+   * - `sortBy`: An ordered list of columns to initially sort by.
+   * - `searchQuery`: A search query to initially filter the table.
+   * - `columns`: A mapping of column keys to configuration options for that column.
+   * - `density`: The density of the table rows.
+   * - `overflow`: The overflow behavior of table cells.
+   */
+  views?: UI.Table.View<TData>[];
 }
 
 type RequiredTableFields = "id" | "data";
@@ -447,7 +441,6 @@ function warnAboutSelectMode(
  * @param {UI.Components.InputTable["model"]["selectionReturnType"]} properties.selectionReturnType - How the table should return selected rows. Defaults to `full` (a list of rows). Must be `id` (a list of row ids) if the table is paginated.
  * @param {UI.Components.InputTable["model"]["searchable"]} properties.searchable - Whether the table should be searchable. Defaults to `true` for normal tables, `false` for paginated tables.
  * @param {boolean} properties.filterable - Whether the table should be filterable. Defaults to `true` for normal tables, `false` for paginated tables.
- * @param {UI.Table.AdvancedFilterModel<TData>} properties.filterBy - Define a filtering model to initially filter the table.
  * @param {boolean} properties.paginate - Whether the table should be paginated. Defaults to `false`. Tables with more than 2500 rows will be paginated by default.
  * @param {boolean} properties.selectable - Whether the table should allow row selection. Defaults to `false`, or `true` if `onChange` is provided.
  * @param {UI.Components.InputTable["model"]["density"]} properties.density - The density of the table rows. Options:
@@ -473,8 +466,7 @@ function warnAboutSelectMode(
  * - `false`: Disable sorting.
  *
  * Defaults to `true` for normal tables, `false` for paginated tables.
- *
- * @param {UI.Components.InputTable["model"]["sortBy"]} properties.sortBy - An ordered list of columns to initially sort by. Each item in the list should include `key` and `direction` (either `asc` or `desc`) fields.
+ * @param {UI.Components.InputTable["model"]["views"]} properties.views - A list of views that enable the user to quickly switch between different table configurations.
  * @returns The configured table component.
  */
 function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
@@ -561,12 +553,6 @@ function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
     modelProperties.sortable = sortable;
   }
 
-  if (sortable && properties.sortBy) {
-    modelProperties.sortBy = properties.sortBy as UI.Table.ColumnSort<
-      UI.Table.DataRow[]
-    >[];
-  }
-
   if (properties.primaryKey !== undefined) {
     modelProperties.primaryKey = properties.primaryKey;
   }
@@ -580,13 +566,24 @@ function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
     modelProperties.filterable = false;
   }
 
-  if (filterable && properties.filterBy) {
-    modelProperties.filterBy =
-      properties.filterBy as UI.Table.AdvancedFilterModel<UI.Table.DataRow[]>;
-  }
-
   if (properties.density) {
     modelProperties.density = properties.density;
+  }
+
+  if (properties.views) {
+    if (!Array.isArray(properties.views)) {
+      throw new Error(
+        "views property must be an array of view objects for table with id: " +
+          id
+      );
+    }
+
+    modelProperties.views = properties.views.map((view, idx) => {
+      return {
+        ...view,
+        key: `${idx}_${view.label}`,
+      } as UI.Table.ViewInternal<UI.Table.DataRow[]>;
+    });
   }
 
   warnAboutSelectMode(

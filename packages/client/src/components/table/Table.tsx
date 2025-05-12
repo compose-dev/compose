@@ -7,7 +7,7 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { classNames } from "~/utils/classNames";
 import { IOComponent } from "~/components/io-component";
 import { UI } from "@composehq/ts-public";
@@ -16,15 +16,19 @@ import {
   useFormattedColumns,
   type FormattedTableRow,
   type TableColumnProp,
-  useSorting,
   usePagination,
   TanStackTable,
   useColumnPinning,
   GlobalFiltering,
   RowSelections,
   INTERNAL_COLUMN_ID,
+  Views,
+  useColumnVisibility,
+  Sorting,
+  ServerView,
 } from "./utils";
 import { ColumnHeaderRow, FooterRow, ToolbarRow } from "./components";
+import { log } from "@compose/ts";
 
 function Table({
   id,
@@ -45,18 +49,16 @@ function Table({
   errorMessage = null,
   disableRowSelection = false,
   searchable = true,
-  searchBy = null,
-  serverSearchQuery = UI.Table.DEFAULT_SEARCH_QUERY,
+  serverView = UI.Table.DEFAULT_VIEW,
   paginated = UI.Table.DEFAULT_PAGINATED,
   loading = false,
   height,
-  sortBy,
   sortable = UI.Table.SORT_OPTION.MULTI,
   density = UI.Table.DENSITY.STANDARD,
   overflow = "ellipsis",
   filterable = true,
-  filterBy = null,
   primaryKey = undefined,
+  views = [],
 }: {
   id: string;
   data: UI.Components.InputTable["model"]["properties"]["data"];
@@ -68,7 +70,8 @@ function Table({
     offset: number,
     pageSize: number,
     sortBy: UI.Table.PageChangeParams<UI.Table.DataRow[]>["sortBy"],
-    filterBy: UI.Table.PageChangeParams<UI.Table.DataRow[]>["filterBy"]
+    filterBy: UI.Table.PageChangeParams<UI.Table.DataRow[]>["filterBy"],
+    viewBy: string | undefined
   ) => void;
   onTableRowActionHook: (rowIdx: number, actionIdx: number) => void;
   pageSize?: number;
@@ -82,18 +85,16 @@ function Table({
   errorMessage?: string | null;
   disableRowSelection?: boolean;
   searchable?: boolean;
-  searchBy?: string | null;
-  serverSearchQuery?: string | null;
+  serverView?: ServerView;
   paginated?: boolean;
   loading?: UI.Stale.Option;
   height?: string;
-  sortBy?: UI.Components.InputTable["model"]["properties"]["sortBy"];
   sortable?: UI.Table.SortOption;
   density?: UI.Table.Density;
   overflow?: UI.Table.OverflowBehavior;
   filterable?: boolean;
-  filterBy?: UI.Table.AdvancedFilterModel<FormattedTableRow[]>;
   primaryKey?: string | number | undefined;
+  views?: UI.Table.ViewInternal<FormattedTableRow[]>[];
 }) {
   const fixedHeight = paginated || totalRecords > 35;
   const formattedData = useFormattedData(data, columns, offset, primaryKey);
@@ -101,44 +102,49 @@ function Table({
   const handleRequestServerDataRef = useRef<(() => void) | null>(null);
   const handleRequestBrowserDataRef = useRef<(() => void) | null>(null);
 
-  const {
-    displayValue: sort,
-    setDisplayValue: setSort,
-    resetValue: resetSort,
-    serverValueRef: serverSortRef,
-  } = useSorting({
+  const viewsHook = Views.use({
+    views,
+    serverViewBy: serverView.viewBy,
+    paginated,
+  });
+
+  const tableOverflow = useMemo(() => {
+    if (viewsHook.applied.overflow) {
+      return viewsHook.applied.overflow;
+    }
+
+    return overflow;
+  }, [viewsHook.applied, overflow]);
+
+  const tableDensity = useMemo(() => {
+    if (viewsHook.applied.density) {
+      return viewsHook.applied.density;
+    }
+
+    return density;
+  }, [viewsHook.applied, density]);
+
+  const sortingHook = Sorting.use({
     columns,
-    initialValueFromServer: sortBy,
     sortable,
-    onShouldRequestServerData: handleRequestServerDataRef.current,
+    paginated,
+    viewsHook,
+    serverSortBy: serverView.sortBy,
   });
 
-  const {
-    displayValue: searchQuery,
-    setDisplayValue: setSearchQuery,
-    validatedValueRef: validatedSearchQueryRef,
-    serverValueRef: serverSearchQueryRef,
-  } = GlobalFiltering.useSearch({
-    initialValue: searchBy,
+  const searchQueryHook = GlobalFiltering.useSearch({
+    serverSearchQuery: serverView.searchQuery,
     searchable,
-    onShouldRequestBrowserData: handleRequestBrowserDataRef.current,
+    paginated,
+    viewsHook,
   });
 
-  const {
-    displayValue: filters,
-    setDisplayValue: setFilters,
-    resetValue: resetFilters,
-    validatedValueRef: validatedFiltersRef,
-    serverValueRef: serverFilterByRef,
-    manuallySyncServerValue: manuallySyncServerFilters,
-    serverValueIsSynced: serverFiltersAreSynced,
-  } = GlobalFiltering.useAdvancedFiltering({
-    initialValue: filterBy,
+  const advancedFilteringHook = GlobalFiltering.useAdvancedFiltering({
+    serverFilterBy: serverView.filterBy,
     filterable,
     columns,
-    onShouldRequestBrowserData: handleRequestBrowserDataRef.current,
-    onShouldRequestServerData: handleRequestServerDataRef.current,
     paginated,
+    viewsHook,
   });
 
   const { paginationState, setPaginationState } = usePagination(
@@ -152,13 +158,61 @@ function Table({
     useColumnPinning(
       enableRowSelection,
       columns,
-      !!actions && actions.length > 0
+      !!actions && actions.length > 0,
+      viewsHook.applied
     );
+
+  const { columnVisibility, setColumnVisibility, resetColumnVisibility } =
+    useColumnVisibility(columns, viewsHook.applied);
 
   const { toggleRowSelection } = RowSelections.use(
     formattedData,
     enableRowSelection ? (allowMultiSelection ? "multi" : "single") : false
   );
+
+  const isViewDirty = useMemo(() => {
+    if (searchable) {
+      const searchQuery = paginated
+        ? serverView.searchQuery
+        : searchQueryHook.nextServer;
+      if (viewsHook.applied.searchQuery !== searchQuery) {
+        return true;
+      }
+    }
+
+    if (filterable) {
+      const filterBy = paginated
+        ? serverView.filterBy
+        : advancedFilteringHook.nextServer;
+      if (
+        !GlobalFiltering.advancedFilterModelValuesAreEqual(
+          viewsHook.applied.filterBy,
+          filterBy ?? null
+        )
+      ) {
+        return true;
+      }
+    }
+
+    if (sortable) {
+      const sortBy = paginated ? serverView.sortBy : sortingHook.nextServer;
+      if (!Sorting.sortByIsEqual(viewsHook.applied.sortBy, sortBy ?? [])) {
+        return true;
+      }
+    }
+
+    return false;
+  }, [
+    viewsHook.applied,
+    serverView,
+    searchable,
+    filterable,
+    sortable,
+    paginated,
+    searchQueryHook.nextServer,
+    advancedFilteringHook.nextServer,
+    sortingHook.nextServer,
+  ]);
 
   const formattedColumns = useFormattedColumns(
     columns,
@@ -168,7 +222,8 @@ function Table({
     disableRowSelection,
     actions,
     onTableRowActionHook,
-    density,
+    tableDensity,
+    tableOverflow,
     toggleRowSelection
   );
 
@@ -196,29 +251,22 @@ function Table({
     // STATE
     state: {
       rowSelection: rowSelections,
-      sorting: sort,
+      sorting: sortingHook.applied,
       columnPinning,
       pagination: paginationState,
-    },
-    initialState: {
-      // Set initial state to properly leverage tanstack table's "resetColumnVisibility"
-      // function, which will reset back to this initial state.
-      columnVisibility: columns.reduce(
-        (acc, column) => {
-          acc[column.id] = !column.hidden;
-          return acc;
-        },
-        {} as Record<string, boolean>
-      ),
+      columnVisibility,
     },
 
     // COLUMN PINNING
     onColumnPinningChange: setColumnPinning,
 
+    // COLUMN VISIBILITY
+    onColumnVisibilityChange: setColumnVisibility,
+
     // GLOBAL FILTERING
     getFilteredRowModel: GlobalFiltering.getFilteredRowModel({
-      getSearchQuery: () => validatedSearchQueryRef.current,
-      getAdvancedFilter: () => validatedFiltersRef.current,
+      getSearchQuery: () => searchQueryHook.appliedRef.current,
+      getAdvancedFilter: () => advancedFilteringHook.appliedRef.current,
     }),
     manualFiltering: paginated,
 
@@ -236,7 +284,7 @@ function Table({
     enableMultiSort: sortable === UI.Table.SORT_OPTION.MULTI,
     getSortedRowModel: getSortedRowModel(),
     manualSorting: paginated,
-    onSortingChange: setSort,
+    onSortingChange: sortingHook.set,
 
     // PAGINATION
     manualPagination: paginated,
@@ -255,14 +303,39 @@ function Table({
       return;
     }
 
+    if (
+      !searchable &&
+      !sortable &&
+      !filterable &&
+      (newOffset ?? offset) === offset &&
+      (newPageSize ?? pageSize) === pageSize
+    ) {
+      return;
+    }
+
+    log(
+      "Page change requested",
+      {
+        searchQuery: searchQueryHook.nextServerRef.current,
+        offset: newOffset ?? offset,
+        pageSize: newPageSize ?? pageSize,
+        sortBy: sortingHook.nextServerRef.current,
+        filterBy: advancedFilteringHook.nextServerRef.current,
+        viewBy: viewsHook.nextServerRef.current,
+      },
+      "green"
+    );
+
     onTablePageChangeHook(
-      serverSearchQueryRef.current,
+      searchQueryHook.nextServerRef.current,
       newOffset ?? offset,
       newPageSize ?? pageSize,
-      serverSortRef.current,
-      serverFilterByRef.current as UI.Table.AdvancedFilterModel<
+      sortingHook.nextServerRef.current as UI.Table.ColumnSort<
         UI.Table.DataRow[]
-      >
+      >[],
+      advancedFilteringHook.nextServerRef
+        .current as UI.Table.AdvancedFilterModel<UI.Table.DataRow[]>,
+      viewsHook.nextServerRef.current
     );
   };
 
@@ -292,29 +365,69 @@ function Table({
         >
           <ToolbarRow
             tableId={id}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            serverSearchQuery={serverSearchQuery}
-            filters={filters}
-            setFilters={setFilters}
+            searchQueryHook={searchQueryHook}
+            advancedFilteringHook={advancedFilteringHook}
+            sortingHook={sortingHook}
+            viewsHook={viewsHook}
             loading={loading}
             paginated={paginated}
             onTablePageChangeHook={handleRequestServerDataRef.current}
             table={table}
             searchable={searchable}
             sortable={sortable}
-            resetSort={resetSort}
             resetColumnPinningToInitial={resetColumnPinningToInitial}
             filterable={filterable}
-            resetFilters={resetFilters}
-            manuallySyncServerFilters={manuallySyncServerFilters}
-            serverFiltersAreSynced={serverFiltersAreSynced}
+            resetColumnVisibility={resetColumnVisibility}
+            views={views}
+            setView={(view: Views.ViewDisplayFormat) => {
+              // Set the active view
+              viewsHook.set(view);
+
+              // Sync the new view to the data operation values
+              sortingHook.set(
+                sortingHook.serverToDraft(viewsHook.appliedRef.current.sortBy)
+              );
+              searchQueryHook.set(
+                searchQueryHook.serverToDraft(
+                  viewsHook.appliedRef.current.searchQuery
+                )
+              );
+              advancedFilteringHook.set(
+                advancedFilteringHook.serverToDraft(
+                  viewsHook.appliedRef.current.filterBy
+                )
+              );
+
+              // If paginated, request a new page of data from server
+              if (paginated && handleRequestServerDataRef.current) {
+                handleRequestServerDataRef.current();
+              } else if (!paginated && handleRequestBrowserDataRef.current) {
+                handleRequestBrowserDataRef.current();
+              }
+            }}
+            resetView={() => {
+              // Set the active view
+              viewsHook.reset();
+
+              // Sync the new view to the data operation values
+              sortingHook.reset();
+              searchQueryHook.reset();
+              advancedFilteringHook.reset();
+
+              // If paginated, request a new page of data from server
+              if (paginated && handleRequestServerDataRef.current) {
+                handleRequestServerDataRef.current();
+              } else if (!paginated && handleRequestBrowserDataRef.current) {
+                handleRequestBrowserDataRef.current();
+              }
+            }}
+            isViewDirty={isViewDirty}
           />
           <TableBody
             table={table}
-            density={density}
+            density={tableDensity}
             loading={loading}
-            overflow={overflow}
+            overflow={tableOverflow}
             setScrollToTopHandler={setScrollToTopHandler}
           />
           <FooterRow

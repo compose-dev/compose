@@ -3,6 +3,8 @@ import { Table } from "@tanstack/react-table";
 import { FormattedTagColors } from "./tags";
 
 import "@tanstack/react-table"; //or vue, svelte, solid, qwik, etc.
+import * as GlobalFiltering from "./globalFiltering";
+import * as Sorting from "./sorting";
 
 declare module "@tanstack/react-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -102,7 +104,7 @@ interface TableColumnProp {
   /**
    * The overflow behavior of the column.
    */
-  overflow: NonNullable<
+  overflow?: NonNullable<
     UI.Table.AdvancedColumn<UI.Table.DataRow[]>["overflow"]
   >;
   /**
@@ -138,16 +140,12 @@ const COLUMN_WIDTH = {
   JSON: `${COLUMN_WIDTH_NUMERIC.JSON}px`,
 } as const;
 
-interface PaginationOperators {
-  searchQuery: string | null;
-  sortBy: UI.Table.PageChangeParams<UI.Table.DataRow[]>["sortBy"];
-  filterBy: UI.Table.AdvancedFilterModel<FormattedTableRow[]>;
+interface ServerView {
+  searchQuery?: GlobalFiltering.ServerSearchModel;
+  sortBy?: Sorting.ServerSortModel;
+  filterBy?: GlobalFiltering.ServerAdvancedFilterModel;
+  viewBy?: string;
 }
 
 export { INTERNAL_COLUMN_ID, COLUMN_WIDTH, COLUMN_WIDTH_NUMERIC };
-export type {
-  FormattedTableRow,
-  TableColumnProp,
-  TanStackTable,
-  PaginationOperators,
-};
+export type { FormattedTableRow, TableColumnProp, TanStackTable, ServerView };

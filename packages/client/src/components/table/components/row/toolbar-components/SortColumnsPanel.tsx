@@ -7,6 +7,7 @@ import DropdownMenu from "~/components/dropdown-menu";
 import { UI } from "@composehq/ts-public";
 import { classNames } from "~/utils/classNames";
 import { Popover } from "~/components/popover";
+import * as Toolbar from "./Toolbar";
 
 function SortRow({
   columnOptions,
@@ -15,6 +16,7 @@ function SortRow({
   desc,
   toggleDesc,
   removeSort,
+  disabled,
 }: {
   columnOptions: Parameters<typeof ComboboxSingle>[0]["options"];
   column: Parameters<typeof ComboboxSingle>[0]["value"];
@@ -22,6 +24,7 @@ function SortRow({
   desc: boolean;
   toggleDesc: () => void;
   removeSort: (() => void) | null;
+  disabled: boolean;
 }) {
   return (
     <div className="flex flex-row space-x-2">
@@ -31,13 +34,19 @@ function SortRow({
         setValue={setColumn}
         id="sort-column"
         label={null}
-        disabled={false}
+        disabled={disabled}
         rootClassName="w-full"
       />
       <Button
         variant="ghost"
-        className="border border-brand-neutral bg-brand-io rounded-brand p-1 px-2 flex flex-row items-center space-x-1 text-sm w-24 justify-center"
+        className={classNames(
+          "border border-brand-neutral bg-brand-io rounded-brand p-1 px-2 flex flex-row items-center space-x-1 text-sm w-24 justify-center",
+          {
+            "!bg-brand-io-disabled !opacity-100": disabled,
+          }
+        )}
         onClick={toggleDesc}
+        disabled={disabled}
       >
         <span>{desc ? "Desc" : "Asc"}</span>
         <Icon name={desc ? "arrow-down" : "arrow-up"} size="1" />
@@ -46,6 +55,7 @@ function SortRow({
         variant="ghost"
         onClick={removeSort ?? (() => {})}
         className={removeSort ? "" : "invisible"}
+        disabled={disabled}
       >
         <Icon name="x" size="0.625" color="brand-neutral-2" />
       </Button>
@@ -59,6 +69,7 @@ function SortColumnsPanel({
   table,
   sortable,
   resetSortingState,
+  loading,
   className = "",
 }: {
   sortingState: SortingState;
@@ -67,6 +78,7 @@ function SortColumnsPanel({
   sortable: UI.Table.SortOption;
   className?: string;
   resetSortingState: () => void;
+  loading: UI.Stale.Option;
 }) {
   const sortColumnOptions = table
     .getAllColumns()
@@ -82,8 +94,12 @@ function SortColumnsPanel({
       className={classNames("flex flex-col space-y-4 max-w-full", className)}
     >
       <div className="flex flex-row items-center justify-between">
-        <h5>Sort by</h5>
-        <Button variant="ghost" onClick={resetSortingState}>
+        <Toolbar.Header loading={loading}>Sort by</Toolbar.Header>
+        <Button
+          variant="ghost"
+          onClick={resetSortingState}
+          disabled={loading === UI.Stale.OPTION.UPDATE_DISABLED}
+        >
           <p className="text-sm text-brand-neutral-2">Reset to default</p>
         </Button>
       </div>
@@ -117,6 +133,7 @@ function SortColumnsPanel({
                 const newSort = sortingState.filter((s) => s.id !== sort.id);
                 setSortingState(newSort);
               }}
+              disabled={loading === UI.Stale.OPTION.UPDATE_DISABLED}
             />
           ))}
         </div>
@@ -127,7 +144,15 @@ function SortColumnsPanel({
           <DropdownMenu
             labelVariant="ghost"
             label={
-              <div className="flex flex-row items-center space-x-1 border border-brand-neutral rounded-brand p-1.5 px-2 bg-brand-io">
+              <div
+                className={classNames(
+                  "flex flex-row items-center space-x-1 border border-brand-neutral rounded-brand p-1.5 px-2 bg-brand-io",
+                  {
+                    "bg-brand-io-disabled pointer-events-none cursor-not-allowed":
+                      loading === UI.Stale.OPTION.UPDATE_DISABLED,
+                  }
+                )}
+              >
                 <Icon name="plus" />
                 <p className="text-sm">Add sort</p>
               </div>
@@ -167,12 +192,14 @@ function SortColumnsPopover({
   resetSortingState,
   table,
   sortable,
+  loading,
 }: {
   sortingState: SortingState;
   setSortingState: (val: SortingState) => void;
   resetSortingState: () => void;
   table: TanStackTable;
   sortable: UI.Table.SortOption;
+  loading: UI.Stale.Option;
 }) {
   if (sortable === UI.Table.SORT_OPTION.DISABLED) {
     return null;
@@ -199,6 +226,7 @@ function SortColumnsPopover({
         <div
           data-tooltip-id="top-tooltip-offset4"
           data-tooltip-content={getSortingTooltipContent()}
+          data-tooltip-class-name="hidden sm:block"
         >
           <Icon
             name="arrows-sort"
@@ -216,6 +244,7 @@ function SortColumnsPopover({
           className="w-96"
           sortable={sortable}
           resetSortingState={resetSortingState}
+          loading={loading}
         />
       </Popover.Panel>
     </Popover.Root>

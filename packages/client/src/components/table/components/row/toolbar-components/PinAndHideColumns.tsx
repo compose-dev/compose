@@ -216,9 +216,11 @@ function PinAndHideColumnsPanel({
 function PinAndHideColumnsPopover({
   table,
   resetColumnPinningToInitial,
+  resetColumnVisibility,
 }: {
   table: TanStackTable;
   resetColumnPinningToInitial: () => void;
+  resetColumnVisibility: () => void;
 }) {
   const columnVisibility = table.getState().columnVisibility;
   const columnPinning = table.getState().columnPinning;
@@ -279,6 +281,7 @@ function PinAndHideColumnsPopover({
         <div
           data-tooltip-id="top-tooltip-offset4"
           data-tooltip-content={getTooltipContent()}
+          data-tooltip-class-name="hidden sm:block"
         >
           <Icon
             name="adjustments"
@@ -291,7 +294,7 @@ function PinAndHideColumnsPopover({
           columnVisibility={columnVisibility}
           setColumnVisibility={table.setColumnVisibility}
           resetColumnVisibility={() => {
-            table.resetColumnVisibility();
+            resetColumnVisibility();
             resetColumnPinningToInitial();
           }}
           className="w-96"

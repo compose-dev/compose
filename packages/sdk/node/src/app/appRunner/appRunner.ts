@@ -462,11 +462,10 @@ class AppRunner {
           this.onTablePageChangeHook(
             renderId,
             table.tableId,
-            table.searchQuery,
             table.offset,
             table.pageSize,
-            table.activeSortBy,
-            table.activeFilterBy
+            table.activeView,
+            true
           );
         }
       }
@@ -759,11 +758,9 @@ class AppRunner {
           this.onTablePageChangeHook(
             table.renderId,
             table.tableId,
-            newTable.searchQuery,
             newTable.offset,
             newTable.pageSize,
-            newTable.activeSortBy,
-            newTable.activeFilterBy,
+            newTable.activeView,
             true
           );
         });
@@ -1322,11 +1319,12 @@ class AppRunner {
   async onTablePageChangeHook(
     renderId: string,
     componentId: string,
-    searchQuery: string | null,
     offset: number,
     pageSize: number,
-    sortBy: UI.Table.ColumnSort<UI.Table.DataRow[]>[],
-    filterBy: UI.Table.AdvancedFilterModel<UI.Table.DataRow[]> | null,
+    view: Pick<
+      UI.Table.ViewInternal<UI.Table.DataRow[]>,
+      "searchQuery" | "sortBy" | "filterBy"
+    > & { viewBy?: string },
     refreshTotalRecords: boolean = false
   ) {
     try {
@@ -1371,10 +1369,12 @@ class AppRunner {
         return;
       }
 
+      const previousActiveView = { ...tableState.activeView };
+
       // Update table state immediately to avoid race conditions with page.update() method calls.
       this.tableState.update(renderId, componentId, {
         offset,
-        searchQuery,
+        activeView: view,
       });
 
       if (component.hooks.onPageChange === null) {
@@ -1394,13 +1394,18 @@ class AppRunner {
       } else if (
         component.hooks.onPageChange.type === UI.Table.PAGINATION_TYPE.MANUAL
       ) {
+        const shouldRefreshTotalRecords =
+          TableState.Class.shouldRefreshTotalRecord(previousActiveView, view) ||
+          refreshTotalRecords;
+
         const response = await component.hooks.onPageChange.fn({
           offset,
           pageSize,
-          searchQuery,
-          sortBy,
-          filterBy,
-          prevSearchQuery: tableState.searchQuery,
+          searchQuery: view.searchQuery ?? null,
+          sortBy: view.sortBy ?? [],
+          filterBy: view.filterBy ?? null,
+          prevSearchQuery: previousActiveView.searchQuery ?? null,
+          refreshTotalRecords: shouldRefreshTotalRecords,
           prevTotalRecords: refreshTotalRecords
             ? null
             : tableState.totalRecords,
@@ -1423,22 +1428,24 @@ class AppRunner {
       if (tableState.stale !== UI.Stale.OPTION.FALSE) {
         const oldStringified = JSON.stringify({
           offset: tableState.offset,
-          searchQuery: tableState.searchQuery,
+          searchQuery: tableState.activeView.searchQuery ?? null,
           totalRecords: tableState.totalRecords,
           data: tableState.data,
           pageSize: tableState.pageSize,
-          sortBy: tableState.activeSortBy,
-          filterBy: tableState.activeFilterBy,
+          sortBy: tableState.activeView.sortBy ?? [],
+          filterBy: tableState.activeView.filterBy ?? null,
+          viewBy: tableState.activeView.viewBy,
         });
 
         const newStringified = JSON.stringify({
           offset,
-          searchQuery,
+          searchQuery: view.searchQuery ?? null,
           totalRecords,
           data,
           pageSize,
-          sortBy,
-          filterBy,
+          sortBy: view.sortBy ?? [],
+          filterBy: view.filterBy ?? null,
+          viewBy: view.viewBy,
         });
 
         if (oldStringified === newStringified) {
@@ -1467,19 +1474,20 @@ class AppRunner {
       this.tableState.update(renderId, componentId, {
         totalRecords,
         offset,
-        searchQuery,
         data,
         stale: UI.Stale.OPTION.FALSE,
         pageSize,
-        activeSortBy: sortBy,
-        activeFilterBy: filterBy,
+        activeView: view,
       });
 
       component.model.properties = {
         ...component.model.properties,
         data,
         offset,
-        searchQuery,
+        searchQuery: view.searchQuery ?? null,
+        sortBy: view.sortBy ?? [],
+        filterBy: view.filterBy ?? null,
+        viewBy: view.viewBy,
         totalRecords,
         pageSize,
       };
@@ -1505,7 +1513,10 @@ class AppRunner {
           data: compressedData,
           totalRecords,
           offset,
-          searchQuery,
+          searchQuery: view.searchQuery ?? null,
+          sortBy: view.sortBy ?? [],
+          filterBy: view.filterBy ?? null,
+          viewBy: view.viewBy,
           stale: this.tableState.hasQueuedUpdate(renderId, componentId)
             ? UI.Stale.OPTION.UPDATE_NOT_DISABLED
             : UI.Stale.OPTION.FALSE,

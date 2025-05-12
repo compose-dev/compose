@@ -449,11 +449,14 @@ class ComposeClient<TApps extends readonly app.Definition[]> {
       runner.onTablePageChangeHook(
         event.renderId,
         event.componentId,
-        event.searchQuery,
         event.offset,
         event.pageSize,
-        event.sortBy,
-        event.filterBy
+        {
+          searchQuery: event.searchQuery,
+          sortBy: event.sortBy,
+          filterBy: event.filterBy,
+          viewBy: event.viewBy,
+        }
       );
       return;
     }

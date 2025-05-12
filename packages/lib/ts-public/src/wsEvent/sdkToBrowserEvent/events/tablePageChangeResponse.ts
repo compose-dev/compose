@@ -10,5 +10,8 @@ export interface Data extends BaseData {
   totalRecords: number;
   offset: number;
   searchQuery: string | null;
+  sortBy?: UI.Table.ColumnSort<UI.Table.DataRow[]>[];
+  filterBy?: UI.Table.AdvancedFilterModel<UI.Table.DataRow[]>;
+  viewBy?: string;
   stale: UI.Stale.Option;
 }

@@ -1,20 +1,42 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { INTERNAL_COLUMN_ID } from "./constants";
 import { ColumnPinningState, Updater } from "@tanstack/react-table";
 import { TableColumnProp } from "./constants";
 import { UI } from "@composehq/ts-public";
+import * as Views from "./views";
 
 function getColumnPinningState(
   enableRowSelection: boolean,
   columns: TableColumnProp[],
-  hasActions: boolean
+  hasActions: boolean,
+  activeView: Views.ViewValidatedFormat,
+  columnNameToIdMap: Record<string, string>
 ) {
-  const left = columns
+  let left = columns
     .filter((column) => column.pinned === UI.Table.PINNED_SIDE.LEFT)
     .map((column) => column.id);
-  const right = columns
+  let right = columns
     .filter((column) => column.pinned === UI.Table.PINNED_SIDE.RIGHT)
     .map((column) => column.id);
+
+  if (activeView.columns) {
+    const activeViewKeys = Object.keys(activeView.columns);
+    for (const key of activeViewKeys) {
+      const pinnedValue = activeView.columns[key]?.pinned;
+      if (pinnedValue === UI.Table.PINNED_SIDE.LEFT && !left.includes(key)) {
+        left.push(columnNameToIdMap[key]);
+      }
+
+      if (pinnedValue === UI.Table.PINNED_SIDE.RIGHT && !right.includes(key)) {
+        right.push(columnNameToIdMap[key]);
+      }
+
+      if (pinnedValue === UI.Table.PINNED_SIDE.NONE) {
+        left = left.filter((column) => column !== columnNameToIdMap[key]);
+        right = right.filter((column) => column !== columnNameToIdMap[key]);
+      }
+    }
+  }
 
   return correctColumnPinningState(
     enableRowSelection,
@@ -105,28 +127,65 @@ function columnPinningEquals(a: ColumnPinningState, b: ColumnPinningState) {
 function useColumnPinning(
   enableRowSelection: boolean,
   columns: TableColumnProp[],
-  hasActions: boolean
+  hasActions: boolean,
+  activeView: Views.ViewValidatedFormat
 ) {
+  const columnNameToIdMap = useMemo(() => {
+    return columns.reduce(
+      (acc, column) => {
+        acc[column.original ?? column.id] = column.id;
+        return acc;
+      },
+      {} as Record<string, string>
+    );
+  }, [columns]);
+
   const initialColumnPinning = useRef<ColumnPinningState>(
-    getColumnPinningState(enableRowSelection, columns, hasActions)
+    getColumnPinningState(
+      enableRowSelection,
+      columns,
+      hasActions,
+      activeView,
+      columnNameToIdMap
+    )
   );
 
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(
     initialColumnPinning.current
   );
 
+  const lastAppliedViewLabel = useRef<string>(activeView.label);
+
   useEffect(() => {
     const newColumnPinning = getColumnPinningState(
       enableRowSelection,
       columns,
-      hasActions
+      hasActions,
+      activeView,
+      columnNameToIdMap
     );
 
-    if (!columnPinningEquals(newColumnPinning, initialColumnPinning.current)) {
+    // If the current view is not a custom view, then force update the column
+    // pinning if the view did change.
+    if (
+      activeView.label !== lastAppliedViewLabel.current &&
+      activeView.key !== Views.CUSTOM_VIEW_KEY
+    ) {
       initialColumnPinning.current = newColumnPinning;
       setColumnPinning(newColumnPinning);
     }
-  }, [enableRowSelection, columns, hasActions]);
+
+    // Else, only update the column pinning if it's different than the previous
+    // initial state.
+    else if (
+      !columnPinningEquals(newColumnPinning, initialColumnPinning.current)
+    ) {
+      initialColumnPinning.current = newColumnPinning;
+      setColumnPinning(newColumnPinning);
+    }
+
+    lastAppliedViewLabel.current = activeView.label;
+  }, [enableRowSelection, columns, hasActions, activeView, columnNameToIdMap]);
 
   const handleColumnPinningChange = useCallback(
     (newValue: Updater<ColumnPinningState>) => {

@@ -17,7 +17,8 @@ type TanStackTableColumn = ColumnDef<FormattedTableRow>;
 
 function formatColumn(
   column: TableColumnProp,
-  density: UI.Table.Density
+  density: UI.Table.Density,
+  overflow: UI.Table.OverflowBehavior
 ): TanStackTableColumn {
   return {
     id: column.id,
@@ -104,6 +105,7 @@ function formatColumn(
           meta={row.original[INTERNAL_COLUMN_ID.META]}
           isLastRow={row.index === table.getRowModel().rows.length - 1}
           density={density}
+          tableOverflow={overflow}
           pinned={tanstackColumn.getIsPinned()}
         />
       );
@@ -261,6 +263,7 @@ function useFormattedColumns(
   actions: UI.Components.InputTable["model"]["properties"]["actions"],
   onTableRowActionHook: (rowIdx: number, actionIdx: number) => void,
   density: UI.Table.Density,
+  overflow: UI.Table.OverflowBehavior,
   toggleRowSelection: RowSelections.ToggleRowSelection
 ) {
   const formattedColumns = useMemo(() => {
@@ -284,7 +287,7 @@ function useFormattedColumns(
       if (column.accessorKey === INTERNAL_COLUMN_ID.META) {
         return;
       }
-      formatted.push(formatColumn(column, density));
+      formatted.push(formatColumn(column, density, overflow));
     });
 
     // Finally, add the actions column
@@ -304,6 +307,7 @@ function useFormattedColumns(
     actions,
     onTableRowActionHook,
     density,
+    overflow,
     toggleRowSelection,
   ]);
 

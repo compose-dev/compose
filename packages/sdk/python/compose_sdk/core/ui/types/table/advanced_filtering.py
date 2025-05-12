@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import TypedDict, Literal, Union, List, Any
+from unittest import result
 
 
 class TableAdvancedFilterClause(TypedDict):
@@ -23,6 +24,47 @@ class TableAdvancedFilterClause(TypedDict):
     key: str
 
 
+SNAKE_TO_CAMEL_CASE_OPERATOR_MAP = {
+    "is": "is",
+    "is_not": "isNot",
+    "includes": "includes",
+    "not_includes": "notIncludes",
+    "greater_than": "greaterThan",
+    "greater_than_or_equal": "greaterThanOrEqual",
+    "less_than": "lessThan",
+    "less_than_or_equal": "lessThanOrEqual",
+    "is_empty": "isEmpty",
+    "is_not_empty": "isNotEmpty",
+    "has_any": "hasAny",
+    "not_has_any": "notHasAny",
+    "has_all": "hasAll",
+    "not_has_all": "notHasAll",
+}
+
+CAMEL_TO_SNAKE_CASE_OPERATOR_MAP = {
+    "is": "is",
+    "isNot": "is_not",
+    "includes": "includes",
+    "notIncludes": "not_includes",
+    "greaterThan": "greater_than",
+    "greaterThanOrEqual": "greater_than_or_equal",
+    "lessThan": "less_than",
+    "lessThanOrEqual": "less_than_or_equal",
+    "isEmpty": "is_empty",
+    "isNotEmpty": "is_not_empty",
+    "hasAny": "has_any",
+    "notHasAny": "not_has_any",
+    "hasAll": "has_all",
+    "notHasAll": "not_has_all",
+}
+
+
+class FilterModelFormat:
+    SNAKE = "snake"
+    CAMEL = "camel"
+    TYPE = Literal["snake", "camel"]
+
+
 class TableAdvancedFilterGroup(TypedDict):
     logic_operator: Literal["and", "or"]
     filters: List[Union[TableAdvancedFilterClause, TableAdvancedFilterGroup]]
@@ -33,21 +75,22 @@ TableAdvancedFilterModel = Union[
 ]
 
 
-def transform_advanced_filter_model_to_camel_case(
-    filter_model: TableAdvancedFilterModel,
+def transform_advanced_filter_model(
+    filter_model: TableAdvancedFilterModel, result_format: FilterModelFormat.TYPE
 ) -> Union[dict[str, Any], None]:
     """
-    Recursively transforms a TableAdvancedFilterModel from snake_case keys/values
-    to camelCase keys/values as expected by the frontend.
+    Recursively transforms a TableAdvancedFilterModel from either snake_case to
+    camelCase or camelCase to snake_case
 
     Specifically transforms:
-    - 'logic_operator' key to 'logicOperator'
-    - 'operator' key's value from snake_case to camelCase (e.g., 'is_not' to 'isNot')
+    - 'logic_operator' key to 'logicOperator', or vice-versa
+    - 'operator' key's value from snake_case to camelCase (e.g., 'is_not' to 'isNot'), or vice-versa
 
     Leaves 'key' and 'value' fields untouched.
 
     Args:
         filter_model: The filter model dictionary (or None).
+        result_format: either 'snake' or 'camel'
 
     Returns:
         A new dictionary with transformed keys/values, or None if input is None
@@ -56,28 +99,21 @@ def transform_advanced_filter_model_to_camel_case(
     if filter_model is None:
         return None
 
-    # Mapping for operator values from snake_case to camelCase
-    operator_map = {
-        "is": "is",
-        "is_not": "isNot",
-        "includes": "includes",
-        "not_includes": "notIncludes",
-        "greater_than": "greaterThan",
-        "greater_than_or_equal": "greaterThanOrEqual",
-        "less_than": "lessThan",
-        "less_than_or_equal": "lessThanOrEqual",
-        "is_empty": "isEmpty",
-        "is_not_empty": "isNotEmpty",
-        "has_any": "hasAny",
-        "not_has_any": "notHasAny",
-        "has_all": "hasAll",
-        "not_has_all": "notHasAll",
-    }
-
     try:
+        result_logic_operator_key = (
+            "logic_operator"
+            if result_format == FilterModelFormat.SNAKE
+            else "logicOperator"
+        )
+        input_logic_operator_key = (
+            "logicOperator"
+            if result_format == FilterModelFormat.SNAKE
+            else "logic_operator"
+        )
+
         # Check if it's a group (has 'logic_operator')
         # Note: Using .get() for runtime safety, although TypedDict defines keys
-        if "logic_operator" in filter_model:
+        if input_logic_operator_key in filter_model:
             transformed_filters: list[dict[str, Any]] = []
 
             for f in filter_model.get("filters", []):
@@ -91,7 +127,9 @@ def transform_advanced_filter_model_to_camel_case(
                 transformed_filters.append(transformed_filter)
 
             return {
-                "logicOperator": filter_model.get("logic_operator", "and"),
+                result_logic_operator_key: filter_model.get(
+                    input_logic_operator_key, "and"
+                ),
                 "filters": transformed_filters,
             }
         # Check if it's a clause (has 'operator')
@@ -99,9 +137,13 @@ def transform_advanced_filter_model_to_camel_case(
             original_operator = filter_model.get("operator")
 
             # Map the operator value to camelCase
-            camel_case_operator = operator_map.get(original_operator)
+            result_format_operator = (
+                SNAKE_TO_CAMEL_CASE_OPERATOR_MAP.get(original_operator)
+                if result_format == FilterModelFormat.CAMEL
+                else CAMEL_TO_SNAKE_CASE_OPERATOR_MAP.get(original_operator)
+            )
 
-            if camel_case_operator is None:
+            if result_format_operator is None:
                 # This indicates an invalid operator value not covered by the Literal type
                 # or the map, treat as an error.
                 raise ValueError(
@@ -109,7 +151,7 @@ def transform_advanced_filter_model_to_camel_case(
                 )
 
             return {
-                "operator": camel_case_operator,
+                "operator": result_format_operator,
                 "value": filter_model.get("value"),
                 "key": filter_model.get("key"),
             }
@@ -122,3 +164,19 @@ def transform_advanced_filter_model_to_camel_case(
     except Exception:
         # Return None if any error occurs during processing
         return None
+
+
+def transform_advanced_filter_model_to_camel_case(
+    filter_model: TableAdvancedFilterModel,
+) -> Union[dict[str, Any], None]:
+    return transform_advanced_filter_model(
+        filter_model, result_format=FilterModelFormat.CAMEL
+    )
+
+
+def transform_advanced_filter_model_to_snake_case(
+    filter_model: TableAdvancedFilterModel,
+) -> Union[dict[str, Any], None]:
+    return transform_advanced_filter_model(
+        filter_model, result_format=FilterModelFormat.SNAKE
+    )

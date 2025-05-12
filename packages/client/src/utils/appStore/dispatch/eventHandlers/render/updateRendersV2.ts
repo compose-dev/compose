@@ -12,7 +12,8 @@ import { shouldResetOutput } from "./utils";
 interface UpdateRendersV2Event extends AppRunnerBaseEvent {
   type: typeof APP_RUNNER_EVENT_TYPE.UPDATE_RENDERS_V2;
   properties: {
-    diff: ServerToBrowserEvent.RerenderUIV2.Data["diff"];
+    diff: ServerToBrowserEvent.RerenderUIV3.Data["diff"];
+    version: ServerToBrowserEvent.RerenderUIV3.Data["v"];
   };
 }
 
@@ -20,6 +21,8 @@ function updateRendersV2(
   state: AppStore,
   event: UpdateRendersV2Event
 ): Partial<AppStore> {
+  const eventVersion = event.properties.version || 1;
+
   const flattenedModel: AppStore["flattenedModel"] = {
     ...state.flattenedModel,
   };
@@ -126,6 +129,7 @@ function updateRendersV2(
       );
 
       if (
+        eventVersion >= 2 &&
         shouldResetOutput(
           state.flattenedModel[renderId][updatedComponentId],
           hydrated

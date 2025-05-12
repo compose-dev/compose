@@ -117,6 +117,7 @@ function DownloadCSVPopover({
         <div
           data-tooltip-id="top-tooltip-offset4"
           data-tooltip-content="Download CSV"
+          data-tooltip-class-name="hidden sm:block"
         >
           <Icon name="download" color="brand-neutral-2" />
         </div>

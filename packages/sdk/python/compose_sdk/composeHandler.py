@@ -325,11 +325,14 @@ class ComposeClient:
             await runner.on_table_page_change_hook(
                 event["renderId"],
                 event["componentId"],
-                event["searchQuery"],
                 event["offset"],
                 event["pageSize"],
-                event["sortBy"],
-                event["filterBy"],
+                {
+                    "filter_by": event["filterBy"],
+                    "sort_by": event["sortBy"],
+                    "search_query": event["searchQuery"],
+                    "view_by": event["viewBy"],
+                },
             )
 
     async def execute_app(

@@ -53,10 +53,7 @@ function guessColumns(
       const width =
         typeof column === "string" ? undefined : (column.width ?? undefined);
 
-      const overflow =
-        typeof column === "string"
-          ? defaultOverflow
-          : (column.overflow ?? defaultOverflow);
+      const overflow = typeof column === "string" ? undefined : column.overflow;
 
       const hidden =
         typeof column === "string" ? false : (column.hidden ?? false);
@@ -202,7 +199,8 @@ export default function TableComponent({
       offset: number,
       pageSize: number,
       sortBy: UI.Table.ColumnSort<UI.Table.DataRow[]>[],
-      filterBy: UI.Table.AdvancedFilterModel<UI.Table.DataRow[]> | null
+      filterBy: UI.Table.AdvancedFilterModel<UI.Table.DataRow[]> | null,
+      viewBy: string | undefined
     ) => {
       if (!executionId || !environmentId) {
         return;
@@ -219,6 +217,7 @@ export default function TableComponent({
           sortBy,
           pageSize,
           filterBy,
+          viewBy,
         },
         environmentId
       );
@@ -323,11 +322,9 @@ export default function TableComponent({
           errorMessage={errorMessage}
           allowMultiSelection={component.model.properties.maxSelections > 1}
           disableRowSelection={disabled}
-          serverSearchQuery={component.model.properties.searchQuery}
           paginated={component.model.properties.paged}
           loading={componentLoading}
           height={component.model.style?.height ?? undefined}
-          sortBy={component.model.properties.sortBy}
           // We expect the SDK to return undefined if the table should be
           // multi-column sortable. Else, it'll explicitly return the
           // sortable option to use.
@@ -339,13 +336,19 @@ export default function TableComponent({
           density={component.model.properties.density}
           overflow={component.model.properties.overflow}
           filterable={component.model.properties.filterable}
-          filterBy={component.model.properties.filterBy}
           primaryKey={
             component.model.properties.selectMode ===
             UI.Table.SELECTION_RETURN_TYPE.INDEX
               ? undefined
               : component.model.properties.primaryKey
           }
+          views={component.model.properties.views}
+          serverView={{
+            searchQuery: component.model.properties.searchQuery,
+            sortBy: component.model.properties.sortBy,
+            filterBy: component.model.properties.filterBy,
+            viewBy: component.model.properties.viewBy,
+          }}
         />
       </div>
     </div>
