@@ -328,10 +328,10 @@ class ComposeClient:
                 event["offset"],
                 event["pageSize"],
                 {
-                    "filter_by": event["filterBy"],
-                    "sort_by": event["sortBy"],
-                    "search_query": event["searchQuery"],
-                    "view_by": event["viewBy"],
+                    "filter_by": event.get("filterBy", None),
+                    "sort_by": event.get("sortBy", []),
+                    "search_query": event.get("searchQuery", None),
+                    "view_by": event.get("viewBy", None),
                 },
             )
 

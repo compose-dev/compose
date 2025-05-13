@@ -17,7 +17,7 @@ class WSClient {
   private packageName: string;
   private packageVersion: string;
   private onMessageCallback: (event: ListenerEvent) => void;
-
+  private debug: boolean;
   private reconnectionInterval: number;
   private WS_URL: string;
   private shuttingDown: boolean = false;
@@ -35,12 +35,14 @@ class WSClient {
     packageName: string,
     packageVersion: string,
     onMessageCallback: (event: ListenerEvent) => void,
-    host: string | undefined
+    host: string | undefined,
+    debug: boolean
   ) {
     this.apiKey = apiKey;
     this.packageName = packageName;
     this.packageVersion = packageVersion;
     this.onMessageCallback = onMessageCallback;
+    this.debug = debug || isDevelopment;
 
     this.reconnectionInterval = WS_CLIENT.RECONNECTION_INTERVAL.BASE_IN_SECONDS;
     this.WS_URL = isDevelopment
@@ -188,6 +190,10 @@ class WSClient {
   }
 
   private onError(error: Error) {
+    if (this.debug) {
+      console.error(error);
+    }
+
     if (this.ws !== null) {
       this.isConnected = false;
     }

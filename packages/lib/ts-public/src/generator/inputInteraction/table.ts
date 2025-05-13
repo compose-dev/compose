@@ -19,8 +19,29 @@ type TableAction<TData extends UI.Table.DataRow[]> = NonNullable<
   onClick: (row: TData[number], index: number) => void;
 };
 
-interface TableProperties<TData extends UI.Table.DataRow[]>
-  extends BaseWithInputInteraction<boolean> {
+type TableOnChangeDataPayload<
+  TSRT, // Stands for TSelectionReturnType
+  TData extends UI.Table.DataRow[],
+> = TSRT extends typeof UI.Table.SELECTION_RETURN_TYPE.ID
+  ? (string | number)[]
+  : TSRT extends typeof UI.Table.SELECTION_RETURN_TYPE.INDEX
+    ? number[]
+    : TSRT extends typeof UI.Table.SELECTION_RETURN_TYPE.FULL
+      ? TData[]
+      : TSRT extends undefined // Handles case where selectionReturnType is omitted (assuming default behavior implies TData[])
+        ? TData[]
+        : // If TSRT is a union (e.g., "id" | "index" | "full"),
+          // TypeScript's distributive conditional types will make this resolve to:
+          // Array<string | number> | Array<number> | TData[]
+          // This is the desired behavior for the 'rows' parameter.
+          // The final TData[] acts as a default for "full" or any unhandled case within the union.
+          TData[];
+
+interface TableProperties<
+  TData extends UI.Table.DataRow[],
+  TSelectionReturnType extends
+    UI.Components.InputTable["model"]["properties"]["selectMode"],
+> extends BaseWithInputInteraction<boolean> {
   /**
    * Manually specify the columns to be displayed in the table. Usage:
    *
@@ -73,7 +94,11 @@ interface TableProperties<TData extends UI.Table.DataRow[]>
   /**
    * A custom validation function that is called on selected rows. Return nothing if valid, or a string error message if invalid.
    */
-  validate: UI.Components.InputTable["hooks"]["validate"];
+  validate: UI.Factory.Nullable<
+    UI.Factory.ValidatorCallback<
+      TableOnChangeDataPayload<TSelectionReturnType, TData>
+    >
+  >;
   /**
    * The data to display in the table.
    */
@@ -89,7 +114,11 @@ interface TableProperties<TData extends UI.Table.DataRow[]>
   /**
    * A function that is called when the user selects or deselects rows. It receives the selected rows as an argument, or the selected row IDs if the `selectionReturnType` parameter is set to `id`.
    */
-  onChange: UI.Components.InputTable["hooks"]["onSelect"];
+  onChange: UI.Factory.Nullable<
+    UI.Factory.InputValueCallback<
+      TableOnChangeDataPayload<TSelectionReturnType, TData>
+    >
+  >;
   /**
    * A list of row IDs to pre-select when the table is first rendered. Defaults to empty list.
    */
@@ -110,7 +139,7 @@ interface TableProperties<TData extends UI.Table.DataRow[]>
    *
    * Defaults to `full`. Must be set to `id` if the table is paginated to enable row selection.
    */
-  selectionReturnType: UI.Components.InputTable["model"]["properties"]["selectMode"];
+  selectionReturnType: TSelectionReturnType;
   /**
    * Whether the table should be searchable. Defaults to `true` for normal tables, `false` for paginated tables.
    */
@@ -197,12 +226,16 @@ interface TableProperties<TData extends UI.Table.DataRow[]>
 }
 
 type RequiredTableFields = "id" | "data";
-type OptionalTableProperties<TData extends UI.Table.DataRow[]> = Omit<
-  TableProperties<TData>,
-  RequiredTableFields
->;
+type OptionalTableProperties<
+  TData extends UI.Table.DataRow[],
+  TSelectionReturnType extends
+    UI.Components.InputTable["model"]["properties"]["selectMode"],
+> = Omit<TableProperties<TData, TSelectionReturnType>, RequiredTableFields>;
 
-const defaultTableProperties: OptionalTableProperties<UI.Table.DataRow[]> = {
+const defaultTableProperties: OptionalTableProperties<
+  UI.Table.DataRow[],
+  UI.Table.SelectionReturnType
+> = {
   label: null,
   required: true,
   description: null,
@@ -221,7 +254,10 @@ const defaultTableProperties: OptionalTableProperties<UI.Table.DataRow[]> = {
 };
 
 function getModelActions(
-  actions: TableProperties<UI.Table.DataRow[]>["actions"]
+  actions: TableProperties<
+    UI.Table.DataRow[],
+    UI.Table.SelectionReturnType
+  >["actions"]
 ) {
   if (actions === null) {
     return null;
@@ -233,7 +269,10 @@ function getModelActions(
 }
 
 function getHookActions(
-  actions: TableProperties<UI.Table.DataRow[]>["actions"]
+  actions: TableProperties<
+    UI.Table.DataRow[],
+    UI.Table.SelectionReturnType
+  >["actions"]
 ) {
   if (actions === null) {
     return null;
@@ -325,12 +364,15 @@ function getFilterable(
   return true;
 }
 
-function getSelectable(
+function getSelectable<
+  TSelectionReturnType extends
+    UI.Components.InputTable["model"]["properties"]["selectMode"],
+>(
   selectable: boolean | undefined,
   allowSelect: boolean | undefined,
   onChange: UI.Components.InputTable["hooks"]["onSelect"] | null | undefined,
   paginated: boolean,
-  selectMode: UI.Table.SelectionReturnType | undefined,
+  selectMode: TSelectionReturnType,
   tableId: UI.BaseGeneric.Id
 ) {
   const isExplicitlyTrue = selectable === true || allowSelect === true;
@@ -469,10 +511,15 @@ function warnAboutSelectMode(
  * @param {UI.Components.InputTable["model"]["views"]} properties.views - A list of views that enable the user to quickly switch between different table configurations.
  * @returns The configured table component.
  */
-function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
+function table<
+  TId extends UI.BaseGeneric.Id,
+  TData extends UI.Table.DataRow[],
+  TSelectionReturnType extends
+    UI.Components.InputTable["model"]["properties"]["selectMode"] = undefined,
+>(
   id: TId,
   data: TData | UI.Table.OnPageChange<TData>,
-  properties: Partial<OptionalTableProperties<TData>> = {}
+  properties: Partial<OptionalTableProperties<TData, TSelectionReturnType>> = {}
 ): UI.OutputOmittedComponents.InputTable<TId> {
   const mergedProperties = {
     ...defaultTableProperties,
@@ -514,12 +561,12 @@ function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
     hasOnSelectHook: mergedProperties.onChange !== null,
     actions: getModelActions(mergedProperties.actions),
     v: 3,
-    allowSelect: getSelectable(
+    allowSelect: getSelectable<TSelectionReturnType>(
       properties.selectable,
       properties.allowSelect,
-      properties.onChange,
+      properties.onChange as UI.Components.InputTable["hooks"]["onSelect"],
       manuallyPaged || autoPaged,
-      properties.selectionReturnType,
+      properties.selectionReturnType as TSelectionReturnType,
       id
     ),
     initialSelectedRows:
@@ -603,8 +650,10 @@ function table<TId extends UI.BaseGeneric.Id, TData extends UI.Table.DataRow[]>(
       style: mergedProperties.style,
     },
     hooks: {
-      validate: mergedProperties.validate,
-      onSelect: mergedProperties.onChange,
+      validate:
+        mergedProperties.validate as UI.Components.InputTable["hooks"]["validate"],
+      onSelect:
+        mergedProperties.onChange as UI.Components.InputTable["hooks"]["onSelect"],
       onRowActions: getHookActions(mergedProperties.actions),
       onPageChange: manuallyPaged
         ? { fn: data, type: UI.Table.PAGINATION_TYPE.MANUAL }

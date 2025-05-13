@@ -154,7 +154,7 @@ function useColumnPinning(
     initialColumnPinning.current
   );
 
-  const lastAppliedViewLabel = useRef<string>(activeView.label);
+  const lastAppliedViewKey = useRef<string>(activeView.key);
 
   useEffect(() => {
     const newColumnPinning = getColumnPinningState(
@@ -165,12 +165,7 @@ function useColumnPinning(
       columnNameToIdMap
     );
 
-    // If the current view is not a custom view, then force update the column
-    // pinning if the view did change.
-    if (
-      activeView.label !== lastAppliedViewLabel.current &&
-      activeView.key !== Views.CUSTOM_VIEW_KEY
-    ) {
+    if (activeView.key !== lastAppliedViewKey.current) {
       initialColumnPinning.current = newColumnPinning;
       setColumnPinning(newColumnPinning);
     }
@@ -184,7 +179,7 @@ function useColumnPinning(
       setColumnPinning(newColumnPinning);
     }
 
-    lastAppliedViewLabel.current = activeView.label;
+    lastAppliedViewKey.current = activeView.key;
   }, [enableRowSelection, columns, hasActions, activeView, columnNameToIdMap]);
 
   const handleColumnPinningChange = useCallback(

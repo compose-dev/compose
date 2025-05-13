@@ -16,7 +16,12 @@ function compressTableLayout<T extends UI.ComponentGenerators.InputTable>(
 
   const columns =
     columnsProperty === null
-      ? table.model.properties.data.length > 0
+      ? // If the table is paged, do not optimize the columns unless
+        // the property is explicitly set by the user. Manually paged
+        // tables transmit the table model prior to loading any data,
+        // so it's too late to optimize the columns on future pages.
+        table.model.properties.data.length > 0 &&
+        table.model.properties.paged !== true
         ? Object.keys(table.model.properties.data[0])
         : null
       : columnsProperty;

@@ -8,6 +8,8 @@ from typing import (
     Any,
     List,
     Awaitable,
+    Sequence,
+    Mapping,
 )
 from typing_extensions import NotRequired
 from ..validator_response import VoidResponse
@@ -20,8 +22,8 @@ from .advanced_filtering import (
 
 TableDataKey = str
 TableValue = Any
-TableDataRow = Dict[TableDataKey, TableValue]
-TableData = List[TableDataRow]
+TableDataRow = Mapping[TableDataKey, TableValue]
+TableData = Sequence[TableDataRow]
 
 
 TABLE_COLUMN_SORT_DIRECTION = Literal["asc", "desc"]
@@ -242,6 +244,10 @@ class TableView(TypedDict):
     columns: NotRequired[Dict[str, TableViewColumn]]
 
 
+class TableViewInternal(TableView):
+    key: str
+
+
 class TablePaginationView(TypedDict):
     filter_by: TableAdvancedFilterModel
     search_query: Union[str, None]
@@ -266,11 +272,13 @@ class Table:
 
     AdvancedFilterModel = TableAdvancedFilterModel
     View = TableView
+    ViewInternal = TableViewInternal
     PaginationView = TablePaginationView
 
-    DataKey = TableDataKey
-
     ColumnSort = TableColumnSort
+
+    DataKey = TableDataKey
+    DataOutput = List[Any]
 
     @property
     def transform_advanced_filter_model_to_camel_case(self):

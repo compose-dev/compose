@@ -43,17 +43,15 @@ function useColumnVisibility(
     initialColumnVisibility.current
   );
 
-  const lastAppliedView = useRef<string>(activeView.label);
+  const lastAppliedViewKey = useRef<string>(activeView.key);
 
   useEffect(() => {
     const newColumnVisibility = getColumnVisibilityState(columns, activeView);
 
-    if (activeView.label !== lastAppliedView.current) {
-      lastAppliedView.current = activeView.label;
-      if (activeView.key !== Views.CUSTOM_VIEW_KEY) {
-        initialColumnVisibility.current = newColumnVisibility;
-        setColumnVisibility(newColumnVisibility);
-      }
+    if (activeView.key !== lastAppliedViewKey.current) {
+      lastAppliedViewKey.current = activeView.key;
+      initialColumnVisibility.current = newColumnVisibility;
+      setColumnVisibility(newColumnVisibility);
     } else if (
       !columnVisibilityEquals(
         newColumnVisibility,

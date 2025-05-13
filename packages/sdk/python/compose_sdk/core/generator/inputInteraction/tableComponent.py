@@ -2,7 +2,7 @@
 
 import pandas
 import warnings
-from typing import Union, Callable, List
+from typing import Union, Callable, List, Sequence, Any
 
 from ...ui import (
     INTERACTION_TYPE,
@@ -18,7 +18,6 @@ from ...ui import (
     TableDefault,
     TablePagination,
     ComponentStyle,
-    TableColumnSort,
     TABLE_COLUMN_OVERFLOW,
     Table,
 )
@@ -55,15 +54,17 @@ def camel_case_columns(columns: TableColumns) -> TableColumns:
     ]
 
 
-def camel_case_and_add_key_to_views(views: List[Table.View]) -> List[Table.View]:
-    return_views: List[Table.View] = []
+def camel_case_and_add_key_to_views(
+    views: List[Table.View],
+) -> List[Table.ViewInternal]:
+    return_views: List[Table.ViewInternal] = []
 
     for idx, view in enumerate(views):
-        return_view: Table.View = {}
+        return_view: Table.ViewInternal = {}
 
         if "label" in view:
             return_view["label"] = view["label"]
-            return_view["key"] = f"${idx}_${view["label"]}"
+            return_view["key"] = f"{idx}_{view['label']}"
 
         if "description" in view:
             return_view["description"] = view["description"]
@@ -166,7 +167,7 @@ def get_filterable(
 def get_selectable(
     selectable: Union[bool, None],
     allow_select: Union[bool, None],
-    on_change: Nullable.Callable,
+    on_change: Union[Callable[..., Any], None],
     paginated: bool,
     selection_return_type: Union[Table.SelectionReturn.TYPE, None],
     table_id: str,
@@ -178,14 +179,17 @@ def get_selectable(
     # `false`. Else, default to `false` unless explicitly set to `true`.
     is_selectable = (
         is_explicitly_true
-        if on_change is not None
+        if on_change is None
         else False if is_explicitly_false else True
     )
 
     # If paginated, add a secondary check to ensure that they have the correct
     # selection mode.
     if paginated:
-        if selection_return_type != Table.SelectionReturn.INDEX:
+        if (
+            selection_return_type != Table.SelectionReturn.INDEX
+            and selection_return_type != Table.SelectionReturn.ID
+        ):
             # If it's selectable, we assume the user wants row selection and
             # warn them on how to enable it.
             if is_selectable:
@@ -227,14 +231,16 @@ def _table(
     required: bool = True,
     description: Union[str, None] = None,
     initial_selected_rows: List[int] = [],
-    validate: Nullable.Callable = None,
-    on_change: Nullable.Callable = None,
+    validate: Union[Callable[..., Any], None] = None,
+    on_change: Union[Callable[..., Any], None] = None,
     columns: Union[TableColumns, None] = None,
     actions: Union[TableActions, None] = None,
     style: Union[ComponentStyle, None] = None,
     min_selections: int = MULTI_SELECTION_MIN_DEFAULT,
     max_selections: int = MULTI_SELECTION_MAX_DEFAULT,
-    selection_return_type: Table.SelectionReturn.TYPE = Table.SelectionReturn.FULL,
+    selection_return_type: Union[
+        Table.SelectionReturn.TYPE, None
+    ] = Table.SelectionReturn.FULL,
     searchable: bool = True,
     paginate: bool = False,
     overflow: Union[TABLE_COLUMN_OVERFLOW, None] = None,
@@ -380,11 +386,11 @@ def table(
     initial_selected_rows: List[int] = [],
     validate: Union[
         Callable[[], ValidatorResponse],
-        Callable[[TableData], ValidatorResponse],
+        Callable[[Table.DataOutput], ValidatorResponse],
+        None,
     ] = None,
     on_change: Union[
-        Callable[[], VoidResponse],
-        Callable[[TableData], VoidResponse],
+        Callable[[], VoidResponse], Callable[[Table.DataOutput], VoidResponse], None
     ] = None,
     style: Union[ComponentStyle, None] = None,
     min_selections: int = MULTI_SELECTION_MIN_DEFAULT,
@@ -392,13 +398,12 @@ def table(
     selection_return_type: Table.SelectionReturn.TYPE = Table.SelectionReturn.FULL,
     searchable: bool = True,
     paginate: bool = False,
-    sort_by: Union[List[TableColumnSort], None] = None,
     sortable: Union[Table.SortOption.TYPE, None] = None,
     selectable: Union[bool, None] = None,
     density: Union[Table.Density.TYPE, None] = None,
     allow_select: Union[bool, None] = None,
     filterable: Union[bool, None] = None,
-    filter_by: Union[Table.AdvancedFilterModel, None] = None,
+    views: Union[Sequence[Table.View], None] = None,
     primary_key: Union[Table.DataKey, None] = None,
 ) -> ComponentReturn:
     """A powerful and highly customizable table component. For example:
@@ -484,21 +489,6 @@ def table(
     #### paginate : `bool`. Optional.
         Whether to paginate the table. Defaults to `False`. Tables with more than 2500 rows will be paginated by default.
 
-    #### sort_by : `List[TableColumnSort]`. Optional.
-        An ordered list of columns to initially sort by. For example:
-
-        >>> sort_by = [
-        ...     {"key": "name", "direction": "asc"},
-        ...     {"key": "age", "direction": "desc"},
-        ... ]
-
-        Each item in the list should have the following fields:
-
-        - `key`: The key of the column to sort by.
-        - `direction`: The direction to sort by. Either `asc` or `desc`.
-
-        Defaults to `[]`.
-
     #### sortable : `single` | `multi` | `False`. Optional.
         Whether the table should allow multi-column, single-column, or no sorting. Options:
 
@@ -507,9 +497,6 @@ def table(
         - `False`: Disable sorting.
 
         Defaults to `True` for normal tables, `False` for paginated tables.
-
-    #### filter_by : `Table.AdvancedFilterModel`. Optional.
-        A filter to initially apply to the table. Learn more in the [docs](https://docs.composehq.com/components/input/table#filtering).
 
     #### filterable : `bool`. Optional.
         Whether to allow filtering. Defaults to `True` for normal tables, `False` for paginated tables.
@@ -528,6 +515,9 @@ def table(
         - `comfortable`: 48px row height
 
         Defaults to `standard`.
+
+    #### views : `List[Table.View]`. Optional.
+        A list of preset views that can be used to filter, sort, and search the table. Each view is a dictionary with at least a `label` field and other optional fields. Learn more in the [docs](https://docs.composehq.com/components/input/table#views).
 
     ## Returns
     The configured table component.
@@ -558,11 +548,10 @@ def table(
         searchable=searchable,
         paginate=paginate,
         overflow=overflow,
-        sort_by=sort_by,
         sortable=sortable,
         density=density,
         filterable=filterable,
-        filter_by=filter_by,
+        views=views,
         primary_key=primary_key,
     )
 
@@ -577,11 +566,13 @@ def dataframe(
     initial_selected_rows: List[int] = [],
     validate: Union[
         Callable[[], ValidatorResponse],
-        Callable[[TableData], ValidatorResponse],
+        Callable[[Table.DataOutput], ValidatorResponse],
+        None,
     ] = None,
     on_change: Union[
         Callable[[], VoidResponse],
-        Callable[[TableData], VoidResponse],
+        Callable[[Table.DataOutput], VoidResponse],
+        None,
     ] = None,
     actions: Nullable.TableActions = None,
     style: Union[ComponentStyle, None] = None,
@@ -591,13 +582,12 @@ def dataframe(
     searchable: bool = True,
     paginate: bool = False,
     overflow: Union[TABLE_COLUMN_OVERFLOW, None] = None,
-    sort_by: Union[List[TableColumnSort], None] = None,
     sortable: Union[Table.SortOption.TYPE, None] = None,
     selectable: Union[bool, None] = None,
     density: Union[Table.Density.TYPE, None] = None,
     filterable: Union[bool, None] = None,
-    filter_by: Union[Table.AdvancedFilterModel, None] = None,
     allow_select: Union[bool, None] = None,
+    views: Union[Sequence[Table.View], None] = None,
     primary_key: Union[Table.DataKey, None] = None,
 ) -> ComponentReturn:
     if allow_select is not None:
@@ -635,10 +625,9 @@ def dataframe(
         searchable=searchable,
         paginate=paginate,
         overflow=overflow,
-        sort_by=sort_by,
         sortable=sortable,
         density=density,
         filterable=filterable,
-        filter_by=filter_by,
+        views=views,
         primary_key=primary_key,
     )

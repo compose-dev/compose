@@ -1190,7 +1190,7 @@ class AppRunner {
       UI.InputComponentTypes.isEnterType(component)
     ) {
       const hookFunc = component.hooks.onEnter;
-      if (hookFunc !== null) {
+      if (hookFunc) {
         this.hookErrorHandler(() => hookFunc(hydrated[componentId]));
       }
     }
@@ -1200,7 +1200,7 @@ class AppRunner {
       UI.InputComponentTypes.isSelectType(component)
     ) {
       const hookFunc = component.hooks.onSelect;
-      if (hookFunc !== null) {
+      if (hookFunc) {
         this.hookErrorHandler(() => hookFunc(hydrated[componentId]));
       }
     }
@@ -1210,7 +1210,7 @@ class AppRunner {
       UI.InputComponentTypes.isFileChangeType(component)
     ) {
       const hookFunc = component.hooks.onFileChange;
-      if (hookFunc !== null) {
+      if (hookFunc) {
         this.hookErrorHandler(() => hookFunc(hydrated[componentId]));
       }
     }

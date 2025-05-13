@@ -41,6 +41,11 @@ def test_table_compression_shortens_keys():
         ],
     )
 
+    # The compression algorithm adds a primary key property to the table model
+    # by default, but the table function doesn't add one unless it's specified.
+    # Hence, we fill it in here.
+    precompressed_layout["model"]["properties"]["primaryKey"] = None
+
     assert JSON.stringify(compressed) == JSON.stringify(precompressed_layout)
 
 
@@ -65,6 +70,11 @@ def test_compresses_table_with_string_columns():
         columns=[{"key": "0", "original": "id"}],
     )
 
+    # The compression algorithm adds a primary key property to the table model
+    # by default, but the table function doesn't add one unless it's specified.
+    # Hence, we fill it in here.
+    precompressed_layout["model"]["properties"]["primaryKey"] = None
+
     assert JSON.stringify(compressed) == JSON.stringify(precompressed_layout)
 
 
@@ -88,6 +98,11 @@ def test_compresses_table_with_advanced_columns():
         ],
         columns=[{"key": "0", "original": "id"}],
     )
+
+    # The compression algorithm adds a primary key property to the table model
+    # by default, but the table function doesn't add one unless it's specified.
+    # Hence, we fill it in here.
+    precompressed_layout["model"]["properties"]["primaryKey"] = None
 
     assert JSON.stringify(compressed) == JSON.stringify(precompressed_layout)
 
@@ -116,6 +131,11 @@ def test_compresses_table_when_nested():
         ],
         columns=[{"key": "0", "original": "id"}],
     )
+
+    # The compression algorithm adds a primary key property to the table model
+    # by default, but the table function doesn't add one unless it's specified.
+    # Hence, we fill it in here.
+    precompressed_layout["model"]["properties"]["primaryKey"] = None
 
     precompressed_nested_layout = ui.row([ui.stack(precompressed_layout)])
     precompressed_nested_layout["model"]["id"] = "row"
@@ -176,5 +196,10 @@ def test_compresses_table_with_different_keys_across_rows():
         ],
         columns=[{"key": "0", "original": "id"}],
     )
+
+    # The compression algorithm adds a primary key property to the table model
+    # by default, but the table function doesn't add one unless it's specified.
+    # Hence, we fill it in here.
+    precompressed_layout["model"]["properties"]["primaryKey"] = None
 
     assert JSON.stringify(compressed) == JSON.stringify(precompressed_layout)

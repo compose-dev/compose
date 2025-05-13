@@ -39,6 +39,7 @@ import {
   IconAdjustments,
   IconPin,
   IconPinned,
+  IconAlignLeft2,
 } from "@tabler/icons-react";
 
 const ICON_NAME = {
@@ -100,6 +101,7 @@ const ICON_NAME = {
   "adjustments-vertical": "adjustments-vertical",
   pin: "pin",
   "pin-vertical": "pin-vertical",
+  format: "format",
 } as const;
 
 const SIZE = {
@@ -189,6 +191,16 @@ function Icon({
   if (name === ICON_NAME.pin) {
     return (
       <IconPin
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME.format) {
+    return (
+      <IconAlignLeft2
         size={16 * SIZE_MULTIPLIER[size]}
         color={ICON_COLOR[color]}
         strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}

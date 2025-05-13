@@ -542,7 +542,7 @@ function TableBody({
               >
                 {leftVisibleCells.length > 0 && (
                   // without z-10, json columns were rendering on top of the pinned columns when scrolled underneath.
-                  <div className="flex sticky left-0 border-r border-brand-neutral bg-brand-io group-hover:bg-brand-overlay z-10">
+                  <div className="flex sticky left-0 border-r border-brand-neutral bg-brand-io group-hover:bg-brand-overlay z-10 contain-paint">
                     {leftVisibleCells.map((cell) => (
                       <TableRowsMemo
                         key={cell.id}
