@@ -529,10 +529,12 @@ function table<
   if (
     properties.initialSelectedRows !== undefined &&
     (!Array.isArray(properties.initialSelectedRows) ||
-      !properties.initialSelectedRows.every((row) => typeof row === "number"))
+      !properties.initialSelectedRows.every(
+        (row) => typeof row === "number" || typeof row === "string"
+      ))
   ) {
     throw new Error(
-      "initialSelectedRows must be an array of numbers for table"
+      "initialSelectedRows must be an array of row ids (numbers or strings) for table"
     );
   }
 

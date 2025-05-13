@@ -258,9 +258,11 @@ def _table(
             f"initial_selected_rows must be a list for table component, got {type(initial_selected_rows).__name__}"
         )
 
-    if not all(isinstance(row, int) for row in initial_selected_rows):
+    if not all(
+        isinstance(row, int) or isinstance(row, str) for row in initial_selected_rows
+    ):
         raise ValueError(
-            "initial_selected_rows must be a list of table row indices, got "
+            "initial_selected_rows must be a list of table row ids (int or str), got "
             f"{type(initial_selected_rows).__name__}"
         )
 
@@ -383,7 +385,7 @@ def table(
     overflow: Union[TABLE_COLUMN_OVERFLOW, None] = None,
     required: bool = True,
     description: Union[str, None] = None,
-    initial_selected_rows: List[int] = [],
+    initial_selected_rows: Sequence[Union[int, str]] = [],
     validate: Union[
         Callable[[], ValidatorResponse],
         Callable[[Table.DataOutput], ValidatorResponse],
@@ -563,7 +565,7 @@ def dataframe(
     label: Union[str, None] = None,
     required: bool = True,
     description: Union[str, None] = None,
-    initial_selected_rows: List[int] = [],
+    initial_selected_rows: Sequence[Union[int, str]] = [],
     validate: Union[
         Callable[[], ValidatorResponse],
         Callable[[Table.DataOutput], ValidatorResponse],
