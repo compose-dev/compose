@@ -15,7 +15,7 @@ import { classNames } from "~/utils/classNames";
 import { toast } from "~/utils/toast";
 import Icon from "../icon";
 
-function FormatButton({
+function ActionButtons({
   onClickFormat,
   onClickSearch,
   isScrollbarVisible,
@@ -196,7 +196,7 @@ export const JsonEditor: React.FC<JsonEditorProps> = ({
             },
           ]}
         />
-        <FormatButton
+        <ActionButtons
           onClickFormat={() => {
             try {
               if (value === "" || value === null) {

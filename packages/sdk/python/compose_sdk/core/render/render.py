@@ -86,16 +86,10 @@ class Render:
                             if (
                                 component["model"]["properties"].get("selectMode")
                                 == Table.SelectionReturn.ID
-                            ):
-                                hydrated[key] = data["value"]
-                            elif (
-                                component["model"]["properties"].get("selectMode")
+                                or component["model"]["properties"].get("selectMode")
                                 == Table.SelectionReturn.INDEX
                             ):
-                                hydrated[key] = [
-                                    (int(idx) if isinstance(idx, str) else idx)
-                                    for idx in data["value"]
-                                ]
+                                hydrated[key] = data["value"]
                             else:
                                 primary_key = component["model"]["properties"].get(
                                     "primaryKey", None

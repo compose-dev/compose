@@ -18,7 +18,7 @@ import { classNames } from "~/utils/classNames";
 import { UI } from "@composehq/ts-public";
 import { Spinner } from "~/components/spinner";
 import Button from "~/components/button";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 function SearchInput({
   value,

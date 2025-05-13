@@ -79,7 +79,10 @@ function Table({
   tableClassName?: string;
   enableRowSelection?: boolean;
   rowSelections: Record<string, boolean>;
-  setRowSelections: (rowSelections: Record<string, boolean>) => void;
+  setRowSelections: (
+    rowSelections: Record<string, boolean>,
+    primaryKeyMap: Record<string, string | number>
+  ) => void;
   allowMultiSelection?: boolean;
   hasError?: boolean;
   errorMessage?: string | null;
@@ -97,7 +100,12 @@ function Table({
   views?: UI.Table.ViewInternal<FormattedTableRow[]>[];
 }) {
   const fixedHeight = paginated || totalRecords > 35;
-  const formattedData = useFormattedData(data, columns, offset, primaryKey);
+  const { formattedRows: formattedData, primaryKeyMap } = useFormattedData(
+    data,
+    columns,
+    offset,
+    primaryKey
+  );
 
   const handleRequestServerDataRef = useRef<(() => void) | null>(null);
   const handleRequestBrowserDataRef = useRef<(() => void) | null>(null);
@@ -237,9 +245,9 @@ function Table({
       if (typeof newRowSelections === "function") {
         newRowSelections = newRowSelections(rowSelections);
       }
-      setRowSelections(newRowSelections);
+      setRowSelections(newRowSelections, primaryKeyMap);
     },
-    [rowSelections, setRowSelections]
+    [rowSelections, setRowSelections, primaryKeyMap]
   );
 
   const table = useReactTable({

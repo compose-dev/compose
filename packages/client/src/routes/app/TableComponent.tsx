@@ -308,13 +308,14 @@ export default function TableComponent({
           onTablePageChangeHook={onTablePageChangeHook}
           enableRowSelection={component.model.properties.allowSelect}
           rowSelections={componentOutput.output.internalValue}
-          setRowSelections={(internalValue) => {
+          setRowSelections={(internalValue, primaryKeyMap) => {
             dispatch({
               type: appStore.EVENT_TYPE.UPDATE_TABLE_INPUT_VALUE,
               properties: {
                 componentId,
                 internalValue,
                 renderId,
+                primaryKeyMap,
               },
             });
           }}

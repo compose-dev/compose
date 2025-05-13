@@ -13,7 +13,6 @@ import {
   useSelect,
   useSelectMulti,
 } from "~/components/.utils/selectUtils";
-import Button from "~/components/button";
 import Icon from "~/components/icon";
 import { IOComponent } from "~/components/io-component";
 import { classNames } from "~/utils/classNames";

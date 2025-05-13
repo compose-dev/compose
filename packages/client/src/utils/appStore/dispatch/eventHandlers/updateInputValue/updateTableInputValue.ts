@@ -10,6 +10,7 @@ interface updateTableInputValueEvent extends UpdateInputValueEvent {
     renderId: string;
     componentId: string;
     internalValue: UI.Components.InputTable["output"]["internalValue"];
+    primaryKeyMap: Record<string, string | number>;
   };
 }
 
@@ -41,17 +42,10 @@ function updateTableInputValue(
     let networkTransferValue: UI.Components.InputTable["output"]["networkTransferValue"] =
       [];
 
-    if (tableVersion > 2) {
-      // No more parsing int since the new table model could be using a
-      // non-index primary key.
+    if (tableVersion > 1) {
       networkTransferValue = {
-        value: Object.keys(event.properties.internalValue),
-        type: UI.TYPE.INPUT_TABLE,
-      };
-    } else if (tableVersion > 1) {
-      networkTransferValue = {
-        value: Object.keys(event.properties.internalValue).map((idx) =>
-          parseInt(idx)
+        value: Object.keys(event.properties.internalValue).map(
+          (idx) => event.properties.primaryKeyMap[idx]
         ),
         type: UI.TYPE.INPUT_TABLE,
       };

@@ -1,11 +1,7 @@
 // getAdvancedFilteredRowModel.ts
 import type { RowModel, Table, Row } from "@tanstack/react-table";
 import { memo, getMemoOptions, createRow } from "@tanstack/react-table";
-import {
-  FormattedTableRow,
-  INTERNAL_COLUMN_ID,
-  TableColumnProp,
-} from "../constants";
+import { FormattedTableRow, INTERNAL_COLUMN_ID } from "../constants";
 import { UI } from "@composehq/ts-public";
 import { searchTableRow } from "./searchTableRow";
 import { filterTableRow } from "./filterTableRow";
