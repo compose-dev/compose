@@ -92,6 +92,7 @@ function DataCell({
   tableOverflow,
   isLastRow,
   pinned,
+  expand,
 }: {
   value: unknown;
   column: TableColumnProp;
@@ -100,6 +101,7 @@ function DataCell({
   tableOverflow: UI.Table.OverflowBehavior;
   isLastRow: boolean;
   pinned: UI.Table.PinnedSide | false;
+  expand: boolean;
 }) {
   const overflow = column.overflow ?? tableOverflow;
 
@@ -153,7 +155,7 @@ function DataCell({
         <RowCell
           style={style}
           isLastRow={isLastRow}
-          expand={column.expand}
+          expand={expand}
           overflow={overflow}
           density={density}
         >
@@ -171,7 +173,7 @@ function DataCell({
           })}
           style={style}
           isLastRow={isLastRow}
-          expand={column.expand}
+          expand={expand}
           overflow={overflow}
           density={density}
         >
@@ -184,7 +186,7 @@ function DataCell({
       <RowCell
         style={style}
         isLastRow={isLastRow}
-        expand={column.expand}
+        expand={expand}
         overflow={overflow}
         density={density}
       >
@@ -199,7 +201,7 @@ function DataCell({
         <RowCell
           style={style}
           isLastRow={isLastRow}
-          expand={column.expand}
+          expand={expand}
           overflow={overflow}
           density={density}
         >
@@ -212,7 +214,7 @@ function DataCell({
         <RowCell
           style={style}
           isLastRow={isLastRow}
-          expand={column.expand}
+          expand={expand}
           overflow={overflow}
           density={density}
         >
@@ -227,7 +229,7 @@ function DataCell({
         <RowCell
           style={style}
           isLastRow={isLastRow}
-          expand={column.expand}
+          expand={expand}
           overflow={overflow}
           density={density}
         >
@@ -242,7 +244,7 @@ function DataCell({
         <RowCell
           style={style}
           isLastRow={isLastRow}
-          expand={column.expand}
+          expand={expand}
           overflow={overflow}
           density={density}
         >
@@ -257,7 +259,7 @@ function DataCell({
         <RowCell
           style={style}
           isLastRow={isLastRow}
-          expand={column.expand}
+          expand={expand}
           overflow={overflow}
           density={density}
         >
@@ -282,7 +284,7 @@ function DataCell({
           )}
           style={style}
           isLastRow={isLastRow}
-          expand={column.expand}
+          expand={expand}
           overflow={overflow}
           density={density}
         >
@@ -347,7 +349,7 @@ function DataCell({
           style={style}
           className="font-mono"
           isLastRow={isLastRow}
-          expand={column.expand}
+          expand={expand}
           overflow={overflow}
           density={density}
         >
@@ -373,7 +375,7 @@ function DataCell({
         <RowCell
           style={style}
           isLastRow={isLastRow}
-          expand={column.expand}
+          expand={expand}
           overflow={overflow}
           density={density}
         >

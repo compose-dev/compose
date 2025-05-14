@@ -558,6 +558,7 @@ function TableBody({
                         // Since we memoize the table row, we need to directly pass the selection state
                         // so that the checkbox re-renders when the selection state changes!
                         isSelected={row.getIsSelected()}
+                        isExpanded={false}
                       />
                     ))}
                   </div>
@@ -569,6 +570,7 @@ function TableBody({
                     // Since we memoize the table row, we need to directly pass the selection state
                     // so that the checkbox re-renders when the selection state changes!
                     isSelected={row.getIsSelected()}
+                    isExpanded={cell.column.getIsLastColumn("center")}
                   />
                 ))}
                 {rightVisibleCells.length > 0 && (
@@ -583,6 +585,7 @@ function TableBody({
                         // Since we memoize the table row, we need to directly pass the selection state
                         // so that the checkbox re-renders when the selection state changes!
                         isSelected={row.getIsSelected()}
+                        isExpanded={false}
                       />
                     ))}
                   </div>
@@ -605,9 +608,9 @@ function TableRows({
   cell,
 }: {
   cell: Cell<FormattedTableRow, unknown>;
-  // This is a prop purely to force a re-render when the selection state
-  // changes.
+  // These props are here purely to force a re-render when they are updated.
   isSelected: boolean;
+  isExpanded: boolean;
 }) {
   return flexRender(cell.column.columnDef.cell, cell.getContext());
 }

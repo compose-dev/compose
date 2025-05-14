@@ -259,17 +259,6 @@ export default function TableComponent({
       defaultOverflow
     );
 
-    const allColumnsHaveFixedWidth = cols.every(
-      (col) => col.width !== undefined
-    );
-
-    if (allColumnsHaveFixedWidth && cols.length > 0) {
-      cols[cols.length - 1] = {
-        ...cols[cols.length - 1],
-        expand: true,
-      };
-    }
-
     return cols;
   }, [
     component.model.properties.columns,

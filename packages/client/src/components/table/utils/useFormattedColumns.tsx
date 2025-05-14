@@ -59,9 +59,11 @@ function formatColumn(
           };
         }
 
+        const expand = header.column.getIsLastColumn("center");
+
         if (column.width) {
           return {
-            flex: column.expand ? "1 1 0%" : undefined,
+            flex: expand ? "1 1 0%" : undefined,
             width: column.width,
             minWidth: column.width,
           };
@@ -107,6 +109,7 @@ function formatColumn(
           density={density}
           tableOverflow={overflow}
           pinned={tanstackColumn.getIsPinned()}
+          expand={tanstackColumn.getIsLastColumn("center")}
         />
       );
     },

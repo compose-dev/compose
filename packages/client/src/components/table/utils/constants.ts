@@ -108,11 +108,6 @@ interface TableColumnProp {
     UI.Table.AdvancedColumn<UI.Table.DataRow[]>["overflow"]
   >;
   /**
-   * Whether the column should expand to fill the available width. Essentially,
-   * all column cells should set `flex-1` if this is true.
-   */
-  expand?: boolean;
-  /**
    * Whether the column is initially hidden.
    * @default `false`
    */
