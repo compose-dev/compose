@@ -6,4 +6,8 @@ type StringOnlyKeys<T> = keyof {
   [P in keyof T & string]: T[P];
 };
 
-export type { NonSymbolKeys, StringOnlyKeys };
+type StringOrNumberOnlyKeys<T> = keyof {
+  [P in keyof T & (string | number)]: T[P];
+};
+
+export type { NonSymbolKeys, StringOnlyKeys, StringOrNumberOnlyKeys };

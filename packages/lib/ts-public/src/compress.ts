@@ -1,5 +1,7 @@
 import * as UI from "./ui";
 
+const UNIQUE_PRIMARY_KEY_ID = "i";
+
 /**
  * Optimizes the table packet size by removing the columns that are not
  * needed by the client.
@@ -14,7 +16,12 @@ function compressTableLayout<T extends UI.ComponentGenerators.InputTable>(
 
   const columns =
     columnsProperty === null
-      ? table.model.properties.data.length > 0
+      ? // If the table is paged, do not optimize the columns unless
+        // the property is explicitly set by the user. Manually paged
+        // tables transmit the table model prior to loading any data,
+        // so it's too late to optimize the columns on future pages.
+        table.model.properties.data.length > 0 &&
+        table.model.properties.paged !== true
         ? Object.keys(table.model.properties.data[0])
         : null
       : columnsProperty;
@@ -25,7 +32,7 @@ function compressTableLayout<T extends UI.ComponentGenerators.InputTable>(
 
   const optimizedColumns = columns.map((column, idx) => {
     const optimized =
-      typeof column === "string"
+      typeof column === "string" || typeof column === "number"
         ? {
             key: idx.toString(),
             original: column,
@@ -35,12 +42,31 @@ function compressTableLayout<T extends UI.ComponentGenerators.InputTable>(
     return optimized;
   });
 
+  const originalPrimaryKey = table.model.properties.primaryKey;
+  let shouldSeparatelyAssignPrimaryKey = false;
+
+  if (originalPrimaryKey !== undefined) {
+    const primaryKeyColumn = optimizedColumns.find(
+      (column) => column.original === originalPrimaryKey
+    );
+
+    if (primaryKeyColumn) {
+      primaryKeyColumn.key = UNIQUE_PRIMARY_KEY_ID;
+    } else {
+      shouldSeparatelyAssignPrimaryKey = true;
+    }
+  }
+
   const newData = table.model.properties.data.map((row) => {
     const newRow: Record<string, any> = {};
 
     optimizedColumns.forEach((column) => {
       newRow[column.key] = row[column.original];
     });
+
+    if (shouldSeparatelyAssignPrimaryKey) {
+      newRow[UNIQUE_PRIMARY_KEY_ID] = row[originalPrimaryKey as string];
+    }
 
     return newRow;
   });
@@ -53,6 +79,8 @@ function compressTableLayout<T extends UI.ComponentGenerators.InputTable>(
         ...table.model.properties,
         data: newData,
         columns: optimizedColumns,
+        primaryKey:
+          originalPrimaryKey !== undefined ? UNIQUE_PRIMARY_KEY_ID : undefined,
       },
     },
   };

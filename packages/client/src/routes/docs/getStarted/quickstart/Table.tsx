@@ -54,16 +54,28 @@ function TableComponent() {
   return (
     <div className="p-4">
       <Table.Root
+        id="users"
         data={data}
         columns={[
-          { id: "name", label: "Name", accessorKey: "name" },
-          { id: "email", label: "Email", accessorKey: "email" },
+          {
+            id: "name",
+            label: "Name",
+            accessorKey: "name",
+            overflow: "ellipsis",
+          },
+          {
+            id: "email",
+            label: "Email",
+            accessorKey: "email",
+            overflow: "ellipsis",
+          },
           {
             id: "approved",
             label: "Approved",
             accessorKey: "approved",
             format: "boolean",
             width: "170px",
+            overflow: "ellipsis",
           },
         ]}
         actions={[]}

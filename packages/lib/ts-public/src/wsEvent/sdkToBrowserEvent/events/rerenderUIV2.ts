@@ -33,4 +33,5 @@ export interface Data extends BaseData {
       metadata: Record<string, { formId: string | null }>;
     }
   >;
+  v?: 1 | 2;
 }

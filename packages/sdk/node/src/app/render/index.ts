@@ -179,13 +179,30 @@ function hydrateFormData(
           if (component && component.type === UI.TYPE.INPUT_TABLE) {
             if (
               component.model.properties.selectMode ===
-              UI.Table.SELECTION_RETURN_TYPE.INDEX
+                UI.Table.SELECTION_RETURN_TYPE.ID ||
+              component.model.properties.selectMode ===
+                UI.Table.SELECTION_RETURN_TYPE.INDEX
             ) {
               hydrated[key] = formData[key].value;
             } else {
-              const rows = formData[key].value.map((index: number) => {
-                return component.model.properties.data[index];
-              });
+              let rows: any[] = [];
+              const primaryKey = component.model.properties.primaryKey;
+
+              if (primaryKey === undefined) {
+                rows = formData[key].value.map((index: number) => {
+                  return component.model.properties.data[index];
+                });
+              } else {
+                let primaryKeyMap: Record<string | number, any> = {};
+
+                for (const value of formData[key].value) {
+                  primaryKeyMap[value] = true;
+                }
+
+                rows = component.model.properties.data.filter(
+                  (row) => row[primaryKey] in primaryKeyMap
+                );
+              }
 
               hydrated[key] = rows;
             }

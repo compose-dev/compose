@@ -32,4 +32,7 @@ export interface Data extends BaseData {
       metadata: Record<string, { formId: string | null }>;
     }
   >;
+  // Added v2 in SDK version 0.27.0. If v2, updating the initial value
+  // of an input will override the current value of the property.
+  v?: 1 | 2;
 }

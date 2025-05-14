@@ -262,7 +262,7 @@ function AuditLog() {
                 <Icon
                   name="exclamation-circle"
                   color="brand-error-heavy"
-                  size="lg"
+                  size="1.5"
                 />
                 <h4 className="text-brand-error-heavy">Error fetching logs</h4>
               </div>
@@ -277,7 +277,7 @@ function AuditLog() {
                 <Icon
                   name="exclamation-circle"
                   color="brand-warning-heavy"
-                  size="lg"
+                  size="1.5"
                   stroke="semi-bold"
                 />
                 <h4 className="text-brand-warning-heavy">
@@ -407,6 +407,7 @@ function AuditLog() {
           <div className="flex flex-col gap-6 w-full">
             <h3>Data</h3>
             <Table.Root
+              id="audit-logs"
               data={data?.logs ?? []}
               loading={loading ? UI.Stale.OPTION.UPDATE_DISABLED : false}
               columns={[
@@ -415,53 +416,86 @@ function AuditLog() {
                   label: "Severity",
                   accessorKey: "severity",
                   width: "90px",
+                  pinnedWidth: 90,
                   format: "tag",
                   tagColors: {
-                    trace: "blue",
-                    debug: "pink",
-                    info: "gray",
-                    warn: "yellow",
-                    error: "orange",
-                    fatal: "red",
+                    trace: {
+                      color: "blue",
+                      originalValue: "trace",
+                    },
+                    debug: {
+                      color: "pink",
+                      originalValue: "debug",
+                    },
+                    info: {
+                      color: "gray",
+                      originalValue: "info",
+                    },
+                    warn: {
+                      color: "yellow",
+                      originalValue: "warn",
+                    },
+                    error: {
+                      color: "orange",
+                      originalValue: "error",
+                    },
+                    fatal: {
+                      color: "red",
+                      originalValue: "fatal",
+                    },
                   },
+                  overflow: "ellipsis",
                 },
                 {
                   id: "source",
                   label: "Source",
                   accessorKey: "type",
                   width: "100px",
+                  pinnedWidth: 100,
                   format: "tag",
                   tagColors: {
-                    system: "green",
-                    user: "orange",
+                    system: {
+                      color: "green",
+                      originalValue: "system",
+                    },
+                    user: {
+                      color: "orange",
+                      originalValue: "user",
+                    },
                   },
+                  overflow: "ellipsis",
                 },
                 {
                   id: "timestamp",
                   label: "Timestamp (UTC)",
                   accessorKey: "createdAtUTC",
                   width: "210px",
+                  pinnedWidth: 210,
+                  overflow: "ellipsis",
                 },
                 {
                   id: "userEmail",
                   label: "User Email",
                   accessorKey: "userEmail",
                   width: "240px",
-                  truncate: true,
+                  pinnedWidth: 240,
+                  overflow: "ellipsis",
                 },
                 {
                   id: "appRoute",
                   label: "App Route",
                   accessorKey: "appRoute",
                   width: "200px",
-                  truncate: true,
+                  pinnedWidth: 200,
+                  overflow: "ellipsis",
                 },
                 {
                   id: "message",
                   label: "Message",
                   accessorKey: "message",
                   width: "1000px",
-                  truncate: true,
+                  pinnedWidth: 200,
+                  overflow: "ellipsis",
                 },
               ]}
               actions={[{ label: "View Details" }]}
@@ -482,7 +516,9 @@ function AuditLog() {
               }}
               totalRecords={data?.totalRecords ?? Infinity}
               paginated={true}
-              disableSearch={true}
+              searchable={false}
+              filterable={false}
+              sortable={false}
               pageSize={filters.limit}
               offset={filters.offset}
             />

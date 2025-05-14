@@ -237,6 +237,9 @@ class WSSdk {
           client.environment.id
         )
       ) {
+        console.error(
+          `Invalid execution received. Execution ID: ${executionId}, Connection ID: ${connectionId}, Environment ID: ${client.environment.id}`
+        );
         return;
       }
     }

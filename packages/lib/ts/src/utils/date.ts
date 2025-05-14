@@ -268,14 +268,133 @@ function isLaterThan(
 }
 
 function isValidISODateString(
-  str: string | undefined | null | object
-): boolean {
-  if (str === undefined || str === null || typeof str !== "string") {
+  str: string | number | boolean | undefined | null | object
+) {
+  if (typeof str !== "string") {
     return false;
   }
 
-  const date = new Date(str);
-  return !isNaN(date.getTime()) && str === date.toISOString();
+  // minimum "YYYY-MM-DDTHH:mm:ss" → 19 chars
+  if (str.length < 19) return false;
+
+  // quick checks on the fixed separators
+  if (
+    str.charCodeAt(4) !== 45 /*-*/ ||
+    str.charCodeAt(7) !== 45 /*-*/ ||
+    str.charCodeAt(10) !== 84 /*T*/ ||
+    str.charCodeAt(13) !== 58 /*:*/ ||
+    str.charCodeAt(16) !== 58 /*:*/
+  ) {
+    return false;
+  }
+
+  // helper: ensure str[pos] is '0'–'9'
+  function isDigitAt(pos: number) {
+    const c = (str as string).charCodeAt(pos);
+    return c >= 48 && c <= 57;
+  }
+
+  // check all digit positions first
+  const digits = [
+    0,
+    1,
+    2,
+    3, // year
+    5,
+    6, // month
+    8,
+    9, // day
+    11,
+    12, // hour
+    14,
+    15, // minute
+    17,
+    18, // second
+  ];
+  for (let i = 0; i < digits.length; i++) {
+    if (!isDigitAt(digits[i])) return false;
+  }
+
+  // parse the core fields
+  const toInt2 = (i: number) =>
+    (str.charCodeAt(i) - 48) * 10 + (str.charCodeAt(i + 1) - 48);
+  const year =
+    (str.charCodeAt(0) - 48) * 1000 +
+    (str.charCodeAt(1) - 48) * 100 +
+    (str.charCodeAt(2) - 48) * 10 +
+    (str.charCodeAt(3) - 48);
+  const month = toInt2(5);
+  const day = toInt2(8);
+  const hour = toInt2(11);
+  const min = toInt2(14);
+  const sec = toInt2(17);
+
+  // range checks
+  if (month < 1 || month > 12) return false;
+  // days in month
+  const mdays = [
+    31,
+    /*Feb*/ year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0) ? 29 : 28,
+    31,
+    30,
+    31,
+    30,
+    31,
+    31,
+    30,
+    31,
+    30,
+    31,
+  ];
+  if (day < 1 || day > mdays[month - 1]) return false;
+  if (hour > 23 || min > 59 || sec > 59) return false;
+
+  // now handle the fractional‐seconds + timezone starting at pos = 19
+  let pos = 19;
+
+  // optional “.123”, up to 6 digits
+  if (pos < str.length && str.charCodeAt(pos) === 46 /*.*/) {
+    pos++;
+    const start = pos;
+    while (pos < str.length && isDigitAt(pos) && pos - start < 6) pos++;
+    // must have 1–6 digits
+    if (pos === start) return false;
+    // no more than 6
+    if (pos - start > 6) return false;
+  }
+
+  // if we’re at end, that’s a **naïve** ISO (Python’s default) — still OK
+  if (pos === str.length) {
+    return true;
+  }
+
+  // a plain “Z”?
+  if (str.charAt(pos) === "Z") {
+    return pos + 1 === str.length;
+  }
+
+  // or an offset “+HH:MM” / “-HH:MM”
+  const sign = str.charAt(pos);
+  if (sign === "+" || sign === "-") {
+    // must be exactly “+hh:mm” → 6 more chars
+    if (pos + 6 !== str.length) return false;
+    // check digits and colon
+    if (
+      !isDigitAt(pos + 1) ||
+      !isDigitAt(pos + 2) ||
+      str.charCodeAt(pos + 3) !== 58 /*:*/ ||
+      !isDigitAt(pos + 4) ||
+      !isDigitAt(pos + 5)
+    ) {
+      return false;
+    }
+    const offH = toInt2(pos + 1);
+    const offM = toInt2(pos + 4);
+    if (offH > 23 || offM > 59) return false;
+    return true;
+  }
+
+  return false;
 }
 
 export {

@@ -64,6 +64,7 @@ function Spinner({
         <span
           className={classNames({
             "text-sm": size === "sm",
+            "text-brand-primary": variant === "primary",
           })}
         >
           {text}

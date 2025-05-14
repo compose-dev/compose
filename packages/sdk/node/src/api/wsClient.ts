@@ -17,7 +17,7 @@ class WSClient {
   private packageName: string;
   private packageVersion: string;
   private onMessageCallback: (event: ListenerEvent) => void;
-
+  private debug: boolean;
   private reconnectionInterval: number;
   private WS_URL: string;
   private shuttingDown: boolean = false;
@@ -35,12 +35,14 @@ class WSClient {
     packageName: string,
     packageVersion: string,
     onMessageCallback: (event: ListenerEvent) => void,
-    host: string | undefined
+    host: string | undefined,
+    debug: boolean
   ) {
     this.apiKey = apiKey;
     this.packageName = packageName;
     this.packageVersion = packageVersion;
     this.onMessageCallback = onMessageCallback;
+    this.debug = debug || isDevelopment;
 
     this.reconnectionInterval = WS_CLIENT.RECONNECTION_INTERVAL.BASE_IN_SECONDS;
     this.WS_URL = isDevelopment
@@ -62,8 +64,9 @@ class WSClient {
   }
 
   connect() {
-    if (this.ws !== null) {
-      return;
+    if (this.ws) {
+      this.ws.terminate();
+      this.ws = null;
     }
 
     this.makeConnectionRequest();
@@ -187,6 +190,10 @@ class WSClient {
   }
 
   private onError(error: Error) {
+    if (this.debug) {
+      console.error(error);
+    }
+
     if (this.ws !== null) {
       this.isConnected = false;
     }
@@ -228,9 +235,12 @@ class WSClient {
       );
     }
 
-    this.reconnectionInterval = Math.ceil(
-      this.reconnectionInterval *
-        WS_CLIENT.RECONNECTION_INTERVAL.BACKOFF_MULTIPLIER
+    this.reconnectionInterval = Math.min(
+      Math.ceil(
+        this.reconnectionInterval *
+          WS_CLIENT.RECONNECTION_INTERVAL.BACKOFF_MULTIPLIER
+      ),
+      WS_CLIENT.RECONNECTION_INTERVAL.MAX_IN_SECONDS
     );
 
     // Try connecting again after 5 seconds

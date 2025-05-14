@@ -1,15 +1,16 @@
 from typing import Dict, TypedDict, Any, Union, Tuple, List
 from ..scheduler import Scheduler  # type: ignore[attr-defined]
-from .ui import Stale
+from .ui import Stale, TableColumnSort, Table
 from .smart_debounce import SmartDebounce
+from .json import JSON
 
 
 class TableStateRecordInput(TypedDict):
     data: List[Any]
     total_records: Union[int, None]
-    search_query: Union[str, None]
     offset: int
     page_size: int
+    initial_view: Table.PaginationView
     stale: Stale.TYPE
 
 
@@ -17,10 +18,56 @@ class TableStateRecord(TableStateRecordInput):
     page_update_debouncer: SmartDebounce
     render_id: str
     table_id: str
+    active_view: Table.PaginationView
 
 
 PAGE_UPDATE_DEBOUNCE_INTERVAL_MS = 250
 KEY_SEPARATOR = "__"
+
+
+def search_query_did_change(
+    old_search_query: Union[str, None], new_search_query: Union[str, None]
+) -> bool:
+    return old_search_query != new_search_query
+
+
+def sort_by_did_change(
+    old_sort_by: List[TableColumnSort],
+    new_sort_by: List[TableColumnSort],
+) -> bool:
+    if len(old_sort_by) != len(new_sort_by):
+        return True
+
+    for old_sort, new_sort in zip(old_sort_by, new_sort_by):
+        if (
+            old_sort["key"] != new_sort["key"]
+            or old_sort["direction"] != new_sort["direction"]
+        ):
+            return True
+
+    return False
+
+
+def filter_by_did_change(
+    old_filter_by: Table.AdvancedFilterModel, new_filter_by: Table.AdvancedFilterModel
+) -> bool:
+    if old_filter_by is None and new_filter_by is None:
+        return False
+
+    if old_filter_by is None or new_filter_by is None:
+        return True
+
+    return JSON.stringify(old_filter_by) != JSON.stringify(new_filter_by)
+
+
+def view_did_change(
+    old_view: Table.PaginationView, new_view: Table.PaginationView
+) -> bool:
+    return (
+        search_query_did_change(old_view["search_query"], new_view["search_query"])
+        or sort_by_did_change(old_view["sort_by"], new_view["sort_by"])
+        or filter_by_did_change(old_view["filter_by"], new_view["filter_by"])
+    )
 
 
 class TableState:
@@ -59,10 +106,22 @@ class TableState:
             ),
             "render_id": render_id,
             "table_id": table_id,
+            "initial_view": state["initial_view"],
+            "active_view": {**state["initial_view"]},
         }
 
     def update(self, render_id: str, table_id: str, state: Dict[str, Any]) -> None:
         key = self.generate_key(render_id, table_id)
+
+        new_initial_view: Table.PaginationView = state["initial_view"]
+
+        # Update the active sort if the initial sort changed. This overrides
+        # any changes on the browser side that were made to the active sort.
+        if "initial_view" in state and view_did_change(
+            new_initial_view, self.state[key]["initial_view"]
+        ):
+            self.state[key]["active_view"] = {**new_initial_view}
+
         self.state[key] = {**self.state[key], **state}  # type: ignore
 
     def delete(self, render_id: str, table_id: str) -> None:
@@ -88,3 +147,17 @@ class TableState:
             record["page_update_debouncer"].cleanup()
 
         self.state.clear()
+
+    @staticmethod
+    def should_refresh_total_records(
+        previous_view: Table.PaginationView, new_view: Table.PaginationView
+    ) -> bool:
+        if search_query_did_change(
+            previous_view["search_query"], new_view["search_query"]
+        ):
+            return True
+
+        if filter_by_did_change(previous_view["filter_by"], new_view["filter_by"]):
+            return True
+
+        return False

@@ -56,7 +56,8 @@ class Api {
       this.packageName,
       this.packageVersion,
       this.onMessage,
-      options.host
+      options.host,
+      this.debug
     );
   }
 

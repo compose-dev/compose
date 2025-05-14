@@ -17,7 +17,7 @@
     "@compose/ts": "workspace:*",
     "@composehq/ts-public": "workspace:*",
     "@fontsource-variable/inter": "5.0.18",
-    "@headlessui/react": "2.1.4",
+    "@headlessui/react": "2.2.2",
     "@nivo/bar": "^0.88.0",
     "@nivo/core": "^0.88.0",
     "@nivo/line": "^0.88.0",
@@ -34,7 +34,7 @@
     "react-dom": "^18.3.1",
     "react-dropzone": "14.2.3",
     "react-pdf": "^9.1.1",
-    "react-tooltip": "^5.28.0",
+    "react-tooltip": "^5.28.1",
     "uuid": "10.0.0",
     "zustand": "4.5.4"
   },

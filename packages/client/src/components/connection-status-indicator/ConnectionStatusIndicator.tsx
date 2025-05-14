@@ -24,14 +24,14 @@ function ConnectionStatusIndicator({
           ConnectionStatus.HEALTH.GOOD && (
           <Icon
             name="checkmark"
-            size="sm"
+            size="0.75"
             color="brand-success"
             stroke="normal"
           />
         )}
         {ConnectionStatus.STATUS_TO_HEALTH[connectionStatus] ===
           ConnectionStatus.HEALTH.BAD && (
-          <Icon name="x" size="sm" color="brand-error" stroke="normal" />
+          <Icon name="x" size="0.75" color="brand-error" stroke="normal" />
         )}
         {ConnectionStatus.STATUS_TO_HEALTH[connectionStatus] ===
           ConnectionStatus.HEALTH.LOADING && (

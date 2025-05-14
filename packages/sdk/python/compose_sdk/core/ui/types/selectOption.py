@@ -1,4 +1,4 @@
-from typing import TypedDict, Union, List
+from typing import TypedDict, Union, Sequence
 from typing_extensions import NotRequired
 
 SelectOptionValue = Union[str, int, bool]
@@ -13,4 +13,4 @@ class SelectOptionDict(TypedDict):
 SelectOptionPrimitive = SelectOptionValue
 
 SelectOption = Union[SelectOptionDict, SelectOptionPrimitive]
-SelectOptions = List[SelectOption]
+SelectOptions = Sequence[SelectOption]

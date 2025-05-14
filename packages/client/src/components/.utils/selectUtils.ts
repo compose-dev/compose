@@ -61,15 +61,18 @@ function useSelectMulti<T extends SelectValue>(
   }, [value, options]);
 
   const onSelectOptions = useCallback(
-    (options: SelectOption<NonNullable<T>>[]) => {
-      setValue(options.map((option) => option.value));
+    (newOptions: SelectOption<NonNullable<T>>[]) => {
+      setValue(newOptions.map((option) => option.value));
     },
-    []
+    [setValue]
   );
 
-  function onRemoveOption(option: SelectOption<NonNullable<T>>) {
-    setValue(value.filter((value) => value !== option.value));
-  }
+  const onRemoveOption = useCallback(
+    (option: SelectOption<NonNullable<T>>) => {
+      setValue(value.filter((value) => value !== option.value));
+    },
+    [setValue, value]
+  );
 
   return { selectedOptions, onSelectOptions, onRemoveOption };
 }

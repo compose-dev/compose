@@ -1,24 +1,52 @@
-import { FormattedTableRow, TableColumn } from "../constants";
+import {
+  TableColumnProp,
+  INTERNAL_COLUMN_ID,
+  FormattedTableRow,
+} from "./constants";
 
 import { u } from "@compose/ts";
 import { UI } from "@composehq/ts-public";
 
-import { INTERNAL_COLUMN_ID } from "../constants";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 function useFormattedData(
   data: UI.Components.InputTable["model"]["properties"]["data"],
-  columns: TableColumn[]
+  columns: TableColumnProp[],
+  offset: number,
+  primaryKey: string | number | undefined
 ) {
-  const formattedRows: FormattedTableRow[] = useMemo(() => {
+  const result = useMemo(() => {
     const metaColumns = columns.filter(
       (col) =>
         col.format === UI.Table.COLUMN_FORMAT.date ||
         col.format === UI.Table.COLUMN_FORMAT.datetime
     );
 
-    const result = data.map((row) => {
-      const meta: Record<string, string> = {};
+    const primaryKeyMap: Record<string, string | number> = {};
+    const formattedRows: FormattedTableRow[] = [];
+
+    data.forEach((row, rowIdx) => {
+      let rowId: string;
+
+      try {
+        if (primaryKey) {
+          rowId = row[primaryKey].toString();
+          primaryKeyMap[rowId] = row[primaryKey];
+        } else {
+          rowId = (rowIdx + offset).toString();
+          primaryKeyMap[rowId] = rowIdx + offset;
+        }
+      } catch (e) {
+        alert(
+          `Error assigning a row ID to table row. Received error: ${e}. Returning a fallback row ID.`
+        );
+
+        rowId = (rowIdx + offset).toString();
+      }
+
+      const meta: Record<string, string> = {
+        [INTERNAL_COLUMN_ID.ROW_SELECTION]: rowId,
+      };
 
       for (const col of metaColumns) {
         if (col.format === UI.Table.COLUMN_FORMAT.date) {
@@ -41,16 +69,26 @@ function useFormattedData(
         }
       }
 
-      return {
+      formattedRows.push({
         ...row,
         [INTERNAL_COLUMN_ID.META]: meta,
-      };
+      });
     });
 
-    return result;
-  }, [data, columns]);
+    return { formattedRows, primaryKeyMap };
+  }, [data, columns, offset, primaryKey]);
 
-  return formattedRows;
+  const [primaryKeyMap, setPrimaryKeyMap] = useState<
+    Record<string, string | number>
+  >(result.primaryKeyMap);
+
+  useEffect(() => {
+    setPrimaryKeyMap((oldMap) => {
+      return { ...oldMap, ...result.primaryKeyMap };
+    });
+  }, [result.primaryKeyMap]);
+
+  return { formattedRows: result.formattedRows, primaryKeyMap };
 }
 
 export { useFormattedData };

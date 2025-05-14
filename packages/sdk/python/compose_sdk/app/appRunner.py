@@ -4,7 +4,7 @@ import asyncio
 import inspect
 import io
 import traceback
-from typing import Any, TypedDict, Callable, Union, Dict, Literal, Mapping
+from typing import Any, TypedDict, Callable, Union, Dict, Literal, Mapping, List
 import time
 
 from ..scheduler import Scheduler
@@ -39,6 +39,8 @@ from ..core import (
     Debug,
     RateLimiter,
     validate_audit_log,
+    TableColumnSort,
+    Table,
 )
 
 from .appDefinition import AppDefinition
@@ -232,9 +234,10 @@ class AppRunner:
                         self.on_table_page_change_hook(
                             renderId,
                             table["table_id"],
-                            table["search_query"],
                             table["offset"],
                             table["page_size"],
+                            table["active_view"],
+                            True,
                         )
                     )
 
@@ -506,6 +509,7 @@ class AppRunner:
                     {
                         "type": EventType.SdkToServer.RERENDER_UI_V3,
                         "diff": updated_renders,
+                        "v": 2,
                     },
                     self.browserSessionId,
                     self.executionId,
@@ -534,9 +538,9 @@ class AppRunner:
                             self.on_table_page_change_hook(
                                 table["render_id"],
                                 table["table_id"],
-                                table["search_query"],
                                 table["offset"],
                                 table["page_size"],
+                                table["active_view"],
                                 True,
                             )
                         )
@@ -1014,9 +1018,9 @@ class AppRunner:
         self,
         render_id: str,
         component_id: str,
-        search_query: Union[str, None],
         offset: int,
         page_size: int,
+        view: Table.PaginationView,
         refresh_total_records: bool = False,
     ):
         try:
@@ -1058,14 +1062,13 @@ class AppRunner:
                 )
                 return
 
+            previous_active_view = {**table_state["active_view"]}
+
             # Update table state immediately to avoid race conditions with page.update() method calls.
             self.table_state.update(
                 render_id,
                 component_id,
-                {
-                    "offset": offset,
-                    "searchQuery": search_query,
-                },
+                {"offset": offset, "active_view": view},
             )
 
             if component["hooks"]["onPageChange"] is None:
@@ -1080,14 +1083,24 @@ class AppRunner:
                 data = all_data[offset : offset + page_size]
                 total_records = len(all_data)
             elif component["hooks"]["onPageChange"]["type"] == TablePagination.MANUAL:
+                should_refresh_total_records = (
+                    TableState.should_refresh_total_record(previous_active_view, view)
+                    or refresh_total_records
+                )
+
                 arguments = {
                     "offset": offset,
                     "page_size": page_size,
-                    "search_query": search_query,
-                    "prev_search_query": table_state["search_query"],
+                    "search_query": view["search_query"],
+                    "filter_by": Table().transform_advanced_filter_model_to_snake_case(
+                        view["filter_by"]
+                    ),
+                    "sort_by": view["sort_by"],
+                    "prev_search_query": previous_active_view["search_query"],
                     "prev_total_records": (
                         None if refresh_total_records else table_state["total_records"]
                     ),
+                    "refresh_total_records": should_refresh_total_records,
                 }
 
                 response = await Render.run_hook_function(
@@ -1107,20 +1120,26 @@ class AppRunner:
                 old_bytes = JSON.to_bytes(
                     {
                         "offset": table_state["offset"],
-                        "search_query": table_state["search_query"],
+                        "search_query": table_state["active_view"]["search_query"],
                         "total_records": table_state["total_records"],
                         "data": table_state["data"],
                         "page_size": table_state["page_size"],
+                        "sort_by": table_state["active_view"]["sort_by"],
+                        "filter_by": table_state["active_view"]["filter_by"],
+                        "view_by": table_state["active_view"]["view_by"],
                     }
                 )
 
                 new_bytes = JSON.to_bytes(
                     {
                         "offset": offset,
-                        "search_query": search_query,
+                        "search_query": view["search_query"],
                         "total_records": total_records,
                         "data": data,
                         "page_size": page_size,
+                        "sort_by": view["sort_by"],
+                        "filter_by": view["filter_by"],
+                        "view_by": view["view_by"],
                     }
                 )
 
@@ -1159,10 +1178,10 @@ class AppRunner:
                 {
                     "total_records": total_records,
                     "offset": offset,
-                    "search_query": search_query,
                     "data": data,
                     "stale": Stale.FALSE,
                     "page_size": page_size,
+                    "active_view": view,
                 },
             )
 
@@ -1170,7 +1189,10 @@ class AppRunner:
                 **component["model"]["properties"],
                 "data": data,
                 "offset": offset,
-                "searchQuery": search_query,
+                "searchQuery": view["search_query"],
+                "sortBy": view["sort_by"],
+                "filterBy": view["filter_by"],
+                "viewBy": view["view_by"],
                 "totalRecords": total_records,
                 "pageSize": page_size,
             }
@@ -1186,7 +1208,10 @@ class AppRunner:
                     "data": compressed_data,
                     "totalRecords": total_records,
                     "offset": offset,
-                    "searchQuery": search_query,
+                    "searchQuery": view["search_query"],
+                    "sortBy": view["sort_by"],
+                    "filterBy": view["filter_by"],
+                    "viewBy": view["view_by"],
                     "stale": (
                         Stale.UPDATE_NOT_DISABLED
                         if self.table_state.has_queued_update(render_id, component_id)

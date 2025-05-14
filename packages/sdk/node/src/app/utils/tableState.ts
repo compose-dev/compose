@@ -1,21 +1,86 @@
 import { UI } from "@composehq/ts-public";
 import { SmartDebounce } from "./smartDebounce";
 
+type PaginationView = Pick<
+  UI.Table.ViewInternal<UI.Table.DataRow[]>,
+  "filterBy" | "sortBy" | "searchQuery"
+> & { viewBy?: string };
+
 interface TableStateRecord {
   data: any[];
   totalRecords: number | null;
-  searchQuery: string | null;
   offset: number;
   pageSize: number;
   stale: UI.Stale.Option;
   pageUpdateDebouncer: SmartDebounce;
   renderId: string;
   tableId: string;
+  initialView: PaginationView;
+  activeView: PaginationView;
 }
 
 const PAGE_UPDATE_DEBOUNCE_INTERVAL_MS = 250;
 
 const KEY_SEPARATOR = "__";
+
+function searchQueryDidChange(
+  oldSearchQuery: PaginationView["searchQuery"],
+  newSearchQuery: PaginationView["searchQuery"]
+) {
+  return oldSearchQuery !== newSearchQuery;
+}
+
+function sortByDidChange(
+  oldSortBy: PaginationView["sortBy"],
+  newSortBy: PaginationView["sortBy"]
+) {
+  if (oldSortBy === undefined && newSortBy === undefined) {
+    return false;
+  }
+
+  // If one is undefined, the sort by changed. (We know
+  // from the previous check that they are not both undefined.)
+  if (oldSortBy === undefined || newSortBy === undefined) {
+    return true;
+  }
+
+  if (oldSortBy.length !== newSortBy.length) {
+    return true;
+  }
+
+  return oldSortBy.some((sort, index) => {
+    return (
+      sort.key !== newSortBy[index].key ||
+      sort.direction !== newSortBy[index].direction
+    );
+  });
+}
+
+function filterByDidChange(
+  oldFilterBy: PaginationView["filterBy"],
+  newFilterBy: PaginationView["filterBy"]
+) {
+  const noOldFilterBy = oldFilterBy === undefined || oldFilterBy === null;
+  const noNewFilterBy = newFilterBy === undefined || newFilterBy === null;
+
+  if (noOldFilterBy && noNewFilterBy) {
+    return false;
+  }
+
+  if (noOldFilterBy || noNewFilterBy) {
+    return true;
+  }
+
+  return JSON.stringify(oldFilterBy) !== JSON.stringify(newFilterBy);
+}
+
+function viewDidChange(oldView: PaginationView, newView: PaginationView) {
+  return (
+    searchQueryDidChange(oldView.searchQuery, newView.searchQuery) ||
+    sortByDidChange(oldView.sortBy, newView.sortBy) ||
+    filterByDidChange(oldView.filterBy, newView.filterBy)
+  );
+}
 
 class TableState {
   state: Record<string, TableStateRecord>;
@@ -63,7 +128,11 @@ class TableState {
     tableId: string,
     state: Omit<
       TableStateRecord,
-      "pageUpdateDebouncer" | "renderId" | "tableId" | "updateCount"
+      | "pageUpdateDebouncer"
+      | "renderId"
+      | "tableId"
+      | "updateCount"
+      | "activeView"
     >
   ) {
     const key = this.generateKey(renderId, tableId);
@@ -73,11 +142,22 @@ class TableState {
       pageUpdateDebouncer: new SmartDebounce(PAGE_UPDATE_DEBOUNCE_INTERVAL_MS),
       renderId,
       tableId,
+      activeView: { ...state.initialView },
     };
   }
 
   update(renderId: string, tableId: string, state: Partial<TableStateRecord>) {
     const key = this.generateKey(renderId, tableId);
+
+    // Update the active view if the initial view changed. This overrides
+    // any changes on the browser side that were made to the active view.
+    if (
+      state.initialView !== undefined &&
+      viewDidChange(state.initialView, this.state[key].initialView)
+    ) {
+      this.state[key].activeView = { ...state.initialView };
+    }
+
     this.state[key] = { ...this.state[key], ...state };
   }
 
@@ -97,6 +177,21 @@ class TableState {
   hasQueuedUpdate(renderId: string, tableId: string) {
     const key = this.generateKey(renderId, tableId);
     return this.state[key].pageUpdateDebouncer.hasQueuedUpdate();
+  }
+
+  static shouldRefreshTotalRecord(
+    previousView: PaginationView,
+    newView: PaginationView
+  ) {
+    if (searchQueryDidChange(previousView.searchQuery, newView.searchQuery)) {
+      return true;
+    }
+
+    if (filterByDidChange(previousView.filterBy, newView.filterBy)) {
+      return true;
+    }
+
+    return false;
   }
 }
 

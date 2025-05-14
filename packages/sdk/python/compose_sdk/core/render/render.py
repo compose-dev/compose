@@ -5,7 +5,7 @@ import datetime
 
 from ..run_hook_function import run_hook_function
 
-from ..ui import INTERACTION_TYPE, TYPE, TableSelectionReturn
+from ..ui import INTERACTION_TYPE, TYPE, Table
 from ..file import File
 from ..static_tree import StaticTree
 from ..json import JSON
@@ -85,14 +85,35 @@ class Render:
                         ):
                             if (
                                 component["model"]["properties"].get("selectMode")
-                                == TableSelectionReturn.INDEX
+                                == Table.SelectionReturn.ID
+                                or component["model"]["properties"].get("selectMode")
+                                == Table.SelectionReturn.INDEX
                             ):
                                 hydrated[key] = data["value"]
                             else:
-                                rows = [
-                                    component["model"]["properties"]["data"][idx]
-                                    for idx in data["value"]
-                                ]
+                                primary_key = component["model"]["properties"].get(
+                                    "primaryKey", None
+                                )
+
+                                if primary_key is None:
+                                    rows = [
+                                        component["model"]["properties"]["data"][idx]
+                                        for idx in data["value"]
+                                    ]
+                                else:
+                                    primary_key_map = {}
+
+                                    for value in data["value"]:
+                                        primary_key_map[value] = True
+
+                                    rows = [
+                                        row
+                                        for row in component["model"]["properties"][
+                                            "data"
+                                        ]
+                                        if row[primary_key] in primary_key_map
+                                    ]
+
                                 hydrated[key] = rows
                         else:
                             raise Exception(

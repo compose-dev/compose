@@ -462,9 +462,10 @@ class AppRunner {
           this.onTablePageChangeHook(
             renderId,
             table.tableId,
-            table.searchQuery,
             table.offset,
-            table.pageSize
+            table.pageSize,
+            table.activeView,
+            true
           );
         }
       }
@@ -723,6 +724,7 @@ class AppRunner {
         {
           type: SdkToServerEvent.TYPE.RERENDER_UI_V3,
           diff: updatedRenders,
+          v: 2,
         },
         this.browserSessionId,
         this.executionId
@@ -756,9 +758,9 @@ class AppRunner {
           this.onTablePageChangeHook(
             table.renderId,
             table.tableId,
-            newTable.searchQuery,
             newTable.offset,
             newTable.pageSize,
+            newTable.activeView,
             true
           );
         });
@@ -1188,7 +1190,7 @@ class AppRunner {
       UI.InputComponentTypes.isEnterType(component)
     ) {
       const hookFunc = component.hooks.onEnter;
-      if (hookFunc !== null) {
+      if (hookFunc) {
         this.hookErrorHandler(() => hookFunc(hydrated[componentId]));
       }
     }
@@ -1198,7 +1200,7 @@ class AppRunner {
       UI.InputComponentTypes.isSelectType(component)
     ) {
       const hookFunc = component.hooks.onSelect;
-      if (hookFunc !== null) {
+      if (hookFunc) {
         this.hookErrorHandler(() => hookFunc(hydrated[componentId]));
       }
     }
@@ -1208,7 +1210,7 @@ class AppRunner {
       UI.InputComponentTypes.isFileChangeType(component)
     ) {
       const hookFunc = component.hooks.onFileChange;
-      if (hookFunc !== null) {
+      if (hookFunc) {
         this.hookErrorHandler(() => hookFunc(hydrated[componentId]));
       }
     }
@@ -1317,9 +1319,12 @@ class AppRunner {
   async onTablePageChangeHook(
     renderId: string,
     componentId: string,
-    searchQuery: string | null,
     offset: number,
     pageSize: number,
+    view: Pick<
+      UI.Table.ViewInternal<UI.Table.DataRow[]>,
+      "searchQuery" | "sortBy" | "filterBy"
+    > & { viewBy?: string },
     refreshTotalRecords: boolean = false
   ) {
     try {
@@ -1364,10 +1369,12 @@ class AppRunner {
         return;
       }
 
+      const previousActiveView = { ...tableState.activeView };
+
       // Update table state immediately to avoid race conditions with page.update() method calls.
       this.tableState.update(renderId, componentId, {
         offset,
-        searchQuery,
+        activeView: view,
       });
 
       if (component.hooks.onPageChange === null) {
@@ -1387,11 +1394,18 @@ class AppRunner {
       } else if (
         component.hooks.onPageChange.type === UI.Table.PAGINATION_TYPE.MANUAL
       ) {
+        const shouldRefreshTotalRecords =
+          TableState.Class.shouldRefreshTotalRecord(previousActiveView, view) ||
+          refreshTotalRecords;
+
         const response = await component.hooks.onPageChange.fn({
           offset,
           pageSize,
-          searchQuery,
-          prevSearchQuery: tableState.searchQuery,
+          searchQuery: view.searchQuery ?? null,
+          sortBy: view.sortBy ?? [],
+          filterBy: view.filterBy ?? null,
+          prevSearchQuery: previousActiveView.searchQuery ?? null,
+          refreshTotalRecords: shouldRefreshTotalRecords,
           prevTotalRecords: refreshTotalRecords
             ? null
             : tableState.totalRecords,
@@ -1406,21 +1420,32 @@ class AppRunner {
         return;
       }
 
+      // Check for the case where the table state is stale (e.g. due to a page.update() call
+      // or when the table is first rendered). If it's stale, we check if any of the data actually
+      // changed. If not, we just update the client that the table is not stale and nothing
+      // changed. This is mostly for the case where the user is running page.update() calls
+      // that are unrelated to the table.
       if (tableState.stale !== UI.Stale.OPTION.FALSE) {
         const oldStringified = JSON.stringify({
           offset: tableState.offset,
-          searchQuery: tableState.searchQuery,
+          searchQuery: tableState.activeView.searchQuery ?? null,
           totalRecords: tableState.totalRecords,
           data: tableState.data,
           pageSize: tableState.pageSize,
+          sortBy: tableState.activeView.sortBy ?? [],
+          filterBy: tableState.activeView.filterBy ?? null,
+          viewBy: tableState.activeView.viewBy,
         });
 
         const newStringified = JSON.stringify({
           offset,
-          searchQuery,
+          searchQuery: view.searchQuery ?? null,
           totalRecords,
           data,
           pageSize,
+          sortBy: view.sortBy ?? [],
+          filterBy: view.filterBy ?? null,
+          viewBy: view.viewBy,
         });
 
         if (oldStringified === newStringified) {
@@ -1449,17 +1474,20 @@ class AppRunner {
       this.tableState.update(renderId, componentId, {
         totalRecords,
         offset,
-        searchQuery,
         data,
         stale: UI.Stale.OPTION.FALSE,
         pageSize,
+        activeView: view,
       });
 
       component.model.properties = {
         ...component.model.properties,
         data,
         offset,
-        searchQuery,
+        searchQuery: view.searchQuery ?? null,
+        sortBy: view.sortBy ?? [],
+        filterBy: view.filterBy ?? null,
+        viewBy: view.viewBy,
         totalRecords,
         pageSize,
       };
@@ -1485,7 +1513,10 @@ class AppRunner {
           data: compressedData,
           totalRecords,
           offset,
-          searchQuery,
+          searchQuery: view.searchQuery ?? null,
+          sortBy: view.sortBy ?? [],
+          filterBy: view.filterBy ?? null,
+          viewBy: view.viewBy,
           stale: this.tableState.hasQueuedUpdate(renderId, componentId)
             ? UI.Stale.OPTION.UPDATE_NOT_DISABLED
             : UI.Stale.OPTION.FALSE,

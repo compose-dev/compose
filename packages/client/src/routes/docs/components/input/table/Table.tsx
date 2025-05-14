@@ -90,25 +90,43 @@ function TableComponent() {
       )}
       <IOComponent.Label>Companies</IOComponent.Label>
       <Table.Root
+        id="companies"
         data={data}
         columns={[
-          { id: "name", label: "Name", accessorKey: "name", width: "150px" },
+          {
+            id: "name",
+            label: "Name",
+            accessorKey: "name",
+            width: "150px",
+            overflow: "ellipsis",
+          },
           {
             id: "tier",
             label: "Tier",
             accessorKey: "tier",
             format: "tag",
             tagColors: {
-              Enterprise: UI.Table.SEMANTIC_COLOR["enterprise"],
-              Premium: UI.Table.SEMANTIC_COLOR["premium"],
-              Basic: UI.Table.SEMANTIC_COLOR["basic"],
+              Enterprise: {
+                color: UI.Table.SEMANTIC_COLOR["enterprise"],
+                originalValue: "Enterprise",
+              },
+              Premium: {
+                color: UI.Table.SEMANTIC_COLOR["premium"],
+                originalValue: "Premium",
+              },
+              Basic: {
+                color: UI.Table.SEMANTIC_COLOR["basic"],
+                originalValue: "Basic",
+              },
             },
             width: "150px",
+            overflow: "ellipsis",
           },
           {
             id: "headquarters",
             label: "Headquarters",
             accessorKey: "headquarters",
+            overflow: "ellipsis",
           },
           {
             id: "arr",
@@ -116,6 +134,7 @@ function TableComponent() {
             accessorKey: "arr",
             format: "currency",
             width: "150px",
+            overflow: "ellipsis",
           },
         ]}
         actions={[{ label: "View Details" }]}

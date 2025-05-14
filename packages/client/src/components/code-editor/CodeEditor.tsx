@@ -6,44 +6,59 @@ import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/theme-gruvbox";
 import "ace-builds/src-noconflict/ext-language_tools";
+import "ace-builds/src-noconflict/ext-searchbox";
+
 import { theme } from "~/utils/theme";
 import { IOComponent } from "../io-component";
 import Button from "../button";
 import { classNames } from "~/utils/classNames";
 import { toast } from "~/utils/toast";
+import Icon from "../icon";
 
-function FormatButton({
-  onClick,
+function ActionButtons({
+  onClickFormat,
+  onClickSearch,
   isScrollbarVisible,
 }: {
-  onClick: () => void;
+  onClickFormat: () => void;
+  onClickSearch: () => void;
   isScrollbarVisible: boolean;
 }) {
   return (
     <>
-      <Button
-        variant="ghost"
-        className={classNames(
-          "absolute top-2.5 bg-brand-overlay-2 rounded-brand p-1 border border-transparent duration-150 transition-opacity invisible opacity-0 group-hover:visible group-hover:opacity-60 hover:!opacity-100 text-xs/4",
-          {
-            "right-2.5": !isScrollbarVisible,
-            "right-6": isScrollbarVisible,
-          }
-        )}
-        onClick={onClick}
-      >
-        <span className="text-brand-neutral-2">Format</span>
-      </Button>
       <div
         className={classNames(
-          "absolute top-2.5 invisible duration-150 transition-opacity opacity-0 group-hover:visible group-hover:opacity-100 p-1 pointer-events-none border border-brand-neutral rounded-brand text-xs/4",
+          "flex items-center gap-2 absolute top-2.5 bg-brand-overlay rounded-brand border border-brand-neutral p-1 gap-x-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 duration-150 transition-opacity",
           {
             "right-2.5": !isScrollbarVisible,
             "right-6": isScrollbarVisible,
           }
         )}
       >
-        <span className="text-brand-neutral-2">Format</span>
+        <div className="flex relative">
+          <Button variant="ghost" onClick={onClickSearch}>
+            <div
+              data-tooltip-content="Search"
+              data-tooltip-id="top-tooltip-offset8"
+            >
+              <Icon name="search" size="0.875" color="brand-neutral-2" />
+            </div>
+          </Button>
+        </div>
+        <div className="flex relative">
+          <Button
+            variant="ghost"
+            className={classNames("duration-150 transition-opacity")}
+            onClick={onClickFormat}
+          >
+            <div
+              data-tooltip-content="Format"
+              data-tooltip-id="top-tooltip-offset8"
+            >
+              <Icon name="format" size="0.875" color="brand-neutral-2" />
+            </div>
+          </Button>
+        </div>
       </div>
     </>
   );
@@ -79,6 +94,7 @@ export const JsonEditor: React.FC<JsonEditorProps> = ({
   onEnter,
 }) => {
   const { addToast } = toast.useStore();
+  const editorRef = useRef<AceEditor>(null);
 
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -142,6 +158,7 @@ export const JsonEditor: React.FC<JsonEditorProps> = ({
         )}
       >
         <AceEditor
+          ref={editorRef}
           name={id}
           mode="json"
           theme={isDark ? "gruvbox" : "github"}
@@ -179,8 +196,8 @@ export const JsonEditor: React.FC<JsonEditorProps> = ({
             },
           ]}
         />
-        <FormatButton
-          onClick={() => {
+        <ActionButtons
+          onClickFormat={() => {
             try {
               if (value === "" || value === null) {
                 return;
@@ -195,6 +212,17 @@ export const JsonEditor: React.FC<JsonEditorProps> = ({
                   error instanceof Error ? error.message : "Unknown error",
                 appearance: "error",
               });
+            }
+          }}
+          onClickSearch={() => {
+            if (editorRef.current) {
+              const editor = editorRef.current.editor;
+              if (!editor.searchBox) {
+                editor.commands.exec("find", editor, null);
+                return;
+              }
+
+              editor.searchBox.show("");
             }
           }}
           isScrollbarVisible={isScrollbarVisible}

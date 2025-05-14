@@ -1,22 +1,45 @@
 import { UI } from "@composehq/ts-public";
 import RowCell from "./RowCell";
 import { classNames } from "~/utils/classNames";
-import { TableColumn } from "../constants";
+import { TableColumnProp, COLUMN_WIDTH } from "../utils";
 import Icon from "~/components/icon";
 import { u } from "@compose/ts";
+import Json from "~/components/json";
 
-function CircleCheck() {
+function CircleCheck({ density }: { density: UI.Table.Density }) {
   return (
-    <div className="h-[24px] flex items-center">
-      <Icon name="checkmark" color="brand-success" stroke="semi-bold" />
+    <div
+      className={classNames("flex items-center", {
+        "h-6": density === "comfortable",
+        "h-5": density === "standard",
+        "h-4": density === "compact",
+      })}
+    >
+      <Icon
+        name="checkmark"
+        color="brand-success"
+        stroke="semi-bold"
+        size={density === "compact" ? "0.875" : "1"}
+      />
     </div>
   );
 }
 
-function CircleX() {
+function CircleX({ density }: { density: UI.Table.Density }) {
   return (
-    <div className="h-[24px] flex items-center">
-      <Icon name="x" color="brand-error" stroke="bold" size="sm" />
+    <div
+      className={classNames("flex items-center", {
+        "h-6": density === "comfortable",
+        "h-5": density === "standard",
+        "h-4": density === "compact",
+      })}
+    >
+      <Icon
+        name="x"
+        color="brand-error"
+        stroke="bold"
+        size={density === "compact" ? "0.625" : "0.75"}
+      />
     </div>
   );
 }
@@ -65,24 +88,78 @@ function DataCell({
   value,
   column,
   meta,
+  density,
+  tableOverflow,
   isLastRow,
+  pinned,
+  expand,
 }: {
   value: unknown;
-  column: TableColumn;
+  column: TableColumnProp;
   meta: Record<string, string>;
+  density: UI.Table.Density;
+  tableOverflow: UI.Table.OverflowBehavior;
   isLastRow: boolean;
+  pinned: UI.Table.PinnedSide | false;
+  expand: boolean;
 }) {
+  const overflow = column.overflow ?? tableOverflow;
+
+  function getStyle() {
+    if (pinned) {
+      if (column.pinnedWidth) {
+        return {
+          width: column.pinnedWidth,
+          maxWidth: column.pinnedWidth,
+        };
+      } else {
+        if (column.format === UI.Table.COLUMN_FORMAT.json) {
+          return {
+            width: COLUMN_WIDTH.JSON,
+            maxWidth: COLUMN_WIDTH.JSON,
+          };
+        } else {
+          return {
+            width: COLUMN_WIDTH.DEFAULT,
+            maxWidth: COLUMN_WIDTH.DEFAULT,
+          };
+        }
+      }
+    }
+
+    if (column.width) {
+      return {
+        width: column.width,
+        minWidth: column.width,
+      };
+    }
+
+    if (column.format === UI.Table.COLUMN_FORMAT.json) {
+      return {
+        flex: "1 1 0%",
+        minWidth: COLUMN_WIDTH.JSON,
+      };
+    }
+
+    return {
+      flex: "1 1 0%",
+      minWidth: COLUMN_WIDTH.DEFAULT,
+    };
+  }
+
+  const style = getStyle();
+
   if (value === null || value === undefined || value === "") {
     if (column.format === UI.Table.COLUMN_FORMAT.boolean) {
       return (
         <RowCell
-          className={classNames({ "flex-1 min-w-48": !column.width })}
-          style={
-            column.width ? { width: column.width, minWidth: column.width } : {}
-          }
+          style={style}
           isLastRow={isLastRow}
+          expand={expand}
+          overflow={overflow}
+          density={density}
         >
-          <CircleX />
+          <CircleX density={density} />
         </RowCell>
       );
     }
@@ -91,14 +168,14 @@ function DataCell({
       return (
         <RowCell
           className={classNames({
-            "flex-1 min-w-48": !column.width,
             // If the format is string, we don't apply any special styling
             "!text-brand-error-heavy": column.format !== "string",
           })}
-          style={
-            column.width ? { width: column.width, minWidth: column.width } : {}
-          }
+          style={style}
           isLastRow={isLastRow}
+          expand={expand}
+          overflow={overflow}
+          density={density}
         >
           NULL
         </RowCell>
@@ -107,11 +184,11 @@ function DataCell({
 
     return (
       <RowCell
-        className={classNames({ "flex-1 min-w-48": !column.width })}
-        style={
-          column.width ? { width: column.width, minWidth: column.width } : {}
-        }
+        style={style}
         isLastRow={isLastRow}
+        expand={expand}
+        overflow={overflow}
+        density={density}
       >
         <></>
       </RowCell>
@@ -122,13 +199,11 @@ function DataCell({
     case UI.Table.COLUMN_FORMAT.date: {
       return (
         <RowCell
-          className={classNames({
-            "flex-1 min-w-48": !column.width,
-          })}
-          style={
-            column.width ? { width: column.width, minWidth: column.width } : {}
-          }
+          style={style}
           isLastRow={isLastRow}
+          expand={expand}
+          overflow={overflow}
+          density={density}
         >
           {meta[column.accessorKey]}
         </RowCell>
@@ -137,13 +212,11 @@ function DataCell({
     case UI.Table.COLUMN_FORMAT.datetime: {
       return (
         <RowCell
-          className={classNames({
-            "flex-1 min-w-48": !column.width,
-          })}
-          style={
-            column.width ? { width: column.width, minWidth: column.width } : {}
-          }
+          style={style}
           isLastRow={isLastRow}
+          expand={expand}
+          overflow={overflow}
+          density={density}
         >
           {meta[column.accessorKey]}
         </RowCell>
@@ -154,13 +227,11 @@ function DataCell({
 
       return (
         <RowCell
-          className={classNames({
-            "flex-1 min-w-48": !column.width,
-          })}
-          style={
-            column.width ? { width: column.width, minWidth: column.width } : {}
-          }
+          style={style}
           isLastRow={isLastRow}
+          expand={expand}
+          overflow={overflow}
+          density={density}
         >
           {currency}
         </RowCell>
@@ -171,13 +242,11 @@ function DataCell({
 
       return (
         <RowCell
-          className={classNames({
-            "flex-1 min-w-48": !column.width,
-          })}
-          style={
-            column.width ? { width: column.width, minWidth: column.width } : {}
-          }
+          style={style}
           isLastRow={isLastRow}
+          expand={expand}
+          overflow={overflow}
+          density={density}
         >
           {number}
         </RowCell>
@@ -188,15 +257,17 @@ function DataCell({
 
       return (
         <RowCell
-          className={classNames({
-            "flex-1 min-w-48": !column.width,
-          })}
-          style={
-            column.width ? { width: column.width, minWidth: column.width } : {}
-          }
+          style={style}
           isLastRow={isLastRow}
+          expand={expand}
+          overflow={overflow}
+          density={density}
         >
-          {isTrue ? <CircleCheck /> : <CircleX />}
+          {isTrue ? (
+            <CircleCheck density={density} />
+          ) : (
+            <CircleX density={density} />
+          )}
         </RowCell>
       );
     }
@@ -206,15 +277,16 @@ function DataCell({
       return (
         <RowCell
           className={classNames(
-            "break-normal flex flex-wrap gap-[.375rem] py-2.5",
+            "flex flex-wrap gap-[.375rem] content-start leading-none",
             {
-              "flex-1 min-w-48": !column.width,
+              "!py-3.5": density === "comfortable",
             }
           )}
-          style={
-            column.width ? { width: column.width, minWidth: column.width } : {}
-          }
+          style={style}
           isLastRow={isLastRow}
+          expand={expand}
+          overflow={overflow}
+          density={density}
         >
           {arrayTags.map((value, idx) => {
             if (value === null) {
@@ -233,13 +305,13 @@ function DataCell({
               return <span key={idx}>{formatStringCell(value)}</span>;
             }
 
-            const tagColor = column.tagColors?.[value.toString()];
+            const tagColor = column.tagColors?.[value.toString()]?.color;
 
             return (
               <div
                 key={idx}
                 className={classNames(
-                  "inline-flex items-center px-1.5 py-0.5 rounded-brand text-xs font-medium max-h-fit h-fit",
+                  "inline-flex items-center px-1.5 py-0.5 rounded-brand font-medium max-h-fit h-fit",
                   {
                     "red-tag": tagColor === UI.Table.TAG_COLOR.red,
                     "orange-tag": tagColor === UI.Table.TAG_COLOR.orange,
@@ -250,6 +322,17 @@ function DataCell({
                     "pink-tag": tagColor === UI.Table.TAG_COLOR.pink,
                     "brown-tag": tagColor === UI.Table.TAG_COLOR.brown,
                     "slate-tag": tagColor === UI.Table.TAG_COLOR.gray,
+                    // Setting overflow ellipsis/clip overrides the container to use
+                    // block instead of flex, which makes the "gap" property not work.
+                    // Hence, we manually add the same spacing here. We don't use
+                    // this for dynamic overflow since "gap" also applies vertical spacing
+                    // while this only applies horizontal spacing (which is fine since
+                    // ellipsis/clip already truncate the cell to one line).
+                    "ml-[0.375rem]":
+                      idx > 0 &&
+                      (overflow === "ellipsis" || overflow === "clip"),
+                    "text-[11px]": density === "compact",
+                    "text-xs": density !== "compact",
                   }
                 )}
               >
@@ -260,19 +343,41 @@ function DataCell({
         </RowCell>
       );
     }
+    case UI.Table.COLUMN_FORMAT.json: {
+      return (
+        <RowCell
+          style={style}
+          className="font-mono"
+          isLastRow={isLastRow}
+          expand={expand}
+          overflow={overflow}
+          density={density}
+        >
+          {overflow === "dynamic" ? (
+            <Json
+              json={value}
+              label={null}
+              bare={true}
+              copyable={false}
+              size={density === "compact" ? "xs" : "sm"}
+              wrap={true}
+            />
+          ) : (
+            JSON.stringify(value, null)
+          )}
+        </RowCell>
+      );
+    }
     default: {
       const formatted = formatStringCell(value);
 
       return (
         <RowCell
-          className={classNames({
-            "flex-1 min-w-48": !column.width,
-            "truncate !block": column.truncate === true,
-          })}
-          style={
-            column.width ? { width: column.width, minWidth: column.width } : {}
-          }
+          style={style}
           isLastRow={isLastRow}
+          expand={expand}
+          overflow={overflow}
+          density={density}
         >
           {formatted}
         </RowCell>

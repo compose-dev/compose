@@ -1,6 +1,8 @@
 from .ui import ComponentReturn, TYPE, INTERACTION_TYPE
 from typing import Any, Dict, List
 
+UNIQUE_PRIMARY_KEY_ID = "i"
+
 
 class Compress:
     @staticmethod
@@ -14,6 +16,11 @@ class Compress:
         columns = (
             list(table["model"]["properties"]["data"][0].keys())
             if columnsProperty is None and len(table["model"]["properties"]["data"]) > 0
+            # If the table is paged, do not optimize the columns unless
+            # the property is explicitly set by the user. Manually paged
+            # tables transmit the table model prior to loading any data,
+            # so it's too late to optimize the columns on future pages.
+            and table["model"]["properties"].get("paged", None) is not True
             else columnsProperty
         )
 
@@ -27,6 +34,8 @@ class Compress:
                     "original": column,
                 }
                 if isinstance(column, str)
+                or isinstance(column, int)
+                or isinstance(column, float)
                 else {
                     **column,
                     "key": str(idx),
@@ -35,6 +44,24 @@ class Compress:
             )
             for idx, column in enumerate(columns)
         ]
+
+        original_primary_key = table["model"]["properties"].get("primaryKey", None)
+        should_separately_assign_primary_key = False
+
+        if original_primary_key is not None:
+            primary_key_column = next(
+                (
+                    col
+                    for col in optimized_columns
+                    if col["original"] == original_primary_key
+                ),
+                None,
+            )
+
+            if primary_key_column is not None:
+                primary_key_column["key"] = UNIQUE_PRIMARY_KEY_ID
+            else:
+                should_separately_assign_primary_key = True
 
         # Pre-compute original and key mappings for better performance
         key_original_map = [(col["key"], col["original"]) for col in optimized_columns]
@@ -45,7 +72,11 @@ class Compress:
             new_row: Dict[str, Any] = {}
             for key, original in key_original_map:
                 if original in row:
-                    new_row[key] = row[original]
+                    new_row[key] = row[original]  # type: ignore
+
+            if should_separately_assign_primary_key:
+                new_row[UNIQUE_PRIMARY_KEY_ID] = row[original_primary_key]
+
             new_data.append(new_row)
 
         return {
@@ -56,6 +87,9 @@ class Compress:
                     **table["model"]["properties"],
                     "data": new_data,
                     "columns": optimized_columns,
+                    "primaryKey": (
+                        None if original_primary_key is None else UNIQUE_PRIMARY_KEY_ID
+                    ),
                 },
             },
         }

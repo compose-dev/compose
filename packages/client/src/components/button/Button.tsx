@@ -15,6 +15,7 @@ const VARIANT = {
 type Variant = (typeof VARIANT)[keyof typeof VARIANT];
 
 const SIZE = {
+  xs: "xs",
   sm: "sm",
   md: "md",
   lg: "lg",
@@ -58,6 +59,8 @@ function Button({
             variant !== VARIANT.GHOST,
           "shadow-sm":
             variant !== VARIANT.GHOST && variant !== VARIANT.SUBTLE_SECONDARY,
+          "px-[6px] py-0 min-w-12 text-xs/5":
+            variant !== VARIANT.GHOST && size === SIZE.xs,
           "px-[8px] py-0 min-w-16 text-sm/6":
             variant !== VARIANT.GHOST && size === SIZE.sm,
           "px-[17px] py-[5px] min-w-24 text-base/6":

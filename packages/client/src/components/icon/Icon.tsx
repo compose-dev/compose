@@ -1,5 +1,8 @@
 import { classNames } from "~/utils/classNames";
 import {
+  IconArrowUp,
+  IconArrowDown,
+  IconArrowsSort,
   IconHome,
   IconRefresh,
   IconCopy,
@@ -28,6 +31,15 @@ import {
   IconSearch,
   IconTrendingUp,
   IconTrendingDown,
+  IconEye,
+  IconFilter,
+  IconDownload,
+  IconAdjustmentsHorizontal,
+  IconMenu2,
+  IconAdjustments,
+  IconPin,
+  IconPinned,
+  IconAlignLeft2,
 } from "@tabler/icons-react";
 
 const ICON_NAME = {
@@ -71,32 +83,51 @@ const ICON_NAME = {
   x: "x",
   world: "world",
   stack: "stack",
-
   // directly from tabler (note: not yet accurate, but thought I'd the separation process...)
+  "arrow-up": "arrow-up",
+  "arrow-down": "arrow-down",
+  "arrows-sort": "arrows-sort",
+  eye: "eye",
+  download: "download",
   typescript: "typescript",
   javascript: "javascript",
   python: "python",
+  filter: "filter",
   "sidebar-right": "sidebar-right",
   "trending-up": "trending-up",
   "trending-down": "trending-down",
+  adjustments: "adjustments",
+  "hamburger-menu": "hamburger-menu",
+  "adjustments-vertical": "adjustments-vertical",
+  pin: "pin",
+  "pin-vertical": "pin-vertical",
+  format: "format",
 } as const;
 
 const SIZE = {
-  xs: "xs",
-  sm: "sm",
-  md: "md",
-  mlg: "mlg",
-  lg: "lg",
+  "0.5": "0.5",
+  "0.625": "0.625",
+  "0.75": "0.75",
+  "0.875": "0.875",
+  "1": "1",
+  "1.125": "1.125",
+  "1.25": "1.25",
+  "1.375": "1.375",
+  "1.5": "1.5",
 } as const;
 
 type Size = (typeof SIZE)[keyof typeof SIZE];
 
 const SIZE_MULTIPLIER = {
-  [SIZE.xs]: 0.5,
-  [SIZE.sm]: 0.75,
-  [SIZE.md]: 1,
-  [SIZE.mlg]: 1.25, // medium lg
-  [SIZE.lg]: 1.5,
+  [SIZE["0.5"]]: 0.5,
+  [SIZE["0.625"]]: 0.625,
+  [SIZE["0.75"]]: 0.75,
+  [SIZE["0.875"]]: 0.875,
+  [SIZE["1"]]: 1,
+  [SIZE["1.125"]]: 1.125,
+  [SIZE["1.25"]]: 1.25,
+  [SIZE["1.375"]]: 1.375,
+  [SIZE["1.5"]]: 1.5,
 } as const;
 
 type IconName = (typeof ICON_NAME)[keyof typeof ICON_NAME];
@@ -140,7 +171,7 @@ function Icon({
   name,
   stroke = STROKE_WIDTH.NORMAL,
   color = "brand-neutral",
-  size = "md",
+  size = "1",
 }: {
   name: IconName;
   stroke?: StrokeWidth;
@@ -150,6 +181,125 @@ function Icon({
   if (name === ICON_NAME["sidebar-right"]) {
     return (
       <IconLayoutSidebarRight
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME.pin) {
+    return (
+      <IconPin
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME.format) {
+    return (
+      <IconAlignLeft2
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME["pin-vertical"]) {
+    return (
+      <IconPinned
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME["adjustments-vertical"]) {
+    return (
+      <IconAdjustments
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME.adjustments) {
+    return (
+      <IconAdjustmentsHorizontal
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME["hamburger-menu"]) {
+    return (
+      <IconMenu2
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+  if (name === ICON_NAME.download) {
+    return (
+      <IconDownload
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME.filter) {
+    return (
+      <IconFilter
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME.eye) {
+    return (
+      <IconEye
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME["arrow-up"]) {
+    return (
+      <IconArrowUp
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME["arrow-down"]) {
+    return (
+      <IconArrowDown
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME["arrows-sort"]) {
+    return (
+      <IconArrowsSort
         size={16 * SIZE_MULTIPLIER[size]}
         color={ICON_COLOR[color]}
         strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}

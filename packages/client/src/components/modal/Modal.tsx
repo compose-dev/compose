@@ -102,7 +102,7 @@ function ModalCloseIcon({
 }) {
   return (
     <Button variant="ghost" onClick={onClick}>
-      <Icon name="x" color="brand-neutral-2" size="sm" />
+      <Icon name="x" color="brand-neutral-2" size="0.75" />
     </Button>
   );
 }

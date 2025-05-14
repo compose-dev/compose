@@ -89,6 +89,7 @@ interface PageHandler {
     options?: Omit<Page.toast.Base, "message">
   ) => void;
   /**
+   * @deprecated Simply update the initial value of the input component then call `page.update()` instead.
    * Manually set the value of input components. Use this to create
    * controlled components and dynamically update the value of inputs
    * in response to events on the server.

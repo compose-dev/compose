@@ -4,12 +4,15 @@ import Table from "~/components/table";
 import { useCallback, useMemo } from "react";
 import { IOComponent } from "~/components/io-component";
 import { useWSContext } from "~/utils/wsContext";
-import { BrowserToServerEvent } from "@compose/ts";
+import { BrowserToServerEvent, u } from "@compose/ts";
 import { classNames } from "~/utils/classNames";
 
 function guessColumns(
   data: UI.Components.InputTable["model"]["properties"]["data"],
-  columns: UI.Components.InputTable["model"]["properties"]["columns"]
+  columns: UI.Components.InputTable["model"]["properties"]["columns"],
+  defaultOverflow: NonNullable<
+    UI.Components.InputTable["model"]["properties"]["overflow"]
+  >
 ): React.ComponentProps<typeof Table.Root>["columns"] {
   if (data.length === 0) {
     return [];
@@ -50,13 +53,39 @@ function guessColumns(
       const width =
         typeof column === "string" ? undefined : (column.width ?? undefined);
 
+      const overflow = typeof column === "string" ? undefined : column.overflow;
+
+      const hidden =
+        typeof column === "string" ? false : (column.hidden ?? false);
+
+      let pinnedWidth: number | undefined = undefined;
+      if (typeof column !== "string" && column.width) {
+        try {
+          const convertedWidth = u.number.convertCssWidthToPixelsStrict(
+            column.width
+          );
+
+          pinnedWidth = convertedWidth;
+        } catch (e) {
+          // Ignore
+        }
+      }
+
+      const pinned =
+        typeof column === "string" ? undefined : (column.pinned ?? undefined);
+
       return {
         id: key,
         accessorKey: key,
         label,
         format,
         width,
+        pinned,
+        pinnedWidth,
         tagColors,
+        overflow,
+        hidden,
+        original: typeof column === "string" ? undefined : column.original,
       };
     });
   }
@@ -69,6 +98,11 @@ function guessColumns(
     accessorKey: key,
     format: Table.guessColumnFormat(data, key),
     tagColors: {},
+    overflow: defaultOverflow,
+    hidden: false,
+    original: key,
+    pinned: undefined,
+    pinnedWidth: undefined,
   }));
 }
 
@@ -160,7 +194,14 @@ export default function TableComponent({
   );
 
   const onTablePageChangeHook = useCallback(
-    (searchQuery: string | null, offset: number, pageSize: number) => {
+    (
+      searchQuery: string | null,
+      offset: number,
+      pageSize: number,
+      sortBy: UI.Table.ColumnSort<UI.Table.DataRow[]>[],
+      filterBy: UI.Table.AdvancedFilterModel<UI.Table.DataRow[]> | null,
+      viewBy: string | undefined
+    ) => {
       if (!executionId || !environmentId) {
         return;
       }
@@ -173,9 +214,10 @@ export default function TableComponent({
           executionId,
           offset,
           searchQuery,
-          sortKey: null,
-          sortDirection: null,
+          sortBy,
           pageSize,
+          filterBy,
+          viewBy,
         },
         environmentId
       );
@@ -202,13 +244,28 @@ export default function TableComponent({
   const columns = useMemo(() => {
     let cols: React.ComponentProps<typeof Table.Root>["columns"] = [];
 
+    // The default overflow behavior for columns. First, try to use the
+    // user provided overflow behavior. If that's not set, use ellipsis
+    // for v3+ and dynamic for v2 and below.
+    const defaultOverflow = component.model.properties.overflow
+      ? component.model.properties.overflow
+      : component.model.properties.v && component.model.properties.v >= 3
+        ? UI.Table.OVERFLOW_BEHAVIOR.ELLIPSIS
+        : UI.Table.OVERFLOW_BEHAVIOR.DYNAMIC;
+
     cols = guessColumns(
       component.model.properties.data,
-      component.model.properties.columns
+      component.model.properties.columns,
+      defaultOverflow
     );
 
     return cols;
-  }, [component.model.properties.columns, component.model.properties.data]);
+  }, [
+    component.model.properties.columns,
+    component.model.properties.data,
+    component.model.properties.overflow,
+    component.model.properties.v,
+  ]);
 
   return (
     <div
@@ -226,6 +283,7 @@ export default function TableComponent({
       )}
       <div className="self-stretch">
         <Table.Root
+          id={componentId}
           data={component.model.properties.data}
           columns={columns}
           actions={component.model.properties.actions}
@@ -239,13 +297,14 @@ export default function TableComponent({
           onTablePageChangeHook={onTablePageChangeHook}
           enableRowSelection={component.model.properties.allowSelect}
           rowSelections={componentOutput.output.internalValue}
-          setRowSelections={(internalValue) => {
+          setRowSelections={(internalValue, primaryKeyMap) => {
             dispatch({
               type: appStore.EVENT_TYPE.UPDATE_TABLE_INPUT_VALUE,
               properties: {
                 componentId,
                 internalValue,
                 renderId,
+                primaryKeyMap,
               },
             });
           }}
@@ -253,11 +312,33 @@ export default function TableComponent({
           errorMessage={errorMessage}
           allowMultiSelection={component.model.properties.maxSelections > 1}
           disableRowSelection={disabled}
-          disableSearch={component.model.properties.notSearchable}
-          serverSearchQuery={component.model.properties.searchQuery}
           paginated={component.model.properties.paged}
           loading={componentLoading}
           height={component.model.style?.height ?? undefined}
+          // We expect the SDK to return undefined if the table should be
+          // multi-column sortable. Else, it'll explicitly return the
+          // sortable option to use.
+          sortable={component.model.properties.sortable}
+          // We expect the SDK to return undefined if the table should be
+          // searchable. Else, it'll explicitly return the searchable option
+          // to use.
+          searchable={!component.model.properties.notSearchable}
+          density={component.model.properties.density}
+          overflow={component.model.properties.overflow}
+          filterable={component.model.properties.filterable}
+          primaryKey={
+            component.model.properties.selectMode ===
+            UI.Table.SELECTION_RETURN_TYPE.INDEX
+              ? undefined
+              : component.model.properties.primaryKey
+          }
+          views={component.model.properties.views}
+          serverView={{
+            searchQuery: component.model.properties.searchQuery,
+            sortBy: component.model.properties.sortBy,
+            filterBy: component.model.properties.filterBy,
+            viewBy: component.model.properties.viewBy,
+          }}
         />
       </div>
     </div>
