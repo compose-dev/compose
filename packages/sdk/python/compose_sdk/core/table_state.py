@@ -112,15 +112,12 @@ class TableState:
 
     def update(self, render_id: str, table_id: str, state: Dict[str, Any]) -> None:
         key = self.generate_key(render_id, table_id)
-
-        new_initial_view: Table.PaginationView = state["initial_view"]
-
         # Update the active sort if the initial sort changed. This overrides
         # any changes on the browser side that were made to the active sort.
         if "initial_view" in state and view_did_change(
-            new_initial_view, self.state[key]["initial_view"]
+            state["initial_view"], self.state[key]["initial_view"]
         ):
-            self.state[key]["active_view"] = {**new_initial_view}
+            self.state[key]["active_view"] = {**state["initial_view"]}  # type: ignore
 
         self.state[key] = {**self.state[key], **state}  # type: ignore
 
@@ -149,7 +146,7 @@ class TableState:
         self.state.clear()
 
     @staticmethod
-    def should_refresh_total_records(
+    def should_refresh_total_record(
         previous_view: Table.PaginationView, new_view: Table.PaginationView
     ) -> bool:
         if search_query_did_change(
