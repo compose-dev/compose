@@ -267,6 +267,38 @@ export default function TableComponent({
     component.model.properties.v,
   ]);
 
+  const tableVersion = component.model.properties.v || 1;
+
+  function isFilterable() {
+    // filterable prop was introduced in 0.27, which is v3
+    if (tableVersion >= 3) {
+      return component.model.properties.filterable;
+    }
+
+    // If it's an older table and it's paged, we definitely
+    // don't support filtering.
+    if (component.model.properties.paged === true) {
+      return false;
+    }
+
+    return true;
+  }
+
+  function isSortable() {
+    // sortable prop was introduced in 0.27, which is v3
+    if (tableVersion >= 3) {
+      return component.model.properties.sortable;
+    }
+
+    // If it's an older table and it's paged, we definitely
+    // don't support sorting.
+    if (component.model.properties.paged === true) {
+      return false;
+    }
+
+    return true;
+  }
+
   return (
     <div
       className={classNames(
@@ -315,17 +347,11 @@ export default function TableComponent({
           paginated={component.model.properties.paged}
           loading={componentLoading}
           height={component.model.style?.height ?? undefined}
-          // We expect the SDK to return undefined if the table should be
-          // multi-column sortable. Else, it'll explicitly return the
-          // sortable option to use.
-          sortable={component.model.properties.sortable}
-          // We expect the SDK to return undefined if the table should be
-          // searchable. Else, it'll explicitly return the searchable option
-          // to use.
+          sortable={isSortable()}
           searchable={!component.model.properties.notSearchable}
           density={component.model.properties.density}
           overflow={component.model.properties.overflow}
-          filterable={component.model.properties.filterable}
+          filterable={isFilterable()}
           primaryKey={
             component.model.properties.selectMode ===
             UI.Table.SELECTION_RETURN_TYPE.INDEX

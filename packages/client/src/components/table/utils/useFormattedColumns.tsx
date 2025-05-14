@@ -15,6 +15,24 @@ import { RowSelections } from "./rowSelections";
 
 type TanStackTableColumn = ColumnDef<FormattedTableRow>;
 
+function sortJsonColumn(
+  a: Row<FormattedTableRow>,
+  b: Row<FormattedTableRow>,
+  columnId: string
+) {
+  if (a.original[columnId] === undefined) {
+    return 1;
+  }
+
+  if (b.original[columnId] === undefined) {
+    return -1;
+  }
+
+  return JSON.stringify(a.original[columnId]).localeCompare(
+    JSON.stringify(b.original[columnId])
+  );
+}
+
 function formatColumn(
   column: TableColumnProp,
   density: UI.Table.Density,
@@ -30,11 +48,8 @@ function formatColumn(
       tagColors: column.tagColors,
     },
     sortingFn:
-      column.format === "json"
-        ? (a, b, columnId) =>
-            JSON.stringify(a.original[columnId]).localeCompare(
-              JSON.stringify(b.original[columnId])
-            )
+      column.format === "json" || column.format === "tag"
+        ? sortJsonColumn
         : "basic",
     sortDescFirst: UI.Table.shouldSortDescendingFirst(column.format),
     header: (header) => {

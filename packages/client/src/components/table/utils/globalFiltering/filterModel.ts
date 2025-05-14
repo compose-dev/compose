@@ -165,6 +165,17 @@ function advancedFilterModelValuesAreEqual(
     }
   }
 
+  const oldValueIsNullish = oldValue.value === null || oldValue.value === "";
+  const newValueIsNullish = newValue.value === null || newValue.value === "";
+
+  if (oldValueIsNullish && newValueIsNullish) {
+    return true;
+  }
+
+  if (oldValueIsNullish || newValueIsNullish) {
+    return false;
+  }
+
   return oldValue.value === newValue.value;
 }
 

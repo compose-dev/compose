@@ -5,6 +5,7 @@ import {
   Updater,
   Cell,
   getSortedRowModel,
+  SortingState,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
@@ -29,6 +30,9 @@ import {
 } from "./utils";
 import { ColumnHeaderRow, FooterRow, ToolbarRow } from "./components";
 import { log } from "@compose/ts";
+import { getNodeEnvironment } from "~/utils/nodeEnvironment";
+
+const isDevelopment = getNodeEnvironment() === "development";
 
 function Table({
   id,
@@ -250,6 +254,24 @@ function Table({
     [rowSelections, setRowSelections, primaryKeyMap]
   );
 
+  const updateSorting = useCallback(
+    (sortBy: Updater<SortingState>) => {
+      sortingHook.set(sortBy);
+
+      if (
+        handleRequestServerDataRef.current &&
+        paginated &&
+        !Sorting.sortByIsEqual(
+          sortingHook.nextServerRef.current,
+          serverView.sortBy ?? []
+        )
+      ) {
+        handleRequestServerDataRef.current();
+      }
+    },
+    [sortingHook, paginated, serverView.sortBy, handleRequestServerDataRef]
+  );
+
   const table = useReactTable({
     // BASE SETUP
     data: formattedData,
@@ -292,7 +314,7 @@ function Table({
     enableMultiSort: sortable === UI.Table.SORT_OPTION.MULTI,
     getSortedRowModel: getSortedRowModel(),
     manualSorting: paginated,
-    onSortingChange: sortingHook.set,
+    onSortingChange: updateSorting,
 
     // PAGINATION
     manualPagination: paginated,
@@ -321,18 +343,20 @@ function Table({
       return;
     }
 
-    log(
-      "Page change requested",
-      {
-        searchQuery: searchQueryHook.nextServerRef.current,
-        offset: newOffset ?? offset,
-        pageSize: newPageSize ?? pageSize,
-        sortBy: sortingHook.nextServerRef.current,
-        filterBy: advancedFilteringHook.nextServerRef.current,
-        viewBy: viewsHook.nextServerRef.current,
-      },
-      "green"
-    );
+    if (isDevelopment) {
+      log(
+        "Page change requested",
+        {
+          searchQuery: searchQueryHook.nextServerRef.current,
+          offset: newOffset ?? offset,
+          pageSize: newPageSize ?? pageSize,
+          sortBy: sortingHook.nextServerRef.current,
+          filterBy: advancedFilteringHook.nextServerRef.current,
+          viewBy: viewsHook.nextServerRef.current,
+        },
+        "green"
+      );
+    }
 
     onTablePageChangeHook(
       searchQueryHook.nextServerRef.current,
