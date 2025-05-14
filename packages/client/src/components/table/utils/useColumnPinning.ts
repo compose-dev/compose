@@ -200,6 +200,17 @@ function useColumnPinning(
     [enableRowSelection, hasActions, columnPinning]
   );
 
+  // Account for case where row selection is enabled after the table is
+  // initially rendered.
+  useEffect(() => {
+    setColumnPinning((prev) => {
+      return {
+        left: correctColumnPinningState(enableRowSelection, prev, true).left,
+        right: prev.right,
+      };
+    });
+  }, [enableRowSelection]);
+
   const resetColumnPinning = useCallback(() => {
     setColumnPinning(initialColumnPinning.current);
   }, []);

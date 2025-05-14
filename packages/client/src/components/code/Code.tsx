@@ -14,6 +14,7 @@ function Code({
   bare = false,
   copyable = true,
   size = "sm",
+  wrap = false,
 }: {
   code: string;
   label?: string;
@@ -22,6 +23,7 @@ function Code({
   bare?: boolean;
   copyable?: boolean;
   size?: "xs" | "sm" | "md";
+  wrap?: boolean;
 }) {
   const codeRef = useRef<HTMLElement>(null);
 
@@ -61,6 +63,7 @@ function Code({
             })}
             style={{
               scrollbarWidth: "thin",
+              whiteSpace: wrap ? "pre-wrap" : "pre",
             }}
           >
             {code}

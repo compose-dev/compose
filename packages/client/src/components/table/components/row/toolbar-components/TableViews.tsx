@@ -93,7 +93,10 @@ function TableViewsPanel({
       </div>
       <div className="flex flex-col">
         {views.map((view, idx) => (
-          <div className="border-b border-brand-neutral" key={idx}>
+          <div
+            className="border-b border-brand-neutral last:border-0"
+            key={idx}
+          >
             <ViewRow
               view={view}
               isActiveView={activeDisplayView === view.key}

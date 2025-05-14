@@ -116,7 +116,7 @@ class TableState:
         if "initial_view" in state and view_did_change(
             state["initial_view"], self.state[key]["initial_view"]
         ):
-            self.state[key]["initial_view"] = state["initial_view"]
+            self.state[key]["active_view"] = state["initial_view"]
 
         self.state[key] = {**self.state[key], **state}  # type: ignore
 

@@ -138,6 +138,23 @@ function advancedFilterModelValuesAreEqual(
     return true;
   }
 
+  if (oldValue.value instanceof Date || newValue.value instanceof Date) {
+    try {
+      const oldValueDate =
+        oldValue.value instanceof Date
+          ? oldValue.value.getTime()
+          : new Date(oldValue.value).getTime();
+      const newValueDate =
+        newValue.value instanceof Date
+          ? newValue.value.getTime()
+          : new Date(newValue.value).getTime();
+
+      return oldValueDate === newValueDate;
+    } catch (e) {
+      return false;
+    }
+  }
+
   return oldValue.value === newValue.value;
 }
 

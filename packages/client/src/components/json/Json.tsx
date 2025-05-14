@@ -7,6 +7,7 @@ function Json({
   bare = false,
   copyable = true,
   size = "sm",
+  wrap = false,
 }: {
   label: string | null;
   json: object;
@@ -14,6 +15,7 @@ function Json({
   bare?: boolean;
   copyable?: boolean;
   size?: "xs" | "sm" | "md";
+  wrap?: boolean;
 }) {
   return (
     <Code
@@ -24,6 +26,7 @@ function Json({
       bare={bare}
       copyable={copyable}
       size={size}
+      wrap={wrap}
     />
   );
 }

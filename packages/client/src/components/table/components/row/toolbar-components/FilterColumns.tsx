@@ -745,7 +745,8 @@ function FilterColumnsPanel({
               }
             }}
             disabled={
-              !isServerValueStale || loading === UI.Stale.OPTION.UPDATE_DISABLED
+              (paginated && !isServerValueStale) ||
+              loading === UI.Stale.OPTION.UPDATE_DISABLED
             }
           >
             Reset to default

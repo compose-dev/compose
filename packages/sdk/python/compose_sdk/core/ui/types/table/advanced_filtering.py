@@ -1,6 +1,5 @@
 from __future__ import annotations
-from typing import TypedDict, Literal, Union, List, Any
-from unittest import result
+from typing import TypedDict, Literal, Union, Sequence, Any
 
 
 class TableAdvancedFilterClause(TypedDict):
@@ -67,7 +66,7 @@ class FilterModelFormat:
 
 class TableAdvancedFilterGroup(TypedDict):
     logic_operator: Literal["and", "or"]
-    filters: List[Union[TableAdvancedFilterClause, TableAdvancedFilterGroup]]
+    filters: Sequence[Union[TableAdvancedFilterClause, TableAdvancedFilterGroup]]
 
 
 TableAdvancedFilterModel = Union[

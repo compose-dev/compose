@@ -358,6 +358,7 @@ function DataCell({
               bare={true}
               copyable={false}
               size={density === "compact" ? "xs" : "sm"}
+              wrap={true}
             />
           ) : (
             JSON.stringify(value, null)

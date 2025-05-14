@@ -1,12 +1,10 @@
-from typing import Any, List, Union, Literal, Dict
-
-from compose_sdk.core.ui.types.table.table import TableColumnSort
+from typing import Any, List, Union, Literal
 
 from ..ui import TYPE, ComponentReturn, TableDefault, TablePagination, Stale, Table
 from ..table_state import TableState
 from .find_component import FindComponent  # type: ignore[attr-defined]
 
-DEFAULT_VIEW: Table.PaginationView = {
+FALLBACK_VIEW: Table.PaginationView = {
     "search_query": None,
     "sort_by": [],
     "filter_by": None,
@@ -14,17 +12,35 @@ DEFAULT_VIEW: Table.PaginationView = {
 }
 
 
+def get_sort_by(
+    sortable: Table.SortOption.TYPE,
+    default_view: Table.ViewInternal,
+) -> List[Table.ColumnSort]:
+    if sortable == Table.SortOption.DISABLED:
+        return []
+
+    default_view_sort_by = default_view.get("sortBy", [])
+
+    if sortable == Table.SortOption.SINGLE:
+        if len(default_view_sort_by) > 1:
+            return default_view_sort_by[0:1]
+        else:
+            return default_view_sort_by
+    else:
+        return default_view_sort_by
+
+
 def get_default_view(
-    views: Union[List[Dict[str, Any]], None],
+    views: Union[List[Table.ViewInternal], None],
     filterable: bool,
     searchable: bool,
     sortable: Table.SortOption.TYPE,
 ) -> Table.PaginationView:
     try:
         if views is None or len(views) == 0:
-            return {**DEFAULT_VIEW}
+            return {**FALLBACK_VIEW}
 
-        default_view = None
+        default_view: Union[Table.ViewInternal, None] = None
 
         for view in views:
             if view.get("isDefault", False) == True:
@@ -32,7 +48,7 @@ def get_default_view(
                 break
 
         if default_view is None:
-            return {**DEFAULT_VIEW}
+            return {**FALLBACK_VIEW}
 
         filter_by = (
             default_view.get("filterBy", None) if filterable is not False else None
@@ -40,22 +56,16 @@ def get_default_view(
         search_query = (
             default_view.get("searchQuery", None) if searchable is not False else None
         )
-        sort_by: List[TableColumnSort] = (
-            [] if sortable is False else default_view.get("sortBy", [])
-        )
-
-        if sortable == Table.SortOption.SINGLE and len(sort_by) > 1:
-            sort_by = sort_by[0:1]
 
         return {
             "filter_by": filter_by,
             "search_query": search_query,
-            "sort_by": sort_by,
+            "sort_by": get_sort_by(sortable, default_view),
             "view_by": default_view.get("key", None),
         }
 
     except Exception:
-        return {**DEFAULT_VIEW}
+        return {**FALLBACK_VIEW}
 
 
 def configure_table_pagination(
@@ -106,26 +116,6 @@ def configure_table_pagination(
             else component["model"]["properties"].get(
                 "pageSize", TableDefault.PAGE_SIZE
             )
-        )
-        search_query = (
-            current_state["active_view"]["search_query"]
-            if current_state
-            else default_view["search_query"]
-        )
-        filter_by = (
-            current_state["active_view"]["filter_by"]
-            if current_state
-            else default_view["filter_by"]
-        )
-        sort_by = (
-            current_state["active_view"]["sort_by"]
-            if current_state
-            else default_view["sort_by"]
-        )
-        view_by = (
-            current_state["active_view"]["view_by"]
-            if current_state
-            else default_view["view_by"]
         )
 
         if component["hooks"]["onPageChange"]["type"] == TablePagination.MANUAL:
@@ -185,6 +175,30 @@ def configure_table_pagination(
                     component["model"]["id"],
                     {"initial_view": default_view},
                 )
+
+        # Set these at the end to ensure they are working with the most recent
+        # active view. In some cases, the active view will be overriden when
+        # the initial view is updated above!
+        search_query = (
+            current_state["active_view"]["search_query"]
+            if current_state
+            else default_view["search_query"]
+        )
+        filter_by = (
+            current_state["active_view"]["filter_by"]
+            if current_state
+            else default_view["filter_by"]
+        )
+        sort_by = (
+            current_state["active_view"]["sort_by"]
+            if current_state
+            else default_view["sort_by"]
+        )
+        view_by = (
+            current_state["active_view"]["view_by"]
+            if current_state
+            else default_view["view_by"]
+        )
 
         return {
             **component,

@@ -14,6 +14,31 @@ const FALLBACK_VIEW: PaginationView = {
   viewBy: undefined,
 };
 
+function getSortBy(
+  sortable: UI.Table.SortOption,
+  defaultView: UI.Table.ViewInternal<UI.Table.DataRow[]>
+) {
+  if (sortable === UI.Table.SORT_OPTION.DISABLED) {
+    return [];
+  }
+
+  if (sortable === UI.Table.SORT_OPTION.SINGLE) {
+    if (defaultView.sortBy) {
+      return defaultView.sortBy.length > 1
+        ? defaultView.sortBy.slice(0, 1)
+        : defaultView.sortBy;
+    }
+
+    return FALLBACK_VIEW.sortBy;
+  }
+
+  if (defaultView.sortBy) {
+    return defaultView.sortBy;
+  }
+
+  return FALLBACK_VIEW.sortBy;
+}
+
 function getDefaultView(
   views: UI.Components.InputTable["model"]["properties"]["views"],
   filterable: boolean,
@@ -41,14 +66,7 @@ function getDefaultView(
         searchable && defaultView.searchQuery
           ? defaultView.searchQuery
           : FALLBACK_VIEW.searchQuery,
-      sortBy:
-        sortable === UI.Table.SORT_OPTION.DISABLED
-          ? []
-          : sortable === UI.Table.SORT_OPTION.SINGLE && defaultView.sortBy
-            ? defaultView.sortBy.length > 1
-              ? defaultView.sortBy.slice(0, 1)
-              : defaultView.sortBy
-            : FALLBACK_VIEW.sortBy,
+      sortBy: getSortBy(sortable, defaultView),
     };
   } catch (error) {
     return { ...FALLBACK_VIEW };
@@ -103,18 +121,6 @@ async function configureTablePagination(
     const pageSize = currentState
       ? currentState.pageSize
       : component.model.properties.pageSize || UI.Table.DEFAULT_PAGE_SIZE;
-    const searchQuery = currentState
-      ? currentState.activeView.searchQuery
-      : defaultView.searchQuery;
-    const sortBy = currentState
-      ? currentState.activeView.sortBy
-      : defaultView.sortBy;
-    const filterBy = currentState
-      ? currentState.activeView.filterBy
-      : defaultView.filterBy;
-    const viewBy = currentState
-      ? currentState.activeView.viewBy
-      : defaultView.viewBy;
 
     let data: UI.Table.DataRow[];
     let totalRecords: number;
@@ -161,6 +167,22 @@ async function configureTablePagination(
         });
       }
     }
+
+    // Set these at the end to ensure they are working with the most recent
+    // active view. In some cases, the active view will be overriden when
+    // the initial view is updated above!
+    const searchQuery = currentState
+      ? currentState.activeView.searchQuery
+      : defaultView.searchQuery;
+    const sortBy = currentState
+      ? currentState.activeView.sortBy
+      : defaultView.sortBy;
+    const filterBy = currentState
+      ? currentState.activeView.filterBy
+      : defaultView.filterBy;
+    const viewBy = currentState
+      ? currentState.activeView.viewBy
+      : defaultView.viewBy;
 
     return {
       ...component,
