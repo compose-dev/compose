@@ -744,10 +744,7 @@ function FilterColumnsPanel({
                 onTablePageChangeHook();
               }
             }}
-            disabled={
-              (paginated && !isServerValueStale) ||
-              loading === UI.Stale.OPTION.UPDATE_DISABLED
-            }
+            disabled={loading === UI.Stale.OPTION.UPDATE_DISABLED}
           >
             Reset to default
           </Button>

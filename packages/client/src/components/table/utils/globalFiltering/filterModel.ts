@@ -1,5 +1,6 @@
 import { types, UI } from "@composehq/ts-public";
 import { FormattedTableRow } from "../constants";
+import { u } from "@compose/ts";
 
 interface EditableAdvancedFilterClause
   extends UI.Table.AdvancedFilterClauseBase {
@@ -149,7 +150,16 @@ function advancedFilterModelValuesAreEqual(
           ? newValue.value.getTime()
           : new Date(newValue.value).getTime();
 
-      return oldValueDate === newValueDate;
+      return Math.abs(oldValueDate - newValueDate) < 30000; // Within 30 seconds
+    } catch (e) {
+      return false;
+    }
+  } else if (u.date.isValidISODateString(oldValue.value)) {
+    try {
+      const oldValueDate = new Date(oldValue.value).getTime();
+      const newValueDate = new Date(newValue.value).getTime();
+
+      return Math.abs(oldValueDate - newValueDate) < 30000; // Within 30 seconds
     } catch (e) {
       return false;
     }

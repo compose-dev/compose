@@ -54,7 +54,7 @@ def filter_by_did_change(
     if old_filter_by is None and new_filter_by is None:
         return False
 
-    if old_filter_by or new_filter_by is None:
+    if old_filter_by is None or new_filter_by is None:
         return True
 
     return JSON.stringify(old_filter_by) != JSON.stringify(new_filter_by)
@@ -116,7 +116,7 @@ class TableState:
         if "initial_view" in state and view_did_change(
             state["initial_view"], self.state[key]["initial_view"]
         ):
-            self.state[key]["active_view"] = state["initial_view"]
+            self.state[key]["active_view"] = {**state["initial_view"]}  # type: ignore
 
         self.state[key] = {**self.state[key], **state}  # type: ignore
 

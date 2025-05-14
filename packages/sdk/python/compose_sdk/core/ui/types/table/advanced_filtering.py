@@ -117,7 +117,7 @@ def transform_advanced_filter_model(
 
             for f in filter_model.get("filters", []):
                 # Recursively transform nested filters
-                transformed_filter = transform_advanced_filter_model_to_camel_case(f)
+                transformed_filter = transform_advanced_filter_model(f, result_format)
 
                 if transformed_filter is None:
                     # Propagate failure if a sub-transformation fails
