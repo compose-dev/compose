@@ -50,7 +50,9 @@ function formatColumn(
     sortingFn:
       column.format === "json" || column.format === "tag"
         ? sortJsonColumn
-        : "basic",
+        : column.format === "string" || !column.format
+          ? "text"
+          : "basic",
     sortDescFirst: UI.Table.shouldSortDescendingFirst(column.format),
     header: (header) => {
       function getStyle() {
