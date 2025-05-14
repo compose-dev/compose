@@ -27,7 +27,7 @@ KEY_SEPARATOR = "__"
 
 def search_query_did_change(
     old_search_query: Union[str, None], new_search_query: Union[str, None]
-):
+) -> bool:
     return old_search_query != new_search_query
 
 
@@ -50,7 +50,7 @@ def sort_by_did_change(
 
 def filter_by_did_change(
     old_filter_by: Table.AdvancedFilterModel, new_filter_by: Table.AdvancedFilterModel
-):
+) -> bool:
     if old_filter_by is None and new_filter_by is None:
         return False
 
@@ -60,7 +60,9 @@ def filter_by_did_change(
     return JSON.stringify(old_filter_by) != JSON.stringify(new_filter_by)
 
 
-def view_did_change(old_view: Table.PaginationView, new_view: Table.PaginationView):
+def view_did_change(
+    old_view: Table.PaginationView, new_view: Table.PaginationView
+) -> bool:
     return (
         search_query_did_change(old_view["search_query"], new_view["search_query"])
         or sort_by_did_change(old_view["sort_by"], new_view["sort_by"])
@@ -111,12 +113,14 @@ class TableState:
     def update(self, render_id: str, table_id: str, state: Dict[str, Any]) -> None:
         key = self.generate_key(render_id, table_id)
 
+        new_initial_view: Table.PaginationView = state["initial_view"]
+
         # Update the active sort if the initial sort changed. This overrides
         # any changes on the browser side that were made to the active sort.
         if "initial_view" in state and view_did_change(
-            state["initial_view"], self.state[key]["initial_view"]
+            new_initial_view, self.state[key]["initial_view"]
         ):
-            self.state[key]["active_view"] = {**state["initial_view"]}  # type: ignore
+            self.state[key]["active_view"] = {**new_initial_view}
 
         self.state[key] = {**self.state[key], **state}  # type: ignore
 
@@ -145,9 +149,9 @@ class TableState:
         self.state.clear()
 
     @staticmethod
-    def should_refresh_total_record(
+    def should_refresh_total_records(
         previous_view: Table.PaginationView, new_view: Table.PaginationView
-    ):
+    ) -> bool:
         if search_query_did_change(
             previous_view["search_query"], new_view["search_query"]
         ):
@@ -155,3 +159,5 @@ class TableState:
 
         if filter_by_did_change(previous_view["filter_by"], new_view["filter_by"]):
             return True
+
+        return False

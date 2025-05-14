@@ -59,8 +59,8 @@ CAMEL_TO_SNAKE_CASE_OPERATOR_MAP = {
 
 
 class FilterModelFormat:
-    SNAKE = "snake"
-    CAMEL = "camel"
+    SNAKE: Literal["snake"] = "snake"
+    CAMEL: Literal["camel"] = "camel"
     TYPE = Literal["snake", "camel"]
 
 
@@ -76,7 +76,7 @@ TableAdvancedFilterModel = Union[
 
 def transform_advanced_filter_model(
     filter_model: TableAdvancedFilterModel, result_format: FilterModelFormat.TYPE
-) -> Union[dict[str, Any], None]:
+) -> TableAdvancedFilterModel:
     """
     Recursively transforms a TableAdvancedFilterModel from either snake_case to
     camelCase or camelCase to snake_case
@@ -113,9 +113,11 @@ def transform_advanced_filter_model(
         # Check if it's a group (has 'logic_operator')
         # Note: Using .get() for runtime safety, although TypedDict defines keys
         if input_logic_operator_key in filter_model:
-            transformed_filters: list[dict[str, Any]] = []
+            transformed_filters: list[
+                Union[TableAdvancedFilterClause, TableAdvancedFilterGroup]
+            ] = []
 
-            for f in filter_model.get("filters", []):
+            for f in filter_model.get("filters", []):  # type: ignore
                 # Recursively transform nested filters
                 transformed_filter = transform_advanced_filter_model(f, result_format)
 
@@ -125,15 +127,17 @@ def transform_advanced_filter_model(
 
                 transformed_filters.append(transformed_filter)
 
-            return {
-                result_logic_operator_key: filter_model.get(
+            new_filter_group: TableAdvancedFilterGroup = {
+                result_logic_operator_key: filter_model.get(  # type: ignore
                     input_logic_operator_key, "and"
                 ),
                 "filters": transformed_filters,
             }
+
+            return new_filter_group
         # Check if it's a clause (has 'operator')
         elif "operator" in filter_model:
-            original_operator = filter_model.get("operator")
+            original_operator: str = filter_model.get("operator")  # type: ignore
 
             # Map the operator value to camelCase
             result_format_operator = (
@@ -150,9 +154,9 @@ def transform_advanced_filter_model(
                 )
 
             return {
-                "operator": result_format_operator,
+                "operator": result_format_operator,  # type: ignore
                 "value": filter_model.get("value"),
-                "key": filter_model.get("key"),
+                "key": filter_model.get("key"),  # type: ignore
             }
         else:
             # Should not happen with valid TableAdvancedFilterModel input
@@ -167,7 +171,7 @@ def transform_advanced_filter_model(
 
 def transform_advanced_filter_model_to_camel_case(
     filter_model: TableAdvancedFilterModel,
-) -> Union[dict[str, Any], None]:
+) -> TableAdvancedFilterModel:
     return transform_advanced_filter_model(
         filter_model, result_format=FilterModelFormat.CAMEL
     )
@@ -175,7 +179,7 @@ def transform_advanced_filter_model_to_camel_case(
 
 def transform_advanced_filter_model_to_snake_case(
     filter_model: TableAdvancedFilterModel,
-) -> Union[dict[str, Any], None]:
+) -> TableAdvancedFilterModel:
     return transform_advanced_filter_model(
         filter_model, result_format=FilterModelFormat.SNAKE
     )

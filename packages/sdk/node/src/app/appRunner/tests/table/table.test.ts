@@ -105,7 +105,7 @@ describe("App Runner - Table", () => {
     expect(tracker.metCondition).toEqual(true);
   });
 
-  it("selections are enabled by default", async () => {
+  it("selections are disabled by default", async () => {
     const { appRunner, api } = mockRunner(async ({ page, ui }) => {
       page.add(() =>
         ui.table(
@@ -128,7 +128,7 @@ describe("App Runner - Table", () => {
             return false;
           }
 
-          if (ui.model.properties.allowSelect === true) {
+          if (ui.model.properties.allowSelect === false) {
             return true;
           }
         }

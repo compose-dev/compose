@@ -19,7 +19,7 @@ def get_sort_by(
     if sortable == Table.SortOption.DISABLED:
         return []
 
-    default_view_sort_by = default_view.get("sortBy", [])
+    default_view_sort_by: List[Table.ColumnSort] = default_view.get("sortBy", [])  # type: ignore
 
     if sortable == Table.SortOption.SINGLE:
         if len(default_view_sort_by) > 1:
@@ -50,11 +50,11 @@ def get_default_view(
         if default_view is None:
             return {**FALLBACK_VIEW}
 
-        filter_by = (
-            default_view.get("filterBy", None) if filterable is not False else None
+        filter_by: Union[Table.AdvancedFilterModel, None] = (
+            default_view.get("filterBy", None) if filterable is not False else None  # type: ignore
         )
-        search_query = (
-            default_view.get("searchQuery", None) if searchable is not False else None
+        search_query: Union[str, None] = (
+            default_view.get("searchQuery", None) if searchable is not False else None  # type: ignore
         )
 
         return {

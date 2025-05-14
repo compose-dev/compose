@@ -516,7 +516,9 @@ function AuditLog() {
               }}
               totalRecords={data?.totalRecords ?? Infinity}
               paginated={true}
-              disableSearch={true}
+              searchable={false}
+              filterable={false}
+              sortable={false}
               pageSize={filters.limit}
               offset={filters.offset}
             />

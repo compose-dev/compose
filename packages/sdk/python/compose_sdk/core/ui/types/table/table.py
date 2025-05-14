@@ -11,7 +11,7 @@ from typing import (
     Sequence,
     Mapping,
 )
-from typing_extensions import NotRequired
+from typing_extensions import NotRequired, TypeAlias
 from ..validator_response import VoidResponse
 from ..button_appearance import BUTTON_APPEARANCE
 from .advanced_filtering import (
@@ -270,20 +270,24 @@ class Table:
         INDEX = "index"  # deprecated
         TYPE = Literal["full", "id", "index"]
 
-    AdvancedFilterModel = TableAdvancedFilterModel
-    View = TableView
-    ViewInternal = TableViewInternal
-    PaginationView = TablePaginationView
+    AdvancedFilterModel: TypeAlias = TableAdvancedFilterModel
+    View: TypeAlias = TableView
+    ViewInternal: TypeAlias = TableViewInternal
+    PaginationView: TypeAlias = TablePaginationView
 
-    ColumnSort = TableColumnSort
+    ColumnSort: TypeAlias = TableColumnSort
 
-    DataKey = TableDataKey
-    DataOutput = List[Any]
+    DataKey: TypeAlias = TableDataKey
+    DataOutput: TypeAlias = List[Any]
 
     @property
-    def transform_advanced_filter_model_to_camel_case(self):
+    def transform_advanced_filter_model_to_camel_case(
+        self,
+    ) -> Callable[[TableAdvancedFilterModel], TableAdvancedFilterModel]:
         return transform_advanced_filter_model_to_camel_case
 
     @property
-    def transform_advanced_filter_model_to_snake_case(self):
+    def transform_advanced_filter_model_to_snake_case(
+        self,
+    ) -> Callable[[TableAdvancedFilterModel], TableAdvancedFilterModel]:
         return transform_advanced_filter_model_to_snake_case
