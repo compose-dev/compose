@@ -19,7 +19,11 @@ function getColumnVisibilityState(
     const activeViewKeys = Object.keys(activeView.columns);
     for (const key of activeViewKeys) {
       if ("hidden" in activeView.columns[key]!) {
-        visibilityState[key] = !activeView.columns[key].hidden;
+        const columnId = columns.find((c) => (c.original ?? c.id) === key)?.id;
+
+        if (columnId) {
+          visibilityState[columnId] = !activeView.columns[key].hidden;
+        }
       }
     }
   }
