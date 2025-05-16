@@ -14,7 +14,6 @@ from ...ui import (
     ValidatorResponse,
     VoidResponse,
     TableActions,
-    TableOnPageChange,
     TableDefault,
     TablePagination,
     ComponentStyle,
@@ -225,7 +224,7 @@ def warn_about_select_mode(
 
 def _table(
     id: str,
-    data: Union[TableData, TableOnPageChange],
+    data: Union[TableData, Table.OnPageChangeSync, Table.OnPageChangeAsync],
     *,
     label: Union[str, None] = None,
     required: bool = True,
@@ -276,15 +275,10 @@ def _table(
         len(data) > TableDefault.PAGINATION_THRESHOLD or paginate is True
     )
 
-    # Perform a shallow copy of the data to make it less likely to be mutated
-    # by the user, and thus more likely that any page.update() calls will
-    # succeed.
-    shallow_copy = [] if manually_paged else list(data)
-
     model_properties = {
         "initialSelectedRows": initial_selected_rows,
         "hasOnSelectHook": on_change is not None,
-        "data": shallow_copy,
+        "data": [] if manually_paged else data,
         "columns": columns if columns is None else camel_case_columns(columns),
         "actions": get_model_actions(actions),
         "minSelections": min_selections,
@@ -330,7 +324,7 @@ def _table(
         if manually_paged
         else (
             {
-                "fn": lambda: shallow_copy,
+                "fn": lambda: data,
                 "type": TablePagination.AUTO,
             }
             if auto_paged
@@ -377,7 +371,7 @@ def _table(
 
 def table(
     id: str,
-    data: Union[TableData, TableOnPageChange],
+    data: Union[TableData, Table.OnPageChangeSync, Table.OnPageChangeAsync],
     *,
     columns: Union[TableColumns, None] = None,
     actions: Union[TableActions, None] = None,

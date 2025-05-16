@@ -42,7 +42,7 @@ async def test_updates_page_when_text_changes(scheduler, api, app_runner_factory
 
 @pytest.mark.asyncio
 async def test_does_not_update_page_when_text_does_not_change(
-    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]]
+    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]],
 ):
     runner: AppRunner
     scheduler: Scheduler
@@ -74,7 +74,7 @@ async def test_does_not_update_page_when_text_does_not_change(
 
 @pytest.mark.asyncio
 async def test_updates_when_table_data_changes(
-    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]]
+    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]],
 ):
     runner: AppRunner
     scheduler: Scheduler
@@ -110,7 +110,7 @@ async def test_updates_when_table_data_changes(
 
 @pytest.mark.asyncio
 async def test_does_not_update_when_table_data_does_not_change(
-    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]]
+    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]],
 ):
     runner: AppRunner
     scheduler: Scheduler
@@ -132,6 +132,7 @@ async def test_does_not_update_when_table_data_does_not_change(
     async def send(event, _, _1):
         nonlocal did_rerender
         if event["type"] == EventType.SdkToServer.RERENDER_UI_V3:
+            print(event)
             did_rerender = True
 
     api.send = send
@@ -144,7 +145,7 @@ async def test_does_not_update_when_table_data_does_not_change(
 
 @pytest.mark.asyncio
 async def test_updates_when_table_row_is_added(
-    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]]
+    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]],
 ):
     runner: AppRunner
     scheduler: Scheduler
@@ -180,7 +181,7 @@ async def test_updates_when_table_row_is_added(
 
 @pytest.mark.asyncio
 async def test_updates_when_select_option_changes(
-    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]]
+    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]],
 ):
     runner: AppRunner
     scheduler: Scheduler
@@ -216,7 +217,7 @@ async def test_updates_when_select_option_changes(
 
 @pytest.mark.asyncio
 async def test_updates_when_multiselect_option_changes(
-    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]]
+    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]],
 ):
     runner: AppRunner
     scheduler: Scheduler
@@ -252,7 +253,7 @@ async def test_updates_when_multiselect_option_changes(
 
 @pytest.mark.asyncio
 async def test_updates_when_radio_option_changes(
-    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]]
+    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]],
 ):
     runner: AppRunner
     scheduler: Scheduler

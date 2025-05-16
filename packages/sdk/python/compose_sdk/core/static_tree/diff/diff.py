@@ -5,6 +5,7 @@ from typing import TypedDict, List
 from ...json import JSON
 from ...ui import ComponentReturn, is_interactive_component, INTERACTION_TYPE, TYPE
 from ...compress import Compress
+from ...component_update_cache import ComponentUpdateCache
 
 from .apply_ids import apply_ids
 from .metadata import get_component_metadata
@@ -27,7 +28,10 @@ def interactive_component_id_changed(
 
 
 def diff_static_layouts_recursive(
-    old_layout: ComponentReturn, new_layout: ComponentReturn
+    old_layout: ComponentReturn,
+    new_layout: ComponentReturn,
+    render_id: str,
+    cache: ComponentUpdateCache,
 ) -> DiffMap:
     # Option 1: The component has changed entirely. In this case,
     # delete the old component and add the new component.
@@ -54,12 +58,23 @@ def diff_static_layouts_recursive(
         old_layout["interactionType"] != INTERACTION_TYPE.LAYOUT
         or new_layout["interactionType"] != INTERACTION_TYPE.LAYOUT
     ):
-        # For non-input components, ids are regenerated on every render,
-        # so we need to ignore them when comparing.
-        old_model = JSON.remove_keys(old_layout["model"], ["id"])
-        new_model = JSON.remove_keys(new_layout["model"], ["id"])
+        old_model_bytes: Union[bytes, None] = cache.get(
+            render_id, old_layout["model"]["id"]
+        )
 
-        if JSON.to_bytes(old_model) != JSON.to_bytes(new_model):
+        if old_model_bytes is None:
+            old_model_to_compare = JSON.remove_keys(old_layout["model"], ["id"])
+            old_model_bytes = JSON.to_bytes(old_model_to_compare)
+
+        new_model_to_compare = JSON.remove_keys(new_layout["model"], ["id"])
+        new_model_bytes = JSON.to_bytes(new_model_to_compare)
+
+        # Always update cache
+        cache.delete(render_id, old_layout["model"]["id"])
+        if cache.should_cache(new_layout):
+            cache.set(render_id, new_layout["model"]["id"], new_model_bytes)
+
+        if old_model_bytes != new_model_bytes:
             compressed = Compress.ui_tree(new_layout)
             compressed_model = JSON.remove_keys(compressed["model"], ["id"])
 
@@ -113,7 +128,9 @@ def diff_static_layouts_recursive(
 
         # If both children exist, we'll compare them recursively.
         if old_child is not None and new_child is not None:
-            child_diff = diff_static_layouts_recursive(old_child, new_child)
+            child_diff = diff_static_layouts_recursive(
+                old_child, new_child, render_id, cache
+            )
 
             if new_child["model"]["id"] in child_diff["add"]:
                 child_ids.append(new_child["model"]["id"])
@@ -161,7 +178,12 @@ def diff_static_layouts_recursive(
     }
 
 
-def diff_static_layouts(old_layout: ComponentReturn, new_layout: ComponentReturn):
+def diff_static_layouts(
+    old_layout: ComponentReturn,
+    new_layout: ComponentReturn,
+    render_id: str,
+    cache: ComponentUpdateCache,
+):
     """
     Diff two static layouts.
 
@@ -171,7 +193,7 @@ def diff_static_layouts(old_layout: ComponentReturn, new_layout: ComponentReturn
     included in the `delete` array. It is up to the client to delete any
     stranded leaf nodes as a result of a deleted branch.
     """
-    diff = diff_static_layouts_recursive(old_layout, new_layout)
+    diff = diff_static_layouts_recursive(old_layout, new_layout, render_id, cache)
 
     new_layout_with_ids_applied = apply_ids(new_layout, diff["id_map"])
     root_id = new_layout_with_ids_applied["model"]["id"]
@@ -181,6 +203,16 @@ def diff_static_layouts(old_layout: ComponentReturn, new_layout: ComponentReturn
     is_empty = (
         len(diff["delete"]) == 0 and len(diff["add"]) == 0 and len(diff["update"]) == 0
     )
+
+    # Remove deleted components from cache
+    for deleted_id in diff["delete"]:
+        cache.delete(render_id, deleted_id)
+
+    # Add new components to cache
+    for added_id, added_component in diff["add"].items():
+        if cache.should_cache(added_component):
+            model_to_cache = JSON.remove_keys(added_component["model"], ["id"])
+            cache.set(render_id, added_id, JSON.to_bytes(model_to_cache))
 
     return {
         **diff,

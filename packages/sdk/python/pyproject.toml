@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "compose-sdk"
-version = "0.27.0"
+version = "0.27.1"
 description = "The open-source SDK for building custom internal tools."
 authors = ["Atul Jalan <atul@composehq.com>"]
 maintainers = ["Atul Jalan <atul@composehq.com>"]
@@ -26,6 +26,7 @@ pytest = "^8.3.2"
 pytest-asyncio = "^0.24.0"
 pytest-benchmark = "^5.1.0"
 mypy = "^1.14.0"
+black = "^25.1.0"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

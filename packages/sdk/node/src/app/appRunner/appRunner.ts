@@ -23,7 +23,7 @@ import {
 } from "../constants";
 import * as render from "../render";
 import State from "../state";
-import { TableState, ComponentTree } from "../utils";
+import { TableState, ComponentTree, ComponentUpdateCache } from "../utils";
 import { debug } from "../../utils";
 
 const DELETED_RENDER = "DELETED";
@@ -86,7 +86,11 @@ class AppRunner {
    */
   private tempFiles: Record<string, ArrayBuffer>;
 
-  private tableState: TableState.Class = new TableState.Class();
+  private componentUpdateCache: ComponentUpdateCache =
+    new ComponentUpdateCache();
+  private tableState: TableState.Class = new TableState.Class(
+    this.componentUpdateCache
+  );
 
   constructor(
     appDefinition: AppDefinition,
@@ -219,6 +223,7 @@ class AppRunner {
             );
 
             // After the modal is closed, we no longer need to track it.
+            this.componentUpdateCache.clearRender(renderId);
             this.rendersById[renderId] = DELETED_RENDER;
           }
         };
@@ -227,13 +232,31 @@ class AppRunner {
         try {
           if (this.debug) {
             staticLayout = await debug.asyncMeasureDuration(
-              async () =>
-                await render.generateStaticLayout(
+              async () => {
+                const generatedStaticLayout = await render.generateStaticLayout(
                   layout,
                   resolveRender,
                   renderId,
                   this.tableState
-                ),
+                );
+
+                ComponentTree.doForComponent(
+                  generatedStaticLayout,
+                  (component) => {
+                    if (this.componentUpdateCache.shouldCache(component)) {
+                      const { id, ...modelWithoutId } = component.model;
+
+                      this.componentUpdateCache.set(
+                        renderId,
+                        component.model.id,
+                        JSON.stringify(modelWithoutId)
+                      );
+                    }
+                  }
+                );
+
+                return generatedStaticLayout;
+              },
               (elapsed) =>
                 debug.log(
                   `Page add (fragment: ${renderId})`,
@@ -251,6 +274,19 @@ class AppRunner {
               renderId,
               this.tableState
             );
+
+            ComponentTree.doForComponent(staticLayout, (component) => {
+              if (this.componentUpdateCache.shouldCache(component)) {
+                const { id, ...modelWithoutId } = component.model;
+                component.model;
+
+                this.componentUpdateCache.set(
+                  renderId,
+                  component.model.id,
+                  JSON.stringify(modelWithoutId)
+                );
+              }
+            });
           }
         } catch (error: any) {
           return this.sendError(
@@ -665,7 +701,14 @@ class AppRunner {
       let diff: ReturnType<typeof render.diffStaticLayouts>;
       if (this.debug) {
         diff = debug.measureDuration(
-          () => render.diffStaticLayouts(staticLayout, newLayout),
+          () => {
+            return render.diffStaticLayouts(
+              staticLayout,
+              newLayout,
+              renderId,
+              this.componentUpdateCache
+            );
+          },
           (elapsed) =>
             debug.log(
               `Page update (fragment: ${renderId})`,
@@ -677,7 +720,12 @@ class AppRunner {
             )
         );
       } else {
-        diff = render.diffStaticLayouts(staticLayout, newLayout);
+        diff = render.diffStaticLayouts(
+          staticLayout,
+          newLayout,
+          renderId,
+          this.componentUpdateCache
+        );
       }
 
       // When we perform a diff, we don't update the IDs of existing
@@ -1426,11 +1474,16 @@ class AppRunner {
       // changed. This is mostly for the case where the user is running page.update() calls
       // that are unrelated to the table.
       if (tableState.stale !== UI.Stale.OPTION.FALSE) {
+        const cachedTableData = this.tableState.getCachedTableData(
+          renderId,
+          componentId
+        );
+
         const oldStringified = JSON.stringify({
           offset: tableState.offset,
           searchQuery: tableState.activeView.searchQuery ?? null,
           totalRecords: tableState.totalRecords,
-          data: tableState.data,
+          data: cachedTableData || tableState.data,
           pageSize: tableState.pageSize,
           sortBy: tableState.activeView.sortBy ?? [],
           filterBy: tableState.activeView.filterBy ?? null,

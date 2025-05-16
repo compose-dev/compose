@@ -39,9 +39,12 @@ from ..core import (
     Debug,
     RateLimiter,
     validate_audit_log,
-    TableColumnSort,
     Table,
+    ComponentUpdateCache,
+    ComponentReturn,
 )
+
+from ..core.static_tree.find_component import FindComponent
 
 from .appDefinition import AppDefinition
 from .state import State
@@ -96,7 +99,8 @@ class AppRunner:
 
         self.confirmationDialog: Union[ConfirmationDialog, None] = None
 
-        self.table_state = TableState(self.scheduler)
+        self.component_update_cache = ComponentUpdateCache()
+        self.table_state = TableState(self.scheduler, self.component_update_cache)
 
     async def render_ui(
         self,
@@ -123,6 +127,7 @@ class AppRunner:
                         self.browserSessionId,
                         self.executionId,
                     )
+                    self.component_update_cache.clear_render(renderId)
 
                     # After the modal is closed, we no longer need to track it.
                     self.renders[renderId] = DELETED_RENDER
@@ -146,6 +151,16 @@ class AppRunner:
             else:
                 renderId = Utils.generate_id()
 
+            def cache_component(component: ComponentReturn):
+                if self.component_update_cache.should_cache(component):
+                    model_to_cache = JSON.remove_keys(component["model"], ["id"])
+                    self.component_update_cache.set(
+                        renderId,
+                        component["model"]["id"],
+                        # diff function uses bytes in python SDK
+                        JSON.to_bytes(model_to_cache),
+                    )
+
             if self.debug:
                 async with Debug.async_measure_duration(
                     lambda elapsed: Debug.log(
@@ -158,10 +173,12 @@ class AppRunner:
                     static_layout = await StaticTree.generate(
                         layout, resolve_render, renderId, self.table_state
                     )
+                    await FindComponent.do_for_component(static_layout, cache_component)
             else:
                 static_layout = await StaticTree.generate(
                     layout, resolve_render, renderId, self.table_state
                 )
+                await FindComponent.do_for_component(static_layout, cache_component)
 
             if self.debug:
                 with Debug.measure_duration(
@@ -461,10 +478,18 @@ class AppRunner:
                         )
                     ):
                         diff = StaticTree.diff(
-                            render["static_layout"], new_static_layout
+                            render["static_layout"],
+                            new_static_layout,
+                            renderId,
+                            self.component_update_cache,
                         )
                 else:
-                    diff = StaticTree.diff(render["static_layout"], new_static_layout)
+                    diff = StaticTree.diff(
+                        render["static_layout"],
+                        new_static_layout,
+                        renderId,
+                        self.component_update_cache,
+                    )
 
                 # When we perform a diff, we don't update the IDs of existing
                 # components (even if they're updated). Instead, in these cases,
@@ -1117,12 +1142,22 @@ class AppRunner:
                 return
 
             if table_state["stale"] != Stale.FALSE:
+                cached_table_data = self.table_state.get_cached_table_data(
+                    render_id, component_id
+                )
+
+                old_table_data = (
+                    cached_table_data
+                    if cached_table_data is not None
+                    else table_state["data"]
+                )
+
                 old_bytes = JSON.to_bytes(
                     {
                         "offset": table_state["offset"],
                         "search_query": table_state["active_view"]["search_query"],
                         "total_records": table_state["total_records"],
-                        "data": table_state["data"],
+                        "data": old_table_data,
                         "page_size": table_state["page_size"],
                         "sort_by": table_state["active_view"]["sort_by"],
                         "filter_by": table_state["active_view"]["filter_by"],
@@ -1242,5 +1277,7 @@ class AppRunner:
                 self.execution_task.cancel()
 
             self.table_state.cleanup()
+            self.component_update_cache.clear()
+
         except Exception as error:
             print(f"Error cleaning up app runner: {error}")

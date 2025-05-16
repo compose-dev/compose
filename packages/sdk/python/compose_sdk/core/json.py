@@ -55,6 +55,9 @@ class JSON:
 
     @staticmethod
     def remove_keys(data: Dict[Any, Any], keys_to_ignore: List[str]) -> Dict[Any, Any]:
+        """
+        Remove top level keys from a dictionary.
+        """
         return {k: v for k, v in data.items() if k not in keys_to_ignore}
 
     @staticmethod

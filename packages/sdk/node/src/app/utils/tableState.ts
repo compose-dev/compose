@@ -1,5 +1,6 @@
 import { UI } from "@composehq/ts-public";
 import { SmartDebounce } from "./smartDebounce";
+import { ComponentUpdateCache } from "./componentUpdateCache";
 
 type PaginationView = Pick<
   UI.Table.ViewInternal<UI.Table.DataRow[]>,
@@ -85,8 +86,11 @@ function viewDidChange(oldView: PaginationView, newView: PaginationView) {
 class TableState {
   state: Record<string, TableStateRecord>;
 
-  constructor() {
+  tableDataCache: ComponentUpdateCache;
+
+  constructor(componentUpdateCache: ComponentUpdateCache) {
     this.state = {};
+    this.tableDataCache = componentUpdateCache;
 
     this.generateKey = this.generateKey.bind(this);
     this.parseKey = this.parseKey.bind(this);
@@ -98,6 +102,12 @@ class TableState {
 
   generateKey(renderId: string, tableId: string) {
     return `${renderId}${KEY_SEPARATOR}${tableId}`;
+  }
+
+  generateCacheKey(tableId: string) {
+    // Add `paged` suffix to make this key unique from the normal key we use
+    // for the component update cache.
+    return `${tableId}_%%__%%COMPOSE_INTERN#L_KEY_@#$%^&`;
   }
 
   parseKey(key: string) {
@@ -144,6 +154,12 @@ class TableState {
       tableId,
       activeView: { ...state.initialView },
     };
+
+    this.tableDataCache.set(
+      renderId,
+      this.generateCacheKey(tableId),
+      JSON.stringify(state.data)
+    );
   }
 
   update(renderId: string, tableId: string, state: Partial<TableStateRecord>) {
@@ -158,11 +174,20 @@ class TableState {
       this.state[key].activeView = { ...state.initialView };
     }
 
+    if (state.data !== undefined) {
+      this.tableDataCache.set(
+        renderId,
+        this.generateCacheKey(tableId),
+        JSON.stringify(state.data)
+      );
+    }
+
     this.state[key] = { ...this.state[key], ...state };
   }
 
   delete(renderId: string, tableId: string) {
     const key = this.generateKey(renderId, tableId);
+    this.tableDataCache.delete(renderId, this.generateCacheKey(tableId));
     delete this.state[key];
   }
 
@@ -170,6 +195,7 @@ class TableState {
     Object.keys(this.state).forEach((key) => {
       if (this.parseKey(key).renderId === renderId) {
         delete this.state[key];
+        this.tableDataCache.delete(renderId, this.generateCacheKey(key));
       }
     });
   }
@@ -177,6 +203,10 @@ class TableState {
   hasQueuedUpdate(renderId: string, tableId: string) {
     const key = this.generateKey(renderId, tableId);
     return this.state[key].pageUpdateDebouncer.hasQueuedUpdate();
+  }
+
+  getCachedTableData(renderId: string, tableId: string) {
+    return this.tableDataCache.get(renderId, this.generateCacheKey(tableId));
   }
 
   static shouldRefreshTotalRecord(

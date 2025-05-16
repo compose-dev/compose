@@ -379,8 +379,6 @@ def radio_group(
             f"options must be a list for radio group, got {type(options).__name__}"
         )
 
-    shallow_copy = list(options)
-
     return {
         "model": {
             "id": id,
@@ -392,7 +390,7 @@ def radio_group(
             "properties": {
                 "initialValue": initial_value,
                 "hasOnSelectHook": on_change is not None,
-                "options": shallow_copy,
+                "options": options,
             },
         },
         "hooks": {
@@ -466,8 +464,6 @@ def select_dropdown_single(
             f"options must be a list for select dropdown, got {type(options).__name__}"
         )
 
-    shallow_copy = list(options)
-
     return {
         "model": {
             "id": id,
@@ -478,7 +474,7 @@ def select_dropdown_single(
             "style": style,
             "properties": {
                 "hasOnSelectHook": on_change is not None,
-                "options": shallow_copy,
+                "options": options,
                 "initialValue": initial_value,
             },
         },
@@ -521,8 +517,6 @@ def select_dropdown_multi(
             f"initial_value must be a list for multiselect box, got {type(initial_value).__name__}"
         )
 
-    shallow_copy = list(options)
-
     return {
         "model": {
             "id": id,
@@ -534,7 +528,7 @@ def select_dropdown_multi(
             "properties": {
                 "initialValue": initial_value,
                 "hasOnSelectHook": on_change is not None,
-                "options": shallow_copy,
+                "options": options,
                 "minSelections": min_selections,
                 "maxSelections": max_selections,
             },

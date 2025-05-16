@@ -4,6 +4,7 @@ import { UIRenderStaticLayoutUpdateModel } from "../../constants/renderLayout";
 
 import { getComponentMetadata } from "./metadata";
 import { applyIDs } from "./applyIDs";
+import { ComponentUpdateCache } from "../../utils";
 
 function interactiveComponentIDChanged(
   oldComponent: UI.ComponentGenerators.All,
@@ -18,7 +19,9 @@ function interactiveComponentIDChanged(
 
 function diffStaticLayoutsRecursive(
   oldLayout: UIRenderStaticLayout,
-  newLayout: UIRenderStaticLayout
+  newLayout: UIRenderStaticLayout,
+  renderId: string,
+  cache: ComponentUpdateCache
 ): {
   delete: string[];
   add: Record<string, UIRenderStaticLayout>;
@@ -64,12 +67,23 @@ function diffStaticLayoutsRecursive(
     oldLayout.interactionType !== UI.INTERACTION_TYPE.LAYOUT ||
     newLayout.interactionType !== UI.INTERACTION_TYPE.LAYOUT
   ) {
+    let oldModelString = cache.get(renderId, oldLayout.model.id);
+
+    if (oldModelString === undefined) {
+      const { id: oldId, ...oldModelWithoutId } = oldLayout.model;
+      oldModelString = JSON.stringify(oldModelWithoutId);
+    }
+
     // For non-input components, ids are regenerated on every render,
     // so we need to ignore them when comparing.
-    const { id: oldId, ...oldModelWithoutId } = oldLayout.model;
     const { id: newId, ...newModelWithoutId } = newLayout.model;
-    const oldModelString = JSON.stringify(oldModelWithoutId);
     const newModelString = JSON.stringify(newModelWithoutId);
+
+    // Always update cache
+    cache.delete(renderId, oldLayout.model.id);
+    if (cache.shouldCache(newLayout)) {
+      cache.set(renderId, newLayout.model.id, newModelString);
+    }
 
     if (oldModelString !== newModelString) {
       const compressed = compress.uiTree(newLayout);
@@ -124,7 +138,12 @@ function diffStaticLayoutsRecursive(
 
     // If both children exist, we'll compare them recursively.
     if (oldChild !== null && newChild !== null) {
-      const childDiff = diffStaticLayoutsRecursive(oldChild, newChild);
+      const childDiff = diffStaticLayoutsRecursive(
+        oldChild,
+        newChild,
+        renderId,
+        cache
+      );
 
       if (newChild.model.id in childDiff.add) {
         childIds.push(newChild.model.id);
@@ -200,7 +219,9 @@ function diffStaticLayoutsRecursive(
  */
 function diffStaticLayouts(
   oldLayout: UIRenderStaticLayout,
-  newLayout: UIRenderStaticLayout
+  newLayout: UIRenderStaticLayout,
+  renderId: string,
+  cache: ComponentUpdateCache
 ): {
   delete: string[];
   add: Record<string, UIRenderStaticLayout>;
@@ -210,7 +231,12 @@ function diffStaticLayouts(
   newLayoutWithIDsApplied: UIRenderStaticLayout;
   didChange: boolean;
 } {
-  const diff = diffStaticLayoutsRecursive(oldLayout, newLayout);
+  const diff = diffStaticLayoutsRecursive(
+    oldLayout,
+    newLayout,
+    renderId,
+    cache
+  );
 
   const newLayoutWithIDsApplied = applyIDs(newLayout, diff.idMap);
   const rootId = newLayoutWithIDsApplied.model.id;
@@ -221,6 +247,19 @@ function diffStaticLayouts(
     diff.delete.length === 0 &&
     Object.keys(diff.add).length === 0 &&
     Object.keys(diff.update).length === 0;
+
+  // Remove deleted components from cache
+  for (const deleteId of diff.delete) {
+    cache.delete(renderId, deleteId);
+  }
+
+  // Add new components to cache
+  for (const [newId, newCacheValue] of Object.entries(diff.add)) {
+    if (cache.shouldCache(newCacheValue)) {
+      const { id, ...rest } = newCacheValue.model;
+      cache.set(renderId, newId, JSON.stringify(rest));
+    }
+  }
 
   return {
     ...diff,

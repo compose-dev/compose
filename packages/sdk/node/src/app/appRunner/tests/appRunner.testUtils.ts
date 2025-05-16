@@ -6,9 +6,7 @@ import { SdkToServerEvent } from "@composehq/ts-public";
 
 const MAX_WAIT_MS = 10;
 
-function mockRunner(
-  handlerFunction: AppHandler<Record<string, any>> = () => {}
-) {
+function mockRunner(handlerFunction: AppHandler = () => {}) {
   const appDefinition = new AppDefinition({
     name: "Test App",
     route: "test-app",
@@ -30,6 +28,7 @@ function mockRunner(
 type WaitUntilOptions = Partial<{
   timeoutMs: number;
   intervalMs: number;
+  onSuccess?: () => void;
 }>;
 
 async function waitUntil(
@@ -43,6 +42,10 @@ async function waitUntil(
 
   while (!condition() && Date.now() - start < timeoutMs) {
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+
+  if (condition() && options.onSuccess) {
+    options.onSuccess();
   }
 }
 

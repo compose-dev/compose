@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mockRunner, ApiEventTracker } from "../appRunner.testUtils";
+import { mockRunner, ApiEventTracker, waitUntil } from "../appRunner.testUtils";
 import { SdkToServerEvent, UI } from "@composehq/ts-public";
 
 describe("App Runner - Table", () => {
@@ -261,6 +261,8 @@ describe("App Runner - Table", () => {
   });
 
   it("should update when table data changes", async () => {
+    let tracker: ApiEventTracker;
+
     const { appRunner, api } = mockRunner(async ({ page, ui }) => {
       const data = Array.from({ length: 2500 }, (_, i) => ({ id: i }));
 
@@ -268,11 +270,15 @@ describe("App Runner - Table", () => {
         ui.stack([ui.stack([]), ui.stack([ui.table("table", data)])])
       );
 
-      data[150] = { id: 199 };
-      page.update();
+      await waitUntil(() => tracker && tracker.oneRenderOrMore, {
+        onSuccess: () => {
+          data[150].id = 199;
+          page.update();
+        },
+      });
     });
 
-    const tracker = new ApiEventTracker(api, {
+    tracker = new ApiEventTracker(api, {
       condition: (event) => {
         if (event.type === SdkToServerEvent.TYPE.RERENDER_UI_V3) {
           const key = Object.keys(event.diff)[0];
@@ -294,6 +300,8 @@ describe("App Runner - Table", () => {
   });
 
   it("the updated data should be compressed", async () => {
+    let tracker: ApiEventTracker;
+
     const { appRunner, api } = mockRunner(async ({ page, ui }) => {
       const data = Array.from({ length: 2500 }, (_, i) => ({
         id: i,
@@ -315,11 +323,15 @@ describe("App Runner - Table", () => {
         ])
       );
 
-      data[150] = { ...data[150], id: 199 };
-      page.update();
+      await waitUntil(() => tracker && tracker.oneRenderOrMore, {
+        onSuccess: () => {
+          data[150].id = 199;
+          page.update();
+        },
+      });
     });
 
-    const tracker = new ApiEventTracker(api, {
+    tracker = new ApiEventTracker(api, {
       condition: (event) => {
         if (event.type === SdkToServerEvent.TYPE.RERENDER_UI_V3) {
           const key = Object.keys(event.diff)[0];

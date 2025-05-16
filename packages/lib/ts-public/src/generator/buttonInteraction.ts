@@ -154,9 +154,7 @@ function buttonBarChart<TData extends UI.Chart.SeriesInputData>(
     throw new Error("data must be an array");
   }
 
-  const shallowCopy: TData = [...data] as TData;
-
-  const finalData = UI.Chart.formatSeriesData<TData>(shallowCopy, {
+  const finalData = UI.Chart.formatSeriesData<TData>(data, {
     group: properties.group,
     series: properties.series,
     aggregate: properties.aggregate,

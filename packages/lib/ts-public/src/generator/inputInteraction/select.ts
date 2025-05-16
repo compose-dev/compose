@@ -275,8 +275,6 @@ function radioGroup<
     ...properties,
   };
 
-  const shallowCopy = [...options] as unknown as TOptions;
-
   return {
     model: {
       id,
@@ -285,7 +283,7 @@ function radioGroup<
       required: mergedProperties.required as TRequired,
       hasValidateHook: mergedProperties.validate !== null,
       properties: {
-        options: shallowCopy,
+        options,
         initialValue: mergedProperties.initialValue,
         hasOnSelectHook: mergedProperties.onChange !== null,
       },
@@ -438,8 +436,6 @@ function selectDropdownSingle<
     ...properties,
   };
 
-  const shallowCopy = [...options] as unknown as TOptions;
-
   return {
     model: {
       id,
@@ -448,7 +444,7 @@ function selectDropdownSingle<
       required: mergedProperties.required as TRequired,
       hasValidateHook: mergedProperties.validate !== null,
       properties: {
-        options: shallowCopy,
+        options,
         initialValue: mergedProperties.initialValue,
         hasOnSelectHook: mergedProperties.onChange !== null,
       },
@@ -621,8 +617,6 @@ function selectDropdownMulti<
     throw new Error("initialValue must be an array for multiselect box");
   }
 
-  const shallowCopy = [...options] as unknown as TOptions;
-
   return {
     model: {
       id,
@@ -631,7 +625,7 @@ function selectDropdownMulti<
       required: mergedProperties.required as TRequired,
       hasValidateHook: mergedProperties.validate !== null,
       properties: {
-        options: shallowCopy,
+        options,
         initialValue: mergedProperties.initialValue,
         minSelections: mergedProperties.minSelections,
         maxSelections: mergedProperties.maxSelections,

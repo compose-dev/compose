@@ -550,13 +550,8 @@ function table<
     (data.length > UI.Table.PAGINATION_THRESHOLD ||
       mergedProperties.paginate === true);
 
-  // Perform a shallow copy of the data to make it less likely to be mutated
-  // by the user, and thus more likely that any page.update() calls will
-  // succeed.
-  const shallowCopy = manuallyPaged ? [] : [...data];
-
   const modelProperties: UI.Components.InputTable["model"]["properties"] = {
-    data: shallowCopy,
+    data: manuallyPaged ? [] : data,
     columns: mergedProperties.columns,
     minSelections: mergedProperties.minSelections,
     maxSelections: mergedProperties.maxSelections,
@@ -660,7 +655,7 @@ function table<
       onPageChange: manuallyPaged
         ? { fn: data, type: UI.Table.PAGINATION_TYPE.MANUAL }
         : autoPaged
-          ? { fn: () => shallowCopy, type: UI.Table.PAGINATION_TYPE.AUTO }
+          ? { fn: () => data, type: UI.Table.PAGINATION_TYPE.AUTO }
           : null,
     },
     type: UI.TYPE.INPUT_TABLE,

@@ -3,6 +3,7 @@ from ..scheduler import Scheduler  # type: ignore[attr-defined]
 from .ui import Stale, TableColumnSort, Table
 from .smart_debounce import SmartDebounce
 from .json import JSON
+from .component_update_cache import ComponentUpdateCache
 
 
 class TableStateRecordInput(TypedDict):
@@ -71,12 +72,18 @@ def view_did_change(
 
 
 class TableState:
-    def __init__(self, scheduler: Scheduler):
+    def __init__(
+        self, scheduler: Scheduler, component_update_cache: ComponentUpdateCache
+    ):
         self.state: Dict[str, TableStateRecord] = {}
         self.scheduler = scheduler
+        self.component_update_cache = component_update_cache
 
     def generate_key(self, render_id: str, table_id: str) -> str:
         return f"{render_id}{KEY_SEPARATOR}{table_id}"
+
+    def _generate_cache_key(self, table_id: str) -> str:
+        return f"{table_id}_%%__%%COMPOSE_INTERN#L_KEY_@#$%^&"
 
     def parse_key(self, key: str) -> Tuple[str, str]:
         split_index = key.index(KEY_SEPARATOR)
@@ -109,18 +116,26 @@ class TableState:
             "initial_view": state["initial_view"],
             "active_view": {**state["initial_view"]},
         }
+        self.component_update_cache.set(
+            render_id, self._generate_cache_key(table_id), JSON.stringify(state["data"])
+        )
 
     def update(self, render_id: str, table_id: str, state: Dict[str, Any]) -> None:
         key = self.generate_key(render_id, table_id)
 
-        new_initial_view: Table.PaginationView = state["initial_view"]
-
         # Update the active sort if the initial sort changed. This overrides
         # any changes on the browser side that were made to the active sort.
         if "initial_view" in state and view_did_change(
-            new_initial_view, self.state[key]["initial_view"]
+            state["initial_view"], self.state[key]["initial_view"]
         ):
-            self.state[key]["active_view"] = {**new_initial_view}
+            self.state[key]["active_view"] = {**state["initial_view"]}  # type: ignore
+
+        if "data" in state:
+            self.component_update_cache.set(
+                render_id,
+                self._generate_cache_key(table_id),
+                JSON.stringify(state["data"]),
+            )
 
         self.state[key] = {**self.state[key], **state}  # type: ignore
 
@@ -131,11 +146,17 @@ class TableState:
         record["page_update_debouncer"].cleanup()
 
         del self.state[key]
+        self.component_update_cache.delete(
+            render_id, self._generate_cache_key(table_id)
+        )
 
     def delete_for_render_id(self, render_id: str) -> None:
         for record in self.get_by_render_id(render_id):
             key = self.generate_key(record["render_id"], record["table_id"])
             record["page_update_debouncer"].cleanup()
+            self.component_update_cache.delete(
+                render_id, self._generate_cache_key(record["table_id"])
+            )
             del self.state[key]
 
     def has_queued_update(self, render_id: str, table_id: str) -> bool:
@@ -148,8 +169,15 @@ class TableState:
 
         self.state.clear()
 
+    def get_cached_table_data(
+        self, render_id: str, table_id: str
+    ) -> Union[str, bytes, None]:
+        return self.component_update_cache.get(
+            render_id, self._generate_cache_key(table_id)
+        )
+
     @staticmethod
-    def should_refresh_total_records(
+    def should_refresh_total_record(
         previous_view: Table.PaginationView, new_view: Table.PaginationView
     ) -> bool:
         if search_query_did_change(

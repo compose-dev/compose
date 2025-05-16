@@ -1,6 +1,7 @@
 # type: ignore
 
 from typing import Literal, Union, Callable, Awaitable
+import inspect
 
 from ..ui import INTERACTION_TYPE, TYPE, ComponentReturn
 
@@ -155,7 +156,9 @@ class FindComponent:
         static_layout: ComponentReturn,
         callback: Callable[[ComponentReturn], Union[Awaitable[None], None]],
     ) -> None:
-        await callback(static_layout)
+        result = callback(static_layout)
+        if inspect.isawaitable(result):
+            await result
 
         if static_layout["interactionType"] == INTERACTION_TYPE.LAYOUT:
             children = (

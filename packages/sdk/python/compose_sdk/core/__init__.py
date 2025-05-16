@@ -52,7 +52,6 @@ from .ui import (
     TableDataRow,
     TablePageChangeArgs,
     TablePageChangeResponse,
-    TableOnPageChange,
     TableDefault,
     TablePagination,
     Stale,
@@ -70,6 +69,7 @@ from .debug import Debug
 from .string import prettify_key
 from .audit_log import validate_audit_log
 from .rate_limiter import RateLimiter
+from .component_update_cache import ComponentUpdateCache
 
 __all__ = [
     "EventType",
@@ -132,7 +132,6 @@ __all__ = [
     "TableDataRow",
     "TablePageChangeArgs",
     "TablePageChangeResponse",
-    "TableOnPageChange",
     "TableDefault",
     "TablePagination",
     "TableState",
@@ -144,4 +143,5 @@ __all__ = [
     "NumberFormat",
     "TableColumnSort",
     "Table",
+    "ComponentUpdateCache",
 ]

@@ -45,13 +45,18 @@ class TablePageChangeArgs(TypedDict):
 
 
 class TablePageChangeResponse(TypedDict):
-    data: TableData
+    data: List[Any]
     total_records: int
 
 
-TableOnPageChange = Callable[
+TableOnPageChangeSync = Callable[
     [TablePageChangeArgs],
-    Union[TablePageChangeResponse, Awaitable[TablePageChangeResponse]],
+    TablePageChangeResponse,
+]
+
+TableOnPageChangeAsync = Callable[
+    [TablePageChangeArgs],
+    Awaitable[TablePageChangeResponse],
 ]
 
 
@@ -192,8 +197,8 @@ TableActionOnClick = Union[
     # that consumers don't have any type issues. Eventually
     # we should have a better type here that's responsive
     # to whatever is passed in
-    Callable[[Dict[str, Any]], VoidResponse],
-    Callable[[Dict[str, Any], int], VoidResponse],
+    Callable[[Any], VoidResponse],
+    Callable[[Any, int], VoidResponse],
 ]
 
 
@@ -274,6 +279,9 @@ class Table:
     View: TypeAlias = TableView
     ViewInternal: TypeAlias = TableViewInternal
     PaginationView: TypeAlias = TablePaginationView
+
+    OnPageChangeSync: TypeAlias = TableOnPageChangeSync
+    OnPageChangeAsync: TypeAlias = TableOnPageChangeAsync
 
     ColumnSort: TypeAlias = TableColumnSort
 
