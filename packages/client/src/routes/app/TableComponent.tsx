@@ -14,10 +14,6 @@ function guessColumns(
     UI.Components.InputTable["model"]["properties"]["overflow"]
   >
 ): React.ComponentProps<typeof Table.Root>["columns"] {
-  if (data.length === 0) {
-    return [];
-  }
-
   // If columns are explicitly set, use them. We'll use whatever is
   // explicitly set and infer whatever is not.
   if (columns !== null && columns !== undefined && Array.isArray(columns)) {
@@ -88,6 +84,10 @@ function guessColumns(
         original: typeof column === "string" ? undefined : column.original,
       };
     });
+  }
+
+  if (data.length === 0) {
+    return [];
   }
 
   const keys = Object.keys(data[0]);

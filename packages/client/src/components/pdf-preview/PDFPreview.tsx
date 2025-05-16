@@ -220,10 +220,7 @@ function PDFPreview({
             disabled={pageNumber <= 1}
             variant="ghost"
           >
-            <Icon
-              name="chevron-left"
-              color={pageNumber <= 1 ? "brand-neutral-2" : "black"}
-            />
+            <Icon name="chevron-left" />
           </Button>
           <p className="px-4 text-sm">
             Page {pageNumber} of {numPages}
