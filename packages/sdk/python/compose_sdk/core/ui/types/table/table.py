@@ -249,6 +249,9 @@ class TableView(TypedDict):
     columns: NotRequired[Dict[str, TableViewColumn]]
 
 
+TableViews = List[TableView]
+
+
 class TableViewInternal(TableView):
     key: str
 

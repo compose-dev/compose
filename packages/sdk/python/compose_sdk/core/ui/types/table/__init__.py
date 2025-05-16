@@ -19,6 +19,8 @@ from .table import (
     TABLE_COLUMN_OVERFLOW,
     TableColumnSort,
     Table,
+    TableView,
+    TableViews,
 )
 
 __all__ = [
@@ -42,4 +44,6 @@ __all__ = [
     "TABLE_COLUMN_OVERFLOW",
     "TableColumnSort",
     "Table",
+    "TableView",
+    "TableViews",
 ]

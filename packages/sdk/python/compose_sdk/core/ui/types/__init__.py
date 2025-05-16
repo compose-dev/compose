@@ -38,6 +38,8 @@ from .table import (
     TABLE_COLUMN_OVERFLOW,
     TableColumnSort,
     Table,
+    TableView,
+    TableViews,
 )
 from .type import TYPE
 from .button_appearance import (
@@ -111,4 +113,6 @@ __all__ = [
     "TABLE_COLUMN_OVERFLOW",
     "TableColumnSort",
     "Table",
+    "TableView",
+    "TableViews",
 ]

@@ -53,6 +53,8 @@ from .types import (
     TABLE_COLUMN_OVERFLOW,
     TableColumnSort,
     Table,
+    TableView,
+    TableViews,
 )
 from .componentGenerators import ComponentReturn
 from .constants import Nullable
@@ -117,4 +119,6 @@ __all__ = [
     "TABLE_COLUMN_OVERFLOW",
     "TableColumnSort",
     "Table",
+    "TableView",
+    "TableViews",
 ]

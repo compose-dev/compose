@@ -6,19 +6,6 @@ import {
   MULTI_SELECTION_MAX_DEFAULT,
 } from "../base";
 
-// Takes a table action interface and adds an onClick handler
-type TableAction<TData extends UI.Table.DataRow[]> = NonNullable<
-  UI.Components.InputTable["model"]["properties"]["actions"]
->[number] & {
-  /**
-   * The function to call when the action is clicked.
-   *
-   * @param row - The row that was clicked.
-   * @param index - The index of the row that was clicked.
-   */
-  onClick: (row: TData[number], index: number) => void;
-};
-
 type TableOnChangeDataPayload<
   TSRT, // Stands for TSelectionReturnType
   TData extends UI.Table.DataRow[],
@@ -82,7 +69,7 @@ interface TableProperties<
    * @link
    * Learn more in the {@link https://docs.composehq.com/components/input/table#row-actions documentation}.
    */
-  actions: TableAction<TData>[] | null;
+  actions: UI.Table.Action<TData>[] | null;
   /**
    * The minimum number of rows that must be selected. Defaults to `0`.
    */

@@ -3,6 +3,7 @@ import { StringOnlyKeys } from "../../../types";
 import type { DataRow as TableDataRow } from "./dataRow";
 import { AdvancedFilterModel } from "./advancedFiltering";
 import type { ColumnFormat } from "./columnFormat";
+import type { InputTable } from "../../components";
 
 const COLUMN_SORT_DIRECTION = {
   ASC: "asc",
@@ -303,6 +304,19 @@ type TableView<TData extends TableDataRow[]> = Omit<
   "key"
 >;
 
+// Takes a table action interface and adds an onClick handler
+type TableAction<TData extends TableDataRow[]> = NonNullable<
+  InputTable["model"]["properties"]["actions"]
+>[number] & {
+  /**
+   * The function to call when the action is clicked.
+   *
+   * @param row - The row that was clicked.
+   * @param index - The index of the row that was clicked.
+   */
+  onClick: (row: TData[number], index: number) => void;
+};
+
 export {
   OnPageChange as OnPageChange,
   TablePageChangeParams as PageChangeParams,
@@ -333,4 +347,5 @@ export {
   PinnedSide as PinnedSide,
   TableView as View,
   TableViewInternal as ViewInternal,
+  TableAction as Action,
 };

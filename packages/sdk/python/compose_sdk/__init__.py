@@ -17,6 +17,10 @@ from .core.ui import (
     TablePageChangeArgs,
     TablePageChangeResponse,
     ChartSeriesData,
+    TableAction,
+    TableActions,
+    TableView,
+    TableViews,
 )
 
 BarChartData = ChartSeriesData
@@ -41,6 +45,10 @@ __all__ = [
     "SelectOption",
     "SelectOptions",
     "BarChartData",
+    "TableAction",
+    "TableActions",
+    "TableView",
+    "TableViews",
     # Deprecated
     "AdvancedTableColumn",
     "State",

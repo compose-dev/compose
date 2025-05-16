@@ -15,6 +15,14 @@ type TablePageChangeParams<
 type TablePageChangeResponse<
   TData extends UI.Table.DataRow[] = UI.Table.DataRow[],
 > = UI.Table.PageChangeResponse<TData>;
+type TableAction<TData extends UI.Table.DataRow[] = UI.Table.DataRow[]> =
+  UI.Table.Action<TData>;
+type TableActions<TData extends UI.Table.DataRow[] = UI.Table.DataRow[]> =
+  UI.Table.Action<TData>[];
+type TableView<TData extends UI.Table.DataRow[] = UI.Table.DataRow[]> =
+  UI.Table.View<TData>;
+type TableViews<TData extends UI.Table.DataRow[] = UI.Table.DataRow[]> =
+  UI.Table.View<TData>[];
 
 type ComposeFile = UI.ComposeFile.Type;
 
@@ -34,6 +42,10 @@ export {
   TableColumns,
   TablePageChangeParams,
   TablePageChangeResponse,
+  TableAction,
+  TableActions,
+  TableView,
+  TableViews,
   // Deprecated
   State,
 };
