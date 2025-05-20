@@ -49,6 +49,7 @@ const DOC_TYPE = {
   "components-display-header": "components-display-header",
   "components-display-header-appearance":
     "components-display-header-appearance",
+  "components-display-divider": "components-display-divider",
   "components-display-markdown": "components-display-markdown",
   "components-display-json": "components-display-json",
   "components-display-image": "components-display-image",

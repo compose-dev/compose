@@ -9,6 +9,7 @@ import { PDFPreview } from "~/components/pdf-preview";
 import { classNames } from "~/utils/classNames";
 import { Statistic } from "~/components/statistic";
 import { useShallow } from "zustand/react/shallow";
+import { Divider } from "~/components/divider";
 
 function DisplayInteractionComponent({
   componentId,
@@ -163,51 +164,13 @@ function DisplayInteractionComponent({
   }
 
   if (component.type === UI.TYPE.DISPLAY_DIVIDER) {
-    const horizontal =
-      component.model.properties.orientation === "horizontal" ||
-      !component.model.properties.orientation;
-
-    const isDefaultThickness =
-      !component.model.properties.thickness ||
-      component.model.properties.thickness === "thin";
-
-    if (horizontal) {
-      return (
-        <hr
-          className={classNames("border-brand-neutral w-full", {
-            "border-t": isDefaultThickness,
-            "border-t-2":
-              !isDefaultThickness &&
-              component.model.properties.thickness === "medium",
-            "border-t-4":
-              !isDefaultThickness &&
-              component.model.properties.thickness === "thick",
-          })}
-          style={{
-            margin: "0.5rem 0",
-            ...(component.model.style || undefined),
-          }}
-        />
-      );
-    } else {
-      return (
-        <div
-          className={classNames("border-brand-neutral h-full", {
-            "border-l": isDefaultThickness,
-            "border-l-2":
-              !isDefaultThickness &&
-              component.model.properties.thickness === "medium",
-            "border-l-4":
-              !isDefaultThickness &&
-              component.model.properties.thickness === "thick",
-          })}
-          style={{
-            margin: "0 0.5rem",
-            ...(component.model.style || undefined),
-          }}
-        />
-      );
-    }
+    return (
+      <Divider
+        orientation={component.model.properties.orientation}
+        thickness={component.model.properties.thickness}
+        style={component.model.style}
+      />
+    );
   }
 
   if (component.type === UI.TYPE.DISPLAY_PDF) {

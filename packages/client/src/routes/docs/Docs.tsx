@@ -337,6 +337,14 @@ function Docs() {
     );
   }
 
+  if (type === DOC_TYPE["components-display-divider"]) {
+    return (
+      <BrowserWrapper>
+        <Components.Display.Dividers />
+      </BrowserWrapper>
+    );
+  }
+
   if (type === DOC_TYPE["components-input-textarea"]) {
     return (
       <BrowserWrapper>

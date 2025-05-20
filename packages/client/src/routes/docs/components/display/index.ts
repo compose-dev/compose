@@ -14,6 +14,7 @@ import PDFDefaultScroll from "./PDFDefaultScroll";
 import PDFHorizontalScroll from "./PDFHorizontalScroll";
 import PDFAnnotation from "./PDFAnnotation";
 import Statistic from "./Statistic";
+import Dividers from "./Dividers";
 
 export {
   Text,
@@ -32,4 +33,5 @@ export {
   PDFHorizontalScroll,
   PDFAnnotation,
   Statistic,
+  Dividers,
 };
