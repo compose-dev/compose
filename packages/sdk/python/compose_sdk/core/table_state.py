@@ -1,6 +1,6 @@
 from typing import Dict, TypedDict, Any, Union, Tuple, List
 from ..scheduler import Scheduler  # type: ignore[attr-defined]
-from .ui import Stale, TableColumnSort, Table
+from .ui import Stale, TableColumnSortRule, Table
 from .smart_debounce import SmartDebounce
 from .json import JSON
 from .component_update_cache import ComponentUpdateCache
@@ -33,8 +33,8 @@ def search_query_did_change(
 
 
 def sort_by_did_change(
-    old_sort_by: List[TableColumnSort],
-    new_sort_by: List[TableColumnSort],
+    old_sort_by: List[TableColumnSortRule],
+    new_sort_by: List[TableColumnSortRule],
 ) -> bool:
     if len(old_sort_by) != len(new_sort_by):
         return True
@@ -50,7 +50,7 @@ def sort_by_did_change(
 
 
 def filter_by_did_change(
-    old_filter_by: Table.AdvancedFilterModel, new_filter_by: Table.AdvancedFilterModel
+    old_filter_by: Table.ColumnFilterModel, new_filter_by: Table.ColumnFilterModel
 ) -> bool:
     if old_filter_by is None and new_filter_by is None:
         return False

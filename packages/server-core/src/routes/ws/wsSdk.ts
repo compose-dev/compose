@@ -152,7 +152,9 @@ class WSSdk {
     }
 
     if (this.sdkConnections.exists(environment.id)) {
-      return ConnectionError.generate("Connection already exists.", "srvr9");
+      return ConnectionError.generate("Connection already exists", "srvr9", {
+        environment: JSON.stringify(environment),
+      });
     }
 
     return {

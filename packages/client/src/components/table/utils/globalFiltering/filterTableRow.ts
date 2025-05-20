@@ -197,7 +197,7 @@ function isLessThanOrEqual(
 
 function filterTableRow(
   row: FormattedTableRow,
-  filterBy: NonNullable<UI.Table.AdvancedFilterModel<FormattedTableRow[]>>,
+  filterBy: NonNullable<UI.Table.ColumnFilterModel<FormattedTableRow[]>>,
   columnFormatMap: Record<string, UI.Table.ColumnFormat | undefined>
 ): boolean {
   // Handle filter groups

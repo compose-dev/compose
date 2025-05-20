@@ -44,7 +44,7 @@ class WSBase<TClient> {
     const authResult = await this.authenticate(request);
 
     if (!authResult.success) {
-      console.dir(authResult, { depth: null });
+      console.log(JSON.stringify(authResult, null, 2));
       socket.write(makeErrorResponse(authResult));
       socket.destroy();
       return;

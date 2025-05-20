@@ -38,6 +38,7 @@ function TableActions() {
           },
           {
             label: "Delete",
+            appearance: "danger",
           },
           {
             label: "View",

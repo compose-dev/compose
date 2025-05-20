@@ -82,7 +82,7 @@ function useSorting({
   }, [paginated, serverSortBy, viewsHook.appliedRef]);
 
   const serverToDraft = useCallback(
-    (sortBy: UI.Table.ColumnSort<FormattedTableRow[]>[]) =>
+    (sortBy: UI.Table.ColumnSortRule<FormattedTableRow[]>[]) =>
       formatServerToDraft(sortBy, columns, sortable),
     [columns, sortable]
   );

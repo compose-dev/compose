@@ -362,11 +362,12 @@ function Table({
       searchQueryHook.nextServerRef.current,
       newOffset ?? offset,
       newPageSize ?? pageSize,
-      sortingHook.nextServerRef.current as UI.Table.ColumnSort<
+      sortingHook.nextServerRef.current as UI.Table.ColumnSortRule<
         UI.Table.DataRow[]
       >[],
-      advancedFilteringHook.nextServerRef
-        .current as UI.Table.AdvancedFilterModel<UI.Table.DataRow[]>,
+      advancedFilteringHook.nextServerRef.current as UI.Table.ColumnFilterModel<
+        UI.Table.DataRow[]
+      >,
       viewsHook.nextServerRef.current
     );
   };

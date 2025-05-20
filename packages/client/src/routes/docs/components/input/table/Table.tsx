@@ -1,75 +1,22 @@
 import { useState } from "react";
-import { IOComponent } from "~/components/io-component";
 import Table from "~/components/table";
 import { Modal } from "~/components/modal";
 import Json from "~/components/json";
 import { UI } from "@composehq/ts-public";
+import { u } from "@compose/ts";
 
-const data = [
-  {
-    name: "Apple",
-    headquarters: "Cupertino, CA",
-    tier: "Enterprise",
-    arr: 150000,
-  },
-  {
-    name: "Asana",
-    headquarters: "San Francisco, CA",
-    tier: "Basic",
-    arr: 12000,
-  },
-  {
-    name: "HubSpot",
-    headquarters: "Cambridge, MA",
-    tier: "Premium",
-    arr: 35000,
-  },
-  {
-    name: "Microsoft",
-    headquarters: "Redmond, WA",
-    tier: "Enterprise",
-    arr: 120000,
-  },
-  {
-    name: "Canva",
-    headquarters: "Sydney, Australia",
-    tier: "Basic",
-    arr: 5000,
-  },
-  {
-    name: "Shopify",
-    headquarters: "Ottawa, Canada",
-    tier: "Premium",
-    arr: 45000,
-  },
-  {
-    name: "Zendesk",
-    headquarters: "San Francisco, CA",
-    tier: "Premium",
-    arr: 25000,
-  },
-  {
-    name: "Salesforce",
-    headquarters: "San Francisco, CA",
-    tier: "Enterprise",
-    arr: 80000,
-  },
-  {
-    name: "MailChimp",
-    headquarters: "Atlanta, GA",
-    tier: "Basic",
-    arr: 15000,
-  },
-  {
-    name: "Notion",
-    headquarters: "San Francisco, CA",
-    tier: "Basic",
-    arr: 8000,
-  },
-];
-
-function TableComponent() {
-  const [selected, setSelected] = useState<Record<string, boolean>>({});
+function TableComponent({ coreConcepts }: { coreConcepts?: boolean }) {
+  const [data] = useState(
+    u.faker.generateRows(
+      [
+        { type: "companyName", key: "companyName" },
+        { type: "tier", key: "tier" },
+        { type: "number", key: "arr", min: 10000, max: 1000000 },
+        { type: "boolean", key: "onboarded" },
+      ],
+      1456
+    )
+  );
   const [modalContent, setModalContent] = useState(null);
 
   return (
@@ -81,30 +28,30 @@ function TableComponent() {
           onClose={() => setModalContent(null)}
         >
           <Modal.CloseableHeader onClose={() => setModalContent(null)}>
-            Company Details
+            Customer Details
           </Modal.CloseableHeader>
           <Modal.Body>
             <Json json={modalContent} label={null} />
           </Modal.Body>
         </Modal.Root>
       )}
-      <IOComponent.Label>Companies</IOComponent.Label>
       <Table.Root
         id="companies"
         data={data}
         columns={[
           {
-            id: "name",
+            id: "companyName",
             label: "Name",
-            accessorKey: "name",
-            width: "150px",
-            overflow: "ellipsis",
+            accessorKey: "companyName",
+            format: "string",
+            original: "companyName",
           },
           {
             id: "tier",
             label: "Tier",
             accessorKey: "tier",
             format: "tag",
+            original: "tier",
             tagColors: {
               Enterprise: {
                 color: UI.Table.SEMANTIC_COLOR["enterprise"],
@@ -119,32 +66,52 @@ function TableComponent() {
                 originalValue: "Basic",
               },
             },
-            width: "150px",
-            overflow: "ellipsis",
-          },
-          {
-            id: "headquarters",
-            label: "Headquarters",
-            accessorKey: "headquarters",
-            overflow: "ellipsis",
           },
           {
             id: "arr",
             label: "ARR",
             accessorKey: "arr",
             format: "currency",
-            width: "150px",
-            overflow: "ellipsis",
+            original: "arr",
+          },
+          {
+            id: "onboarded",
+            label: "Onboarded",
+            accessorKey: "onboarded",
+            format: "boolean",
+            original: "onboarded",
           },
         ]}
-        actions={[{ label: "View Details" }]}
+        actions={[{ label: "Details" }]}
+        views={
+          coreConcepts
+            ? []
+            : [
+                {
+                  label: "Highest ARR",
+                  description: "Sort by ARR (decreasing)",
+                  key: "highest-arr",
+                  sortBy: [{ key: "arr", direction: "desc" }],
+                  isDefault: true,
+                },
+                {
+                  label: "Enterprise Customers",
+                  description: "Filter to show only enterprise customers",
+                  key: "enterprise-customers",
+                  filterBy: {
+                    key: "tier",
+                    operator: "hasAny",
+                    value: ["Enterprise"],
+                  },
+                },
+              ]
+        }
         onTableRowActionHook={(rowIdx) => {
           setModalContent(data[rowIdx] as unknown as null);
         }}
-        enableRowSelection={true}
-        rowSelections={selected}
-        setRowSelections={setSelected}
-        allowMultiSelection={true}
+        enableRowSelection={false}
+        rowSelections={{}}
+        setRowSelections={() => {}}
         onTablePageChangeHook={() => {}}
         totalRecords={data.length}
       />

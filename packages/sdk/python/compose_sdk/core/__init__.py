@@ -56,7 +56,7 @@ from .ui import (
     TablePagination,
     Stale,
     NumberFormat,
-    TableColumnSort,
+    TableColumnSortRule,
     Table,
 )
 from .json import JSON
@@ -141,7 +141,7 @@ __all__ = [
     "validate_audit_log",
     "RateLimiter",
     "NumberFormat",
-    "TableColumnSort",
+    "TableColumnSortRule",
     "Table",
     "ComponentUpdateCache",
 ]

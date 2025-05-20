@@ -82,10 +82,9 @@ function ModalComponent() {
           onTableRowActionHook={(rowIdx) => {
             setModalContent(users[rowIdx]);
           }}
-          enableRowSelection={true}
+          enableRowSelection={false}
           rowSelections={selected}
           setRowSelections={setSelected}
-          allowMultiSelection={true}
           onTablePageChangeHook={() => {}}
           totalRecords={users.length}
         />

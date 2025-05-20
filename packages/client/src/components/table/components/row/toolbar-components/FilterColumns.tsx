@@ -41,7 +41,7 @@ function getTagOptionsForColumn(column: Column<FormattedTableRow> | undefined) {
   }
 }
 
-function createDefaultClause(): GlobalFiltering.EditableAdvancedFilterClause {
+function createDefaultClause(): GlobalFiltering.EditableColumnFilterRule {
   return {
     key: null,
     operator: UI.Table.COLUMN_FILTER_OPERATOR.IS,
@@ -50,7 +50,7 @@ function createDefaultClause(): GlobalFiltering.EditableAdvancedFilterClause {
   };
 }
 
-function createDefaultGroup(): GlobalFiltering.EditableAdvancedFilterGroup {
+function createDefaultGroup(): GlobalFiltering.EditableColumnFilterGroup {
   return {
     logicOperator: UI.Table.COLUMN_FILTER_LOGIC_OPERATOR.AND,
     filters: [createDefaultClause()],
@@ -82,7 +82,7 @@ function FilterClauseRow({
   onRemoveFilterNode,
   disabled,
 }: {
-  clause: GlobalFiltering.EditableAdvancedFilterClause;
+  clause: GlobalFiltering.EditableColumnFilterRule;
   path: string[];
   table: TanStackTable;
   onUpdateFilterClauseOperator: (
@@ -270,7 +270,7 @@ function FilterGroupSection({
   onRemoveFilterNode,
   disabled,
 }: {
-  group: GlobalFiltering.EditableAdvancedFilterGroup;
+  group: GlobalFiltering.EditableColumnFilterGroup;
   path: string[];
   table: TanStackTable;
   onUpdateFilterGroupLogicOperator: (
@@ -444,7 +444,7 @@ function FilterNode({
   onRemoveFilterNode,
   disabled,
 }: {
-  node: NonNullable<GlobalFiltering.EditableAdvancedFilterModel>;
+  node: NonNullable<GlobalFiltering.EditableColumnFilterModel>;
   path: string[];
   table: TanStackTable;
   onUpdateFilterClauseOperator: (

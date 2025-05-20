@@ -77,7 +77,7 @@ function filterRowModelFromLeafs(
 // our own search + advanced filtering.
 function getFilteredRowModel(opts: {
   getSearchQuery: () => string | null;
-  getAdvancedFilter: () => UI.Table.AdvancedFilterModel<FormattedTableRow[]>;
+  getAdvancedFilter: () => UI.Table.ColumnFilterModel<FormattedTableRow[]>;
 }) {
   return (table: Table<FormattedTableRow>) =>
     memo(

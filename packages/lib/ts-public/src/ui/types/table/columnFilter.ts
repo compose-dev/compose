@@ -29,37 +29,37 @@ const COLUMN_FILTER_OPERATOR = {
 type ColumnFilterOperator =
   (typeof COLUMN_FILTER_OPERATOR)[keyof typeof COLUMN_FILTER_OPERATOR];
 
-interface AdvancedFilterClauseBase {
+interface ColumnFilterRuleBase {
   operator: ColumnFilterOperator;
   value: any;
 }
 
-interface AdvancedFilterGroupBase {
+interface ColumnFilterGroupBase {
   logicOperator: ColumnFilterLogicOperator;
 }
 
-interface AdvancedFilterClause<TData extends TableDataRow[]>
-  extends AdvancedFilterClauseBase {
+interface ColumnFilterRule<TData extends TableDataRow[]>
+  extends ColumnFilterRuleBase {
   key: StringOnlyKeys<TData[number]>;
 }
 
-interface AdvancedFilterGroup<TData extends TableDataRow[]>
-  extends AdvancedFilterGroupBase {
-  filters: NonNullable<AdvancedFilterModel<TData>>[];
+interface ColumnFilterGroup<TData extends TableDataRow[]>
+  extends ColumnFilterGroupBase {
+  filters: NonNullable<ColumnFilterModel<TData>>[];
 }
 
-type AdvancedFilterModel<TData extends TableDataRow[]> =
-  | AdvancedFilterClause<TData>
-  | AdvancedFilterGroup<TData>
+type ColumnFilterModel<TData extends TableDataRow[]> =
+  | ColumnFilterRule<TData>
+  | ColumnFilterGroup<TData>
   | null;
 
 export { COLUMN_FILTER_LOGIC_OPERATOR, COLUMN_FILTER_OPERATOR };
 export type {
   ColumnFilterLogicOperator,
   ColumnFilterOperator,
-  AdvancedFilterClauseBase,
-  AdvancedFilterGroupBase,
-  AdvancedFilterClause,
-  AdvancedFilterGroup,
-  AdvancedFilterModel,
+  ColumnFilterRuleBase,
+  ColumnFilterGroupBase,
+  ColumnFilterRule,
+  ColumnFilterGroup,
+  ColumnFilterModel,
 };

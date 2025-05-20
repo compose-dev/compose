@@ -138,7 +138,7 @@ const COLUMN_WIDTH = {
 interface ServerView {
   searchQuery?: GlobalFiltering.ServerSearchModel;
   sortBy?: Sorting.ServerSortModel;
-  filterBy?: GlobalFiltering.ServerAdvancedFilterModel;
+  filterBy?: GlobalFiltering.ServerColumnFilterModel;
   viewBy?: string;
 }
 

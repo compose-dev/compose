@@ -1,7 +1,7 @@
 import { TagColor, TagValue } from "./tagColor";
 import { StringOnlyKeys } from "../../../types";
 import type { DataRow as TableDataRow } from "./dataRow";
-import { AdvancedFilterModel } from "./advancedFiltering";
+import { ColumnFilterModel } from "./columnFilter";
 import type { ColumnFormat } from "./columnFormat";
 import type { InputTable } from "../../components";
 
@@ -13,17 +13,19 @@ const COLUMN_SORT_DIRECTION = {
 type ColumnSortDirection =
   (typeof COLUMN_SORT_DIRECTION)[keyof typeof COLUMN_SORT_DIRECTION];
 
-interface ColumnSort<TData extends TableDataRow[]> {
+interface ColumnSortRule<TData extends TableDataRow[]> {
   key: StringOnlyKeys<TData[number]>;
   direction: ColumnSortDirection;
 }
+
+type ColumnSortModel<TData extends TableDataRow[]> = ColumnSortRule<TData>[];
 
 interface TablePageChangeParams<TData extends TableDataRow[]> {
   offset: number;
   pageSize: number;
   searchQuery: string | null;
-  sortBy: ColumnSort<TData>[];
-  filterBy: AdvancedFilterModel<TData> | null;
+  sortBy: ColumnSortRule<TData>[];
+  filterBy: ColumnFilterModel<TData> | null;
   refreshTotalRecords: boolean;
   prevTotalRecords: number | null;
   /**
@@ -241,11 +243,11 @@ interface TableViewInternal<TData extends TableDataRow[]> {
   /**
    * The filter model to apply to the table.
    */
-  filterBy?: AdvancedFilterModel<TData>;
+  filterBy?: ColumnFilterModel<TData>;
   /**
    * The columns to sort the table by.
    */
-  sortBy?: ColumnSort<TData>[];
+  sortBy?: ColumnSortRule<TData>[];
   /**
    * The search query to apply to the table.
    */
@@ -340,7 +342,8 @@ export {
   TableSortOption as SortOption,
   COLUMN_SORT_DIRECTION as SORT_DIRECTION,
   ColumnSortDirection as SortDirection,
-  ColumnSort as ColumnSort,
+  ColumnSortRule as ColumnSortRule,
+  ColumnSortModel as ColumnSortModel,
   TABLE_DENSITY as DENSITY,
   TableDensity as Density,
   PINNED_SIDE as PINNED_SIDE,

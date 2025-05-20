@@ -15,7 +15,7 @@ from typing_extensions import NotRequired, TypeAlias
 from ..validator_response import VoidResponse
 from ..button_appearance import BUTTON_APPEARANCE
 from .advanced_filtering import (
-    TableAdvancedFilterModel,
+    TableColumnFilterModel,
     transform_advanced_filter_model_to_camel_case,
     transform_advanced_filter_model_to_snake_case,
 )
@@ -29,22 +29,62 @@ TableData = Sequence[TableDataRow]
 TABLE_COLUMN_SORT_DIRECTION = Literal["asc", "desc"]
 
 
-class TableColumnSort(TypedDict):
+class TableColumnSortRule(TypedDict):
+    """
+    A rule for sorting a table column.
+
+    Required properties:
+    - `key`: The key of the column to sort by.
+    - `direction`: The direction to sort the column by. Either `"asc"` or `"desc"`.
+    """
+
     key: TableDataKey
     direction: TABLE_COLUMN_SORT_DIRECTION
 
 
+TableColumnSortModel: TypeAlias = List[TableColumnSortRule]
+"""
+A sort model is an ordered list of sort rules that is used to sort the table.
+
+For example:
+- `[{"key": "name", "direction": "asc"}]`
+- `[{"key": "name", "direction": "asc"}, {"key": "age", "direction": "desc"}]`
+"""
+
+
 class TablePageChangeArgs(TypedDict):
+    """
+    The arguments for a table page change event.
+
+    The following properties are available:
+    - `offset`: The offset of the first record to return.
+    - `page_size`: The number of records to return.
+    - `refresh_total_records`: Whether to refresh the total number of records.
+    - `prev_total_records`: The previous total number of records. Return this if `refresh_total_records` is `False`.
+    - `search_query`: The search query to filter the table by.
+    - `sort_by`: The sort model to sort the table by.
+    - `filter_by`: The filter model to filter the table by.
+    """
+
     offset: int
     page_size: int
     search_query: Union[str, None]
-    prev_search_query: Union[str, None]
     prev_total_records: Union[int, None]
-    sort_by: List[TableColumnSort]
-    filter_by: TableAdvancedFilterModel
+    sort_by: List[TableColumnSortRule]
+    filter_by: TableColumnFilterModel
+    refresh_total_records: bool
+    prev_search_query: Union[str, None]  # deprecated
 
 
 class TablePageChangeResponse(TypedDict):
+    """
+    The response for a table page change event.
+
+    Required properties:
+    - `data`: A list of table rows that represents the current page of data.
+    - `total_records`: The total number of records in the table.
+    """
+
     data: List[Any]
     total_records: int
 
@@ -241,9 +281,9 @@ class TableView(TypedDict):
     label: str
     description: NotRequired[str]
     is_default: NotRequired[bool]
-    filter_by: NotRequired[TableAdvancedFilterModel]
+    filter_by: NotRequired[TableColumnFilterModel]
     search_query: NotRequired[Union[str, None]]
-    sort_by: NotRequired[List[TableColumnSort]]
+    sort_by: NotRequired[List[TableColumnSortRule]]
     density: NotRequired[TableDensity]
     overflow: NotRequired[TABLE_COLUMN_OVERFLOW]
     columns: NotRequired[Dict[str, TableViewColumn]]
@@ -257,9 +297,9 @@ class TableViewInternal(TableView):
 
 
 class TablePaginationView(TypedDict):
-    filter_by: TableAdvancedFilterModel
+    filter_by: TableColumnFilterModel
     search_query: Union[str, None]
-    sort_by: List[TableColumnSort]
+    sort_by: List[TableColumnSortRule]
     view_by: Union[str, None]
 
 
@@ -278,7 +318,7 @@ class Table:
         INDEX = "index"  # deprecated
         TYPE = Literal["full", "id", "index"]
 
-    AdvancedFilterModel: TypeAlias = TableAdvancedFilterModel
+    ColumnFilterModel: TypeAlias = TableColumnFilterModel
     View: TypeAlias = TableView
     ViewInternal: TypeAlias = TableViewInternal
     PaginationView: TypeAlias = TablePaginationView
@@ -286,7 +326,7 @@ class Table:
     OnPageChangeSync: TypeAlias = TableOnPageChangeSync
     OnPageChangeAsync: TypeAlias = TableOnPageChangeAsync
 
-    ColumnSort: TypeAlias = TableColumnSort
+    ColumnSortRule: TypeAlias = TableColumnSortRule
 
     DataKey: TypeAlias = TableDataKey
     DataOutput: TypeAlias = List[Any]
@@ -294,11 +334,11 @@ class Table:
     @property
     def transform_advanced_filter_model_to_camel_case(
         self,
-    ) -> Callable[[TableAdvancedFilterModel], TableAdvancedFilterModel]:
+    ) -> Callable[[TableColumnFilterModel], TableColumnFilterModel]:
         return transform_advanced_filter_model_to_camel_case
 
     @property
     def transform_advanced_filter_model_to_snake_case(
         self,
-    ) -> Callable[[TableAdvancedFilterModel], TableAdvancedFilterModel]:
+    ) -> Callable[[TableColumnFilterModel], TableColumnFilterModel]:
         return transform_advanced_filter_model_to_snake_case

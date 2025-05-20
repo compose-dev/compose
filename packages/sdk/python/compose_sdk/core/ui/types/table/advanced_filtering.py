@@ -2,7 +2,16 @@ from __future__ import annotations
 from typing import TypedDict, Literal, Union, Sequence, Any
 
 
-class TableAdvancedFilterClause(TypedDict):
+class TableColumnFilterRule(TypedDict):
+    """
+    A single filter that is applied to a table column. For example: revenue > 1000.
+
+    Required properties:
+    - `operator`: The operator to use for the filter.
+    - `value`: The value to filter by.
+    - `key`: The key of the column to filter by.
+    """
+
     operator: Literal[
         "is",
         "is_not",
@@ -64,21 +73,36 @@ class FilterModelFormat:
     TYPE = Literal["snake", "camel"]
 
 
-class TableAdvancedFilterGroup(TypedDict):
+class TableColumnFilterGroup(TypedDict):
+    """
+    A group of filters that are applied to a table column. For example: (revenue > 1000) AND (revenue < 2000).
+
+    Required properties:
+    - `logic_operator`: The operator to use for the group. Either `"and"` or `"or"`.
+    - `filters`: A list of filter rules or sub-groups to apply to the group.
+    """
+
     logic_operator: Literal["and", "or"]
-    filters: Sequence[Union[TableAdvancedFilterClause, TableAdvancedFilterGroup]]
+    filters: Sequence[Union[TableColumnFilterRule, TableColumnFilterGroup]]
 
 
-TableAdvancedFilterModel = Union[
-    TableAdvancedFilterClause, TableAdvancedFilterGroup, None
-]
+TableColumnFilterModel = Union[TableColumnFilterRule, TableColumnFilterGroup, None]
+"""
+A filter model describes how to filter a table based on either a filter rule or group, which
+is a collection of filter rules or sub-groups that can be nested to arbitrary depth.
+
+For example:
+- `TableColumnFilterRule`: revenue > 1000
+- `TableColumnFilterGroup`: (revenue > 1000) AND (revenue < 2000)
+- `TableColumnFilterGroup`: ((revenue > 1000) AND (revenue < 2000)) OR ((revenue > 3000) AND (revenue < 4000))
+"""
 
 
 def transform_advanced_filter_model(
-    filter_model: TableAdvancedFilterModel, result_format: FilterModelFormat.TYPE
-) -> TableAdvancedFilterModel:
+    filter_model: TableColumnFilterModel, result_format: FilterModelFormat.TYPE
+) -> TableColumnFilterModel:
     """
-    Recursively transforms a TableAdvancedFilterModel from either snake_case to
+    Recursively transforms a TableColumnFilterModel from either snake_case to
     camelCase or camelCase to snake_case
 
     Specifically transforms:
@@ -114,7 +138,7 @@ def transform_advanced_filter_model(
         # Note: Using .get() for runtime safety, although TypedDict defines keys
         if input_logic_operator_key in filter_model:
             transformed_filters: list[
-                Union[TableAdvancedFilterClause, TableAdvancedFilterGroup]
+                Union[TableColumnFilterRule, TableColumnFilterGroup]
             ] = []
 
             for f in filter_model.get("filters", []):  # type: ignore
@@ -127,7 +151,7 @@ def transform_advanced_filter_model(
 
                 transformed_filters.append(transformed_filter)
 
-            new_filter_group: TableAdvancedFilterGroup = {
+            new_filter_group: TableColumnFilterGroup = {
                 result_logic_operator_key: filter_model.get(  # type: ignore
                     input_logic_operator_key, "and"
                 ),
@@ -159,9 +183,9 @@ def transform_advanced_filter_model(
                 "key": filter_model.get("key"),  # type: ignore
             }
         else:
-            # Should not happen with valid TableAdvancedFilterModel input
+            # Should not happen with valid TableColumnFilterModel input
             raise TypeError(
-                "Input dictionary is neither a TableAdvancedFilterClause nor a TableAdvancedFilterGroup"
+                "Input dictionary is neither a TableColumnFilterClause nor a TableColumnFilterGroup"
             )
 
     except Exception:
@@ -170,16 +194,16 @@ def transform_advanced_filter_model(
 
 
 def transform_advanced_filter_model_to_camel_case(
-    filter_model: TableAdvancedFilterModel,
-) -> TableAdvancedFilterModel:
+    filter_model: TableColumnFilterModel,
+) -> TableColumnFilterModel:
     return transform_advanced_filter_model(
         filter_model, result_format=FilterModelFormat.CAMEL
     )
 
 
 def transform_advanced_filter_model_to_snake_case(
-    filter_model: TableAdvancedFilterModel,
-) -> TableAdvancedFilterModel:
+    filter_model: TableColumnFilterModel,
+) -> TableColumnFilterModel:
     return transform_advanced_filter_model(
         filter_model, result_format=FilterModelFormat.SNAKE
     )

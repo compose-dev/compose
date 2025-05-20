@@ -2,25 +2,24 @@ import { types, UI } from "@composehq/ts-public";
 import { FormattedTableRow } from "../constants";
 import { u } from "@compose/ts";
 
-interface EditableAdvancedFilterClause
-  extends UI.Table.AdvancedFilterClauseBase {
+interface EditableColumnFilterRule extends UI.Table.ColumnFilterRuleBase {
   key: types.StringOnlyKeys<FormattedTableRow> | null;
   id: string;
 }
 
-interface EditableAdvancedFilterGroup extends UI.Table.AdvancedFilterGroupBase {
-  filters: NonNullable<EditableAdvancedFilterModel>[];
+interface EditableColumnFilterGroup extends UI.Table.ColumnFilterGroupBase {
+  filters: NonNullable<EditableColumnFilterModel>[];
   id: string;
 }
 
-type EditableAdvancedFilterModel =
-  | EditableAdvancedFilterClause
-  | EditableAdvancedFilterGroup
+type EditableColumnFilterModel =
+  | EditableColumnFilterRule
+  | EditableColumnFilterGroup
   | null;
 
 function copyAdvancedFilterModel(
-  model: EditableAdvancedFilterModel
-): EditableAdvancedFilterModel {
+  model: EditableColumnFilterModel
+): EditableColumnFilterModel {
   if (model === null) {
     return null;
   }
@@ -30,7 +29,7 @@ function copyAdvancedFilterModel(
       ...model,
       filters: model.filters.map(
         copyAdvancedFilterModel
-      ) as NonNullable<EditableAdvancedFilterModel>[],
+      ) as NonNullable<EditableColumnFilterModel>[],
     };
   }
 
@@ -38,9 +37,9 @@ function copyAdvancedFilterModel(
 }
 
 function findFilterModelNode(
-  model: EditableAdvancedFilterModel,
+  model: EditableColumnFilterModel,
   path: string[]
-): EditableAdvancedFilterModel {
+): EditableColumnFilterModel {
   if (model === null) {
     return null;
   }
@@ -62,17 +61,15 @@ function findFilterModelNode(
   return null;
 }
 
-type ServerAdvancedFilterModel = UI.Table.AdvancedFilterModel<
-  FormattedTableRow[]
->;
-type DisplayAdvancedFilterModel = EditableAdvancedFilterModel;
-type ValidatedAdvancedFilterModel = UI.Table.AdvancedFilterModel<
+type ServerColumnFilterModel = UI.Table.ColumnFilterModel<FormattedTableRow[]>;
+type DisplayColumnFilterModel = EditableColumnFilterModel;
+type ValidatedColumnFilterModel = UI.Table.ColumnFilterModel<
   FormattedTableRow[]
 >;
 
 function advancedFilterModelValuesAreEqual(
-  oldValue: ServerAdvancedFilterModel | EditableAdvancedFilterModel,
-  newValue: ServerAdvancedFilterModel | EditableAdvancedFilterModel
+  oldValue: ServerColumnFilterModel | EditableColumnFilterModel,
+  newValue: ServerColumnFilterModel | EditableColumnFilterModel
 ) {
   if (oldValue === null && newValue === null) {
     return true;
@@ -180,12 +177,12 @@ function advancedFilterModelValuesAreEqual(
 }
 
 export type {
-  EditableAdvancedFilterClause,
-  EditableAdvancedFilterGroup,
-  EditableAdvancedFilterModel,
-  ServerAdvancedFilterModel,
-  DisplayAdvancedFilterModel,
-  ValidatedAdvancedFilterModel,
+  EditableColumnFilterRule,
+  EditableColumnFilterGroup,
+  EditableColumnFilterModel,
+  ServerColumnFilterModel,
+  DisplayColumnFilterModel,
+  ValidatedColumnFilterModel,
 };
 export {
   copyAdvancedFilterModel,

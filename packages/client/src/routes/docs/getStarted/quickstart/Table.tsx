@@ -1,54 +1,33 @@
 import { useState } from "react";
 import Table from "~/components/table";
-
-const generateRandomData = (count: number) => {
-  const firstNames = [
-    "John",
-    "Jane",
-    "Bob",
-    "Alice",
-    "Michael",
-    "Emily",
-    "David",
-    "Sarah",
-    "Tom",
-    "Lisa",
-  ];
-  const lastNames = [
-    "Smith",
-    "Johnson",
-    "Williams",
-    "Brown",
-    "Jones",
-    "Garcia",
-    "Miller",
-    "Davis",
-    "Rodriguez",
-    "Martinez",
-  ];
-
-  const emailDomains = ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com"];
-
-  return Array.from({ length: count }, () => {
-    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-    const emailDomain =
-      emailDomains[Math.floor(Math.random() * emailDomains.length)];
-
-    const name = `${firstName} ${lastName}`;
-    const email = `${firstName.toLowerCase()}@${emailDomain}`;
-
-    return {
-      name,
-      email,
-      approved: Math.random() < 0.5,
-    };
-  });
-};
-
-const data = generateRandomData(6321);
+import { u } from "@compose/ts";
 
 function TableComponent() {
+  const [data] = useState(
+    u.faker.generateRows(
+      [
+        {
+          key: "name",
+          type: "personName",
+        },
+        {
+          key: "email",
+          type: "email",
+        },
+        {
+          key: "approved",
+          type: "boolean",
+        },
+        {
+          key: "createdAt",
+          type: "date",
+          min: new Date("2020-01-01"),
+          max: new Date("2025-01-01"),
+        },
+      ],
+      6321
+    )
+  );
   const [selected, setSelected] = useState<Record<string, boolean>>({});
 
   return (
@@ -77,14 +56,19 @@ function TableComponent() {
             width: "170px",
             overflow: "ellipsis",
           },
+          {
+            id: "createdAt",
+            label: "Created At",
+            accessorKey: "createdAt",
+            format: "date",
+          },
         ]}
         actions={[]}
         onTableRowActionHook={() => {}}
-        enableRowSelection={true}
+        enableRowSelection={false}
         rowSelections={selected}
         setRowSelections={setSelected}
         tableClassName="!h-[80vh]"
-        allowMultiSelection={true}
         onTablePageChangeHook={() => {}}
         totalRecords={data.length}
       />

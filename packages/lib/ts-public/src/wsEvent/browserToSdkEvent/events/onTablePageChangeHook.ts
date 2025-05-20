@@ -9,7 +9,7 @@ export interface Data {
   offset: number;
   pageSize: number;
   searchQuery: string | null;
-  sortBy: UI.Table.ColumnSort<UI.Table.DataRow[]>[];
-  filterBy: UI.Table.AdvancedFilterModel<UI.Table.DataRow[]> | null;
+  sortBy: UI.Table.ColumnSortRule<UI.Table.DataRow[]>[];
+  filterBy: UI.Table.ColumnFilterModel<UI.Table.DataRow[]> | null;
   viewBy?: string;
 }

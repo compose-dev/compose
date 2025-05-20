@@ -23,6 +23,14 @@ from .core.ui import (
     TableViews,
 )
 
+from .core.ui.types.table.advanced_filtering import (
+    TableColumnFilterModel,
+    TableColumnFilterGroup,
+    TableColumnFilterRule,
+)
+
+from .core.ui.types.table.table import TableColumnSortRule, TableColumnSortModel
+
 BarChartData = ChartSeriesData
 
 __all__ = [
@@ -35,6 +43,10 @@ __all__ = [
     "Page",
     # Additional Types
     "File",
+    "SelectOption",
+    "SelectOptions",
+    "BarChartData",
+    # Table Types
     "TableColumn",
     "TableColumns",
     "TableDataRow",
@@ -42,13 +54,16 @@ __all__ = [
     "TablePageChangeArgs",
     "TablePageChangeResponse",
     "TableTagColors",
-    "SelectOption",
-    "SelectOptions",
-    "BarChartData",
     "TableAction",
     "TableActions",
     "TableView",
     "TableViews",
+    # Table Data Control Types
+    "TableColumnFilterModel",
+    "TableColumnFilterGroup",
+    "TableColumnFilterRule",
+    "TableColumnSortRule",
+    "TableColumnSortModel",
     # Deprecated
     "AdvancedTableColumn",
     "State",

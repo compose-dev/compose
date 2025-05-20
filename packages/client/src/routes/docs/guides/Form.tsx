@@ -262,10 +262,9 @@ function Form() {
         ]}
         actions={null}
         onTableRowActionHook={() => {}}
-        enableRowSelection={true}
+        enableRowSelection={false}
         rowSelections={{}}
         setRowSelections={() => {}}
-        allowMultiSelection={true}
         onTablePageChangeHook={() => {}}
         totalRecords={users.length}
       />

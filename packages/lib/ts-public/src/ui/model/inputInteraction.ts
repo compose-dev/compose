@@ -147,8 +147,8 @@ export interface Table<
     offset?: number;
     pageSize?: number;
     searchQuery?: string | null;
-    sortBy?: TTable.ColumnSort<TTable.DataRow[]>[];
-    filterBy?: TTable.AdvancedFilterModel<TTable.DataRow[]>;
+    sortBy?: TTable.ColumnSortRule<TTable.DataRow[]>[];
+    filterBy?: TTable.ColumnFilterModel<TTable.DataRow[]>;
     viewBy?: string;
     selectMode?: TTable.SelectionReturnType;
     overflow?: TTable.OverflowBehavior;

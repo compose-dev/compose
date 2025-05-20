@@ -1,10 +1,10 @@
 import { UI } from "@composehq/ts-public";
 import {
   advancedFilterModelValuesAreEqual,
-  DisplayAdvancedFilterModel,
-  EditableAdvancedFilterModel,
-  ServerAdvancedFilterModel,
-  ValidatedAdvancedFilterModel,
+  DisplayColumnFilterModel,
+  EditableColumnFilterModel,
+  ServerColumnFilterModel,
+  ValidatedColumnFilterModel,
 } from "./filterModel";
 import { FormattedTableRow, TableColumnProp } from "../constants";
 import { v4 as uuid } from "uuid";
@@ -18,12 +18,12 @@ import { useDataControl } from "../useDataControl";
 import * as Views from "../views";
 
 function serverToDisplayFilterModelRecursive(
-  model: UI.Table.AdvancedFilterModel<FormattedTableRow[]>,
+  model: UI.Table.ColumnFilterModel<FormattedTableRow[]>,
   getMetadata: (key: string) => {
     id: string;
     format: UI.Table.ColumnFormat | undefined;
   }
-): EditableAdvancedFilterModel {
+): EditableColumnFilterModel {
   if (model === null) {
     return null;
   }
@@ -33,7 +33,7 @@ function serverToDisplayFilterModelRecursive(
       ...model,
       filters: model.filters.map((filter) =>
         serverToDisplayFilterModelRecursive(filter, getMetadata)
-      ) as NonNullable<EditableAdvancedFilterModel>[],
+      ) as NonNullable<EditableColumnFilterModel>[],
       id: uuid(),
     };
   }
@@ -127,12 +127,12 @@ function serverToDisplayFilterModelRecursive(
 }
 
 function serverToDisplayFilterModel(
-  model: ServerAdvancedFilterModel,
+  model: ServerColumnFilterModel,
   getMetadata: (key: string) => {
     id: string;
     format: UI.Table.ColumnFormat | undefined;
   }
-): DisplayAdvancedFilterModel {
+): DisplayColumnFilterModel {
   try {
     return serverToDisplayFilterModelRecursive(model, getMetadata);
   } catch (error) {
@@ -149,10 +149,10 @@ function isEmptyOperator(operator: UI.Table.ColumnFilterOperator): boolean {
 
 function getValidFilterModel(
   model:
-    | EditableAdvancedFilterModel
-    | UI.Table.AdvancedFilterModel<FormattedTableRow[]>,
+    | EditableColumnFilterModel
+    | UI.Table.ColumnFilterModel<FormattedTableRow[]>,
   getKey: (key: string) => string
-): UI.Table.AdvancedFilterModel<FormattedTableRow[]> {
+): UI.Table.ColumnFilterModel<FormattedTableRow[]> {
   if (model === null) {
     return null;
   }
@@ -199,7 +199,7 @@ function useAdvancedFiltering({
   paginated,
   viewsHook,
 }: {
-  serverFilterBy: ServerAdvancedFilterModel | undefined;
+  serverFilterBy: ServerColumnFilterModel | undefined;
   filterable: boolean;
   columns: TableColumnProp[];
   paginated: boolean;
@@ -244,19 +244,19 @@ function useAdvancedFiltering({
   );
 
   const serverToDraft = useCallback(
-    (model: ServerAdvancedFilterModel) =>
+    (model: ServerColumnFilterModel) =>
       serverToDisplayFilterModel(model, (key) => columnNameToMetadata[key]),
     [columnNameToMetadata]
   );
 
   const draftToApplied = useCallback(
-    (model: DisplayAdvancedFilterModel) =>
+    (model: DisplayColumnFilterModel) =>
       getValidFilterModel(model, (key) => key),
     []
   );
 
   const appliedToServer = useCallback(
-    (model: ValidatedAdvancedFilterModel) =>
+    (model: ValidatedColumnFilterModel) =>
       getValidFilterModel(model, (key) => columnIdToName[key]),
     [columnIdToName]
   );

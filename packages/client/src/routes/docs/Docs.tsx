@@ -417,6 +417,14 @@ function Docs() {
     );
   }
 
+  if (type === DOC_TYPE["components-input-table-core-concepts"]) {
+    return (
+      <BrowserWrapper>
+        <Components.Input.Table.Default coreConcepts />
+      </BrowserWrapper>
+    );
+  }
+
   if (type === DOC_TYPE["components-input-table-actions"]) {
     return (
       <BrowserWrapper>

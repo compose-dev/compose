@@ -33,6 +33,8 @@ const DOC_TYPE = {
   "components-input-multi-select": "components-input-multi-select",
   "components-input-radio-group": "components-input-radio-group",
   "components-input-table": "components-input-table",
+  "components-input-table-core-concepts":
+    "components-input-table-core-concepts",
   "components-input-table-actions": "components-input-table-actions",
   "components-input-dataframe": "components-input-dataframe",
   "components-input-filedrop": "components-input-filedrop",
