@@ -1,15 +1,21 @@
 import { u } from "@compose/ts";
 import { useEffect, useMemo, useState } from "react";
 import Button from "~/components/button";
+import { JsonEditor } from "~/components/code-editor";
 import { ComboboxSingle } from "~/components/combobox";
-import { EmailInput, TextAreaInput } from "~/components/input";
+import { EmailInput } from "~/components/input";
 import { IOComponent } from "~/components/io-component";
 import { toast } from "~/utils/toast";
 
 const REQUIRED = {
   email: true,
   role: true,
-  notes: true,
+  featureFlags: true,
+};
+
+const DEFAULT_FEATURE_FLAGS = {
+  betaAccess: false,
+  lang: "en-US",
 };
 
 function ModalFormApp() {
@@ -17,11 +23,13 @@ function ModalFormApp() {
 
   const [email, setEmail] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
-  const [notes, setNotes] = useState<string | null>(null);
+  const [featureFlags, setFeatureFlags] = useState<string | null>(
+    JSON.stringify(DEFAULT_FEATURE_FLAGS, null, 2)
+  );
 
   const [didFillEmail, setDidFillEmail] = useState(false);
   const [didFillRole, setDidFillRole] = useState(false);
-  const [didFillNotes, setDidFillNotes] = useState(false);
+  const [didFillFeatureFlags, setDidFillFeatureFlags] = useState(false);
 
   const [didSubmit, setDidSubmit] = useState(false);
 
@@ -38,10 +46,10 @@ function ModalFormApp() {
   }, [didFillRole, role]);
 
   useEffect(() => {
-    if (!didFillNotes && notes !== null) {
-      setDidFillNotes(true);
+    if (!didFillFeatureFlags && featureFlags !== null) {
+      setDidFillFeatureFlags(true);
     }
-  }, [didFillNotes, notes]);
+  }, [didFillFeatureFlags, featureFlags]);
 
   const emailError = useMemo(() => {
     if (!email && REQUIRED.email) {
@@ -63,21 +71,27 @@ function ModalFormApp() {
     return null;
   }, [role]);
 
-  const notesError = useMemo(() => {
-    if (notes === null && REQUIRED.notes) {
-      return "Notes are required.";
+  const featureFlagsError = useMemo(() => {
+    if (featureFlags === null && REQUIRED.featureFlags) {
+      return "Feature flags are required.";
+    }
+
+    try {
+      JSON.parse(featureFlags as string);
+    } catch (error) {
+      return `Invalid JSON: ${error instanceof Error ? error.message : "Unknown error"}`;
     }
 
     return null;
-  }, [notes]);
+  }, [featureFlags]);
 
   const formError = useMemo(() => {
-    if (emailError || roleError || notesError) {
+    if (emailError || roleError || featureFlagsError) {
       return "Form is invalid.";
     }
 
     return null;
-  }, [emailError, roleError, notesError]);
+  }, [emailError, roleError, featureFlagsError]);
 
   return (
     <div className="p-4 flex flex-col gap-4 items-center justify-center">
@@ -90,10 +104,10 @@ function ModalFormApp() {
             if (!formError) {
               setEmail(null);
               setRole(null);
-              setNotes(null);
+              setFeatureFlags(null);
               setDidFillEmail(false);
               setDidFillRole(false);
-              setDidFillNotes(false);
+              setDidFillFeatureFlags(false);
               setDidSubmit(false);
               addToast({
                 message: "Form submitted successfully",
@@ -129,12 +143,17 @@ function ModalFormApp() {
             />
           </div>
           <div className="max-w-md w-full">
-            <TextAreaInput
-              label="Notes"
-              value={notes}
-              setValue={setNotes}
-              errorMessage={notesError}
-              hasError={notesError !== null && (didSubmit || didFillNotes)}
+            <JsonEditor
+              label="Feature flags"
+              value={featureFlags}
+              onChange={(value) => setFeatureFlags(value)}
+              errorMessage={featureFlagsError}
+              hasError={
+                featureFlagsError !== null && (didSubmit || didFillFeatureFlags)
+              }
+              id="feature-flags"
+              description={null}
+              height="120px"
             />
           </div>
           <div>
