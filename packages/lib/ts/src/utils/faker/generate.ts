@@ -6,6 +6,7 @@ import {
   generateTier,
   generateEmail,
   generateDate,
+  generateFeatureFlags,
 } from "./data";
 
 const DATA_TYPES = {
@@ -16,6 +17,7 @@ const DATA_TYPES = {
   personName: "personName",
   email: "email",
   date: "date",
+  featureFlags: "featureFlags",
 } as const;
 
 type DataType = keyof typeof DATA_TYPES;
@@ -57,6 +59,11 @@ interface DateDataInput extends BaseDataInput {
   max: Date;
 }
 
+interface FeatureFlagsDataInput extends BaseDataInput {
+  type: "featureFlags";
+  count: number;
+}
+
 type DataInput =
   | CompanyNameDataInput
   | TierDataInput
@@ -64,10 +71,14 @@ type DataInput =
   | BooleanDataInput
   | PersonNameDataInput
   | EmailDataInput
-  | DateDataInput;
+  | DateDataInput
+  | FeatureFlagsDataInput;
 
 function generateRow<T extends DataInput>(dataInputs: T[]) {
-  const row: Record<string, string | number | boolean | Date> = {};
+  const row: Record<
+    string,
+    string | number | boolean | Date | Record<string, string | number | boolean>
+  > = {};
 
   const name = generatePersonName();
 
@@ -93,6 +104,9 @@ function generateRow<T extends DataInput>(dataInputs: T[]) {
         break;
       case "date":
         row[dataInput.key] = generateDate(dataInput.min, dataInput.max);
+        break;
+      case "featureFlags":
+        row[dataInput.key] = generateFeatureFlags(dataInput.count);
         break;
       default:
         throw new Error(`Unknown data input: ${JSON.stringify(dataInput)}`);

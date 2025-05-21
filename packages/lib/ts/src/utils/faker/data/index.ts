@@ -1,6 +1,7 @@
 import { generateCompanyName } from "./companyName";
 import { generatePersonName } from "./name";
 import { generateEmail } from "./email";
+import { generateFeatureFlags } from "./featureFlags";
 
 function generateNumber(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -30,4 +31,5 @@ export {
   generateDate,
   generatePersonName,
   generateEmail,
+  generateFeatureFlags,
 };
