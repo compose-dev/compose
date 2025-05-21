@@ -12,3 +12,5 @@ export * from "./rowSelections";
 export * as Views from "./views";
 export * from "./useColumnVisibility";
 export * from "./useDataControl";
+export * from "./useTableOverflow";
+export * from "./useTableDensity";
