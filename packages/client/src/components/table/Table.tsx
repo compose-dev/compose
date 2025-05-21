@@ -27,6 +27,7 @@ import {
   useColumnVisibility,
   Sorting,
   ServerView,
+  useTableOverflow,
 } from "./utils";
 import { ColumnHeaderRow, FooterRow, ToolbarRow } from "./components";
 import { log } from "@compose/ts";
@@ -120,21 +121,21 @@ function Table({
     paginated,
   });
 
-  const tableOverflow = useMemo(() => {
-    if (viewsHook.applied.overflow) {
-      return viewsHook.applied.overflow;
-    }
+  // const tableOverflow = useMemo(() => {
+  //   if (viewsHook.applied.overflow) {
+  //     return viewsHook.applied.overflow;
+  //   }
+  //
+  //   return overflow;
+  // }, [viewsHook.applied, overflow]);
 
-    return overflow;
-  }, [viewsHook.applied, overflow]);
-
-  const tableDensity = useMemo(() => {
-    if (viewsHook.applied.density) {
-      return viewsHook.applied.density;
-    }
-
-    return density;
-  }, [viewsHook.applied, density]);
+  // const tableDensity = useMemo(() => {
+  //   if (viewsHook.applied.density) {
+  //     return viewsHook.applied.density;
+  //   }
+  //
+  //   return density;
+  // }, [viewsHook.applied, density]);
 
   const sortingHook = Sorting.use({
     columns,
@@ -176,6 +177,8 @@ function Table({
 
   const { columnVisibility, setColumnVisibility, resetColumnVisibility } =
     useColumnVisibility(columns, viewsHook.applied);
+
+  const tableOverflowHook = useTableOverflow({ overflow, activeView: viewsHook.applied });
 
   const { toggleRowSelection } = RowSelections.use(
     formattedData,
@@ -234,8 +237,8 @@ function Table({
     disableRowSelection,
     actions,
     onTableRowActionHook,
-    tableDensity,
-    tableOverflow,
+    tableDensity, // This will be handled by useTableDensity later
+    tableOverflowHook.tableOverflow,
     toggleRowSelection
   );
 
@@ -411,6 +414,9 @@ function Table({
             resetColumnPinningToInitial={resetColumnPinningToInitial}
             filterable={filterable}
             resetColumnVisibility={resetColumnVisibility}
+            currentTableOverflow={tableOverflowHook.tableOverflow}
+            setTableOverflow={tableOverflowHook.setTableOverflow}
+            resetTableOverflow={tableOverflowHook.resetTableOverflow}
             views={views}
             setView={(view: Views.ViewDisplayFormat) => {
               // Set the active view
@@ -430,6 +436,7 @@ function Table({
                   viewsHook.appliedRef.current.filterBy
                 )
               );
+              // No need to explicitly set tableOverflow, it's reactive to activeView
 
               // If paginated, request a new page of data from server
               if (paginated && handleRequestServerDataRef.current) {
@@ -446,6 +453,7 @@ function Table({
               sortingHook.reset();
               searchQueryHook.reset();
               advancedFilteringHook.reset();
+              tableOverflowHook.resetTableOverflow(); // Reset overflow to initial on view reset
 
               // If paginated, request a new page of data from server
               if (paginated && handleRequestServerDataRef.current) {
@@ -458,9 +466,9 @@ function Table({
           />
           <TableBody
             table={table}
-            density={tableDensity}
+            density={tableDensity} // This will be handled by useTableDensity later
             loading={loading}
-            overflow={tableOverflow}
+            overflow={tableOverflowHook.tableOverflow}
             setScrollToTopHandler={setScrollToTopHandler}
           />
           <FooterRow

@@ -139,8 +139,12 @@ function PinAndHideColumnsPanel({
   resetColumnVisibility: () => void;
   className?: string;
   table: TanStackTable;
+  currentTableOverflow: OverflowBehavior;
+  setTableOverflow: (overflow: OverflowBehavior) => void;
+  resetTableOverflow: () => void;
 }) {
   const [searchTerm, setSearchTerm] = useState<string | null>(null);
+  type OverflowBehavior = 'Dynamic' | 'Clip' | 'Ellipsis';
 
   const filteredColumns = table.getAllColumns().filter((col) => {
     if (!col.columnDef.meta?.isDataColumn) {
@@ -166,6 +170,7 @@ function PinAndHideColumnsPanel({
 
   const resetAllSettings = () => {
     resetColumnVisibility();
+    resetTableOverflow();
   };
 
   const onPinColumn = (columnId: string, pinned: ColumnPinningPosition) => {
@@ -185,6 +190,22 @@ function PinAndHideColumnsPanel({
         >
           Reset to default
         </Button>
+      </div>
+
+      <div className="py-2">
+        <h6 className="text-sm font-medium text-brand-neutral mb-2">Table Overflow</h6>
+        <div className="flex space-x-2">
+          {(['Dynamic', 'Clip', 'Ellipsis'] as OverflowBehavior[]).map((behavior) => (
+            <Button
+              key={behavior}
+              variant={currentTableOverflow === behavior ? "primary" : "secondary"}
+              onClick={() => setTableOverflow(behavior)}
+              className="flex-1"
+            >
+              {behavior}
+            </Button>
+          ))}
+        </div>
       </div>
 
       <TextInput
@@ -217,12 +238,19 @@ function PinAndHideColumnsPopover({
   table,
   resetColumnPinningToInitial,
   resetColumnVisibility,
+  currentTableOverflow,
+  setTableOverflow,
+  resetTableOverflow,
 }: {
   table: TanStackTable;
   resetColumnPinningToInitial: () => void;
   resetColumnVisibility: () => void;
+  currentTableOverflow: OverflowBehavior;
+  setTableOverflow: (overflow: OverflowBehavior) => void;
+  resetTableOverflow: () => void;
 }) {
   const columnVisibility = table.getState().columnVisibility;
+  type OverflowBehavior = 'Dynamic' | 'Clip' | 'Ellipsis';
   const columnPinning = table.getState().columnPinning;
 
   function getPinnedCount() {
@@ -297,6 +325,9 @@ function PinAndHideColumnsPopover({
             resetColumnVisibility();
             resetColumnPinningToInitial();
           }}
+          currentTableOverflow={currentTableOverflow}
+          setTableOverflow={setTableOverflow}
+          resetTableOverflow={resetTableOverflow}
           className="w-96"
           table={table}
         />

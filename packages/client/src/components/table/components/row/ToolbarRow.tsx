@@ -194,6 +194,9 @@ function ToolbarRow({
   setView: (view: Views.ViewDisplayFormat) => void;
   resetView: () => void;
   isViewDirty: boolean;
+  resetTableOverflow: () => void;
+  currentTableOverflow: 'Dynamic' | 'Clip' | 'Ellipsis';
+  setTableOverflow: (overflow: 'Dynamic' | 'Clip' | 'Ellipsis') => void;
 }) {
   const offset =
     table.getState().pagination.pageIndex *
@@ -275,6 +278,9 @@ function ToolbarRow({
           table={table}
           resetColumnPinningToInitial={resetColumnPinningToInitial}
           resetColumnVisibility={resetColumnVisibility}
+          currentTableOverflow={currentTableOverflow}
+          setTableOverflow={setTableOverflow}
+          resetTableOverflow={resetTableOverflow}
         />
         <DownloadCSVPopover
           table={table}
