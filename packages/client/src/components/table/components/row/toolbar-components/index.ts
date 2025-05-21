@@ -6,6 +6,7 @@ import {
 } from "./PinAndHideColumns";
 import { FilterColumnsPanel, FilterColumnsPopover } from "./FilterColumns";
 import { TableViewsPopover } from "./TableViews";
+import { TableSettingsPopover } from "./TableSettings";
 
 export {
   SortColumnsPanel,
@@ -17,4 +18,5 @@ export {
   FilterColumnsPanel,
   FilterColumnsPopover,
   TableViewsPopover,
+  TableSettingsPopover,
 };
