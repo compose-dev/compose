@@ -3,17 +3,24 @@ import Table from "~/components/table";
 import { Modal } from "~/components/modal";
 import Json from "~/components/json";
 import { UI } from "@composehq/ts-public";
-import { u } from "@compose/ts";
+import { faker } from "@composehq/faker";
 
 function TableComponent({ coreConcepts }: { coreConcepts?: boolean }) {
   const [data] = useState(
-    u.faker.generateRows(
-      [
-        { type: "companyName", key: "companyName" },
-        { type: "tier", key: "tier" },
-        { type: "number", key: "arr", min: 10000, max: 1000000 },
-        { type: "boolean", key: "onboarded" },
-      ],
+    faker.records(
+      {
+        companyName: "companyName",
+        tier: {
+          type: "arrayElement",
+          options: ["Enterprise", "Premium", "Basic"],
+        },
+        arr: {
+          type: "int",
+          min: 10000,
+          max: 1000000,
+        },
+        onboarded: "boolean",
+      },
       1456
     )
   );

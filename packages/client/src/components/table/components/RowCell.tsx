@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from "react";
+import { UI } from "@composehq/ts-public";
 import { classNames } from "~/utils/classNames";
 
 function RowCell({
@@ -8,6 +10,7 @@ function RowCell({
   className = "",
   style = {},
   expand = false,
+  tooltipContent = null,
 }: {
   children: React.ReactNode;
   overflow?: "clip" | "ellipsis" | "dynamic";
@@ -16,11 +19,50 @@ function RowCell({
   className?: string;
   style?: React.CSSProperties;
   expand?: boolean;
+  tooltipContent?: string | null;
 }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  const [tooltipAttributes, setTooltipAttributes] = useState<Record<
+    string,
+    string | number
+  > | null>(null);
+
+  useEffect(() => {
+    if (
+      !ref.current ||
+      overflow === UI.Table.OVERFLOW_BEHAVIOR.DYNAMIC ||
+      !tooltipContent
+    ) {
+      return;
+    }
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (ref.current) {
+        if (ref.current.scrollWidth > ref.current.clientWidth) {
+          setTooltipAttributes({
+            "data-tooltip-id": "right-tooltip-offset4",
+            "data-tooltip-html": tooltipContent,
+          });
+        } else {
+          setTooltipAttributes(null);
+        }
+      }
+    });
+
+    resizeObserver.observe(ref.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [overflow, tooltipContent]);
+
   return (
     <div
+      ref={ref}
       className={classNames(
-        "px-2 flex break-all text-brand-neutral",
+        // table-row-cell class is used to target the tooltip.
+        "px-2 flex break-all text-brand-neutral table-row-cell",
         {
           "first:rounded-bl-brand last:rounded-br-brand": isLastRow,
           "truncate !block": overflow === "ellipsis",
@@ -34,6 +76,7 @@ function RowCell({
         className
       )}
       style={style}
+      {...tooltipAttributes}
     >
       {children}
     </div>

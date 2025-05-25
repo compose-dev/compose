@@ -329,6 +329,16 @@ function App() {
         offset={4}
         noArrow={true}
       />
+      <Tooltip
+        id="right-tooltip-offset4"
+        className="tooltip tooltip-contrast tooltip-sm z-40 hidden sm:block"
+        place="right"
+        offset={4}
+        noArrow={true}
+        clickable={true}
+        anchorSelect=".table-row-cell"
+        delayShow={300}
+      />
     </>
   );
 }

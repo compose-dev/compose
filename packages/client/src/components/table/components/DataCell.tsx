@@ -204,6 +204,7 @@ function DataCell({
           expand={expand}
           overflow={overflow}
           density={density}
+          tooltipContent={meta[column.accessorKey]}
         >
           {meta[column.accessorKey]}
         </RowCell>
@@ -217,6 +218,7 @@ function DataCell({
           expand={expand}
           overflow={overflow}
           density={density}
+          tooltipContent={meta[column.accessorKey]}
         >
           {meta[column.accessorKey]}
         </RowCell>
@@ -232,6 +234,7 @@ function DataCell({
           expand={expand}
           overflow={overflow}
           density={density}
+          tooltipContent={currency}
         >
           {currency}
         </RowCell>
@@ -247,6 +250,7 @@ function DataCell({
           expand={expand}
           overflow={overflow}
           density={density}
+          tooltipContent={number}
         >
           {number}
         </RowCell>
@@ -287,6 +291,11 @@ function DataCell({
           expand={expand}
           overflow={overflow}
           density={density}
+          tooltipContent={
+            "<pre className='font-mono'>" +
+            JSON.stringify(value, null, 2) +
+            "</pre>"
+          }
         >
           {arrayTags.map((value, idx) => {
             if (value === null) {
@@ -352,6 +361,11 @@ function DataCell({
           expand={expand}
           overflow={overflow}
           density={density}
+          tooltipContent={
+            "<pre className='font-mono'>" +
+            JSON.stringify(value, null, 2) +
+            "</pre>"
+          }
         >
           {overflow === "dynamic" ? (
             <Json
@@ -378,6 +392,7 @@ function DataCell({
           expand={expand}
           overflow={overflow}
           density={density}
+          tooltipContent={formatted}
         >
           {formatted}
         </RowCell>

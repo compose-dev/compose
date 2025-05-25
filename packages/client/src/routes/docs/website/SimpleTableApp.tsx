@@ -2,31 +2,21 @@ import { useState } from "react";
 import Table from "~/components/table";
 import { Modal } from "~/components/modal";
 import Json from "~/components/json";
-import { u } from "@compose/ts";
+import { faker } from "@composehq/faker";
 
 function TableComponent() {
   const [data] = useState(
-    u.faker.generateRows(
-      [
-        {
-          key: "name",
-          type: "personName",
-        },
-        {
-          key: "email",
-          type: "email",
-        },
-        {
-          key: "approved",
-          type: "boolean",
-        },
-        {
-          key: "createdAt",
+    faker.records(
+      {
+        name: "personName",
+        email: "email",
+        approved: "boolean",
+        createdAt: {
           type: "date",
           min: new Date("2020-01-01"),
           max: new Date("2025-01-01"),
         },
-      ],
+      },
       6321
     )
   );

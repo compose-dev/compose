@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@compose/ts": "workspace:*",
+    "@composehq/faker": "^0.4.1",
     "@composehq/ts-public": "workspace:*",
     "@fontsource-variable/inter": "5.0.18",
     "@headlessui/react": "2.2.2",

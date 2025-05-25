@@ -347,6 +347,10 @@
     @apply rounded-brand !p-2 !text-sm !shadow !animate-tooltip-in;
   }
 
+  .tooltip-contrast {
+    background-color: #ffffff !important;
+  }
+
   .tooltip-sm {
     @apply !text-xs !p-1.5;
   }
@@ -388,6 +392,10 @@
 
   .theme-dark .tooltip {
     background-color: var(--brand-bg-overlay) !important;
+  }
+
+  .theme-dark .tooltip-contrast {
+    background-color: var(--brand-bg-page) !important;
   }
 
   .c-row > .c-container:not(.c-manual-width),
