@@ -1,4 +1,3 @@
-// import { faker } from "@faker-js/faker";
 import { describe, it, expect } from "vitest";
 import { formatSeriesData } from "./format";
 import * as chartConstants from "./constants";

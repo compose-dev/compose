@@ -1,15 +1,19 @@
 import { bench, describe } from "vitest";
-import { faker } from "@faker-js/faker";
 import { buttonGenerator } from "./buttonInteraction";
+import { faker } from "@composehq/faker";
 
 const generateWorkout = () => {
-  return {
-    type: faker.helpers.arrayElement(["strength", "cardio", "yoga"]),
-    date: faker.date.between({
-      from: new Date(Date.now() - 12 * 30 * 24 * 60 * 60 * 1000),
-      to: Date.now(),
-    }),
-  };
+  return faker.record({
+    type: {
+      type: "arrayElement",
+      options: ["strength", "cardio", "yoga"] as const,
+    },
+    date: {
+      type: "date",
+      min: faker.helpers.date.daysFromNow(-365),
+      max: new Date(),
+    },
+  });
 };
 
 function createFakeDataArray(length: number) {
