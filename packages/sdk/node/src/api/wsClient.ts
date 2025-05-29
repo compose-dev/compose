@@ -65,11 +65,10 @@ class WSClient {
 
   connect() {
     if (this.ws) {
-      this.ws.terminate();
-      this.ws = null;
+      this.ws.close();
+    } else {
+      this.makeConnectionRequest();
     }
-
-    this.makeConnectionRequest();
   }
 
   shutdown() {
@@ -113,7 +112,11 @@ class WSClient {
             WS_CLIENT.RECONNECTION_INTERVAL.BACKOFF_MULTIPLIER
         );
 
-        this.onClose(1006);
+        if (this.ws) {
+          this.ws.close(1006);
+        } else {
+          this.onClose(1006);
+        }
       }
     });
 
@@ -136,9 +139,7 @@ class WSClient {
 
     this.ws.on("message", this.onMessage);
     this.ws.on("error", this.onError);
-    this.ws.on("close", (code) => {
-      this.onClose(code);
-    });
+    this.ws.on("close", this.onClose);
     this.ws.on("ping", () => {
       this.resetPingTimer();
       this.flushSendQueue();
@@ -152,9 +153,10 @@ class WSClient {
 
     this.pingTimeoutTimer = setTimeout(() => {
       if (this.ws) {
-        this.ws.terminate();
+        this.ws.close(WSUtils.PING_TIMEOUT_CODE);
+      } else {
+        this.onClose(WSUtils.PING_TIMEOUT_CODE);
       }
-      this.onClose(WSUtils.PING_TIMEOUT_CODE);
     }, PING_TIMEOUT_MS);
   }
 
