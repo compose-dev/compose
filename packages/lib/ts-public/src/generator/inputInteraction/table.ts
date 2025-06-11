@@ -14,15 +14,15 @@ type TableOnChangeDataPayload<
   : TSRT extends typeof UI.Table.SELECTION_RETURN_TYPE.INDEX
     ? number[]
     : TSRT extends typeof UI.Table.SELECTION_RETURN_TYPE.FULL
-      ? TData[]
+      ? TData
       : TSRT extends undefined // Handles case where selectionReturnType is omitted (assuming default behavior implies TData[])
-        ? TData[]
+        ? TData
         : // If TSRT is a union (e.g., "id" | "index" | "full"),
           // TypeScript's distributive conditional types will make this resolve to:
           // Array<string | number> | Array<number> | TData[]
           // This is the desired behavior for the 'rows' parameter.
           // The final TData[] acts as a default for "full" or any unhandled case within the union.
-          TData[];
+          TData;
 
 interface TableProperties<
   TData extends UI.Table.DataRow[],

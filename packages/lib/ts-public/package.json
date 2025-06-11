@@ -1,7 +1,7 @@
 {
   "name": "@composehq/ts-public",
   "description": "The open-source SDK for building custom internal tools.",
-  "version": "0.27.3",
+  "version": "0.27.4",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
