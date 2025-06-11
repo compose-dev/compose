@@ -5,6 +5,8 @@ import {
   GlobalFiltering,
   Sorting,
   TanStackTable,
+  useTableDensity,
+  useTableOverflow,
   Views,
 } from "../../utils";
 import {
@@ -12,6 +14,7 @@ import {
   FilterColumnsPopover,
   PinAndHideColumnsPopover,
   SortColumnsPopover,
+  TableSettingsPopover,
   TableViewsPopover,
 } from "./toolbar-components";
 import { classNames } from "~/utils/classNames";
@@ -173,6 +176,8 @@ function ToolbarRow({
   setView,
   resetView,
   isViewDirty,
+  tableOverflowHook,
+  tableDensityHook,
 }: {
   searchQueryHook: ReturnType<typeof GlobalFiltering.useSearch>;
   advancedFilteringHook: ReturnType<
@@ -194,6 +199,8 @@ function ToolbarRow({
   setView: (view: Views.ViewDisplayFormat) => void;
   resetView: () => void;
   isViewDirty: boolean;
+  tableOverflowHook: ReturnType<typeof useTableOverflow>;
+  tableDensityHook: ReturnType<typeof useTableDensity>;
 }) {
   const offset =
     table.getState().pagination.pageIndex *
@@ -280,6 +287,14 @@ function ToolbarRow({
           table={table}
           paginated={paginated}
           defaultFileName={`${tableId}`}
+        />
+        <TableSettingsPopover
+          tableOverflow={tableOverflowHook.applied}
+          setTableOverflow={tableOverflowHook.set}
+          resetTableOverflow={tableOverflowHook.reset}
+          tableDensity={tableDensityHook.applied}
+          setTableDensity={tableDensityHook.set}
+          resetTableDensity={tableDensityHook.reset}
         />
         {views && views.length > 0 && (
           <>
