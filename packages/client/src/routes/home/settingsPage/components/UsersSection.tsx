@@ -242,7 +242,7 @@ function UsersSection({
             inviteFlow.setActiveModal(inviteFlow.ACTIVE_MODAL.FORM);
           }}
         >
-          Invite User
+          Add User
         </Button>
       </div>
       {userToDelete && (

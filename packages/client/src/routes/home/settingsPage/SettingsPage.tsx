@@ -5,7 +5,7 @@ import { useHomeStore } from "../useHomeStore";
 import { api } from "~/api";
 
 import { fetcher } from "~/utils/fetcher";
-import { CenteredSpinner } from "~/components/spinner";
+import { Spinner } from "~/components/spinner";
 
 import { toast } from "~/utils/toast";
 
@@ -21,6 +21,7 @@ import {
   UserProfileSection,
   UsersSection,
 } from "./components";
+import * as Page from "../Page";
 
 function SettingsPage() {
   const { addToast } = toast.useStore();
@@ -75,79 +76,60 @@ function SettingsPage() {
 
   if (loading || loadingBilling || !settingsData || !billingData) {
     return (
-      <div className="py-16 px-4 flex justify-center bg-brand-page">
-        <div className="flex flex-col w-full max-w-5xl items-start justify-start gap-12">
-          <div className="flex flex-row items-center justify-between w-full">
-            <h2>Settings</h2>
-            <Button variant="outline" onClick={() => navigate({ to: "/home" })}>
-              <Icon name="arrow-back-up" color="brand-neutral" />
-              Back to home
-            </Button>
-          </div>
-          <div className="w-full border-b border-brand-neutral" />
-
-          <CenteredSpinner />
-        </div>
-      </div>
+      <Page.Root>
+        <Page.Title>Settings</Page.Title>
+        <div className="w-full border-b border-brand-neutral" />
+        <Spinner />
+      </Page.Root>
     );
   }
 
   return (
-    <div className="py-16 px-4 flex justify-center bg-brand-page">
-      <div className="flex flex-col w-full max-w-5xl items-start justify-start gap-12">
-        <div className="flex flex-row items-center justify-between w-full">
-          <h2>Settings</h2>
-          <Button variant="outline" onClick={() => navigate({ to: "/home" })}>
-            <Icon name="arrow-back-up" color="brand-neutral" />
-            Back to home
-          </Button>
-        </div>
-        <div className="w-full border-b border-brand-neutral" />
-        <SettingsSection title="User Profile">
-          <UserProfileSection />
-        </SettingsSection>
-        <div className="w-full border-b border-brand-neutral"></div>
-        <SettingsSection title="Organization">
-          <UsersSection
-            settings={settingsData}
-            inviteFlow={inviteFlow}
-            copyText={copyText}
-            refetchBilling={refetchBilling}
-            refetchSettings={refetchSettings}
-          />
-        </SettingsSection>
-        <div className="w-full border-b border-brand-neutral"></div>
-        <SettingsSection>
-          <BillingSection
-            settings={settingsData}
-            billing={billingData}
-            billingFlow={billingFlow}
-          />
-        </SettingsSection>
-        <div className="w-full border-b border-brand-neutral"></div>
-        <SettingsSection title="Support">
-          <p>
-            If you ever have any issues, please feel free to reach out to us at
-            <span className="font-medium"> atul@composehq.com</span>.
-          </p>
-        </SettingsSection>
-        <InviteUserFormModal
+    <Page.Root>
+      <Page.Title>Settings</Page.Title>
+      <div className="w-full border-b border-brand-neutral" />
+      <SettingsSection title="User Profile">
+        <UserProfileSection />
+      </SettingsSection>
+      <div className="w-full border-b border-brand-neutral"></div>
+      <SettingsSection title="Organization">
+        <UsersSection
+          settings={settingsData}
           inviteFlow={inviteFlow}
-          billingData={billingData}
+          copyText={copyText}
+          refetchBilling={refetchBilling}
+          refetchSettings={refetchSettings}
+        />
+      </SettingsSection>
+      <div className="w-full border-b border-brand-neutral"></div>
+      <SettingsSection>
+        <BillingSection
+          settings={settingsData}
+          billing={billingData}
           billingFlow={billingFlow}
         />
-        <InviteUserSuccessModal inviteFlow={inviteFlow} copyText={copyText} />
-        <ProvisionProModal billingFlow={billingFlow} />
-        <DowngradePlanModal
-          isOpen={
-            billingFlow.activeModal === billingFlow.ACTIVE_MODAL.DOWNGRADE_HOBBY
-          }
-          close={() =>
-            billingFlow.setActiveModal(billingFlow.ACTIVE_MODAL.NONE)
-          }
-        />
-      </div>
-    </div>
+      </SettingsSection>
+      <div className="w-full border-b border-brand-neutral"></div>
+      <SettingsSection title="Support">
+        <p>
+          If you ever have any issues, please feel free to reach out to us at
+          <span className="font-medium"> atul@composehq.com</span>.
+        </p>
+      </SettingsSection>
+      <InviteUserFormModal
+        inviteFlow={inviteFlow}
+        billingData={billingData}
+        billingFlow={billingFlow}
+      />
+      <InviteUserSuccessModal inviteFlow={inviteFlow} copyText={copyText} />
+      <ProvisionProModal billingFlow={billingFlow} />
+      <DowngradePlanModal
+        isOpen={
+          billingFlow.activeModal === billingFlow.ACTIVE_MODAL.DOWNGRADE_HOBBY
+        }
+        close={() => billingFlow.setActiveModal(billingFlow.ACTIVE_MODAL.NONE)}
+      />
+    </Page.Root>
   );
 }
 

@@ -29,8 +29,8 @@ const PERMISSION_TO_SUMMARY = {
   [PERMISSION.ADMIN]:
     "App manager permissions, plus the ability to view audit logs and add/remove users within your team.",
   [PERMISSION.APP_MANAGER]:
-    "Member permissions, plus the ability to manage how apps are shared with external users.",
-  [PERMISSION.MEMBER]: "Access to use and build apps.",
+    "Member permissions, plus the ability to manage app permissions and sharing.",
+  [PERMISSION.MEMBER]: "Can use and build apps.",
   [PERMISSION.GUEST]:
     "Access to use specific apps that've been shared with them.",
 } as const;

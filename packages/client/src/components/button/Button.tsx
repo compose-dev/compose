@@ -34,7 +34,7 @@ function Button({
   loading = false,
   style = undefined,
 }: {
-  onClick: () => void;
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
   children: string | React.ReactNode;
   variant: Variant;
   type?: "button" | "submit";

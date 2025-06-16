@@ -104,7 +104,7 @@ function GoogleOauth2Callback() {
 
   if (error) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
+      <div className="fixed inset-0 flex items-center justify-center">
         <div className="w-80 space-y-12">
           <div className="space-y-2">
             <p>Received an error while trying to log in.</p>

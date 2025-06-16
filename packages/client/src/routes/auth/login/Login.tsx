@@ -18,7 +18,7 @@ function Login() {
   return (
     <DashedWrapper>
       <div className="w-full h-full flex items-center justify-center flex-col space-y-8 text-brand-neutral">
-        <div className="flex items-center justify-center flex-col space-y-8">
+        <div className="flex items-center justify-center flex-col gap-y-8">
           <Favicon className="w-10 h-10" />
           <h2 className="font-medium text-2xl">Log in to Compose</h2>
         </div>

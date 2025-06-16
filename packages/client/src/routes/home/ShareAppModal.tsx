@@ -9,7 +9,7 @@ import { toast } from "~/utils/toast";
 import { InlineLink } from "~/components/inline-link";
 import { fetcher } from "~/utils/fetcher";
 import { useNavigate } from "@tanstack/react-router";
-import { CenteredSpinner, Spinner } from "~/components/spinner";
+import { Spinner } from "~/components/spinner";
 import { BillingNotice as BillingNoticeUI } from "~/components/billing-notice";
 import { useHomeStore } from "./useHomeStore";
 
@@ -334,7 +334,9 @@ export default function ShareAppModal({
     if (!billingData || !user) {
       return (
         <Modal.Body className="!space-y-8">
-          <CenteredSpinner />
+          <div className="w-full flex justify-center items-center">
+            <Spinner />
+          </div>
         </Modal.Body>
       );
     }

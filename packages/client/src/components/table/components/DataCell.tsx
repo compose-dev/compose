@@ -292,7 +292,7 @@ function DataCell({
           overflow={overflow}
           density={density}
           tooltipContent={
-            "<pre className='font-mono'>" +
+            "<pre style='white-space: pre-wrap;'>" +
             JSON.stringify(value, null, 2) +
             "</pre>"
           }
@@ -362,7 +362,7 @@ function DataCell({
           overflow={overflow}
           density={density}
           tooltipContent={
-            "<pre className='font-mono'>" +
+            "<pre style='white-space: pre-wrap;'>" +
             JSON.stringify(value, null, 2) +
             "</pre>"
           }

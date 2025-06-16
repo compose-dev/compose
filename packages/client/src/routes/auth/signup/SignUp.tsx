@@ -16,7 +16,7 @@ function SignUp() {
 
   return (
     <DashedWrapper>
-      <div className="flex items-center justify-center flex-col space-y-8">
+      <div className="flex items-center justify-center flex-col gap-y-8">
         <Favicon className="w-10 h-10" />
         <h2 className="font-medium text-2xl">
           {inviteCode ? "Join your workspace" : "Create your workspace"}

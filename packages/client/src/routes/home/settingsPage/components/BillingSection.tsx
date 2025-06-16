@@ -182,11 +182,9 @@ function BillingSection({
             <CheckmarkItem>Dedicated engineering support</CheckmarkItem>
             <CheckmarkItem>Access to secure external sharing</CheckmarkItem>
             <CheckmarkItem>
-              1 year audit logs and analytics history (available soon)
+              1 year audit logs and analytics history
             </CheckmarkItem>
-            <CheckmarkItem>
-              Role based permissions (available soon)
-            </CheckmarkItem>
+            <CheckmarkItem>Role based permissions</CheckmarkItem>
           </div>
         </div>
       </div>

@@ -1,3 +1,5 @@
+import * as Page from "../../Page";
+
 function SettingsSection({
   title,
   children,
@@ -7,7 +9,7 @@ function SettingsSection({
 }) {
   return (
     <div className="flex flex-col gap-8 w-full">
-      {title && <h3>{title}</h3>}
+      {title && <Page.Subtitle>{title}</Page.Subtitle>}
       {children}
     </div>
   );

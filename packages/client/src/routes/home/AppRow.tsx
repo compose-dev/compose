@@ -1,13 +1,12 @@
 import { m } from "@compose/ts";
-import { Link } from "@tanstack/react-router";
-
+import { useNavigate } from "@tanstack/react-router";
 import Icon from "~/components/icon";
-import DropdownMenu from "~/components/dropdown-menu";
 
 import { useHomeStore, type HomeStore } from "./useHomeStore";
 import ShareAppModal from "./ShareAppModal";
 import { useState } from "react";
 import { classNames } from "~/utils/classNames";
+import Button from "~/components/button";
 
 function isPublic(
   environment: HomeStore["environments"][string],
@@ -60,6 +59,7 @@ function AppRow({
   refetchEnvironment: (environmentId: string) => void;
   hidden?: boolean;
 }) {
+  const navigate = useNavigate();
   const { environment } = useHomeStore((state) => ({
     environment: state.environments[environmentId],
   }));
@@ -70,15 +70,19 @@ function AppRow({
     (externalUser) => externalUser.appRoute === route
   );
 
+  function onNavigate(environmentId: string, appRoute: string) {
+    navigate({
+      to: "/app/$environmentId/$appRoute",
+      params: { environmentId, appRoute },
+    });
+  }
+
   return (
     <>
-      <Link
-        key={route}
-        to={"/app/$environmentId/$appRoute"}
-        params={{
-          environmentId,
-          appRoute: route,
-        }}
+      <div
+        onClick={() => onNavigate(environmentId, route)}
+        role="button"
+        tabIndex={0}
         className="px-2 hover:bg-brand-overlay -mx-2 transition-all duration-50 rounded-brand"
       >
         <div
@@ -133,31 +137,21 @@ function AppRow({
                 />
               </div>
             )}
-            <DropdownMenu
-              label={
-                <div className="w-6 h-6 flex items-center justify-center rounded-brand hover:bg-brand-overlay-2">
-                  <Icon
-                    name="dots"
-                    size="0.75"
-                    color={hidden ? "brand-neutral-2" : "brand-neutral-2"}
-                  />
-                </div>
-              }
-              options={[
-                {
-                  label: "Share",
-                  onClick: async (e) => {
-                    e.stopPropagation();
-                    setShareModalOpen(true);
-                  },
-                },
-              ]}
-              dropdownAnchor="bottom end"
-              labelVariant="ghost"
-            />
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShareModalOpen(true);
+              }}
+            >
+              <div className="text-sm text-brand-neutral-2 hover:text-brand-neutral">
+                Share
+              </div>
+            </Button>
           </div>
         </div>
-      </Link>
+      </div>
       <ShareAppModal
         isOpen={shareModalOpen}
         onClose={() => {

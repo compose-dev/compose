@@ -152,7 +152,7 @@ function ModalBody({
           onClick={inviteFlow.onInviteUser}
           className="mt-2"
         >
-          Invite User
+          Add User
         </Button>
         {inviteFlow.formError && (
           <IOComponent.Error>{inviteFlow.formError}</IOComponent.Error>
@@ -178,7 +178,7 @@ export default function InviteUserFormModal({
       onClose={() => inviteFlow.closeModal()}
     >
       <Modal.CloseableHeader onClose={() => inviteFlow.closeModal()}>
-        Invite User
+        Add User
       </Modal.CloseableHeader>
       <ModalBody
         inviteFlow={inviteFlow}

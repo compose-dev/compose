@@ -5,6 +5,7 @@ interface AuthContextData {
   loading: boolean;
   setIsAuthenticated: (isAuthenticated: boolean) => void;
   checkAuth: () => Promise<boolean>;
+  navigateToLogin: ({ redirect }?: { redirect?: string }) => Promise<void>;
 }
 
 const authContext = createContext<AuthContextData | null>(null);

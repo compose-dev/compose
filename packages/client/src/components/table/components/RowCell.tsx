@@ -41,7 +41,7 @@ function RowCell({
       if (ref.current) {
         if (ref.current.scrollWidth > ref.current.clientWidth) {
           setTooltipAttributes({
-            "data-tooltip-id": "right-tooltip-offset4",
+            "data-tooltip-id": "table-tooltip",
             "data-tooltip-html": tooltipContent,
           });
         } else {

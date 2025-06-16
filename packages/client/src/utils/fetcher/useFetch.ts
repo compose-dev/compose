@@ -37,7 +37,7 @@ function useFetch<SuccessT, ErrorT>(
   );
 
   const [didError, setDidError] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(options.fetchOnMount !== false);
 
   const didInitialFetch = useRef(false);
 

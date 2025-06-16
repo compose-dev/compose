@@ -26,7 +26,7 @@ export default function InviteUserSuccessModal({
           inviteFlow.clearSuccessData();
         }}
       >
-        Invite User
+        Add User
       </Modal.CloseableHeader>
       <Modal.Body>
         <div className="flex flex-col gap-8">

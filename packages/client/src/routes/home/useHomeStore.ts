@@ -9,9 +9,12 @@ type FormattedEnvironment = Omit<
 };
 
 type HomeStore = {
+  // STATE
   environments: Record<string, FormattedEnvironment>;
   user: BrowserToServerEvent.Initialize.Response["user"] | null;
   developmentApiKey: string | null;
+
+  // ACTIONS
   setEnvironments: (environments: Record<string, FormattedEnvironment>) => void;
   setUser: (
     user: BrowserToServerEvent.Initialize.Response["user"] | null

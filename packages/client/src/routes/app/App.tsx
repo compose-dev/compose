@@ -330,8 +330,8 @@ function App() {
         noArrow={true}
       />
       <Tooltip
-        id="right-tooltip-offset4"
-        className="tooltip tooltip-contrast tooltip-sm z-40 hidden sm:block"
+        id="table-tooltip"
+        className="tooltip tooltip-contrast tooltip-sm z-40 hidden sm:block max-w-md"
         place="right"
         offset={4}
         noArrow={true}
