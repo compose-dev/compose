@@ -1,4 +1,4 @@
-import * as Page from "../../Page";
+import { Page } from "~/routes/home/components/page";
 
 function SettingsSection({
   title,

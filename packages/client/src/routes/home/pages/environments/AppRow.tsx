@@ -2,7 +2,7 @@ import { m } from "@compose/ts";
 import { useNavigate } from "@tanstack/react-router";
 import Icon from "~/components/icon";
 
-import { useHomeStore, type HomeStore } from "./useHomeStore";
+import { useHomeStore, type HomeStore } from "~/routes/home/utils/useHomeStore";
 import ShareAppModal from "./ShareAppModal";
 import { useState } from "react";
 import { classNames } from "~/utils/classNames";

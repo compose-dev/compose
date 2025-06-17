@@ -11,7 +11,7 @@ function PageRoot({
     <div className="flex justify-center">
       <div
         className={classNames(
-          "flex flex-col py-16 px-4 lg:px-8 gap-12 w-full",
+          "flex flex-col justify-start items-start py-16 px-4 lg:px-8 gap-12 w-full",
           {
             "max-w-5xl": width === "md",
             "max-w-7xl": width === "lg",

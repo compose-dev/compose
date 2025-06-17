@@ -9,27 +9,34 @@ type FormattedEnvironment = Omit<
 };
 
 type HomeStore = {
-  // STATE
+  // USER STATE
   environments: Record<string, FormattedEnvironment>;
   user: BrowserToServerEvent.Initialize.Response["user"] | null;
   developmentApiKey: string | null;
 
-  // ACTIONS
+  // SET USER STATE
   setEnvironments: (environments: Record<string, FormattedEnvironment>) => void;
   setUser: (
     user: BrowserToServerEvent.Initialize.Response["user"] | null
   ) => void;
   setDevelopmentApiKey: (apiKey: string | null) => void;
+
+  // RESET ALL STATE
   resetStore: () => void;
 };
 
 const useHomeStore = create<HomeStore>((set) => ({
+  // USER STATE
   environments: {},
   user: null,
   developmentApiKey: null,
+
+  // SET USER STATE
   setEnvironments: (environments) => set({ environments }),
   setUser: (user) => set({ user }),
   setDevelopmentApiKey: (apiKey) => set({ developmentApiKey: apiKey }),
+
+  // RESET ALL STATE
   resetStore: () =>
     set({ environments: {}, user: null, developmentApiKey: null }),
 }));

@@ -36,9 +36,7 @@ export default function ProvisionProModal({
         <div className="flex flex-col">
           <IOComponent.Label>Standard users</IOComponent.Label>
           <IOComponent.Description className="text-xs mb-2">
-            Team members within your organization, i.e. coworkers. Compose
-            charges one fixed price for each seat regardless of if the team
-            member will build apps or just use them.
+            Users within your organization that will use and/or build apps.
           </IOComponent.Description>
           <div className="flex flex-row justify-between items-center">
             <NumberInput
@@ -55,9 +53,9 @@ export default function ProvisionProModal({
         <div className="flex flex-col">
           <IOComponent.Label>External user credits</IOComponent.Label>
           <IOComponent.Description className="text-xs mb-2">
-            Share apps with users outside of your organization, such as
-            contractors or clients. One credit allows you to share one app with
-            one external email address.
+            Users that are not part of your organization, such as contractors or
+            clients. One credit allows you to share one app with one external
+            email address.
           </IOComponent.Description>
           <div className="flex flex-row justify-between items-center">
             <NumberInput

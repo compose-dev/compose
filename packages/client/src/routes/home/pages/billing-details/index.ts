@@ -1,3 +1,3 @@
 import BillingDetails from "./BillingDetails";
 
-export { BillingDetails };
+export default BillingDetails;

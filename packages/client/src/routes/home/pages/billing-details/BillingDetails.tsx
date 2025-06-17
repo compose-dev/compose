@@ -1,26 +1,38 @@
 import { m, u } from "@compose/ts";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { api } from "~/api";
 import Button from "~/components/button";
 import { CenteredSpinner } from "~/components/spinner";
 import { classNames } from "~/utils/classNames";
-import { fetcher } from "~/utils/fetcher";
-import { useHomeStore } from "../useHomeStore";
+import { useHomeStore } from "~/routes/home/utils/useHomeStore";
 import { Favicon } from "~/components/favicon";
+import { useBillingQuery } from "../../utils/useBillingQuery";
+import { useEffect, useState } from "react";
 
 export default function BillingDetails() {
   const { user } = useHomeStore();
   const navigate = useNavigate();
-  const { data, loading, error } = fetcher.use(api.routes.getBillingData);
+
+  const [didInitialFetch, setDidInitialFetch] = useState(false);
+
+  const billing = useBillingQuery();
+
+  useEffect(() => {
+    // Always refetch billing data on this page since it's the callback
+    // for the checkout flow.
+    if (!didInitialFetch) {
+      billing.refetch();
+      setDidInitialFetch(true);
+    }
+  }, [billing, didInitialFetch]);
 
   const { checkoutResult } = useSearch({ from: "/home/billing/details" });
 
-  if (error) {
+  if (billing.error) {
     return (
       <div className="py-16 px-4 flex justify-center items-center h-full">
         <div className="flex flex-col max-w-sm justify-start gap-12 items-center">
           <Favicon className="w-10 h-10" />
-          <p className="text-brand-error">Error: {error.data.message}</p>
+          <p className="text-brand-error">Error: {billing.error.message}</p>
           <Button
             onClick={() => navigate({ to: "/home/settings" })}
             variant="primary"
@@ -33,7 +45,7 @@ export default function BillingDetails() {
     );
   }
 
-  if (!data || loading || !user) {
+  if (!billing.data || billing.isPending || !user || !didInitialFetch) {
     return <CenteredSpinner />;
   }
 
@@ -60,9 +72,9 @@ export default function BillingDetails() {
     );
   }
 
-  const planName = data.FREE_UNLIMITED_USAGE
+  const planName = billing.data.FREE_UNLIMITED_USAGE
     ? "Friends and Family"
-    : m.Company.PLAN_TO_LABEL[data.company.plan];
+    : m.Company.PLAN_TO_LABEL[billing.data.company.plan];
 
   return (
     <div className="py-16 px-4 flex justify-center items-center h-full">
@@ -79,7 +91,8 @@ export default function BillingDetails() {
           <p>Current plan</p>
           <p
             className={classNames({
-              "text-orange-700": data.company.plan === m.Company.PLANS.PRO,
+              "text-orange-700":
+                billing.data.company.plan === m.Company.PLANS.PRO,
             })}
           >
             {planName}
@@ -89,22 +102,22 @@ export default function BillingDetails() {
         <div className="flex flex-col gap-8 w-full">
           <div className="flex flex-col gap-2 w-full">
             <div className="flex flex-row items-center justify-between">
-              <p>Standard seats</p>
-              <p>{data.standardSeats}</p>
+              <p>Standard users</p>
+              <p>{billing.data.standardSeats}</p>
             </div>
             <p className="text-xs text-brand-neutral-2">
-              Team members within your organization with full access to the
-              Compose platform, depending on the permissions they are assigned.
+              Users within your organization that can use and/or build apps.
             </p>
           </div>
           <div className="flex flex-col gap-2 w-full">
             <div className="flex flex-row items-center justify-between">
-              <p>External seats</p>
-              <p>{data.externalSeats}</p>
+              <p>External user credits</p>
+              <p>{billing.data.externalSeats}</p>
             </div>
             <p className="text-xs text-brand-neutral-2">
-              Users outside of your organization who can be given access by
-              email to use individual apps.
+              Users that are not part of your organization, such as contractors
+              or clients. One credit allows you to share one app with one
+              external email address.
             </p>
           </div>
         </div>

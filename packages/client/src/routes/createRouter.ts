@@ -9,10 +9,10 @@ import {
 import App from "~/routes/app/App";
 import {
   Home,
-  SettingsPage,
-  HomeWrapper,
+  Settings,
+  Environments,
   BillingDetails,
-  AuditLog,
+  ActivityLogs,
 } from "./home";
 import { Root, RootIndexRoute } from "~/routes/root";
 
@@ -216,13 +216,13 @@ interface HomeRouteSearch {
 const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "home",
-  component: HomeWrapper,
+  component: Home,
 });
 
 const homeIndexRoute = createRoute({
   getParentRoute: () => homeRoute,
   path: "/",
-  component: Home,
+  component: Environments,
   validateSearch: (search: Record<string, unknown>): HomeRouteSearch => {
     return {
       newUser: search.newUser as boolean | undefined,
@@ -234,13 +234,13 @@ const homeIndexRoute = createRoute({
 const settingsRoute = createRoute({
   getParentRoute: () => homeRoute,
   path: "settings",
-  component: SettingsPage,
+  component: Settings,
 });
 
 const auditLogsRoute = createRoute({
   getParentRoute: () => homeRoute,
   path: "audit-log",
-  component: AuditLog,
+  component: ActivityLogs,
 });
 
 interface BillingDetailsRouteSearch {

@@ -1,5 +1,5 @@
 import { BrowserToServerEvent, m, u } from "@compose/ts";
-import { useHomeStore } from "../../useHomeStore";
+import { useHomeStore } from "~/routes/home/utils/useHomeStore";
 import Button from "~/components/button";
 import { useNavigate } from "@tanstack/react-router";
 import { classNames } from "~/utils/classNames";
@@ -44,8 +44,8 @@ function BillingSection({
     !u.permission.isAllowed(u.permission.FEATURE.VIEW_BILLING, user.permission)
   ) {
     return (
-      <div className="flex flex-col gap-4">
-        <h5>Billing</h5>
+      <div className="flex flex-col gap-8">
+        <h3>Billing</h3>
         <p className="text-brand-neutral-2">
           You are not authorized to view billing information. Please reach out
           to an admin to make changes, or email support: atul@composehq.com.

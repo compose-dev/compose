@@ -1,16 +1,15 @@
-import { Outlet, useNavigate, useLocation } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { CenteredSpinner } from "~/components/spinner";
-import { useAuthContext } from "~/utils/authContext";
-import { useHomeStore, type HomeStore } from "./useHomeStore";
-import { api } from "~/api";
-import { theme } from "~/utils/theme";
-import { Navigation } from "~/components/navigation";
-import Icon from "~/components/icon";
-import { classNames } from "~/utils/classNames";
-import { Tooltip } from "react-tooltip";
+import { useLocation, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 
-function SidebarItem({
+import { api } from "~/api";
+
+import Icon from "~/components/icon";
+import { Navigation } from "~/components/navigation";
+
+import { classNames } from "~/utils/classNames";
+import { useAuthContext } from "~/utils/authContext";
+
+function NavigationItem({
   icon,
   label,
   isActive,
@@ -60,82 +59,21 @@ function SidebarItem({
   );
 }
 
-function HomeWrapper() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const {
-    isAuthenticated,
-    loading: authLoading,
-    checkAuth,
-    navigateToLogin,
-  } = useAuthContext();
-  const { setEnvironments, setUser, setDevelopmentApiKey, resetStore, user } =
-    useHomeStore();
-
-  const isInitialized = useRef(false);
-
+export default function HomeNavigation({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  theme.use();
-
-  useEffect(() => {
-    if (!isAuthenticated && !authLoading) {
-      navigateToLogin();
-    }
-  }, [isAuthenticated, navigate, authLoading, navigateToLogin]);
-
-  useEffect(() => {
-    async function fetchInitialize() {
-      resetStore();
-
-      const response = await api.routes.initialize();
-
-      if (response.didError) {
-        if (response.statusCode === 401) {
-          navigateToLogin();
-        }
-        return;
-      }
-
-      const formattedEnvironments: HomeStore["environments"] = {};
-
-      for (const environment of response.data.environments) {
-        const apps: HomeStore["environments"][string]["apps"] = {};
-
-        for (const app of environment.apps) {
-          apps[app.route] = app;
-        }
-
-        formattedEnvironments[environment.id] = { ...environment, apps };
-
-        if (environment.key !== null) {
-          setDevelopmentApiKey(environment.key);
-        }
-      }
-
-      setEnvironments(formattedEnvironments);
-      setUser(response.data.user);
-    }
-
-    if (!isInitialized.current) {
-      fetchInitialize();
-      isInitialized.current = true;
-    }
-  }, [
-    setEnvironments,
-    setUser,
-    setDevelopmentApiKey,
-    resetStore,
-    navigateToLogin,
-  ]);
-
-  if (authLoading || !user) {
-    return <CenteredSpinner />;
-  }
+  const { checkAuth } = useAuthContext();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const activeTab = location.pathname.includes("/home/audit-log")
     ? "activity-logs"
-    : location.pathname.includes("/home/settings")
+    : location.pathname.includes("/home/settings") ||
+        location.pathname.includes("/home/billing/details")
       ? "settings"
       : "environments";
 
@@ -155,26 +93,26 @@ function HomeWrapper() {
           />
         </div>
         <div className="flex flex-col flex-1 gap-y-2">
-          <SidebarItem
+          <NavigationItem
             icon="server"
             label="Environments"
             isActive={activeTab === "environments"}
             onClick={() => navigate({ to: "/home" })}
           />
-          <SidebarItem
+          <NavigationItem
             icon="clipboard-text"
             label="Activity Logs"
             isActive={activeTab === "activity-logs"}
             onClick={() => navigate({ to: "/home/audit-log" })}
           />
-          <SidebarItem
+          <NavigationItem
             icon="settings"
             label="Settings"
             isActive={activeTab === "settings"}
             onClick={() => navigate({ to: "/home/settings" })}
           />
           <div className="flex flex-1" />
-          <SidebarItem
+          <NavigationItem
             icon="logout"
             label="Log out"
             isActive={false}
@@ -218,7 +156,7 @@ function HomeWrapper() {
             />
           </div>
           <div className="flex flex-col gap-y-2 -mx-2">
-            <SidebarItem
+            <NavigationItem
               icon="server"
               label="Environments"
               isActive={activeTab === "environments"}
@@ -227,7 +165,7 @@ function HomeWrapper() {
                 setIsSidebarOpen(false);
               }}
             />
-            <SidebarItem
+            <NavigationItem
               icon="clipboard-text"
               label="Activity Logs"
               isActive={activeTab === "activity-logs"}
@@ -236,7 +174,7 @@ function HomeWrapper() {
                 setIsSidebarOpen(false);
               }}
             />
-            <SidebarItem
+            <NavigationItem
               icon="settings"
               label="Settings"
               isActive={activeTab === "settings"}
@@ -247,7 +185,7 @@ function HomeWrapper() {
             />
           </div>
           <div className="flex flex-1" />
-          <SidebarItem
+          <NavigationItem
             icon="logout"
             label="Log out"
             isActive={false}
@@ -260,21 +198,7 @@ function HomeWrapper() {
           />
         </div>
       </Navigation.MobileTopBar>
-      <Navigation.Content>
-        <Outlet />
-      </Navigation.Content>
-      <Tooltip
-        id="table-tooltip"
-        className="tooltip tooltip-contrast tooltip-sm z-40 hidden sm:block max-w-md"
-        place="right"
-        offset={4}
-        noArrow={true}
-        clickable={true}
-        anchorSelect=".table-row-cell"
-        delayShow={300}
-      />
+      <Navigation.Content>{children}</Navigation.Content>
     </Navigation.Root>
   );
 }
-
-export default HomeWrapper;

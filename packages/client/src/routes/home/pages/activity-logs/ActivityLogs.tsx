@@ -10,12 +10,12 @@ import Table from "~/components/table";
 import { UI } from "@composehq/ts-public";
 import { Modal } from "~/components/modal";
 import Json from "~/components/json";
-import { useHomeStore } from "../useHomeStore";
+import { useHomeStore } from "~/routes/home/utils/useHomeStore";
 import { classNames } from "~/utils/classNames";
 import { DateTimeInput, TextInput } from "~/components/input";
 import { ComboboxMulti, ComboboxSingle } from "~/components/combobox";
 import { InlineLink } from "~/components/inline-link";
-import * as Page from "../Page";
+import { Page } from "~/routes/home/components/page";
 
 type Filters = {
   limit: number;
@@ -56,7 +56,7 @@ function KeyValuePair({
   );
 }
 
-function AuditLog() {
+export default function ActivityLogs() {
   const navigate = useNavigate();
   const [modalContent, setModalContent] = useState<Omit<
     m.Log.DB,
@@ -272,12 +272,12 @@ function AuditLog() {
                 stroke="semi-bold"
               />
               <h4 className="text-brand-warning-heavy">
-                Unlock Audit Logs and more with a Pro plan
+                Unlock Activity Logs and more with a Pro plan
               </h4>
             </div>
             <p className="text-brand-neutral">
               The pro plan enables teams to build and use apps together, collect
-              audit logs, implement granular permissions, and more.
+              activity logs, implement granular permissions, and more.
             </p>
             <Button
               variant="warning"
@@ -532,5 +532,3 @@ function AuditLog() {
     </Page.Root>
   );
 }
-
-export default AuditLog;

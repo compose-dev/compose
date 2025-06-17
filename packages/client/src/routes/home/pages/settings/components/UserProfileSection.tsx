@@ -1,5 +1,5 @@
 import { m } from "@compose/ts";
-import { useHomeStore } from "../../useHomeStore";
+import { useHomeStore } from "~/routes/home/utils/useHomeStore";
 
 function TitleLabel({ title, label }: { title: string; label: string }) {
   return (

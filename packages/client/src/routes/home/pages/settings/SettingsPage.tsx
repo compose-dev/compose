@@ -1,7 +1,7 @@
 import Button from "~/components/button";
 import { useNavigate } from "@tanstack/react-router";
 import Icon from "~/components/icon";
-import { useHomeStore } from "../useHomeStore";
+import { useHomeStore } from "~/routes/home/utils/useHomeStore";
 import { api } from "~/api";
 
 import { fetcher } from "~/utils/fetcher";
@@ -21,9 +21,11 @@ import {
   UserProfileSection,
   UsersSection,
 } from "./components";
-import * as Page from "../Page";
+import { Page } from "~/routes/home/components/page";
+import { useBillingQuery } from "../../utils/useBillingQuery";
+import { useEffect } from "react";
 
-function SettingsPage() {
+export default function Settings() {
   const { addToast } = toast.useStore();
   const navigate = useNavigate();
 
@@ -35,15 +37,16 @@ function SettingsPage() {
     refetch: refetchSettings,
   } = fetcher.use(api.routes.getSettings);
 
-  const {
-    data: billingData,
-    loading: loadingBilling,
-    error: billingError,
-    refetch: refetchBilling,
-  } = fetcher.use(api.routes.getBillingData);
+  const billing = useBillingQuery();
+
+  useEffect(() => {
+    if (billing.isPending && !billing.isFetching) {
+      billing.refetch();
+    }
+  }, [billing]);
 
   const inviteFlow = useInviteUser(refetchSettings);
-  const billingFlow = useBilling(billingData);
+  const billingFlow = useBilling(billing.data);
 
   function copyText(text: string) {
     navigator.clipboard.writeText(text);
@@ -57,7 +60,7 @@ function SettingsPage() {
     return null;
   }
 
-  if (billingError) {
+  if (billing.error) {
     return (
       <div className="py-16 px-4 flex justify-center bg-brand-page">
         <div className="flex flex-col w-full max-w-5xl items-start justify-start gap-12">
@@ -66,15 +69,15 @@ function SettingsPage() {
             Back to home
           </Button>
           <p className="text-brand-error">
-            Error fetching billing data: {billingError.data.message}. Please
-            reach out to support: atul@composehq.com
+            Error fetching billing data: {billing.error?.message}. Please reach
+            out to support: atul@composehq.com
           </p>
         </div>
       </div>
     );
   }
 
-  if (loading || loadingBilling || !settingsData || !billingData) {
+  if (loading || billing.isPending || !settingsData) {
     return (
       <Page.Root>
         <Page.Title>Settings</Page.Title>
@@ -97,7 +100,7 @@ function SettingsPage() {
           settings={settingsData}
           inviteFlow={inviteFlow}
           copyText={copyText}
-          refetchBilling={refetchBilling}
+          refetchBilling={billing.refetch}
           refetchSettings={refetchSettings}
         />
       </SettingsSection>
@@ -105,7 +108,7 @@ function SettingsPage() {
       <SettingsSection>
         <BillingSection
           settings={settingsData}
-          billing={billingData}
+          billing={billing.data}
           billingFlow={billingFlow}
         />
       </SettingsSection>
@@ -118,7 +121,7 @@ function SettingsPage() {
       </SettingsSection>
       <InviteUserFormModal
         inviteFlow={inviteFlow}
-        billingData={billingData}
+        billingData={billing.data}
         billingFlow={billingFlow}
       />
       <InviteUserSuccessModal inviteFlow={inviteFlow} copyText={copyText} />
@@ -132,5 +135,3 @@ function SettingsPage() {
     </Page.Root>
   );
 }
-
-export default SettingsPage;

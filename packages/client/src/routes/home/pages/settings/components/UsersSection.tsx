@@ -1,4 +1,4 @@
-import { useHomeStore } from "../../useHomeStore";
+import { useHomeStore } from "~/routes/home/utils/useHomeStore";
 import { BrowserToServerEvent, m, u } from "@compose/ts";
 import Button from "~/components/button";
 import { useInviteUser } from "../useInviteUser";
@@ -159,7 +159,7 @@ function UsersSection({
         </table>
       </div>
       {settings.pendingInvites.length > 0 && (
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 my-4">
           <h5>Pending Invites</h5>
           <table className="w-full border-collapse">
             <thead>

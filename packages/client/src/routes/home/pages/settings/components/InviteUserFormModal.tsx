@@ -19,7 +19,7 @@ function BillingNotice({
     return (
       <BillingNoticeUI className="!mt-4">
         You're on the friends and family plan, which allows you and your team
-        full access to Compose for free. Thanks for being a user!
+        unlimited access to Compose for free. Thanks for being a user!
       </BillingNoticeUI>
     );
   }
@@ -27,18 +27,17 @@ function BillingNotice({
   if (standardSeatsAvailable <= 0) {
     return (
       <BillingNoticeUI className="!mt-4">
-        You've filled your standard seats allowance. Don't worry - you can still
-        invite new users to your organization. We'll automatically update your
-        subscription and pro-rate for the days remaining in the current billing
-        cycle from the day the new user accepts the invitation.
+        You've used all of your standard user seats. Adding a new user will
+        update your subscription to include one additional standard user.
       </BillingNoticeUI>
     );
   }
 
   return (
     <BillingNoticeUI className="!mt-4">
-      You're good for now! You currently have {standardSeatsAvailable}{" "}
-      {standardSeatsAvailable === 1 ? "seat" : "seats"} available on your plan.
+      You're good for now! You currently have {standardSeatsAvailable} unfilled
+      {standardSeatsAvailable === 1 ? " seat" : " seats"} available on your
+      plan.
     </BillingNoticeUI>
   );
 }

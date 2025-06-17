@@ -7,11 +7,11 @@ import { EmailInput, TextInput } from "~/components/input";
 import { Modal } from "~/components/modal";
 import { toast } from "~/utils/toast";
 import { InlineLink } from "~/components/inline-link";
-import { fetcher } from "~/utils/fetcher";
 import { useNavigate } from "@tanstack/react-router";
 import { Spinner } from "~/components/spinner";
 import { BillingNotice as BillingNoticeUI } from "~/components/billing-notice";
-import { useHomeStore } from "./useHomeStore";
+import { useHomeStore } from "~/routes/home/utils/useHomeStore";
+import { useBillingQuery } from "../../utils/useBillingQuery";
 
 function BillingNotice({
   plan,
@@ -53,18 +53,16 @@ function BillingNotice({
   if (externalSeatsRemaining > 0) {
     return (
       <BillingNoticeUI className="!mt-4">
-        You're good for now! You currently have {externalSeatsRemaining}{" "}
-        additional external seats available on your plan.
+        You're good for now! You currently have {externalSeatsRemaining} unused
+        external user credits available on your plan.
       </BillingNoticeUI>
     );
   }
 
   return (
     <BillingNoticeUI className="!mt-4">
-      You've filled your external seats allowance. Don't worry - you can still
-      add external users. Upon inviting, we'll automatically update your
-      subscription and pro-rate for the days remaining in the current billing
-      cycle.
+      You've used all of your external user credits. Adding a new user will
+      update your subscription to include one additional external user credit.
     </BillingNoticeUI>
   );
 }
@@ -99,18 +97,13 @@ export default function ShareAppModal({
     null
   );
 
-  const {
-    data: billingData,
-    error: billingError,
-    refetch: refetchBilling,
-    didInitialFetch: didInitialBillingFetch,
-  } = fetcher.use(api.routes.getBillingData, { fetchOnMount: false });
+  const billing = useBillingQuery();
 
   useEffect(() => {
-    if (!didInitialBillingFetch.current && isOpen) {
-      refetchBilling();
+    if (billing.isPending && !billing.isFetching && isOpen) {
+      billing.refetch();
     }
-  }, [isOpen, refetchBilling, didInitialBillingFetch]);
+  }, [isOpen, billing]);
 
   async function onClickShare() {
     if (!email || !u.string.isValidEmail(email)) {
@@ -155,7 +148,7 @@ export default function ShareAppModal({
 
     setEmail(null);
     refetchExternalUsers();
-    refetchBilling();
+    billing.refetch();
   }
 
   async function onClickMakePublic() {
@@ -315,14 +308,14 @@ export default function ShareAppModal({
       message: "Removed user from sharing options",
       appearance: toast.APPEARANCE.info,
     });
-    if (billingData && !billingData.FREE_UNLIMITED_USAGE) {
+    if (billing.data && !billing.data.FREE_UNLIMITED_USAGE) {
       addToast({
         message: "Removed external seat from billing.",
         appearance: toast.APPEARANCE.success,
       });
     }
     refetchExternalUsers();
-    refetchBilling();
+    billing.refetch();
   }
 
   const canViewExternalUsers = u.permission.isAllowed(
@@ -331,7 +324,7 @@ export default function ShareAppModal({
   );
 
   function modalBody() {
-    if (!billingData || !user) {
+    if (!billing.data || !user) {
       return (
         <Modal.Body className="!space-y-8">
           <div className="w-full flex justify-center items-center">
@@ -341,11 +334,11 @@ export default function ShareAppModal({
       );
     }
 
-    if (billingError) {
+    if (billing.error) {
       return (
         <Modal.Body className="!space-y-8">
           <p className="text-brand-error">
-            Error loading data: {billingError.data.message}
+            Error loading data: {billing.error.message}
           </p>
         </Modal.Body>
       );
@@ -438,14 +431,14 @@ export default function ShareAppModal({
                 setValue={setEmail}
                 value={email}
                 placeholder={"john.doe@gmail.com"}
-                disabled={!billingData.allowInvitingExternalUsers}
+                disabled={!billing.data.allowInvitingExternalUsers}
               />
               <Button
                 variant="primary"
                 disabled={
                   !email ||
                   !u.string.isValidEmail(email) ||
-                  !billingData.allowInvitingExternalUsers
+                  !billing.data.allowInvitingExternalUsers
                 }
                 onClick={onClickShare}
                 loading={submittingExternalUser}
@@ -454,11 +447,11 @@ export default function ShareAppModal({
               </Button>
             </div>
             <BillingNotice
-              plan={billingData.company.plan}
+              plan={billing.data.company.plan}
               externalSeatsRemaining={
-                billingData.externalSeats - billingData.externalSeatsUsed
+                billing.data.externalSeats - billing.data.externalSeatsUsed
               }
-              freeUnlimited={billingData.FREE_UNLIMITED_USAGE}
+              freeUnlimited={billing.data.FREE_UNLIMITED_USAGE}
             />
           </div>
           {emailExternalUsers.length > 0 && (
