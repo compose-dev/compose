@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import Icon from "~/components/icon";
 
 import { useHomeStore, type HomeStore } from "~/routes/home/utils/useHomeStore";
-import ShareAppModal from "./ShareAppModal";
+import ShareAppModal from "./share-app-modal";
 import { useState } from "react";
 import { classNames } from "~/utils/classNames";
 import Button from "~/components/button";
@@ -118,7 +118,7 @@ function AppRow({
             {isInheritingFrom(environment, route) && (
               <div
                 data-tooltip-id="top-tooltip"
-                data-tooltip-content="This app is inheriting permissions from another app."
+                data-tooltip-content="This app is a sub-page of another app."
               >
                 <Icon
                   name="stack"
@@ -164,6 +164,7 @@ function AppRow({
         appRoute={route}
         environmentApps={environment.apps}
         externalUsers={externalUsersForApp}
+        environmentType={environment.type}
       />
     </>
   );

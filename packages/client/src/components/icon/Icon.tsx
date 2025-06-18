@@ -41,6 +41,7 @@ import {
   IconPinned,
   IconAlignLeft2,
   IconServer,
+  IconExternalLink,
 } from "@tabler/icons-react";
 
 const ICON_NAME = {
@@ -104,6 +105,7 @@ const ICON_NAME = {
   "pin-vertical": "pin-vertical",
   format: "format",
   server: "server",
+  "external-link": "external-link",
 } as const;
 
 const SIZE = {
@@ -143,6 +145,7 @@ const STROKE_WIDTH = {
 
 const ICON_COLOR = {
   black: "#000000",
+  "white-btn": "rgba(255, 255, 255, 0.95)",
   "brand-neutral": "var(--brand-neutral-text)",
   "brand-neutral-2": "var(--brand-neutral-text-2)",
   "brand-neutral-3": "var(--brand-bg-overlay-3)",
@@ -193,6 +196,16 @@ function Icon({
   if (name === ICON_NAME.pin) {
     return (
       <IconPin
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME["external-link"]) {
+    return (
+      <IconExternalLink
         size={16 * SIZE_MULTIPLIER[size]}
         color={ICON_COLOR[color]}
         strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}

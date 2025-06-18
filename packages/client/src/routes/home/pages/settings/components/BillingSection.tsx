@@ -57,7 +57,7 @@ function BillingSection({
   return (
     <>
       <div className="flex flex-row justify-between items-center">
-        <h3>Billing</h3>
+        <h3 id="billing">Billing</h3>
         <Button
           variant="outline"
           onClick={() => navigate({ to: "/home/billing/details" })}

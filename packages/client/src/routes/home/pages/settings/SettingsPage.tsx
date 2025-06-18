@@ -2,9 +2,7 @@ import Button from "~/components/button";
 import { useNavigate } from "@tanstack/react-router";
 import Icon from "~/components/icon";
 import { useHomeStore } from "~/routes/home/utils/useHomeStore";
-import { api } from "~/api";
 
-import { fetcher } from "~/utils/fetcher";
 import { Spinner } from "~/components/spinner";
 
 import { toast } from "~/utils/toast";
@@ -23,7 +21,8 @@ import {
 } from "./components";
 import { Page } from "~/routes/home/components/page";
 import { useBillingQuery } from "../../utils/useBillingQuery";
-import { useEffect } from "react";
+import { useSettingsQuery } from "../../utils/useSettingsQuery";
+import { useRunOnce } from "~/utils/useRunOnce";
 
 export default function Settings() {
   const { addToast } = toast.useStore();
@@ -31,21 +30,10 @@ export default function Settings() {
 
   const { user } = useHomeStore();
 
-  const {
-    data: settingsData,
-    loading,
-    refetch: refetchSettings,
-  } = fetcher.use(api.routes.getSettings);
-
+  const settings = useSettingsQuery();
   const billing = useBillingQuery();
 
-  useEffect(() => {
-    if (billing.isPending && !billing.isFetching) {
-      billing.refetch();
-    }
-  }, [billing]);
-
-  const inviteFlow = useInviteUser(refetchSettings);
+  const inviteFlow = useInviteUser(settings.refetch);
   const billingFlow = useBilling(billing.data);
 
   function copyText(text: string) {
@@ -55,6 +43,27 @@ export default function Settings() {
       appearance: toast.APPEARANCE.success,
     });
   }
+
+  useRunOnce(() => {
+    if (billing.isPending && !billing.isFetching) {
+      billing.refetch();
+    }
+  });
+
+  useRunOnce(
+    () => {
+      const hash = window.location.hash;
+      if (hash) {
+        const element = document.getElementById(hash.substring(1));
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+    },
+    {
+      waitUntil: !settings.isPending && !billing.isPending,
+    }
+  );
 
   if (!user) {
     return null;
@@ -77,7 +86,7 @@ export default function Settings() {
     );
   }
 
-  if (loading || billing.isPending || !settingsData) {
+  if (settings.isPending || billing.isPending || !settings.data) {
     return (
       <Page.Root>
         <Page.Title>Settings</Page.Title>
@@ -97,17 +106,17 @@ export default function Settings() {
       <div className="w-full border-b border-brand-neutral"></div>
       <SettingsSection title="Organization">
         <UsersSection
-          settings={settingsData}
+          settings={settings.data}
           inviteFlow={inviteFlow}
           copyText={copyText}
           refetchBilling={billing.refetch}
-          refetchSettings={refetchSettings}
+          refetchSettings={settings.refetch}
         />
       </SettingsSection>
       <div className="w-full border-b border-brand-neutral"></div>
       <SettingsSection>
         <BillingSection
-          settings={settingsData}
+          settings={settings.data}
           billing={billing.data}
           billingFlow={billingFlow}
         />

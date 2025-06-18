@@ -22,6 +22,7 @@ export default {
         xs: "300px",
       },
       borderColor: {
+        "brand-text": "var(--brand-neutral-text)",
         "brand-neutral": "var(--brand-neutral-border)",
         "brand-error": "var(--brand-error-border)",
         "brand-success": "var(--brand-success-border)",

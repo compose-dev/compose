@@ -9,7 +9,11 @@ function SettingsSection({
 }) {
   return (
     <div className="flex flex-col gap-8 w-full">
-      {title && <Page.Subtitle>{title}</Page.Subtitle>}
+      {title && (
+        <Page.Subtitle id={title.toLowerCase().replace(" ", "-")}>
+          {title}
+        </Page.Subtitle>
+      )}
       {children}
     </div>
   );

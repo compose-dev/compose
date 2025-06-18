@@ -15,13 +15,12 @@ export default function BillingNotice({
   return (
     <div
       className={classNames(
-        "flex flex-col space-y-4 p-4 rounded bg-brand-overlay text-sm",
+        "flex flex-row items-start gap-x-2 p-4 rounded bg-brand-overlay text-sm",
         className
       )}
     >
-      <div className="flex flex-row space-x-1 items-center">
-        <Icon name="coin" color="brand-neutral" size="1.5" />
-        <p className="font-medium">Billing</p>
+      <div>
+        <Icon name="coin" color="brand-neutral-2" size="1.25" />
       </div>
       <p className="text-brand-neutral-2">{children}</p>
     </div>

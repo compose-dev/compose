@@ -31,15 +31,18 @@ function PageTitle({ children }: { children: React.ReactNode }) {
 function PageSubtitle({
   children,
   color = "neutral",
+  id,
 }: {
   children: React.ReactNode;
   color?: "neutral" | "primary";
+  id?: string;
 }) {
   return (
     <h3
       className={classNames("text-brand-neutral", {
         "text-brand-primary": color === "primary",
       })}
+      id={id}
     >
       {children}
     </h3>

@@ -16,12 +16,7 @@ function BillingNotice({
   freeUnlimited: boolean;
 }) {
   if (freeUnlimited === true) {
-    return (
-      <BillingNoticeUI className="!mt-4">
-        You're on the friends and family plan, which allows you and your team
-        unlimited access to Compose for free. Thanks for being a user!
-      </BillingNoticeUI>
-    );
+    return null;
   }
 
   if (standardSeatsAvailable <= 0) {
@@ -35,7 +30,7 @@ function BillingNotice({
 
   return (
     <BillingNoticeUI className="!mt-4">
-      You're good for now! You currently have {standardSeatsAvailable} unfilled
+      Adding a user will use one of {standardSeatsAvailable} unfilled
       {standardSeatsAvailable === 1 ? " seat" : " seats"} available on your
       plan.
     </BillingNoticeUI>
@@ -62,7 +57,7 @@ function ModalBody({
           invite more users.
         </p>
         <Button
-          variant="warning"
+          variant="brand"
           onClick={() => {
             inviteFlow.closeModal();
             billingFlow.clearForm();

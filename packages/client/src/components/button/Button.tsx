@@ -4,12 +4,15 @@ import { Button as HeadlessButton } from "@headlessui/react";
 import { Spinner } from "../spinner";
 
 const VARIANT = {
+  // public marketing colors
+  BRAND: "brand",
   PRIMARY: "primary",
   DANGER: "danger",
   WARNING: "warning",
   OUTLINE: "outline",
   SUBTLE_SECONDARY: "subtle-secondary",
   GHOST: "ghost",
+  SUBTLE_DANGER: "subtle-danger",
 } as const;
 
 type Variant = (typeof VARIANT)[keyof typeof VARIANT];
@@ -47,7 +50,11 @@ function Button({
   const isColoredVariant =
     variant === VARIANT.PRIMARY ||
     variant === VARIANT.DANGER ||
-    variant === VARIANT.WARNING;
+    variant === VARIANT.WARNING ||
+    variant === VARIANT.BRAND;
+
+  const isSubtleVariant =
+    variant === VARIANT.SUBTLE_SECONDARY || variant === VARIANT.SUBTLE_DANGER;
 
   return (
     <HeadlessButton
@@ -57,8 +64,7 @@ function Button({
           "opacity-50": disabled,
           "rounded-brand transition duration-100 text-base/6 space-x-2 flex items-center justify-center focus:outline-none focus:ring-2":
             variant !== VARIANT.GHOST,
-          "shadow-sm":
-            variant !== VARIANT.GHOST && variant !== VARIANT.SUBTLE_SECONDARY,
+          "shadow-sm": variant !== VARIANT.GHOST && !isSubtleVariant,
           "px-[6px] py-0 min-w-12 text-xs/5":
             variant !== VARIANT.GHOST && size === SIZE.xs,
           "px-[8px] py-0 min-w-16 text-sm/6":
@@ -70,6 +76,8 @@ function Button({
           "text-white/95 font-medium": isColoredVariant,
           "bg-brand-btn-primary hover:bg-brand-btn-primary-hover focus:ring-brand-primary-heavy":
             variant === VARIANT.PRIMARY,
+          "bg-orange-500 hover:bg-orange-600 focus:ring-orange-700 dark:bg-orange-600 dark:hover:bg-orange-500 dark:focus:ring-orange-400":
+            variant === VARIANT.BRAND,
           "bg-brand-btn-error hover:bg-brand-btn-error-hover focus:ring-brand-error-heavy":
             variant === VARIANT.DANGER,
           "bg-brand-btn-warning hover:bg-brand-btn-warning-hover focus:ring-brand-warning-heavy":
@@ -78,6 +86,8 @@ function Button({
             variant === VARIANT.OUTLINE,
           "bg-transparent hover:bg-brand-page-inverted-5 text-brand-neutral-2":
             variant === VARIANT.SUBTLE_SECONDARY,
+          "bg-transparent hover:bg-brand-page-inverted-5 text-brand-error":
+            variant === VARIANT.SUBTLE_DANGER,
         },
         className
       )}
