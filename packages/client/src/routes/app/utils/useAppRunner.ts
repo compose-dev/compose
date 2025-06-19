@@ -39,6 +39,14 @@ function useAppRunner() {
   const navigate = useNavigate({ from: "/app/$environmentId/$appRoute" });
   const { environmentId, appRoute: currentRoute } = routeApi.useParams();
 
+  /**
+   * Some browsers (usually mobile ones) block opening links in new tabs
+   * when not directly triggered by a user action, as it considers these links
+   * to be popups. In those cases, we show the user a prompt to click a button
+   * to go to the link.
+   */
+  const [newTabLink, setNewTabLink] = useState<string | null>(null);
+
   const queryParams = routeApi.useSearch();
 
   const [isExternalUser, setIsExternalUser] = useState(false);
@@ -537,7 +545,15 @@ function useAppRunner() {
         }
 
         if (u.string.isValidUrl(data.appRouteOrUrl)) {
-          window.open(data.appRouteOrUrl, data.newTab ? "_blank" : "_self");
+          if (data.newTab) {
+            const result = window.open(data.appRouteOrUrl, "_blank");
+
+            if (!result) {
+              setNewTabLink(data.appRouteOrUrl);
+            }
+          } else {
+            window.open(data.appRouteOrUrl, "_self");
+          }
         } else {
           const formatted = uPub.appRoute.format(data.appRouteOrUrl);
 
@@ -554,7 +570,11 @@ function useAppRunner() {
                 });
               }
 
-              window.open(url.toString(), "_blank");
+              const result = window.open(url.toString(), "_blank");
+
+              if (!result) {
+                setNewTabLink(url.toString());
+              }
             } else {
               navigate({
                 to: `/app/${environmentId}/${formatted}`,
@@ -730,6 +750,8 @@ function useAppRunner() {
     isExternalUser,
     browserSessionId: sessionId,
     pageLoading,
+    newTabLink,
+    setNewTabLink,
   };
 }
 

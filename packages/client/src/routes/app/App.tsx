@@ -22,6 +22,17 @@ import { Tooltip } from "react-tooltip";
 
 const routeApi = getRouteApi("/app/$environmentId/$appRoute");
 
+function getDomain(url: string) {
+  try {
+    return url
+      .replace(/^https?:\/\//, "")
+      .replace(/^www\./, "")
+      .split("/")[0];
+  } catch (e) {
+    return url;
+  }
+}
+
 function App() {
   const navigate = useNavigate({ from: "/app/$environmentId/$appRoute" });
   const router = useRouter();
@@ -43,6 +54,8 @@ function App() {
     isExternalUser,
     browserSessionId,
     pageLoading,
+    newTabLink,
+    setNewTabLink,
   } = useAppRunner();
 
   const hasNav = appStore.useNavigation((state) => {
@@ -213,6 +226,25 @@ function App() {
                 </Button>
               )}
             </div>
+          </Modal.Body>
+        </Modal.Root>
+      )}
+      {newTabLink !== null && (
+        <Modal.Root isOpen={true} onClose={() => setNewTabLink(null)}>
+          <Modal.CloseableHeader onClose={() => setNewTabLink(null)}>
+            <Modal.Title>Navigate to link</Modal.Title>
+          </Modal.CloseableHeader>
+          <Modal.Body>
+            <p>{getDomain(newTabLink)} will open in a new tab.</p>
+            <Button
+              variant="primary"
+              onClick={() => {
+                window.open(newTabLink, "_blank");
+                setNewTabLink(null);
+              }}
+            >
+              Open link
+            </Button>
           </Modal.Body>
         </Modal.Root>
       )}
