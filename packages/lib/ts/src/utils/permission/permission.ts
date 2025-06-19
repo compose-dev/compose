@@ -30,6 +30,8 @@ const FEATURE = {
   UNSHARE_APP_EXTERNAL_EMAIL: "unshare-app-external-email",
   CREATE_PRODUCTION_ENVIRONMENT: "create-production-environment",
   DELETE_PRODUCTION_ENVIRONMENT: "delete-production-environment",
+  REFRESH_PRODUCTION_ENVIRONMENT_API_KEY:
+    "refresh-production-environment-api-key",
   // These two aren't relevant right now, but theoretically we may allow
   // organization users to have a "guest" permission in the future. In
   // that case, we'd want app manager+ to be able to control that, not just
@@ -108,7 +110,8 @@ function isAllowed(
     feature === FEATURE.SHARE_APP_EXTERNAL_EMAIL ||
     feature === FEATURE.UNSHARE_APP_EXTERNAL_EMAIL ||
     feature === FEATURE.CREATE_PRODUCTION_ENVIRONMENT ||
-    feature === FEATURE.DELETE_PRODUCTION_ENVIRONMENT
+    feature === FEATURE.DELETE_PRODUCTION_ENVIRONMENT ||
+    feature === FEATURE.REFRESH_PRODUCTION_ENVIRONMENT_API_KEY
   ) {
     return isAppManagerOrAbove(permission);
   }

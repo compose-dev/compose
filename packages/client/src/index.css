@@ -94,6 +94,10 @@
   --LIGHT--brand-red-tag-text: #450a0a; /* red 950 */
   --DARK--brand-green-tag-text: rgba(255, 255, 255, 0.82);
   --DARK--brand-red-tag-text: rgba(255, 255, 255, 0.82);
+  --LIGHT--brand-orange-tag-text: #431407; /* orange 950 */
+  --DARK--brand-orange-tag-text: rgba(255, 255, 255, 0.82);
+  --LIGHT--brand-blue-tag-text: #172554; /* blue 950 */
+  --DARK--brand-blue-tag-text: rgba(255, 255, 255, 0.82);
 
   --brand-neutral-text: var(--LIGHT--brand-neutral-text);
   --text-color: var(--brand-neutral-text);
@@ -140,6 +144,8 @@
 
   --brand-green-tag-text: var(--LIGHT--brand-green-tag-text);
   --brand-red-tag-text: var(--LIGHT--brand-red-tag-text);
+  --brand-orange-tag-text: var(--LIGHT--brand-orange-tag-text);
+  --brand-blue-tag-text: var(--LIGHT--brand-blue-tag-text);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -191,6 +197,8 @@
 
     --brand-green-tag-text: var(--DARK--brand-green-tag-text);
     --brand-red-tag-text: var(--DARK--brand-red-tag-text);
+    --brand-orange-tag-text: var(--DARK--brand-orange-tag-text);
+    --brand-blue-tag-text: var(--DARK--brand-blue-tag-text);
   }
 }
 
@@ -313,14 +321,16 @@
     color: var(--brand-red-tag-text);
   }
   .orange-tag {
-    @apply bg-orange-200 text-orange-950;
+    @apply bg-orange-200;
+    color: var(--brand-orange-tag-text);
   }
   .green-tag {
     @apply bg-green-200;
     color: var(--brand-green-tag-text);
   }
   .blue-tag {
-    @apply bg-blue-200 text-blue-950;
+    @apply bg-blue-200;
+    color: var(--brand-blue-tag-text);
   }
   .purple-tag {
     @apply bg-purple-200 text-purple-950;
@@ -360,14 +370,12 @@
   }
   .theme-dark .orange-tag {
     background-color: #854c1d;
-    color: rgba(255, 255, 255, 0.82);
   }
   .theme-dark .green-tag {
     background-color: hsla(142, 66%, 29%, 0.5);
   }
   .theme-dark .blue-tag {
     background-color: hsla(210, 66%, 35%, 0.5);
-    color: rgba(255, 255, 255, 0.82);
   }
   .theme-dark .purple-tag {
     background-color: #492f64;

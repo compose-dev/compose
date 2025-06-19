@@ -67,54 +67,6 @@ async function routes(server: FastifyInstance, wsGateway: WSGateway) {
     }
   );
 
-  server.get<{ Params: { environmentId: string } }>(
-    `/${BrowserToServerEvent.FetchEnvironmentWithDetails.route}`,
-    async (req, reply) => {
-      const { environmentId } = req.params;
-
-      if (!environmentId) {
-        return reply
-          .status(400)
-          .send({ message: "Environment ID is required" });
-      }
-
-      const user = req.user;
-
-      if (!user || user.isExternal) {
-        return reply.status(401).send({ message: "Unauthorized" });
-      }
-
-      const dbUser = await db.user.selectById(server.pg, user.id);
-
-      if (!dbUser) {
-        return reply.status(400).send({ message: "User not found" });
-      }
-
-      const environment = await db.environment.selectByIdWithExternalUsers(
-        server.pg,
-        environmentId
-      );
-
-      if (!environment) {
-        return reply.status(400).send({ message: "Environment not found" });
-      }
-
-      if (
-        environment.type === m.Environment.TYPE.dev &&
-        environment.id !== dbUser.developmentEnvironmentId
-      ) {
-        return reply.status(403).send({ message: "Forbidden" });
-      }
-
-      const response: BrowserToServerEvent.FetchEnvironmentWithDetails.Response =
-        {
-          environment,
-        };
-
-      reply.status(200).send(response);
-    }
-  );
-
   server.get(
     `/${BrowserToServerEvent.GetSettings.route}`,
     async (req, reply) => {
@@ -372,57 +324,6 @@ async function routes(server: FastifyInstance, wsGateway: WSGateway) {
         },
         companyName: company.name,
       });
-    }
-  );
-
-  server.post(
-    `/${BrowserToServerEvent.CreateEnvironment.route}`,
-    async (req, reply) => {
-      const body =
-        req.body as BrowserToServerEvent.CreateEnvironment.RequestBody;
-
-      const user = req.user;
-
-      if (!user || user.isExternal) {
-        return reply.status(401).send({ message: "Unauthorized" });
-      }
-
-      const dbUser = await db.user.selectById(server.pg, user.id);
-
-      if (!dbUser) {
-        return reply.status(400).send({ message: "User not found" });
-      }
-
-      if (
-        !u.permission.isAllowed(
-          body.type === m.Environment.TYPE.dev
-            ? u.permission.FEATURE.CREATE_DEVELOPMENT_ENVIRONMENT
-            : u.permission.FEATURE.CREATE_PRODUCTION_ENVIRONMENT,
-          dbUser.permission
-        )
-      ) {
-        return reply.status(403).send({
-          message: `Forbidden. You are not authorized to create ${body.type} environments.`,
-        });
-      }
-
-      const key = apiKeyService.generate(body.type);
-
-      const environment = await db.environment.insert(
-        server.pg,
-        user.companyId,
-        body.name,
-        body.type,
-        key.oneWayHash,
-        key.twoWayHash
-      );
-
-      const response: BrowserToServerEvent.CreateEnvironment.Response = {
-        ...environment,
-        key: key.plaintext,
-      };
-
-      reply.status(200).send(response);
     }
   );
 

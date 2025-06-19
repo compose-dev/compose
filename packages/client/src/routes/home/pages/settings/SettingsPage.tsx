@@ -20,8 +20,8 @@ import {
   UsersSection,
 } from "./components";
 import { Page } from "~/routes/home/components/page";
-import { useBillingQuery } from "../../utils/useBillingQuery";
-import { useSettingsQuery } from "../../utils/useSettingsQuery";
+import { useBillingQuery } from "~/utils/queries/useBillingQuery";
+import { useSettingsQuery } from "~/utils/queries/useSettingsQuery";
 import { useRunOnce } from "~/utils/useRunOnce";
 
 export default function Settings() {

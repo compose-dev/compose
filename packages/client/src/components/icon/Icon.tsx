@@ -42,6 +42,9 @@ import {
   IconAlignLeft2,
   IconServer,
   IconExternalLink,
+  IconCode,
+  IconShieldCheckFilled,
+  IconTrash,
 } from "@tabler/icons-react";
 
 const ICON_NAME = {
@@ -106,6 +109,9 @@ const ICON_NAME = {
   format: "format",
   server: "server",
   "external-link": "external-link",
+  code: "code",
+  "shield-check-filled": "shield-check-filled",
+  trash: "trash",
 } as const;
 
 const SIZE = {
@@ -156,8 +162,10 @@ const ICON_COLOR = {
   "brand-error-heavy": "var(--brand-error-heavy)",
   "brand-bg": "var(--brand-bg-page)",
   "brand-primary": "var(--brand-primary)",
+  "brand-orange-tag-text": "var(--brand-orange-tag-text)",
   "brand-green-tag-text": "var(--brand-green-tag-text)",
   "brand-red-tag-text": "var(--brand-red-tag-text)",
+  "brand-blue-tag-text": "var(--brand-blue-tag-text)",
   "yellow-500": "#eab308",
 } as const;
 
@@ -193,6 +201,26 @@ function Icon({
     );
   }
 
+  if (name === ICON_NAME.trash) {
+    return (
+      <IconTrash
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME.code) {
+    return (
+      <IconCode
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
   if (name === ICON_NAME.pin) {
     return (
       <IconPin
@@ -216,6 +244,16 @@ function Icon({
   if (name === ICON_NAME.format) {
     return (
       <IconAlignLeft2
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME["shield-check-filled"]) {
+    return (
+      <IconShieldCheckFilled
         size={16 * SIZE_MULTIPLIER[size]}
         color={ICON_COLOR[color]}
         strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}

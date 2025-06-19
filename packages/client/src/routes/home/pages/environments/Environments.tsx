@@ -5,21 +5,20 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { api } from "~/api";
 
 import Icon from "~/components/icon";
-import { ConnectionStatusIndicator } from "~/components/connection-status-indicator";
 import { InlineLink } from "~/components/inline-link";
 
 import { CenteredSpinner } from "~/components/spinner";
 import { useWSContext, WSProvider } from "~/utils/wsContext";
 
 import Button from "~/components/button";
-import { toast } from "~/utils/toast";
 
-import AppRow from "./AppRow";
 import { useHomeStore, type HomeStore } from "~/routes/home/utils/useHomeStore";
 import NewUserGuide from "./NewUserGuide";
 import NewEnvironmentModal from "./NewEnvironmentModal";
 import { Page } from "~/routes/home/components/page";
 import { Tooltip } from "react-tooltip";
+import Environment from "./Environment";
+import { Divider } from "~/components/divider";
 
 function EnvironmentsWrapper() {
   return (
@@ -30,13 +29,8 @@ function EnvironmentsWrapper() {
 }
 
 function Environments() {
-  const { addToast } = toast.useStore();
-  const {
-    connectionStatus,
-    addWSListener,
-    setEnvironmentOnline,
-    setEnvironmentsOnline,
-  } = useWSContext();
+  const { addWSListener, setEnvironmentOnline, setEnvironmentsOnline } =
+    useWSContext();
 
   const navigate = useNavigate({ from: "/home/" });
   const isNewUser = useSearch({ from: "/home/" }).newUser;
@@ -46,11 +40,6 @@ function Environments() {
     useHomeStore();
 
   const [newEnvironmentModalOpen, setNewEnvironmentModalOpen] = useState(false);
-
-  // Whether to show hidden apps for an environment. Keyed by environment ID.
-  const [showHiddenApps, setShowHiddenApps] = useState<Record<string, boolean>>(
-    {}
-  );
 
   const refetchEnvironment = useCallback(
     async (environmentId: string) => {
@@ -141,23 +130,6 @@ function Environments() {
     });
   }
 
-  function sortedApps(environmentId: string) {
-    const apps = Object.values(environments[environmentId].apps);
-    const copy = [...apps];
-
-    return copy.sort((a, b) => {
-      return u.string.sortAlphabetically(a.name, b.name);
-    });
-  }
-
-  function hiddenSortedApps(environmentId: string) {
-    return sortedApps(environmentId).filter((app) => app.hidden === true);
-  }
-
-  function visibleSortedApps(environmentId: string) {
-    return sortedApps(environmentId).filter((app) => !app.hidden);
-  }
-
   return (
     <Page.Root>
       {isNewUser && user.developmentEnvironmentId && (
@@ -206,101 +178,15 @@ function Environments() {
           </Button>
         </div>
       )}
-      {sortedEnvironments.map((environment) => (
-        <div key={environment.id} className="space-y-4 w-full">
-          <div className="flex flex-col space-y-2">
-            <div className="flex flex-row items-center space-x-4">
-              <Page.Subtitle>{environment.name}</Page.Subtitle>
-              <ConnectionStatusIndicator
-                connectionStatus={connectionStatus[environment.id]}
-              />
-            </div>
-            {environment.key && (
-              <div className="flex flex-row items-center space-x-2 text-brand-neutral-2">
-                <p>API key: {environment.key.substring(0, 12)}...</p>
-                <Button
-                  onClick={() => {
-                    navigator.clipboard.writeText(environment.key || "");
-                    addToast({
-                      message: "Copied API key to clipboard",
-                      appearance: toast.APPEARANCE.success,
-                    });
-                  }}
-                  variant="ghost"
-                >
-                  <Icon name="copy" color="brand-neutral-2" />
-                </Button>
-              </div>
-            )}
-          </div>
-          <div className="flex flex-col w-full">
-            {visibleSortedApps(environment.id).map((app) => (
-              <AppRow
-                key={app.route}
-                route={app.route}
-                name={app.name}
-                environmentId={environment.id}
-                refetchEnvironment={refetchEnvironment}
-              />
-            ))}
-            {hiddenSortedApps(environment.id).length > 0 && (
-              <div className="flex flex-col">
-                <Button
-                  className="flex flex-row items-center justify-between hover:bg-brand-overlay cursor-pointer rounded-brand -mx-2 p-2"
-                  onClick={() => {
-                    setShowHiddenApps((prev) => ({
-                      ...prev,
-                      [environment.id]:
-                        prev[environment.id] === true ? false : true,
-                    }));
-                  }}
-                  variant="ghost"
-                >
-                  <div className="flex flex-row items-center space-x-2">
-                    <Icon name="eye-slash" color="brand-neutral-2" />
-                    <p className="text-brand-neutral-2">
-                      {hiddenSortedApps(environment.id).length} hidden{" "}
-                      {hiddenSortedApps(environment.id).length === 1
-                        ? "app"
-                        : "apps"}
-                    </p>
-                  </div>
-                  <div className="mr-2">
-                    <Icon
-                      name={
-                        showHiddenApps[environment.id]
-                          ? "chevron-up"
-                          : "chevron-down"
-                      }
-                      color="brand-neutral-2"
-                      size="0.75"
-                    />
-                  </div>
-                </Button>
-                {showHiddenApps[environment.id] &&
-                  hiddenSortedApps(environment.id).map((app) => (
-                    <AppRow
-                      key={app.route}
-                      route={app.route}
-                      name={app.name}
-                      environmentId={environment.id}
-                      refetchEnvironment={refetchEnvironment}
-                      hidden={true}
-                    />
-                  ))}
-              </div>
-            )}
-            {Object.values(environments[environment.id].apps).length === 0 && (
-              <p className="text-brand-neutral-2">
-                No apps found. Get going with the{" "}
-                <InlineLink url="https://docs.composehq.com/quickstart">
-                  quickstart guide
-                </InlineLink>
-                .
-              </p>
-            )}
-          </div>
-        </div>
+      {sortedEnvironments.map((environment, index) => (
+        <>
+          <Environment
+            key={environment.id}
+            environment={environment}
+            refetchEnvironment={refetchEnvironment}
+          />
+          {index !== sortedEnvironments.length - 1 && <Divider />}
+        </>
       ))}
       {isDeveloperRole &&
         hasAtLeastOneDevelopmentApp &&
@@ -309,6 +195,7 @@ function Environments() {
           user.permission
         ) && (
           <>
+            <Divider />
             {!hasProductionEnvironment && (
               <div className="space-y-4">
                 <div className="space-y-2">

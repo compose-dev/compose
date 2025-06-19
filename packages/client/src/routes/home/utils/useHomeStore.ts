@@ -41,4 +41,4 @@ const useHomeStore = create<HomeStore>((set) => ({
     set({ environments: {}, user: null, developmentApiKey: null }),
 }));
 
-export { useHomeStore, type HomeStore };
+export { useHomeStore, type HomeStore, type FormattedEnvironment };

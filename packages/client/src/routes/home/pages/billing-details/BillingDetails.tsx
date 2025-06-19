@@ -5,7 +5,7 @@ import { CenteredSpinner } from "~/components/spinner";
 import { classNames } from "~/utils/classNames";
 import { useHomeStore } from "~/routes/home/utils/useHomeStore";
 import { Favicon } from "~/components/favicon";
-import { useBillingQuery } from "../../utils/useBillingQuery";
+import { useBillingQuery } from "~/utils/queries/useBillingQuery";
 import { useEffect, useState } from "react";
 
 export default function BillingDetails() {

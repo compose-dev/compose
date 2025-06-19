@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Modal } from "~/components/modal";
 import { TextInput } from "~/components/input";
 import Button from "~/components/button";
+import { Alert } from "../alert";
 
 const APPEARANCE = {
   PRIMARY: "primary",
@@ -22,6 +23,7 @@ export default function ConfirmDialog({
   confirmButtonLabel = "Yes",
   cancelButtonLabel = "No",
   loading = false,
+  errorMessage = null,
 }: {
   onConfirm: () => void;
   onCancel: () => void;
@@ -32,6 +34,7 @@ export default function ConfirmDialog({
   confirmButtonLabel?: string;
   cancelButtonLabel?: string;
   loading?: boolean;
+  errorMessage?: string | null;
 }) {
   const [error, setError] = useState<string | null>(null);
   const [showError, setShowError] = useState<boolean>(false);
@@ -75,6 +78,11 @@ export default function ConfirmDialog({
             errorMessage={error}
             hasError={showError}
           />
+        )}
+        {errorMessage && (
+          <Alert appearance="danger" iconName="exclamation-circle">
+            {errorMessage}
+          </Alert>
         )}
         <div className="flex items-center justify-end gap-2 pt-2">
           <Button

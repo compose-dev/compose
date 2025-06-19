@@ -13,13 +13,13 @@ function Alert({
   return (
     <div
       className={classNames(
-        "border rounded-brand p-2 flex flex-row gap-x-2 items-center relative",
+        "rounded-brand p-4 flex flex-row gap-x-2 items-start relative",
         {
-          "border-brand-warning text-brand-warning": appearance === "warning",
-          "border-brand-primary text-brand-primary": appearance === "primary",
-          "border-brand-success text-brand-success": appearance === "success",
-          "border-brand-error text-brand-error": appearance === "danger",
-          "border-brand-neutral text-brand-neutral": appearance === "outline",
+          "text-brand-warning": appearance === "warning",
+          "text-brand-primary": appearance === "primary",
+          "text-brand-success": appearance === "success",
+          "text-brand-error": appearance === "danger",
+          "text-brand-neutral": appearance === "outline",
         }
       )}
     >
@@ -42,7 +42,7 @@ function Alert({
       </div>
       <p className="text-sm">{children}</p>
       <div
-        className={classNames("absolute inset-0", {
+        className={classNames("absolute inset-0 rounded-brand", {
           "bg-brand-warning opacity-10": appearance === "warning",
           "bg-brand-primary opacity-10": appearance === "primary",
           "bg-brand-success opacity-10": appearance === "success",

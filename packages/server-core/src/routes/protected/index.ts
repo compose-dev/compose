@@ -4,3 +4,4 @@ export { billingRoutes } from "./billingRoutes";
 export { externalAppUserRoutes } from "./externalAppUserRoutes";
 export { userRoutes } from "./userRoutes";
 export { auditLogRoutes } from "./auditLogRoutes";
+export { environmentRoutes } from "./environmentRoutes";

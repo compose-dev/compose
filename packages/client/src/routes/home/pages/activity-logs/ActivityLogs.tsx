@@ -401,7 +401,6 @@ export default function ActivityLogs() {
             id="audit-logs"
             data={data?.logs ?? []}
             loading={loading ? UI.Stale.OPTION.UPDATE_DISABLED : false}
-            density="compact"
             columns={[
               {
                 id: "severity",

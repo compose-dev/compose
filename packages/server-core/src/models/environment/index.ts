@@ -186,6 +186,30 @@ async function deleteById(pg: Postgres, id: string, companyId: string) {
   );
 }
 
+async function updateApiKey(
+  pg: Postgres,
+  id: string,
+  companyId: string,
+  apiKey: m.Environment.DB["apiKey"],
+  decryptableKey: m.Environment.DB["decryptableKey"]
+) {
+  const result = await pg.query<m.Environment.ApiAndDecryptableKeyOmittedDB>(
+    `
+    UPDATE "environment" 
+    SET "apiKey" = $1, "decryptableKey" = $2 
+    WHERE "id" = $3 AND "companyId" = $4 
+    RETURNING ${API_AND_DECRYPTABLE_KEY_OMITTED_SELECT_FIELDS}
+  `,
+    [apiKey, decryptableKey, id, companyId]
+  );
+
+  if (result.rowCount === 0) {
+    return null;
+  }
+
+  return result.rows[0];
+}
+
 export {
   selectByApiKey,
   selectById,
@@ -199,4 +223,5 @@ export {
   selectAll,
   deleteById,
   selectAllWithCompanyName,
+  updateApiKey,
 };
