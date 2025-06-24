@@ -120,7 +120,7 @@ class Scheduler:
     def run_async(
         self,
         coro: Coroutine[Any, Any, Any],
-    ) -> "concurrent.futures.Future[Any] | Any":
+    ) -> Union[concurrent.futures.Future[Any], Any]:
         """Schedule *coro* for execution and return a handle to its result.
 
         • *Blocking* mode – schedules the coroutine on the current event-loop
