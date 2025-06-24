@@ -85,11 +85,11 @@ class APIHandler:
         del self.listeners[id]
 
     def connect(self, on_connect_data: dict) -> None:
-        self.scheduler.run_until_complete(self.__makeConnectionRequest(on_connect_data))
+        self.scheduler.run_endless_task(self.__makeConnectionRequest(on_connect_data))
 
     def shutdown(self) -> None:
         self.shutting_down = True
-        self.scheduler.stop()
+        self.scheduler.shutdown()
 
     async def send_raw(self, data: bytes) -> None:
         if self.is_connected == True:
@@ -157,7 +157,7 @@ class APIHandler:
 
                     async for message in ws:
                         self.__flush_send_queue()
-                        await self.__on_message(message)
+                        self.scheduler.run_async(self.__on_message(message))
 
                 except asyncio.CancelledError:
                     raise DisconnectionError("Server shutting down")
@@ -248,10 +248,10 @@ class APIHandler:
             data = decode_json_message(message)
 
         for listener in self.listeners.values():
-            listener(data)
+            await listener(data)
 
     def __flush_send_queue(self) -> None:
         if self.is_connected:
             while not self.send_queue.empty():
                 binary = self.send_queue.get()
-                self.scheduler.create_task(self.ws.send(binary))
+                self.scheduler.run_async(self.ws.send(binary))

@@ -1,5 +1,5 @@
 import asyncio
-from ..scheduler import Scheduler  # type: ignore[attr-defined]
+from ..scheduler import Scheduler
 from typing import Callable, Any, Union
 
 

@@ -1,6 +1,23 @@
 import { useCallback, useRef } from "react";
 import { appStore } from "~/utils/appStore";
 
+/**
+ * This hook is used to ensure page fragments always render in the correct order.
+ *
+ * Out-of-order rendering can happen for a variety of reasons due to the async nature
+ * of Compose.
+ *
+ * One example: when messages are received by the client, longer messages will take longer to
+ * deserialize back to JSON. Hence, a longer message that is supposed to render first may actually
+ * end up rendering after a much shorter message.
+ *
+ * Another example: Some messages have side effects that are handled on Compose servers while being
+ * proxied between SDK and client. Earlier messages with side effects may arrive after later messages
+ * that don't have side effects.
+ *
+ * This hook maintains an ordered list of render IDs. It relies on the SDK sending a render IDX alongside
+ * each render request.
+ */
 function useRenders() {
   const renders = useRef<Array<string | null>>([]);
 

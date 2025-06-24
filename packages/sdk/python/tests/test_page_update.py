@@ -1,52 +1,57 @@
 # type: ignore
 
-from typing import Callable, Tuple
+from typing import Any
 import pytest
 from compose_sdk.scheduler import Scheduler
-from compose_sdk.app.appRunner import AppRunner
-from compose_sdk.api import ApiHandler
-from compose_sdk import Page, UI, State
-from compose_sdk.core import EventType, TYPE
+from compose_sdk import Page, UI
+from compose_sdk.core import EventType
 from compose_sdk.core.json import JSON
 import compose_sdk as c
+from tests.conftest import AppRunnerFactory, ApiEventTrackerFactory
 
 
 @pytest.mark.asyncio
-async def test_updates_page_when_text_changes(scheduler, api, app_runner_factory):
+async def test_updates_page_when_text_changes(
+    scheduler: Scheduler,
+    app_runner_factory: AppRunnerFactory,
+    api_event_tracker_factory: ApiEventTrackerFactory,
+):
     async def handler(page: c.Page, ui: c.UI):
         text = "original text"
-        await page.add_with_sleep(lambda: ui.text(text))
+        page.add(lambda: ui.text(text))
+        await scheduler.sleep(0)
 
         text = "updated text"
-        await page.update_with_sleep()
+        page.update()
+        await scheduler.sleep(0)
 
-    did_rerender = False
-    did_update = False
-
-    async def send(event, _, _1):
-        nonlocal did_rerender, did_update
+    def condition(event: Any) -> bool:
+        if not isinstance(event, dict):
+            return False
 
         if event["type"] == EventType.SdkToServer.RERENDER_UI_V3:
-            did_rerender = True
-            did_update = "updated text" in JSON.stringify(event["diff"])
+            return "updated text" in JSON.stringify(event["diff"])
+        return False
 
-    api.send = send
+    tracker = api_event_tracker_factory(
+        {
+            "condition": condition,
+        }
+    )
 
     with app_runner_factory(handler=handler) as runner:
         await runner.execute({})
-        await scheduler.sleep(0)
+        await tracker.wait_until_condition()
 
-    assert did_rerender is True
-    assert did_update is True
+    assert tracker.met_condition is True
 
 
 @pytest.mark.asyncio
 async def test_does_not_update_page_when_text_does_not_change(
-    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]],
+    scheduler: Scheduler,
+    app_runner_factory: AppRunnerFactory,
+    api_event_tracker_factory: ApiEventTrackerFactory,
 ):
-    runner: AppRunner
-    scheduler: Scheduler
-
     async def handler(page: Page, ui: UI):
         text = "original text"
         page.add(lambda: ui.text(text))
@@ -55,30 +60,33 @@ async def test_does_not_update_page_when_text_does_not_change(
         page.update()
         await scheduler.sleep(0.002)
 
-    runner, api, scheduler = app_runner_generator(handler=handler)
+    def condition(event: Any) -> bool:
+        if not isinstance(event, dict):
+            return False
 
-    did_rerender = False
-
-    async def send(event, _, _1):
-        nonlocal did_rerender
         if event["type"] == EventType.SdkToServer.RERENDER_UI_V3:
-            did_rerender = True
+            return True
+        return False
 
-    api.send = send
+    tracker = api_event_tracker_factory(
+        {
+            "condition": condition,
+        }
+    )
 
-    await runner.execute({})
-    await scheduler.sleep(0)
+    with app_runner_factory(handler=handler) as runner:
+        await runner.execute({})
+        await tracker.wait_until_condition()
 
-    assert did_rerender is False
+    assert tracker.met_condition is False
 
 
 @pytest.mark.asyncio
 async def test_updates_when_table_data_changes(
-    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]],
+    scheduler: Scheduler,
+    app_runner_factory: AppRunnerFactory,
+    api_event_tracker_factory: ApiEventTrackerFactory,
 ):
-    runner: AppRunner
-    scheduler: Scheduler
-
     async def handler(page: Page, ui: UI):
         data = [{"id": "1", "name": "John"}, {"id": "2", "name": "Jane"}]
         page.add(lambda: ui.table("table-id", data))
@@ -89,32 +97,33 @@ async def test_updates_when_table_data_changes(
         page.update()
         await scheduler.sleep(0.002)
 
-    runner, api, scheduler = app_runner_generator(handler=handler)
+    def condition(event: Any) -> bool:
+        if not isinstance(event, dict):
+            return False
 
-    did_rerender = False
-    did_update = False
-
-    async def send(event, _, _1):
-        nonlocal did_rerender, did_update
         if event["type"] == EventType.SdkToServer.RERENDER_UI_V3:
-            did_rerender = True
-            did_update = "Updated John" in JSON.stringify(event["diff"])
+            return "Updated John" in JSON.stringify(event["diff"])
+        return False
 
-    api.send = send
+    tracker = api_event_tracker_factory(
+        {
+            "condition": condition,
+        }
+    )
 
-    await runner.execute({})
-    await scheduler.sleep(0)
+    with app_runner_factory(handler=handler) as runner:
+        await runner.execute({})
+        await tracker.wait_until_condition()
 
-    assert did_update is True
+    assert tracker.met_condition is True
 
 
 @pytest.mark.asyncio
 async def test_does_not_update_when_table_data_does_not_change(
-    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]],
+    scheduler: Scheduler,
+    app_runner_factory: AppRunnerFactory,
+    api_event_tracker_factory: ApiEventTrackerFactory,
 ):
-    runner: AppRunner
-    scheduler: Scheduler
-
     async def handler(page: Page, ui: UI):
         data = [{"id": "1", "name": "John"}, {"id": "2", "name": "Jane"}]
         page.add(lambda: ui.table("table-id", data))
@@ -125,31 +134,33 @@ async def test_does_not_update_when_table_data_does_not_change(
         page.update()
         await scheduler.sleep(0.002)
 
-    runner, api, scheduler = app_runner_generator(handler=handler)
+    def condition(event: Any) -> bool:
+        if not isinstance(event, dict):
+            return False
 
-    did_rerender = False
-
-    async def send(event, _, _1):
-        nonlocal did_rerender
         if event["type"] == EventType.SdkToServer.RERENDER_UI_V3:
-            print(event)
-            did_rerender = True
+            return True
+        return False
 
-    api.send = send
+    tracker = api_event_tracker_factory(
+        {
+            "condition": condition,
+        }
+    )
 
-    await runner.execute({})
-    await scheduler.sleep(0)
+    with app_runner_factory(handler=handler) as runner:
+        await runner.execute({})
+        await tracker.wait_until_condition()
 
-    assert did_rerender is False
+    assert tracker.met_condition is False
 
 
 @pytest.mark.asyncio
 async def test_updates_when_table_row_is_added(
-    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]],
+    scheduler: Scheduler,
+    app_runner_factory: AppRunnerFactory,
+    api_event_tracker_factory: ApiEventTrackerFactory,
 ):
-    runner: AppRunner
-    scheduler: Scheduler
-
     async def handler(page: Page, ui: UI):
         data = [{"id": "1", "name": "John"}, {"id": "2", "name": "Jane"}]
         page.add(lambda: ui.table("table-id", data))
@@ -160,32 +171,33 @@ async def test_updates_when_table_row_is_added(
         page.update()
         await scheduler.sleep(0.002)
 
-    runner, api, scheduler = app_runner_generator(handler=handler)
+    def condition(event: Any) -> bool:
+        if not isinstance(event, dict):
+            return False
 
-    did_rerender = False
-    did_update = False
-
-    async def send(event, _, _1):
-        nonlocal did_rerender, did_update
         if event["type"] == EventType.SdkToServer.RERENDER_UI_V3:
-            did_rerender = True
-            did_update = "Jim" in JSON.stringify(event["diff"])
+            return "Jim" in JSON.stringify(event["diff"])
+        return False
 
-    api.send = send
+    tracker = api_event_tracker_factory(
+        {
+            "condition": condition,
+        }
+    )
 
-    await runner.execute({})
-    await scheduler.sleep(0)
+    with app_runner_factory(handler=handler) as runner:
+        await runner.execute({})
+        await tracker.wait_until_condition()
 
-    assert did_update is True
+    assert tracker.met_condition is True
 
 
 @pytest.mark.asyncio
 async def test_updates_when_select_option_changes(
-    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]],
+    scheduler: Scheduler,
+    app_runner_factory: AppRunnerFactory,
+    api_event_tracker_factory: ApiEventTrackerFactory,
 ):
-    runner: AppRunner
-    scheduler: Scheduler
-
     async def handler(page: Page, ui: UI):
         data = ["Option 1", "Option 2"]
         page.add(lambda: ui.select_box("select-id", data))
@@ -196,32 +208,33 @@ async def test_updates_when_select_option_changes(
         page.update()
         await scheduler.sleep(0.002)
 
-    runner, api, scheduler = app_runner_generator(handler=handler)
+    def condition(event: Any) -> bool:
+        if not isinstance(event, dict):
+            return False
 
-    did_rerender = False
-    did_update = False
-
-    async def send(event, _, _1):
-        nonlocal did_rerender, did_update
         if event["type"] == EventType.SdkToServer.RERENDER_UI_V3:
-            did_rerender = True
-            did_update = "Option 3" in JSON.stringify(event["diff"])
+            return "Option 3" in JSON.stringify(event["diff"])
+        return False
 
-    api.send = send
+    tracker = api_event_tracker_factory(
+        {
+            "condition": condition,
+        }
+    )
 
-    await runner.execute({})
-    await scheduler.sleep(0)
+    with app_runner_factory(handler=handler) as runner:
+        await runner.execute({})
+        await tracker.wait_until_condition()
 
-    assert did_update is True
+    assert tracker.met_condition is True
 
 
 @pytest.mark.asyncio
 async def test_updates_when_multiselect_option_changes(
-    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]],
+    scheduler: Scheduler,
+    app_runner_factory: AppRunnerFactory,
+    api_event_tracker_factory: ApiEventTrackerFactory,
 ):
-    runner: AppRunner
-    scheduler: Scheduler
-
     async def handler(page: Page, ui: UI):
         data = ["Option 1", "Option 2"]
         page.add(lambda: ui.multi_select_box("select-id", data))
@@ -232,32 +245,33 @@ async def test_updates_when_multiselect_option_changes(
         page.update()
         await scheduler.sleep(0.002)
 
-    runner, api, scheduler = app_runner_generator(handler=handler)
+    def condition(event: Any) -> bool:
+        if not isinstance(event, dict):
+            return False
 
-    did_rerender = False
-    did_update = False
-
-    async def send(event, _, _1):
-        nonlocal did_rerender, did_update
         if event["type"] == EventType.SdkToServer.RERENDER_UI_V3:
-            did_rerender = True
-            did_update = "Option 3" in JSON.stringify(event["diff"])
+            return "Option 3" in JSON.stringify(event["diff"])
+        return False
 
-    api.send = send
+    tracker = api_event_tracker_factory(
+        {
+            "condition": condition,
+        }
+    )
 
-    await runner.execute({})
-    await scheduler.sleep(0)
+    with app_runner_factory(handler=handler) as runner:
+        await runner.execute({})
+        await tracker.wait_until_condition()
 
-    assert did_update is True
+    assert tracker.met_condition is True
 
 
 @pytest.mark.asyncio
 async def test_updates_when_radio_option_changes(
-    app_runner_generator: Callable[[Callable], Tuple[AppRunner, ApiHandler]],
+    scheduler: Scheduler,
+    app_runner_factory: AppRunnerFactory,
+    api_event_tracker_factory: ApiEventTrackerFactory,
 ):
-    runner: AppRunner
-    scheduler: Scheduler
-
     async def handler(page: Page, ui: UI):
         data = ["Option 1", "Option 2"]
         page.add(lambda: ui.radio_group("radio-id", data))
@@ -268,20 +282,22 @@ async def test_updates_when_radio_option_changes(
         page.update()
         await scheduler.sleep(0.002)
 
-    runner, api, scheduler = app_runner_generator(handler=handler)
+    def condition(event: Any) -> bool:
+        if not isinstance(event, dict):
+            return False
 
-    did_rerender = False
-    did_update = False
-
-    async def send(event, _, _1):
-        nonlocal did_rerender, did_update
         if event["type"] == EventType.SdkToServer.RERENDER_UI_V3:
-            did_rerender = True
-            did_update = "Option 3" in JSON.stringify(event["diff"])
+            return "Option 3" in JSON.stringify(event["diff"])
+        return False
 
-    api.send = send
+    tracker = api_event_tracker_factory(
+        {
+            "condition": condition,
+        }
+    )
 
-    await runner.execute({})
-    await scheduler.sleep(0)
+    with app_runner_factory(handler=handler) as runner:
+        await runner.execute({})
+        await tracker.wait_until_condition()
 
-    assert did_update is True
+    assert tracker.met_condition is True

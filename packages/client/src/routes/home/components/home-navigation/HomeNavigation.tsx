@@ -14,12 +14,14 @@ function NavigationItem({
   label,
   isActive,
   appearance = "neutral",
+  isExternalLink = false,
   onClick,
 }: {
   icon: Parameters<typeof Icon>[0]["name"];
   label: string;
   isActive: boolean;
   appearance?: "neutral" | "danger";
+  isExternalLink?: boolean;
   onClick?: () => void;
 }) {
   return (
@@ -45,16 +47,23 @@ function NavigationItem({
         }
         size="1.25"
       />
-      <p
-        className={classNames({
-          "text-brand-neutral": isActive && appearance === "neutral",
-          "text-brand-neutral-2": !isActive && appearance === "neutral",
-          "text-brand-error": isActive && appearance === "danger",
-          "text-brand-error-heavy": !isActive && appearance === "danger",
-        })}
-      >
-        {label}
-      </p>
+      <div className="flex gap-1 items-start">
+        <p
+          className={classNames({
+            "text-brand-neutral": isActive && appearance === "neutral",
+            "text-brand-neutral-2": !isActive && appearance === "neutral",
+            "text-brand-error": isActive && appearance === "danger",
+            "text-brand-error-heavy": !isActive && appearance === "danger",
+          })}
+        >
+          {label}
+        </p>
+        {isExternalLink && (
+          <div className="mt-1">
+            <Icon name="external-link" color="brand-neutral-2" size="0.875" />
+          </div>
+        )}
+      </div>
     </button>
   );
 }
@@ -112,6 +121,26 @@ export default function HomeNavigation({
             onClick={() => navigate({ to: "/home/settings" })}
           />
           <div className="flex flex-1" />
+          <NavigationItem
+            icon="book"
+            label="Docs"
+            isActive={false}
+            appearance="neutral"
+            onClick={async () => {
+              window.open("https://docs.composehq.com", "_blank");
+            }}
+            isExternalLink
+          />
+          <NavigationItem
+            icon="script"
+            label="Changelog"
+            isActive={false}
+            appearance="neutral"
+            onClick={async () => {
+              window.open("https://composehq.com/changelog", "_blank");
+            }}
+            isExternalLink
+          />
           <NavigationItem
             icon="logout"
             label="Log out"
@@ -185,6 +214,26 @@ export default function HomeNavigation({
             />
           </div>
           <div className="flex flex-1" />
+          <NavigationItem
+            icon="book"
+            label="Docs"
+            isActive={false}
+            appearance="neutral"
+            onClick={async () => {
+              window.open("https://docs.composehq.com", "_blank");
+            }}
+            isExternalLink
+          />
+          <NavigationItem
+            icon="script"
+            label="Changelog"
+            isActive={false}
+            appearance="neutral"
+            onClick={async () => {
+              window.open("https://composehq.com/changelog", "_blank");
+            }}
+            isExternalLink
+          />
           <NavigationItem
             icon="logout"
             label="Log out"

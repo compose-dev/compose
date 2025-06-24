@@ -7,6 +7,7 @@ from .literals import (
 from .series_chart import (
     ChartSeries,
     ChartSeriesData,
+    ChartSeriesDataRow,
     ChartSeriesDataKey,
     ChartSeriesGroupFnResult,
     ChartSeriesValueFnResult,
@@ -23,6 +24,7 @@ __all__ = [
     "ChartScale",
     "ChartSeries",
     "ChartSeriesData",
+    "ChartSeriesDataRow",
     "ChartSeriesDataKey",
     "ChartSeriesGroupFnResult",
     "ChartSeriesValueFnResult",

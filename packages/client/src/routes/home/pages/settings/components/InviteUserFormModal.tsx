@@ -30,7 +30,7 @@ function BillingNotice({
 
   return (
     <BillingNoticeUI className="!mt-4">
-      Adding a user will use one of {standardSeatsAvailable} unfilled
+      Adding a user will use 1 of {standardSeatsAvailable} unfilled
       {standardSeatsAvailable === 1 ? " seat" : " seats"} available on your
       plan.
     </BillingNoticeUI>

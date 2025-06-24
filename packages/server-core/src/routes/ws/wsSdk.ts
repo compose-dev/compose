@@ -22,8 +22,8 @@ import {
 import WSBase from "./wsBase";
 
 const MIN_SUPPORTED_PACKAGE_VERSION: Record<uPublic.sdkPackage.Name, string> = {
-  [uPublic.sdkPackage.NAME.NODE]: "0.19.0",
-  [uPublic.sdkPackage.NAME.PYTHON]: "0.19.0",
+  [uPublic.sdkPackage.NAME.NODE]: "0.26.0",
+  [uPublic.sdkPackage.NAME.PYTHON]: "0.26.0",
 };
 
 type SdkClient = {

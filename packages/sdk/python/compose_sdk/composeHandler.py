@@ -168,11 +168,11 @@ class ComposeClient:
         self.audit_log_rate_limiter = RateLimiter(MAX_AUDIT_LOGS_PER_MINUTE, 60000)
 
     def connect(self) -> None:
-        self.scheduler.initialize(True)
+        self.scheduler.init(True)
         self.__connect_ws()
 
     def connect_async(self) -> None:
-        self.scheduler.initialize(False)
+        self.scheduler.init(False)
         self.__connect_ws()
 
     def shutdown(self) -> None:
@@ -181,7 +181,7 @@ class ComposeClient:
     def __connect_ws(self) -> None:
         self.api.add_listener(
             "browser-listener",
-            lambda event: self.scheduler.create_task(self.handle_browser_event(event)),
+            lambda event: self.handle_browser_event(event),
         )
 
         self.api.connect(
@@ -360,9 +360,8 @@ class ComposeClient:
             audit_log_rate_limiter=self.audit_log_rate_limiter,
         )
 
-        runner.execution_task = self.scheduler.create_task(runner.execute(params))
-
         self.app_runners[execution_id] = runner
+        await runner.execute(params)
 
     def cleanup_browser_session(self, browser_session_id: str) -> None:
         old_runner_ids = [

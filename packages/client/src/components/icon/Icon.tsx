@@ -41,10 +41,12 @@ import {
   IconPinned,
   IconAlignLeft2,
   IconServer,
-  IconExternalLink,
+  IconArrowUpRight,
   IconCode,
   IconShieldCheckFilled,
   IconTrash,
+  IconBook2,
+  IconScript,
 } from "@tabler/icons-react";
 
 const ICON_NAME = {
@@ -112,6 +114,8 @@ const ICON_NAME = {
   code: "code",
   "shield-check-filled": "shield-check-filled",
   trash: "trash",
+  book: "book",
+  script: "script",
 } as const;
 
 const SIZE = {
@@ -201,6 +205,26 @@ function Icon({
     );
   }
 
+  if (name === ICON_NAME.script) {
+    return (
+      <IconScript
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME.book) {
+    return (
+      <IconBook2
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
   if (name === ICON_NAME.trash) {
     return (
       <IconTrash
@@ -233,7 +257,7 @@ function Icon({
 
   if (name === ICON_NAME["external-link"]) {
     return (
-      <IconExternalLink
+      <IconArrowUpRight
         size={16 * SIZE_MULTIPLIER[size]}
         color={ICON_COLOR[color]}
         strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}

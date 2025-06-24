@@ -1,20 +1,16 @@
 # type: ignore
-from typing import Any, Callable
-import inspect
 import datetime
 
-from ..run_hook_function import run_hook_function
+from .ui.types import INTERACTION_TYPE, TYPE, Table
+from .file import File
+from .static_tree import StaticTree
+from .json import JSON
+from .run_hook_function import RunHookFunction
 
-from ..ui import INTERACTION_TYPE, TYPE, Table
-from ..file import File
-from ..static_tree import StaticTree
-from ..json import JSON
 
-
-class Render:
-    @staticmethod
-    async def run_hook_function(hook_function: Callable[..., Any], *args: Any):
-        return await run_hook_function(hook_function, *args)
+class ValidateForm:
+    def __init__(self, run_hook_function: RunHookFunction):
+        self.run_hook_function = run_hook_function
 
     @staticmethod
     def hydrate_form_data(form_data, component_tree, temp_files):
@@ -128,8 +124,7 @@ class Render:
 
         return hydrated, temp_files_to_delete
 
-    @staticmethod
-    async def get_form_input_errors(form_data, static_layout):
+    async def get_form_input_errors(self, form_data, static_layout):
         input_errors = {}
         has_errors = False
 
@@ -146,7 +141,9 @@ class Render:
                 continue
 
             validator_func = input_component["hooks"]["validate"]
-            validator_response = await Render.run_hook_function(validator_func, data)
+            validator_response = await self.run_hook_function.execute(
+                validator_func, data
+            )
 
             if isinstance(validator_response, str):
                 has_errors = True
@@ -160,13 +157,14 @@ class Render:
 
         return None
 
-    @staticmethod
-    async def get_form_error(component, form_data):
+    async def get_form_error(self, component, form_data):
         if component["hooks"]["validate"] is None:
             return None
 
         validator_func = component["hooks"]["validate"]
-        validator_response = await Render.run_hook_function(validator_func, form_data)
+        validator_response = await self.run_hook_function.execute(
+            validator_func, form_data
+        )
 
         if isinstance(validator_response, str):
             return validator_response

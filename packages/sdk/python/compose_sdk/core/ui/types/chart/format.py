@@ -1,6 +1,6 @@
 from typing import Callable, List, Union, Dict, Any
 
-from ....run_hook_function import run_hook_function
+from ....run_hook_function import RunHookFunction
 
 from .series_chart import *
 from .literals import ChartAggregator
@@ -12,8 +12,8 @@ async def chart_format_series_data(
     group: Union[
         ChartSeriesDataKey,
         Callable[[], ChartSeriesGroupFnResult],
-        Callable[[ChartSeriesData], ChartSeriesGroupFnResult],
-        Callable[[ChartSeriesData, int], ChartSeriesGroupFnResult],
+        Callable[[ChartSeriesDataRow], ChartSeriesGroupFnResult],
+        Callable[[ChartSeriesDataRow, int], ChartSeriesGroupFnResult],
         None,
     ] = None,
     series: Union[
@@ -32,7 +32,7 @@ async def chart_format_series_data(
 
             if isinstance(group, Callable):  # type: ignore[arg-type]
                 group_key = None
-                group_label = await run_hook_function(
+                group_label = await RunHookFunction.execute_static(
                     group, row, idx  # type: ignore[arg-type]
                 )
             elif isinstance(group, (str, int, float)):
@@ -84,7 +84,9 @@ async def chart_format_series_data(
                     if isinstance(value, Callable):  # type: ignore[arg-type]
                         values = []
                         for i in grouped_data[group]:
-                            val = await run_hook_function(value, data[i], i)  # type: ignore[arg-type]
+                            val = await RunHookFunction.execute_static(
+                                value, data[i], i  # type: ignore[arg-type]
+                            )
                             if val is not None:
                                 values.append(val)
                     elif isinstance(value, (str, int, float)):  # type: ignore[unused-ignore]

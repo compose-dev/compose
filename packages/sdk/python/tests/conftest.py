@@ -112,7 +112,7 @@ def app_runner_factory(
         runner_options: Union[Dict[str, Any], None] = None,
     ) -> Generator[AppRunner, None, None]:
         # Start the scheduler once the test has began running
-        scheduler.initialize(True)
+        scheduler.init(True)
 
         options = {
             "executionId": "test_execution_id",

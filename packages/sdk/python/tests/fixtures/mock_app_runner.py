@@ -19,7 +19,7 @@ def app_runner_generator() -> (
         app_definition: Union[AppDefinition, None] = None,
     ) -> Tuple[AppRunner, ApiHandler, Scheduler]:
         scheduler = Scheduler()
-        scheduler.initialize(True)
+        scheduler.init(True)
 
         api = ApiHandler(
             scheduler,

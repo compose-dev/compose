@@ -44,7 +44,7 @@ function SearchInput({
       placeholder="Search"
       label={null}
       left={<Icon name="search" color="brand-neutral-2" />}
-      rootClassName="!w-full sm:!w-60 md:!w-72"
+      rootClassName="!w-full sm:max-w-60 md:max-w-72"
       inputClassName={classNames("border-none focus:ring-0 focus:border-none", {
         "!bg-brand-io text-brand-neutral-2": disabled === true,
       })}
@@ -97,7 +97,7 @@ function SearchWidget({
 
   return (
     <form
-      className="flex flex-row gap-x-2 items-center sm:mr-2"
+      className="flex flex-row gap-x-2 items-center sm:mr-2 flex-1"
       onSubmit={(e) => {
         e.preventDefault();
         onTablePageChangeHook();
@@ -213,7 +213,7 @@ function ToolbarRow({
         }
       )}
     >
-      <div className="flex flex-row gap-x-2 items-center justify-between self-stretch">
+      <div className="flex flex-row gap-x-2 items-center justify-between self-stretch flex-1">
         <SearchWidget
           searchQuery={searchQueryHook.draft}
           setSearchQuery={searchQueryHook.set}

@@ -1,6 +1,6 @@
 from typing import Dict, TypedDict, Any, Union, Tuple, List
-from ..scheduler import Scheduler  # type: ignore[attr-defined]
-from .ui import Stale, TableColumnSortRule, Table
+from ..scheduler import Scheduler
+from .ui.types import Stale, TableColumnSortRule, Table
 from .smart_debounce import SmartDebounce
 from .json import JSON
 from .component_update_cache import ComponentUpdateCache

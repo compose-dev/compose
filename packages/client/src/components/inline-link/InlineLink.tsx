@@ -51,7 +51,7 @@ function InlineLink({
                   ? "brand-success"
                   : "brand-neutral"
           }
-          size="1.125"
+          size="1"
         />
       )}
     </a>

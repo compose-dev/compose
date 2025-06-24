@@ -10,6 +10,7 @@ from compose_sdk import Page, UI, State
 from compose_sdk.core import EventType, TYPE
 from compose_sdk.app.appDefinition import AppDefinition
 from compose_sdk.core.json import JSON
+from tests.conftest import AppRunnerFactory, ApiEventTrackerFactory
 
 
 @pytest.mark.asyncio
@@ -19,37 +20,56 @@ async def test_app_runner_initialization(
     runner, _, _ = app_runner_generator(handler=lambda: None)  # type: ignore
 
     # Assert that renders and tempFiles are empty
-    assert runner.renders == {}
+    assert runner.renders == []
+    assert runner.renders_by_id == {}
     assert runner.tempFiles == {}
     assert runner.confirmationDialog is None
 
 
 @pytest.mark.asyncio
-async def test_app_runner_renders_ui(scheduler, app_runner_factory):
+async def test_app_runner_renders_ui(
+    scheduler: Scheduler,
+    app_runner_factory: AppRunnerFactory,
+    api_event_tracker_factory: ApiEventTrackerFactory,
+):
     async def handler(page: Page, ui: UI):
         page.add(lambda: ui.text("Hello, World!"))
-
-    with app_runner_factory(handler=handler) as runner:
-        # Run the app
-        await runner.execute({})
         await scheduler.sleep(0)
 
-    # Assert that there's exactly one render
-    assert len(runner.renders) == 1
+    def condition(event) -> bool:
+        if not isinstance(event, dict):
+            return False
 
-    # Get the single render from the dict
-    render_id, render_data = next(iter(runner.renders.items()))
+        if event["type"] == EventType.SdkToServer.RENDER_UI_V2:
+            model = event["ui"]["model"]
+            if (
+                event["ui"]["type"] == TYPE.DISPLAY_TEXT
+                and model["properties"]["text"] == "Hello, World!"
+            ):
+                return True
 
-    # Assert that the static layout is correct
-    assert render_data["static_layout"]["type"] == TYPE.DISPLAY_TEXT
-    assert (
-        render_data["static_layout"]["model"]["properties"]["text"] == "Hello, World!"
+        return False
+
+    tracker = api_event_tracker_factory(
+        {
+            "condition": condition,
+        }
     )
+
+    with app_runner_factory(handler=handler) as runner:
+        await runner.execute({})
+        await tracker.wait_until_condition()
+
+    assert tracker.met_condition is True
 
 
 @pytest.mark.asyncio
-async def test_properly_defers_state_updates(scheduler, api, app_runner_factory):
-    def handler(page: Page, ui: UI, state: State):
+async def test_properly_defers_state_updates(
+    scheduler: Scheduler,
+    app_runner_factory: AppRunnerFactory,
+    api_event_tracker_factory: ApiEventTrackerFactory,
+):
+    async def handler(page: Page, ui: UI, state: State):
         state["processing"] = False
 
         page.add(
@@ -61,56 +81,78 @@ async def test_properly_defers_state_updates(scheduler, api, app_runner_factory)
         )
 
         state["processing"] = True
+        await scheduler.sleep(0)
 
-    did_rerender = False
+    def condition(event) -> bool:
+        if not isinstance(event, dict):
+            return False
 
-    async def send(event, _, _1):
-        nonlocal did_rerender
+        if event["type"] == EventType.SdkToServer.RENDER_UI_V2:
+            # Check if the event contains "YES processing" text
+            event_str = str(event)
+            if "YES processing" in event_str:
+                return True
 
-        if "YES processing" in JSON.stringify(event):
-            did_rerender = True
+        return False
 
-    api.send = send
+    tracker = api_event_tracker_factory(
+        {
+            "condition": condition,
+        }
+    )
 
     # Run the app
     with app_runner_factory(handler=handler) as runner:
         await runner.execute({})
-        await scheduler.sleep(0)
+        await tracker.wait_until_condition()
 
     # Assert that it re-rendered
-    assert did_rerender is True
+    assert tracker.met_condition is True
 
 
 @pytest.mark.asyncio
-async def test_app_runner_sets_confirmation_dialog(app_runner_generator):
+async def test_app_runner_sets_confirmation_dialog(
+    scheduler: Scheduler,
+    app_runner_factory: AppRunnerFactory,
+    api_event_tracker_factory: ApiEventTrackerFactory,
+):
     runner: AppRunner
     scheduler: Scheduler
 
     async def handler(page: Page):
         page.confirm()
 
-    runner, _, scheduler = app_runner_generator(handler=handler)
+    def condition(event) -> bool:
+        if event["type"] == EventType.SdkToServer.CONFIRM_V2:
+            return True
 
-    # It starts off with no confirmation dialog
-    assert runner.confirmationDialog is None
+    tracker = api_event_tracker_factory(
+        {
+            "condition": condition,
+        }
+    )
 
     # Run the app
-    await runner.execute({})
-    await scheduler.sleep(0)
+    with app_runner_factory(handler=handler) as runner:
+        assert runner.confirmationDialog is None
 
-    # Assert that there's no renders
-    assert len(runner.renders) == 0
+        await runner.execute({})
+        await tracker.wait_until_condition()
 
-    assert runner.confirmationDialog is not None
-    assert runner.confirmationDialog["is_active"] is True
-    assert runner.confirmationDialog["id"] is not None
+        # Assert that there's no renders
+        assert len(runner.renders) == 0
+
+        assert runner.confirmationDialog is not None
+        assert runner.confirmationDialog["is_active"] is True
+        assert runner.confirmationDialog["id"] is not None
 
 
 @pytest.mark.asyncio
-async def test_app_runner_correctly_resolves_confirmation_dialog(app_runner_generator):
-    runner: AppRunner
-    scheduler: Scheduler
-
+async def test_app_runner_correctly_resolves_confirmation_dialog(
+    scheduler: Scheduler,
+    app_runner_factory: AppRunnerFactory,
+    api_event_tracker_factory: ApiEventTrackerFactory,
+):
     confirm_response = None
 
     async def handler(page: Page):
@@ -125,24 +167,35 @@ async def test_app_runner_correctly_resolves_confirmation_dialog(app_runner_gene
 
         confirm_response = await response
 
-    runner, _, scheduler = app_runner_generator(handler=handler)
+    def condition(event) -> bool:
+        nonlocal confirm_response
+        if confirm_response is not None:
+            return True
 
-    # It starts off with no confirmation dialog
-    assert runner.confirmationDialog is None
+        return False
 
-    # Run the app
-    await runner.execute({})
-    await scheduler.sleep(0)
+    tracker = api_event_tracker_factory(
+        {
+            "condition": condition,
+        }
+    )
 
-    assert confirm_response is True
+    with app_runner_factory(handler=handler) as runner:
+        assert runner.confirmationDialog is None
+
+        # Run the app
+        await runner.execute({})
+        await tracker.wait_until_condition()
+
+        assert confirm_response is True
 
 
 @pytest.mark.asyncio
-async def test_app_runner_does_not_allow_two_confirmation_dialogs(app_runner_generator):
-    runner: AppRunner
-    api: ApiHandler
-    scheduler: Scheduler
-
+async def test_app_runner_does_not_allow_two_confirmation_dialogs(
+    scheduler: Scheduler,
+    app_runner_factory: AppRunnerFactory,
+    api_event_tracker_factory: ApiEventTrackerFactory,
+):
     async def handler(page: Page):
         page.confirm()
         await scheduler.sleep(0)
@@ -150,30 +203,34 @@ async def test_app_runner_does_not_allow_two_confirmation_dialogs(app_runner_gen
         page.confirm()
         await scheduler.sleep(0)
 
-    runner, api, scheduler = app_runner_generator(handler=handler)
-
-    got_error = False
-
-    def send(event, _, _1):
-        nonlocal got_error
+    def condition(event) -> bool:
+        if not isinstance(event, dict):
+            return False
 
         if (
             event["type"] == EventType.SdkToServer.APP_ERROR_V2
             and event["errorMessage"]
             == "Trying to open a confirmation dialog while another one is already open"
         ):
-            got_error = True
+            return True
 
-    api.send = send  # type: ignore
+        return False
 
-    # It starts off with no confirmation dialog
-    assert runner.confirmationDialog is None
+    tracker = api_event_tracker_factory(
+        {
+            "condition": condition,
+        }
+    )
 
-    # Run the app
-    await runner.execute({})
-    await scheduler.sleep(0)
+    with app_runner_factory(handler=handler) as runner:
+        # It starts off with no confirmation dialog
+        assert runner.confirmationDialog is None
 
-    assert got_error is True
+        # Run the app
+        await runner.execute({})
+        await tracker.wait_until_condition()
+
+    assert tracker.met_condition is True
 
 
 @pytest.mark.asyncio
@@ -268,10 +325,12 @@ async def test_app_runner_state_is_re_initialized_across_executions(
     assert counts[1] == 0
 
 
-async def test_app_runner_updates_component_when_state_is_updated(app_runner_generator):
-    runner: AppRunner
-    scheduler: Scheduler
-
+@pytest.mark.asyncio
+async def test_app_runner_updates_component_when_state_is_updated(
+    scheduler: Scheduler,
+    app_runner_factory: AppRunnerFactory,
+    api_event_tracker_factory: ApiEventTrackerFactory,
+):
     async def handler(page: Page, ui: UI, state: State):
         state["count"] = 0
 
@@ -282,51 +341,50 @@ async def test_app_runner_updates_component_when_state_is_updated(app_runner_gen
 
         page.add(lambda: ui.button("increment", on_click=increment))
 
-        await scheduler.sleep(0)
-
+        await scheduler.sleep(0.002)
         render_id = next(
             render_id
-            for render_id, render_data in runner.renders.items()
+            for render_id, render_data in runner.renders_by_id.items()
             if "increment" in JSON.stringify(render_data)
         )
-
         await runner.on_click_hook("increment", render_id)
-        await scheduler.sleep(0.002)  # Account for debounce on state update
 
-    runner, api, scheduler = app_runner_generator(handler=handler)
+    def condition(event) -> bool:
+        if not isinstance(event, dict):
+            return False
 
-    did_rerender = False
+        # Look for rerender event that updates the text from "0" to "1"
+        if event["type"] == EventType.SdkToServer.RERENDER_UI_V3:
+            event_str = JSON.stringify(event)
+            if "1 UNIQUE_TEXT" in event_str:
+                return True
 
-    async def send(event, _, _1):
-        nonlocal did_rerender
+        return False
 
-        render_id = next(
-            render_id
-            for render_id, render_data in runner.renders.items()
-            if "UNIQUE_TEXT" in JSON.stringify(render_data)
-        )
+    tracker = api_event_tracker_factory(
+        {
+            "condition": condition,
+        }
+    )
 
-        is_rerender = event["type"] == EventType.SdkToServer.RERENDER_UI_V3
+    with app_runner_factory(handler=handler) as runner:
+        await runner.execute({})
+        await tracker.wait_until_condition()
 
-        if is_rerender and "1" in JSON.stringify(event["diff"][render_id]["update"]):
-            did_rerender = True
-
-    api.send = send
-
-    # Run the app
-    await runner.execute({})
-    await scheduler.sleep(0)
-
-    assert did_rerender is True
+    assert tracker.met_condition is True
 
 
+@pytest.mark.asyncio
 async def test_app_runner_deletes_and_adds_component_when_state_is_updated(
-    app_runner_generator,
+    scheduler: Scheduler,
+    app_runner_factory: AppRunnerFactory,
+    api_event_tracker_factory: ApiEventTrackerFactory,
 ):
-    runner: AppRunner
-    scheduler: Scheduler
+    first_render_id = None
 
     async def handler(page: Page, ui: UI, state: State):
+        nonlocal first_render_id
+
         state["count"] = 0
 
         def get_ui():
@@ -342,53 +400,49 @@ async def test_app_runner_deletes_and_adds_component_when_state_is_updated(
 
         page.add(lambda: ui.button("increment", on_click=increment))
 
-        await scheduler.sleep(0)
+        await scheduler.sleep(0.002)
+        first_render_id = runner.renders[0]
 
-        render_id = next(
-            render_id
-            for render_id, render_data in runner.renders.items()
-            if "increment" in JSON.stringify(render_data)
-        )
+        # Find the button and click it
+        await runner.on_click_hook("increment", runner.renders[1])
 
-        await runner.on_click_hook("increment", render_id)
-        await scheduler.sleep(0.002)  # Account for debounce on state update
+    def condition(event) -> bool:
+        if not isinstance(event, dict):
+            return False
 
-    runner, api, scheduler = app_runner_generator(handler=handler)
+        if first_render_id is None:
+            return False
 
-    did_rerender = False
+        # Look for rerender event that deletes UNIQUE_TEXT and adds UNIQUE_HEADER
+        if event["type"] == EventType.SdkToServer.RERENDER_UI_V3:
+            if event["diff"][first_render_id]["delete"][
+                0
+            ] == "UNIQUE_TEXT" and "1, UNIQUE_HEADER" in JSON.stringify(
+                event["diff"][first_render_id]["add"]
+            ):
+                return True
 
-    async def send(event, _, _1):
-        nonlocal did_rerender
+        return False
 
-        render_id = next(
-            render_id
-            for render_id, render_data in runner.renders.items()
-            if "UNIQUE_HEADER" in JSON.stringify(render_data)
-        )
+    tracker = api_event_tracker_factory(
+        {
+            "condition": condition,
+        }
+    )
 
-        is_rerender = event["type"] == EventType.SdkToServer.RERENDER_UI_V3
+    with app_runner_factory(handler=handler) as runner:
+        await runner.execute({})
+        await tracker.wait_until_condition()
 
-        if (
-            is_rerender
-            and event["diff"][render_id]["delete"][0] == "UNIQUE_TEXT"
-            and "1, UNIQUE_HEADER" in JSON.stringify(event["diff"][render_id]["add"])
-        ):
-            did_rerender = True
-
-    api.send = send
-
-    # Run the app
-    await runner.execute({})
-    await scheduler.sleep(0)
-
-    assert did_rerender is True
+    assert tracker.met_condition is True
 
 
+@pytest.mark.asyncio
 async def test_app_runner_does_nothing_when_state_update_does_not_change_anything(
-    app_runner_generator,
+    scheduler: Scheduler,
+    app_runner_factory: AppRunnerFactory,
+    api_event_tracker_factory: ApiEventTrackerFactory,
 ):
-    runner: AppRunner
-    scheduler: Scheduler
 
     async def handler(page: Page, ui: UI, state: State):
         state["initial"] = "initial"
@@ -401,51 +455,55 @@ async def test_app_runner_does_nothing_when_state_update_does_not_change_anythin
 
         page.add(ui.button("increment", on_click=increment))
 
-        await scheduler.sleep(0)
+        await scheduler.sleep(0.002)
 
-        render_id = next(
-            internal_render_id
-            for internal_render_id, render_data in runner.renders.items()
-            if "increment" in JSON.stringify(render_data)
-        )
+        # Should be the second render
+        button_render_id = runner.renders[1]
 
-        await runner.on_click_hook("increment", render_id)
-        await scheduler.sleep(0.002)  # Account for debounce on state update
+        await runner.on_click_hook("increment", button_render_id)
+
         page.add(lambda: ui.header(str(state["count"])))
+        await scheduler.sleep(0.002)
 
-        await scheduler.sleep(0)
-
-        await runner.on_click_hook("increment", render_id)
-        await scheduler.sleep(0.002)  # Account for debounce on state update
-
-    runner, api, scheduler = app_runner_generator(handler=handler)
+        # Second click - this should NOT cause the text component to rerender
+        # since its content and style haven't changed
+        await runner.on_click_hook("increment", button_render_id)
 
     received_incorrect_render = False
-    received_correct_render = False
+    received_correct_render = None
 
-    async def send(event, _, _1):
+    def condition(event) -> bool:
         nonlocal received_incorrect_render
         nonlocal received_correct_render
 
-        if event["type"] != EventType.SdkToServer.RERENDER_UI_V3:
-            return
+        if not isinstance(event, dict):
+            return False
 
-        render_id = list(event["diff"].keys())[0]
+        # Look for rerender event that updates the header count (should happen)
+        # but NOT the text with style (should not happen since it hasn't changed)
+        if event["type"] == EventType.SdkToServer.RERENDER_UI_V3:
+            render_id = list(event["diff"].keys())[0]
 
-        update = list(event["diff"][render_id]["update"].values())[0]
+            update = list(event["diff"][render_id]["update"].values())[0]
 
-        is_style_defined = update["style"] is not None
+            is_style_defined = update["style"] is not None
 
-        if is_style_defined:
-            received_incorrect_render = True
-        else:
-            received_correct_render = True
+            if is_style_defined:
+                received_incorrect_render = True
+            else:
+                received_correct_render = True
 
-    api.send = send
+        return False
 
-    # Run the app
-    await runner.execute({})
-    await scheduler.sleep(0)
+    tracker = api_event_tracker_factory(
+        {
+            "condition": condition,
+        }
+    )
+
+    with app_runner_factory(handler=handler) as runner:
+        await runner.execute({})
+        await tracker.wait_until_condition()
 
     assert received_incorrect_render is False
     assert received_correct_render is True

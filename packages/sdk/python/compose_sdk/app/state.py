@@ -17,20 +17,19 @@ class State:
         self._state = copy.deepcopy(initial_state or {})
         self.appRunner = appRunner
 
-        self._debounce_interval = 0.001  # 1 millisecond
-        self._debounce_timer = None
+        self._debounce_interval = 1  # 1 millisecond
+        self._debounced_update = None
 
     def __onStateUpdate(self):
-        if self._debounce_timer is not None:
-            self._debounce_timer.cancel()
+        if self._debounced_update is not None:
+            self._debounced_update.cancel()
 
-        self._debounce_timer = self.appRunner.scheduler.create_task(
-            self._debounced_update()
+        self._debounced_update = self.appRunner.scheduler.cancelable_delay(
+            self._debounce_interval,
+            lambda: self.appRunner.scheduler.run_async(
+                self.appRunner.on_state_update()
+            ),
         )
-
-    async def _debounced_update(self):
-        await self.appRunner.scheduler.sleep(self._debounce_interval)
-        await self.appRunner.on_state_update()
 
     def __getitem__(self, key: dict_key) -> dict_value:
         return self._state[key]
@@ -65,6 +64,10 @@ class State:
 
     def __contains__(self, item):
         return item in self._state
+
+    def _cleanup(self):
+        if self._debounced_update is not None:
+            self._debounced_update.cancel()
 
     def keys(self):
         return self._state.keys()

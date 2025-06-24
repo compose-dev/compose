@@ -5,7 +5,8 @@ from ....types import IntFloat
 from .literals import ChartAggregator
 
 ChartSeriesDataKey = Union[str, int, float]
-ChartSeriesData = List[Dict[ChartSeriesDataKey, Any]]
+ChartSeriesDataRow = Dict[ChartSeriesDataKey, Any]
+ChartSeriesData = List[ChartSeriesDataRow]
 
 ChartSeriesValueFnResult = Union[None, IntFloat, Awaitable[IntFloat], Awaitable[None]]
 ChartSeriesGroupFnResult = Union[
@@ -19,8 +20,8 @@ class ChartAdvancedSeries(TypedDict):
     value: Union[
         ChartSeriesDataKey,
         Callable[[], ChartSeriesValueFnResult],
-        Callable[[ChartSeriesData], ChartSeriesValueFnResult],
-        Callable[[ChartSeriesData, int], ChartSeriesValueFnResult],
+        Callable[[ChartSeriesDataRow], ChartSeriesValueFnResult],
+        Callable[[ChartSeriesDataRow, int], ChartSeriesValueFnResult],
     ]
 
 

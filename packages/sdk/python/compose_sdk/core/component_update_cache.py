@@ -1,5 +1,6 @@
 from typing import Dict, Union
-from .ui import TYPE, ComponentReturn
+from .ui.types import TYPE
+from .ui.componentGenerators import ComponentReturn
 
 
 class ComponentUpdateCache:

@@ -47,7 +47,7 @@ function BillingNotice({
   if (externalSeatsRemaining > 0) {
     return (
       <BillingNoticeUI className="!mt-4">
-        Inviting a new external user will use one of {externalSeatsRemaining}{" "}
+        Inviting a new external user will use 1 of {externalSeatsRemaining}{" "}
         unused external user credits remaining on your plan.
       </BillingNoticeUI>
     );

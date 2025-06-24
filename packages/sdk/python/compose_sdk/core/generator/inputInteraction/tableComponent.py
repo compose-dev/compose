@@ -240,7 +240,7 @@ def _table(
     selection_return_type: Union[
         Table.SelectionReturn.TYPE, None
     ] = Table.SelectionReturn.FULL,
-    searchable: bool = True,
+    searchable: Union[bool, None] = None,
     paginate: bool = False,
     overflow: Union[TABLE_COLUMN_OVERFLOW, None] = None,
     sortable: Union[Table.SortOption.TYPE, None] = None,
@@ -392,7 +392,7 @@ def table(
     min_selections: int = MULTI_SELECTION_MIN_DEFAULT,
     max_selections: int = MULTI_SELECTION_MAX_DEFAULT,
     selection_return_type: Table.SelectionReturn.TYPE = Table.SelectionReturn.FULL,
-    searchable: bool = True,
+    searchable: Union[bool, None] = None,
     paginate: bool = False,
     sortable: Union[Table.SortOption.TYPE, None] = None,
     selectable: Union[bool, None] = None,
@@ -575,7 +575,7 @@ def dataframe(
     min_selections: int = MULTI_SELECTION_MIN_DEFAULT,
     max_selections: int = MULTI_SELECTION_MAX_DEFAULT,
     selection_return_type: Table.SelectionReturn.TYPE = Table.SelectionReturn.FULL,
-    searchable: bool = True,
+    searchable: Union[bool, None] = None,
     paginate: bool = False,
     overflow: Union[TABLE_COLUMN_OVERFLOW, None] = None,
     sortable: Union[Table.SortOption.TYPE, None] = None,

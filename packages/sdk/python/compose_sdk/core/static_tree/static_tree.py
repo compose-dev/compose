@@ -12,6 +12,7 @@ from .diff import diff_static_layouts
 from .configure_submit_button import configure_layout_form_submit_button
 from .configure_table_pagination import configure_table_pagination
 from .resolve_coroutines import resolve_coroutines
+from ...scheduler import Scheduler
 
 
 class _StaticTree:
@@ -33,7 +34,11 @@ class _StaticTree:
 
     @staticmethod
     async def generate(
-        layout: Any, resolver: Any, render_id: str, table_state: TableState
+        layout: Any,
+        resolver: Any,
+        render_id: str,
+        table_state: TableState,
+        scheduler: Scheduler,
     ) -> ComponentReturn:
         """
         Generates a static layout from a layout.
@@ -45,7 +50,7 @@ class _StaticTree:
             kwargs = {}
             if "resolve" in layout_params:
                 kwargs["resolve"] = resolver
-            executed = layout(**kwargs)
+            executed = scheduler.run_sync(layout, **kwargs)
         else:
             executed = layout
 

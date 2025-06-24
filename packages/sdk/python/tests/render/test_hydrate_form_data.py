@@ -1,15 +1,16 @@
 import datetime
 
-from compose_sdk.core import TYPE, Render, ComponentInstance as ui, JSON
+from compose_sdk.core import TYPE, ComponentInstance as ui
 from compose_sdk.core.file import File
+from compose_sdk.core.validate_form import ValidateForm
 
 
 async def test_empty_form_data():
-    assert Render.hydrate_form_data({}, ui.stack([]), {}) == ({}, [])
+    assert ValidateForm.hydrate_form_data({}, ui.stack([]), {}) == ({}, [])
 
 
 async def test_form_data_with_text_input():
-    assert Render.hydrate_form_data({"firstName": "John"}, ui.stack([]), {}) == (
+    assert ValidateForm.hydrate_form_data({"firstName": "John"}, ui.stack([]), {}) == (
         {"firstName": "John"},
         [],
     )
@@ -27,7 +28,7 @@ async def test_form_data_for_date_input():
         }
     }
 
-    form_data, _ = Render.hydrate_form_data(input, ui.stack([]), {})
+    form_data, _ = ValidateForm.hydrate_form_data(input, ui.stack([]), {})
 
     assert isinstance(form_data["birthday"], datetime.date)
     assert form_data["birthday"].year == 1990
@@ -46,7 +47,7 @@ async def test_form_data_for_time_input():
         }
     }
 
-    form_data, _ = Render.hydrate_form_data(input, ui.stack([]), {})
+    form_data, _ = ValidateForm.hydrate_form_data(input, ui.stack([]), {})
 
     assert isinstance(form_data["birthday"], datetime.time)
     assert form_data["birthday"].hour == 1
@@ -67,7 +68,7 @@ async def test_form_data_for_datetime_input():
         }
     }
 
-    form_data, _ = Render.hydrate_form_data(input, ui.stack([]), {})
+    form_data, _ = ValidateForm.hydrate_form_data(input, ui.stack([]), {})
 
     assert isinstance(form_data["birthday"], datetime.datetime)
     assert form_data["birthday"].year == 1990
@@ -80,7 +81,7 @@ async def test_form_data_for_datetime_input():
 async def test_form_data_for_checkbox_input():
     input = {"checked": True}
 
-    form_data, _ = Render.hydrate_form_data(input, ui.stack([]), {})
+    form_data, _ = ValidateForm.hydrate_form_data(input, ui.stack([]), {})
 
     assert form_data["checked"] == True
 
@@ -96,7 +97,7 @@ async def test_form_data_for_file_drop():
         ]
     }
 
-    form_data, temp_files_to_delete = Render.hydrate_form_data(
+    form_data, temp_files_to_delete = ValidateForm.hydrate_form_data(
         input, ui.stack([]), {"123": b"SOME_FILE_HERE"}
     )
 
@@ -117,7 +118,7 @@ async def test_form_data_for_table_v1():
 
     component_tree = ui.stack([ui.table("table", table_data)])
 
-    form_data, _ = Render.hydrate_form_data(input, component_tree, {})
+    form_data, _ = ValidateForm.hydrate_form_data(input, component_tree, {})
 
     assert form_data["table"] == [{"id": "1"}]
 
@@ -129,6 +130,6 @@ async def test_form_data_for_table_v2():
 
     component_tree = ui.stack([ui.table("table", table_data)])
 
-    form_data, _ = Render.hydrate_form_data(input, component_tree, {})
+    form_data, _ = ValidateForm.hydrate_form_data(input, component_tree, {})
 
     assert form_data["table"] == table_data

@@ -7,8 +7,6 @@ from ..ui import (
     ComponentReturn,
     BUTTON_APPEARANCE,
     BUTTON_APPEARANCE_DEFAULT,
-    ChartSeriesData,
-    ChartSeriesDataKey,
     ChartSeriesGroupFnResult,
     ChartSeries,
     ChartAggregator,
@@ -18,6 +16,7 @@ from ..ui import (
     chart_format_series_data,
     ComponentStyle,
 )
+from ..ui.types.chart import ChartSeriesDataRow, ChartSeriesDataKey
 from ..types import NullableStr
 
 
@@ -95,8 +94,8 @@ def button_bar_chart(
     group: Union[
         ChartSeriesDataKey,
         Callable[[], ChartSeriesGroupFnResult],
-        Callable[[ChartSeriesData], ChartSeriesGroupFnResult],
-        Callable[[ChartSeriesData, int], ChartSeriesGroupFnResult],
+        Callable[[ChartSeriesDataRow], ChartSeriesGroupFnResult],
+        Callable[[ChartSeriesDataRow, int], ChartSeriesGroupFnResult],
         None,
     ] = None,
     series: Union[

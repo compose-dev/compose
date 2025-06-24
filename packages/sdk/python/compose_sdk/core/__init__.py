@@ -1,7 +1,6 @@
 from .eventType import EventType
 from .generator import Component, ComponentInstance, display_none, page_confirm  # type: ignore[attr-defined]
 from .utils import Utils
-from .render import Render
 from .ui import (
     ComponentReturn,
     Nullable,
@@ -78,7 +77,6 @@ __all__ = [
     "display_none",
     "page_confirm",
     "Utils",
-    "Render",
     "JSON",
     "Compress",
     "DateUtils",

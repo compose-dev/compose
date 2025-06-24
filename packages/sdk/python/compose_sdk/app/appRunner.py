@@ -1,10 +1,9 @@
 # type: ignore
 
-import asyncio
 import inspect
 import io
 import traceback
-from typing import Any, TypedDict, Callable, Union, Dict, Literal, Mapping, List
+from typing import Any, TypedDict, Callable, Union, Dict, Literal, Mapping
 import time
 
 from ..scheduler import Scheduler
@@ -17,7 +16,6 @@ from ..api import (
 from ..core import (
     Utils,
     EventType,
-    Render,
     ComponentInstance,
     INTERACTION_TYPE,
     TYPE,
@@ -43,7 +41,8 @@ from ..core import (
     ComponentUpdateCache,
     ComponentReturn,
 )
-
+from ..core.run_hook_function import RunHookFunction
+from ..core.validate_form import ValidateForm
 from ..core.static_tree.find_component import FindComponent
 
 from .appDefinition import AppDefinition
@@ -92,15 +91,17 @@ class AppRunner:
         self.debug = debug
         self.audit_log_rate_limiter = audit_log_rate_limiter
 
-        self.renders: Dict[str, Union[RenderObj, DeletedRender]] = {}
+        self.renders: List[str] = []
+        self.renders_by_id: Dict[str, Union[RenderObj, DeletedRender]] = {}
         self.tempFiles = {}
-
-        self.execution_task: Union[asyncio.Task[Any], None] = None
 
         self.confirmationDialog: Union[ConfirmationDialog, None] = None
 
         self.component_update_cache = ComponentUpdateCache()
         self.table_state = TableState(self.scheduler, self.component_update_cache)
+
+        self.run_hook_function = RunHookFunction(self.scheduler)
+        self.validate_form = ValidateForm(self.run_hook_function)
 
     async def render_ui(
         self,
@@ -130,10 +131,10 @@ class AppRunner:
                     self.component_update_cache.clear_render(renderId)
 
                     # After the modal is closed, we no longer need to track it.
-                    self.renders[renderId] = DELETED_RENDER
+                    self.renders_by_id[renderId] = DELETED_RENDER
 
             def resolve_render(data=None):
-                self.scheduler.create_task(_resolve_render(data))
+                self.scheduler.run_async(_resolve_render(data))
 
             def cleanup():
                 if not future.done():
@@ -142,7 +143,7 @@ class AppRunner:
             if key:
                 renderId = key
 
-                if renderId in self.renders:
+                if renderId in self.renders_by_id:
                     await self.__send_error(
                         f"An error occurred while rendering the UI:\n\nThe render ID is already in use: {key}",
                         "error",
@@ -150,6 +151,8 @@ class AppRunner:
                     return
             else:
                 renderId = Utils.generate_id()
+
+            self.renders.append(renderId)
 
             def cache_component(component: ComponentReturn):
                 if self.component_update_cache.should_cache(component):
@@ -171,12 +174,16 @@ class AppRunner:
                     )
                 ):
                     static_layout = await StaticTree.generate(
-                        layout, resolve_render, renderId, self.table_state
+                        layout,
+                        resolve_render,
+                        renderId,
+                        self.table_state,
+                        self.scheduler,
                     )
                     await FindComponent.do_for_component(static_layout, cache_component)
             else:
                 static_layout = await StaticTree.generate(
-                    layout, resolve_render, renderId, self.table_state
+                    layout, resolve_render, renderId, self.table_state, self.scheduler
                 )
                 await FindComponent.do_for_component(static_layout, cache_component)
 
@@ -198,7 +205,7 @@ class AppRunner:
                     f"An error occurred while rendering the UI:\n\n{validation_error}"
                 )
 
-            self.renders[renderId] = {
+            self.renders_by_id[renderId] = {
                 "resolve": resolve_render,
                 "layout": layout,
                 "static_layout": static_layout,
@@ -231,6 +238,7 @@ class AppRunner:
                 "ui": compressed,
                 "renderId": renderId,
                 "appearance": appearance,
+                "idx": len(self.renders) - 1,
             }
 
             for key, value in optional_params.items():
@@ -247,7 +255,7 @@ class AppRunner:
 
             for table in tables:
                 if table["stale"] == Stale.INITIALLY_STALE:
-                    self.scheduler.create_task(
+                    self.scheduler.run_async(
                         self.on_table_page_change_hook(
                             renderId,
                             table["table_id"],
@@ -414,8 +422,8 @@ class AppRunner:
             if self.debug:
                 algorithm_start_time = time.time()
 
-            for renderId in self.renders:
-                render = self.renders[renderId]
+            for renderId in self.renders_by_id:
+                render = self.renders_by_id[renderId]
 
                 if render == DELETED_RENDER:
                     continue
@@ -439,11 +447,19 @@ class AppRunner:
                             )
                         ):
                             new_static_layout = await StaticTree.generate(
-                                layout, resolve_fn, renderId, self.table_state
+                                layout,
+                                resolve_fn,
+                                renderId,
+                                self.table_state,
+                                self.scheduler,
                             )
                     else:
                         new_static_layout = await StaticTree.generate(
-                            layout, resolve_fn, renderId, self.table_state
+                            layout,
+                            resolve_fn,
+                            renderId,
+                            self.table_state,
+                            self.scheduler,
                         )
                 except Exception as error:
                     return await self.__send_error(
@@ -559,7 +575,7 @@ class AppRunner:
                     )
 
                     def cancelable_hook():
-                        self.scheduler.create_task(
+                        self.scheduler.run_async(
                             self.on_table_page_change_hook(
                                 table["render_id"],
                                 table["table_id"],
@@ -580,8 +596,10 @@ class AppRunner:
         self,
         message: str,
         *,
-        severity: Literal["trace", "debug", "info", "warn", "error", "fatal"] = None,
-        data: Mapping[str, Any] = None,
+        severity: Union[
+            Literal["trace", "debug", "info", "warn", "error", "fatal"], None
+        ] = None,
+        data: Union[Mapping[str, Any], None] = None,
     ) -> None:
         if not self.audit_log_rate_limiter:
             await self.__send_error(
@@ -637,8 +655,8 @@ class AppRunner:
             for input_id in values:
                 was_found = False
 
-                for render_id in self.renders:
-                    render = self.renders[render_id]
+                for render_id in self.renders_by_id:
+                    render = self.renders_by_id[render_id]
 
                     if render == DELETED_RENDER:
                         continue
@@ -788,19 +806,19 @@ class AppRunner:
                 kwargs["ui"] = ComponentInstance
 
             if inspect.iscoroutinefunction(self.appDefinition.handler):
-                await self.appDefinition.handler(**kwargs)
+                self.scheduler.run_async(self.appDefinition.handler(**kwargs))
             else:
-                self.appDefinition.handler(**kwargs)
+                self.scheduler.run_sync(self.appDefinition.handler, **kwargs)
         except Exception as error:
             await self.__send_error(
                 f"An error occurred while running the app:\n\n{str(error)}\n\n{''.join(traceback.format_tb(error.__traceback__))}"
             )
 
     async def on_click_hook(self, component_id: str, render_id: str):
-        if render_id not in self.renders:
+        if render_id not in self.renders_by_id:
             return
 
-        render = self.renders[render_id]
+        render = self.renders_by_id[render_id]
 
         if render == DELETED_RENDER:
             return
@@ -819,7 +837,7 @@ class AppRunner:
 
         if hookFunc is not None:
             try:
-                await Render.run_hook_function(hookFunc)
+                await self.run_hook_function.execute(hookFunc)
             except Exception as error:
                 await self.__send_error(
                     f"An error occurred while executing an on_click callback function:\n\n{str(error)}\n\n{''.join(traceback.format_tb(error.__traceback__))}"
@@ -828,10 +846,10 @@ class AppRunner:
     async def on_submit_form_hook(
         self, form_component_id: str, render_id: str, form_data: dict
     ):
-        if render_id not in self.renders:
+        if render_id not in self.renders_by_id:
             return
 
-        render = self.renders[render_id]
+        render = self.renders_by_id[render_id]
 
         if render == DELETED_RENDER:
             return
@@ -842,15 +860,17 @@ class AppRunner:
         if component is None or component["type"] != TYPE.LAYOUT_FORM:
             return
 
-        hydrated, temp_files_to_delete = Render.hydrate_form_data(
+        hydrated, temp_files_to_delete = ValidateForm.hydrate_form_data(
             form_data, component, self.tempFiles
         )
 
         for file_id in temp_files_to_delete:
             del self.tempFiles[file_id]
 
-        input_errors = await Render.get_form_input_errors(hydrated, static_layout)
-        form_error = await Render.get_form_error(component, hydrated)
+        input_errors = await self.validate_form.get_form_input_errors(
+            hydrated, static_layout
+        )
+        form_error = await self.validate_form.get_form_error(component, hydrated)
 
         if input_errors is not None or form_error is not None:
             await self.api.send(
@@ -882,7 +902,7 @@ class AppRunner:
             )
 
             try:
-                await Render.run_hook_function(hookFunc, hydrated)
+                await self.run_hook_function.execute(hookFunc, hydrated)
             except Exception as error:
                 await self.__send_error(
                     f"An error occurred while executing form submit callback function:\n\n{str(error)}\n\n{''.join(traceback.format_tb(error.__traceback__))}"
@@ -891,10 +911,10 @@ class AppRunner:
     async def on_input_hook(
         self, event_type: str, component_id: str, render_id: str, value: Any
     ):
-        if render_id not in self.renders:
+        if render_id not in self.renders_by_id:
             return
 
-        render = self.renders[render_id]
+        render = self.renders_by_id[render_id]
 
         if render == DELETED_RENDER:
             return
@@ -905,14 +925,16 @@ class AppRunner:
         if component is None or component["interactionType"] != INTERACTION_TYPE.INPUT:
             return
 
-        hydrated, temp_files_to_delete = Render.hydrate_form_data(
+        hydrated, temp_files_to_delete = ValidateForm.hydrate_form_data(
             {component_id: value}, component, self.tempFiles
         )
 
         for file_id in temp_files_to_delete:
             del self.tempFiles[file_id]
 
-        input_errors = await Render.get_form_input_errors(hydrated, static_layout)
+        input_errors = await self.validate_form.get_form_input_errors(
+            hydrated, static_layout
+        )
 
         if input_errors is not None:
             error = input_errors[component_id]
@@ -940,7 +962,7 @@ class AppRunner:
 
         if hookFunc is not None:
             try:
-                await Render.run_hook_function(hookFunc, hydrated[component_id])
+                await self.run_hook_function.execute(hookFunc, hydrated[component_id])
             except Exception as error:
                 await self.__send_error(
                     f"An error occurred while executing input component callback function:\n\n{str(error)}\n\n{''.join(traceback.format_tb(error.__traceback__))}"
@@ -949,14 +971,14 @@ class AppRunner:
     async def on_table_row_action_hook(
         self, component_id: str, render_id: str, action_idx: int, value: Any
     ):
-        if render_id not in self.renders:
+        if render_id not in self.renders_by_id:
             await self.__send_error(
                 "An error occurred while trying to execute a table row action hook:\n\nThe render container was not found",
                 "warning",
             )
             return
 
-        render = self.renders[render_id]
+        render = self.renders_by_id[render_id]
 
         if render == DELETED_RENDER:
             return
@@ -1009,7 +1031,9 @@ class AppRunner:
         selected_row_index = value if isinstance(value, int) else 0
 
         try:
-            await Render.run_hook_function(hookFunc, selected_row, selected_row_index)
+            await self.run_hook_function.execute(
+                hookFunc, selected_row, selected_row_index
+            )
         except Exception as error:
             await self.__send_error(
                 f"An error occurred while executing table row action callback function:\n\n{str(error)}\n\n{''.join(traceback.format_tb(error.__traceback__))}"
@@ -1026,10 +1050,10 @@ class AppRunner:
         self.confirmationDialog["resolve"](response)
 
     def on_close_modal(self, render_id: str):
-        if render_id not in self.renders:
+        if render_id not in self.renders_by_id:
             return
 
-        render = self.renders[render_id]
+        render = self.renders_by_id[render_id]
 
         if render == DELETED_RENDER:
             return
@@ -1049,14 +1073,14 @@ class AppRunner:
         refresh_total_records: bool = False,
     ):
         try:
-            if render_id not in self.renders:
+            if render_id not in self.renders_by_id:
                 await self.__send_error(
                     "An error occurred while trying to execute a table page change hook:\n\nThe render container was not found",
                     "warning",
                 )
                 return
 
-            render = self.renders[render_id]
+            render = self.renders_by_id[render_id]
 
             if render == DELETED_RENDER:
                 return
@@ -1128,7 +1152,7 @@ class AppRunner:
                     "refresh_total_records": should_refresh_total_records,
                 }
 
-                response = await Render.run_hook_function(
+                response = await self.run_hook_function.execute(
                     component["hooks"]["onPageChange"]["fn"], arguments
                 )
 
@@ -1264,7 +1288,7 @@ class AppRunner:
 
     def cleanup(self):
         try:
-            for render in self.renders.values():
+            for render in self.renders_by_id.values():
                 if render == DELETED_RENDER:
                     continue
 
@@ -1272,9 +1296,6 @@ class AppRunner:
 
             if self.confirmationDialog is not None:
                 self.confirmationDialog["cleanup"]()
-
-            if self.execution_task is not None and not self.execution_task.done():
-                self.execution_task.cancel()
 
             self.table_state.cleanup()
             self.component_update_cache.clear()

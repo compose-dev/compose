@@ -153,7 +153,7 @@ class Page:
             else:
                 Debug.log("Page", "add")
 
-        return self.__appRunner.scheduler.ensure_future(
+        return self.__appRunner.scheduler.run_async(
             self.__appRunner.render_ui(layout, key=key)
         )
 
@@ -210,7 +210,7 @@ class Page:
             else:
                 Debug.log("Page", "modal")
 
-        return self.__appRunner.scheduler.ensure_future(
+        return self.__appRunner.scheduler.run_async(
             self.__appRunner.render_ui(
                 layout,
                 appearance="modal",
@@ -246,9 +246,7 @@ class Page:
         if self.__debug:
             Debug.log("Page", f"download file ({filename})")
 
-        self.__appRunner.scheduler.create_task(
-            self.__appRunner.download(file, filename)
-        )
+        self.__appRunner.scheduler.run_async(self.__appRunner.download(file, filename))
 
     def set(self, config: Config) -> None:
         """
@@ -293,7 +291,7 @@ class Page:
                 camel_case_config[key] = value
 
         # Use the converted camelCase config
-        self.__appRunner.scheduler.create_task(
+        self.__appRunner.scheduler.run_async(
             self.__appRunner.set_config(camel_case_config)
         )
 
@@ -334,7 +332,7 @@ class Page:
         if self.__debug:
             Debug.log("Page", "link")
 
-        self.__appRunner.scheduler.create_task(
+        self.__appRunner.scheduler.run_async(
             self.__appRunner.link(appRouteOrUrl, new_tab or newTab, params)
         )
 
@@ -374,7 +372,7 @@ class Page:
         if self.__debug:
             Debug.log("Page", "log")
 
-        self.__appRunner.scheduler.create_task(
+        self.__appRunner.scheduler.run_async(
             self.__appRunner.log(message, severity=severity, data=data)
         )
 
@@ -394,7 +392,7 @@ class Page:
         if self.__debug:
             Debug.log("Page", "reload")
 
-        self.__appRunner.scheduler.create_task(self.__appRunner.reload())
+        self.__appRunner.scheduler.run_async(self.__appRunner.reload())
 
     def confirm(
         self,
@@ -449,7 +447,7 @@ class Page:
         if self.__debug:
             Debug.log("Page", "confirm")
 
-        return self.__appRunner.scheduler.ensure_future(  # type: ignore[no-any-return]
+        return self.__appRunner.scheduler.run_async(  # type: ignore[no-any-return]
             self.__appRunner.confirm(
                 title=title,
                 message=message,
@@ -510,7 +508,7 @@ class Page:
         _appearance = appearance if appearance is not DEFAULT_TOAST_APPEARANCE else None
         _duration = duration if duration is not DEFAULT_TOAST_DURATION else None
 
-        self.__appRunner.scheduler.create_task(
+        self.__appRunner.scheduler.run_async(
             self.__appRunner.toast(message, title, _appearance, _duration)
         )
 
@@ -541,7 +539,7 @@ class Page:
         if self.__debug:
             Debug.log("Page", "set inputs")
 
-        self.__appRunner.scheduler.create_task(self.__appRunner.set_inputs(values))
+        self.__appRunner.scheduler.run_async(self.__appRunner.set_inputs(values))
 
     def loading(
         self,
@@ -590,7 +588,7 @@ class Page:
         if self.__debug:
             Debug.log("Page", "loading")
 
-        self.__appRunner.scheduler.create_task(
+        self.__appRunner.scheduler.run_async(
             self.__appRunner.page_loading(value, text, disable_interaction)
         )
 
