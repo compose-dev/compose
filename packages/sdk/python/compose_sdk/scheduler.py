@@ -167,7 +167,7 @@ class Scheduler:
 
     async def sleep(self, seconds: float) -> None:
         """Asynchronous sleep util bound to the scheduler's event-loop."""
-        return await asyncio.sleep(seconds, loop=self._loop)
+        return await asyncio.sleep(seconds)
 
     def cancelable_delay(
         self, ms: float, callback: Callable[[], Any]
