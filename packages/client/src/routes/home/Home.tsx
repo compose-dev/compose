@@ -1,4 +1,4 @@
-import { Outlet } from "@tanstack/react-router";
+import { Outlet, useLocation } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { CenteredSpinner } from "~/components/spinner";
@@ -8,13 +8,18 @@ import { api } from "~/api";
 import { theme } from "~/utils/theme";
 import { Tooltip } from "react-tooltip";
 import HomeNavigation from "./components/home-navigation";
+import { useWSContext, WSProvider } from "~/utils/wsContext";
+import { ServerToBrowserEvent } from "@compose/ts";
+import { useRefetchEnvironment } from "./utils/useRefetchEnvironment";
 
 const queryClient = new QueryClient();
 
 export default function HomeWrapper() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Home />
+      <WSProvider>
+        <Home />
+      </WSProvider>
     </QueryClientProvider>
   );
 }
@@ -25,6 +30,12 @@ function Home() {
     loading: authLoading,
     navigateToLogin,
   } = useAuthContext();
+
+  const prevHref = useRef("");
+  const location = useLocation();
+
+  const { addWSListener, setEnvironmentsOnline, setEnvironmentOnline } =
+    useWSContext();
 
   const { setEnvironments, setUser, setDevelopmentApiKey, resetStore, user } =
     useHomeStore();
@@ -39,7 +50,55 @@ function Home() {
     }
   }, [isAuthenticated, authLoading, navigateToLogin]);
 
-  useEffect(() => {});
+  const { refetchEnvironment } = useRefetchEnvironment();
+
+  useEffect(() => {
+    function listener(data: ServerToBrowserEvent.Data) {
+      if (
+        data.type ===
+        ServerToBrowserEvent.TYPE.REPORT_ACTIVE_COMPANY_CONNECTIONS
+      ) {
+        setEnvironmentsOnline(data.connections);
+      }
+      if (
+        data.type === ServerToBrowserEvent.TYPE.SDK_CONNECTION_STATUS_CHANGED
+      ) {
+        setEnvironmentOnline(data.environmentId, data.isOnline);
+      }
+      if (data.type === ServerToBrowserEvent.TYPE.ENVIRONMENT_INITIALIZED) {
+        refetchEnvironment(data.environmentId);
+      }
+    }
+
+    const destroy = addWSListener(listener);
+
+    return destroy;
+  }, [
+    addWSListener,
+    setEnvironmentsOnline,
+    setEnvironmentOnline,
+    refetchEnvironment,
+  ]);
+
+  // Log page views as people navigate around the dashboard
+  useEffect(() => {
+    if (prevHref.current !== location.href) {
+      prevHref.current = location.href;
+
+      // Don't log when the user navigates away from the dashboard
+      if (!location.href.startsWith("/home")) {
+        return;
+      }
+
+      api.routes.logEvent({
+        event: "DASHBOARD_PAGE_VIEW",
+        data: {
+          ...location.search,
+          pathname: location.pathname,
+        },
+      });
+    }
+  }, [location.href, location.pathname, location.search]);
 
   useEffect(() => {
     async function fetchInitialize() {

@@ -91,7 +91,7 @@ export default function BillingDetails() {
           <p>Current plan</p>
           <p
             className={classNames({
-              "text-orange-700":
+              "text-orange-700 dark:text-orange-400":
                 billing.data.company.plan === m.Company.PLANS.PRO,
             })}
           >

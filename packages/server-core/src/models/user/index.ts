@@ -59,11 +59,12 @@ async function insert(
   lastName: string,
   email: string,
   developmentEnvironmentId: string | null,
-  permission: m.User.DB["permission"]
+  permission: m.User.DB["permission"],
+  metadata: m.User.Metadata
 ) {
   const result = await pg.query<m.User.DB>(
-    `INSERT INTO "user" ("companyId", "firstName", "lastName", "email", "developmentEnvironmentId", "permission")
-     VALUES ($1, $2, $3, $4, $5, $6)
+    `INSERT INTO "user" ("companyId", "firstName", "lastName", "email", "developmentEnvironmentId", "permission", "metadata")
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
      RETURNING *`,
     [
       companyId,
@@ -72,6 +73,7 @@ async function insert(
       email,
       developmentEnvironmentId,
       permission,
+      metadata,
     ]
   );
 
@@ -155,6 +157,24 @@ async function updatePermission(
   return result.rows[0];
 }
 
+async function updateMetadata(
+  pg: Postgres,
+  id: string,
+  companyId: string,
+  metadata: m.User.Metadata
+) {
+  const result = await pg.query<m.User.DB>(
+    `UPDATE "user" SET "metadata" = $1 WHERE "id" = $2 AND "companyId" = $3 RETURNING *`,
+    [metadata, id, companyId]
+  );
+
+  if (result.rowCount === 0) {
+    throw new Error("Failed to update user metadata");
+  }
+
+  return result.rows[0];
+}
+
 export {
   selectByEmail,
   selectByEmailCaseInsensitive,
@@ -167,4 +187,5 @@ export {
   selectCountAllByCompanyId,
   updatePermission,
   selectAllByCompanyIdAndPermission,
+  updateMetadata,
 };

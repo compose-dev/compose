@@ -8,13 +8,15 @@ export type RequestBody = {
   inviteCode: string;
 };
 
-export type ErrorData = {
+export interface SuccessResponseBody {
+  isFirstDeveloperInOrganization: boolean;
+}
+
+export interface ErrorResponseBody {
   message: string;
   internalCode: authUtils.SignUpErrorCode;
-};
+}
 
-export type ResponseBody = {
-  success: true;
-};
+export type ResponseBody = SuccessResponseBody | ErrorResponseBody;
 
 export const route = "api/v1/auth/complete-sign-up-to-org";

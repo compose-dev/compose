@@ -1,5 +1,5 @@
 import { SdkToServerEvent, u as uPublic } from "@composehq/ts-public";
-import { Environment } from "../../models";
+import { Environment, User } from "../../models";
 
 export type RequestBody = {
   environmentId: string;
@@ -9,9 +9,7 @@ export type RequestBody = {
 
 export interface SuccessResponseBody {
   app: SdkToServerEvent.Initialize.Data["apps"][number];
-  user: {
-    isExternal: boolean;
-  };
+  user: (User.DB & { isExternal: boolean }) | { isExternal: boolean };
   environment: {
     theme: Environment.DB["theme"];
     type: Environment.DB["type"];

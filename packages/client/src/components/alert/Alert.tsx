@@ -5,10 +5,12 @@ function Alert({
   appearance,
   iconName,
   children,
+  className = "",
 }: {
-  appearance: "warning" | "primary" | "outline" | "success" | "danger";
+  appearance: "warning" | "primary" | "neutral" | "success" | "danger";
   iconName: Parameters<typeof Icon>[0]["name"];
-  children: string;
+  children: React.ReactNode;
+  className?: string;
 }) {
   return (
     <div
@@ -19,8 +21,9 @@ function Alert({
           "text-brand-primary": appearance === "primary",
           "text-brand-success": appearance === "success",
           "text-brand-error": appearance === "danger",
-          "text-brand-neutral": appearance === "outline",
-        }
+          "text-brand-neutral-2 bg-brand-overlay": appearance === "neutral",
+        },
+        className
       )}
     >
       <div>
@@ -35,20 +38,23 @@ function Alert({
                   ? "brand-success"
                   : appearance === "danger"
                     ? "brand-error"
-                    : "brand-neutral"
+                    : "brand-neutral-2"
           }
           size="1.25"
         />
       </div>
       <p className="text-sm">{children}</p>
       <div
-        className={classNames("absolute inset-0 rounded-brand", {
-          "bg-brand-warning opacity-10": appearance === "warning",
-          "bg-brand-primary opacity-10": appearance === "primary",
-          "bg-brand-success opacity-10": appearance === "success",
-          "bg-brand-error opacity-10": appearance === "danger",
-          "bg-brand-overlay": appearance === "outline",
-        })}
+        className={classNames(
+          "absolute inset-0 rounded-brand pointer-events-none",
+          {
+            "bg-brand-warning opacity-10": appearance === "warning",
+            "bg-brand-primary opacity-10": appearance === "primary",
+            "bg-brand-success opacity-10": appearance === "success",
+            "bg-brand-error opacity-10": appearance === "danger",
+            "bg-brand-transparent": appearance === "neutral",
+          }
+        )}
       ></div>
     </div>
   );

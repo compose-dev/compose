@@ -289,6 +289,22 @@ function useTheme() {
         : undefined
     );
     setThemeColor(
+      "--brand-primary-light",
+      manualTheme && manualTheme.primaryColor
+        ? isLightBackground
+          ? lightenColor(manualTheme.primaryColor, 15)
+          : darkenColor(manualTheme.primaryColor, 15)
+        : undefined
+    );
+    setThemeColor(
+      "--brand-primary-subtle",
+      manualTheme && manualTheme.primaryColor
+        ? isLightBackground
+          ? lightenColor(manualTheme.primaryColor, 60)
+          : darkenColor(manualTheme.primaryColor, 60)
+        : undefined
+    );
+    setThemeColor(
       "--brand-primary-btn-bg",
       manualTheme && manualTheme.primaryColor
         ? isLightBackground
@@ -327,6 +343,8 @@ function useTheme() {
 
     setThemeColor("--brand-green-tag-text");
     setThemeColor("--brand-red-tag-text");
+    setThemeColor("--brand-orange-tag-text");
+    setThemeColor("--brand-blue-tag-text");
   }, []);
 
   const updatePreference = useCallback(

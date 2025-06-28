@@ -5,7 +5,7 @@ function PageRoot({
   width = "md",
 }: {
   children: React.ReactNode;
-  width?: "md" | "lg" | "full";
+  width?: "sm" | "md" | "lg" | "full";
 }) {
   return (
     <div className="flex justify-center">
@@ -13,6 +13,7 @@ function PageRoot({
         className={classNames(
           "flex flex-col justify-start items-start py-16 px-4 lg:px-8 gap-12 w-full",
           {
+            "max-w-4xl": width === "sm",
             "max-w-5xl": width === "md",
             "max-w-7xl": width === "lg",
           }
@@ -34,13 +35,14 @@ function PageSubtitle({
   id,
 }: {
   children: React.ReactNode;
-  color?: "neutral" | "primary";
+  color?: "neutral" | "primary" | "secondary";
   id?: string;
 }) {
   return (
     <h3
       className={classNames("text-brand-neutral", {
         "text-brand-primary": color === "primary",
+        "text-brand-neutral-2": color === "secondary",
       })}
       id={id}
     >

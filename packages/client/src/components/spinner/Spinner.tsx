@@ -2,6 +2,7 @@ import { classNames } from "~/utils/classNames";
 
 const SIZE = {
   sm: "sm",
+  "5": "5",
   "6": "6",
   md: "md",
 } as const;
@@ -10,6 +11,7 @@ type Size = (typeof SIZE)[keyof typeof SIZE];
 
 const SIZE_TO_TAILWIND: Record<Size, string> = {
   sm: "w-4 h-4",
+  "5": "w-5 h-5",
   "6": "w-6 h-6",
   md: "w-8 h-8",
 };
@@ -18,6 +20,7 @@ const VARIANT = {
   primary: "primary",
   neutral: "neutral",
   white: "white",
+  warning: "warning",
 } as const;
 
 type Variant = (typeof VARIANT)[keyof typeof VARIANT];
@@ -43,6 +46,7 @@ function Spinner({
               "fill-brand-primary": variant === "primary",
               "fill-brand-neutral-2": variant === "neutral",
               "fill-white": variant === "white",
+              "fill-brand-warning": variant === "warning",
             }
           )}
           viewBox="0 0 100 101"

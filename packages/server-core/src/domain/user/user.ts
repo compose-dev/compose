@@ -10,7 +10,8 @@ async function insert(
   lastName: string,
   email: string,
   developmentEnvironmentId: string | null,
-  permission: m.User.DB["permission"]
+  permission: m.User.DB["permission"],
+  metadata: m.User.Metadata
 ) {
   const user = await db.user.insert(
     server.pg,
@@ -19,7 +20,8 @@ async function insert(
     lastName,
     email,
     developmentEnvironmentId,
-    permission
+    permission,
+    metadata
   );
 
   const accountType: m.User.AccountType = developmentEnvironmentId

@@ -3,10 +3,10 @@ import { useInviteUser } from "../useInviteUser";
 import { BrowserToServerEvent, m } from "@compose/ts";
 import { TextInput } from "~/components/input";
 import { ComboboxSingle } from "~/components/combobox";
-import { BillingNotice as BillingNoticeUI } from "~/components/billing-notice";
 import Button from "~/components/button";
 import { IOComponent } from "~/components/io-component";
 import { useBilling } from "../useBilling";
+import { Alert } from "~/components/alert";
 
 function BillingNotice({
   standardSeatsAvailable,
@@ -21,19 +21,19 @@ function BillingNotice({
 
   if (standardSeatsAvailable <= 0) {
     return (
-      <BillingNoticeUI className="!mt-4">
+      <Alert appearance="neutral" iconName="coin" className="!mt-4">
         You've used all of your standard user seats. Adding a new user will
         update your subscription to include one additional standard user.
-      </BillingNoticeUI>
+      </Alert>
     );
   }
 
   return (
-    <BillingNoticeUI className="!mt-4">
+    <Alert appearance="neutral" iconName="coin" className="!mt-4">
       Adding a user will use 1 of {standardSeatsAvailable} unfilled
       {standardSeatsAvailable === 1 ? " seat" : " seats"} available on your
       plan.
-    </BillingNoticeUI>
+    </Alert>
   );
 }
 

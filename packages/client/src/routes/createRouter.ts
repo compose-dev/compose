@@ -13,6 +13,10 @@ import {
   Environments,
   BillingDetails,
   ActivityLogs,
+  Onboarding,
+  type OnboardingStep,
+  type OnboardingFramework,
+  ONBOARDING_DEFAULT_STEP,
 } from "./home";
 import { Root, RootIndexRoute } from "~/routes/root";
 
@@ -23,12 +27,6 @@ import LoginToApp from "./auth/loginToApp";
 import { Docs, DocType } from "./docs";
 import SignUp from "./auth/signup";
 import { NewUserFlow, type NewUserStage } from "./newUserFlow";
-import {
-  InteractiveOnboarding,
-  type Lang as InteractiveOnboardingLang,
-  type Step as InteractiveOnboardingStep,
-  type ProjectType as InteractiveOnboardingProjectType,
-} from "./interactiveOnboarding";
 import AppWrapper from "./app/AppWrapper";
 
 interface Redirect {
@@ -166,31 +164,6 @@ const newUserFlowRoute = createRoute({
   },
 });
 
-interface InteractiveOnboardingRouteSearch {
-  lang: InteractiveOnboardingLang | null;
-  projectType: InteractiveOnboardingProjectType | null;
-  step: InteractiveOnboardingStep;
-}
-
-const interactiveOnboardingRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "start",
-  component: InteractiveOnboarding,
-  validateSearch: (
-    search: Record<string, unknown>
-  ): InteractiveOnboardingRouteSearch => {
-    return {
-      lang: (search.lang as InteractiveOnboardingRouteSearch["lang"]) || null,
-      projectType:
-        (search.projectType as InteractiveOnboardingRouteSearch["projectType"]) ||
-        null,
-      step:
-        (search.step as InteractiveOnboardingRouteSearch["step"]) ||
-        "lang-select",
-    };
-  },
-});
-
 interface DocsRouteSearch {
   type: DocType;
   isDark: "TRUE" | "FALSE";
@@ -210,7 +183,6 @@ const docsRoute = createRoute({
 
 interface HomeRouteSearch {
   newUser?: boolean;
-  newOrganization?: boolean;
 }
 
 const homeRoute = createRoute({
@@ -226,7 +198,6 @@ const homeIndexRoute = createRoute({
   validateSearch: (search: Record<string, unknown>): HomeRouteSearch => {
     return {
       newUser: search.newUser as boolean | undefined,
-      newOrganization: search.newOrganization as boolean | undefined,
     };
   },
 });
@@ -241,6 +212,23 @@ const auditLogsRoute = createRoute({
   getParentRoute: () => homeRoute,
   path: "audit-log",
   component: ActivityLogs,
+});
+
+interface OnboardingRouteSearch {
+  step?: OnboardingStep;
+  framework?: OnboardingFramework;
+}
+
+const onboardingRoute = createRoute({
+  getParentRoute: () => homeRoute,
+  path: "onboarding",
+  component: Onboarding,
+  validateSearch: (search: Record<string, unknown>): OnboardingRouteSearch => {
+    return {
+      step: (search.step as OnboardingStep) || ONBOARDING_DEFAULT_STEP,
+      framework: search.framework as OnboardingFramework,
+    };
+  },
 });
 
 interface BillingDetailsRouteSearch {
@@ -285,12 +273,12 @@ const routeTree = rootRoute.addChildren([
   loginToAppRoute,
   newUserFlowRoute,
   docsRoute,
-  interactiveOnboardingRoute,
   homeRoute.addChildren([
     homeIndexRoute,
     settingsRoute,
     billingDetailsRoute,
     auditLogsRoute,
+    onboardingRoute,
   ]),
   appWrapperRoute.addChildren([appRoute]),
 ]);

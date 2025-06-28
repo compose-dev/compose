@@ -7,10 +7,10 @@ import { EmailInput } from "~/components/input";
 import { api } from "~/api";
 import ProPlanNotice from "./components/ProPlanNotice";
 import { useNavigate } from "@tanstack/react-router";
-import { BillingNotice as BillingNoticeUI } from "~/components/billing-notice";
 import { Spinner } from "~/components/spinner";
 import CopyAppLinkButton from "./components/CopyAppLinkButton";
 import ChildAppNotice from "./components/ChildAppNotice";
+import { Alert } from "~/components/alert";
 
 function BillingNotice({
   plan,
@@ -46,18 +46,18 @@ function BillingNotice({
 
   if (externalSeatsRemaining > 0) {
     return (
-      <BillingNoticeUI className="!mt-4">
+      <Alert appearance="neutral" iconName="coin" className="!mt-4">
         Inviting a new external user will use 1 of {externalSeatsRemaining}{" "}
         unused external user credits remaining on your plan.
-      </BillingNoticeUI>
+      </Alert>
     );
   }
 
   return (
-    <BillingNoticeUI className="!mt-4">
+    <Alert appearance="neutral" iconName="coin" className="!mt-4">
       You've used all of your external user credits. Adding a new user will
       update your subscription to include one additional external user credit.
-    </BillingNoticeUI>
+    </Alert>
   );
 }
 

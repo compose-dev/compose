@@ -111,7 +111,8 @@ describe("environment DB queries", () => {
       "Jalan",
       "atul@composehq.com",
       env.id,
-      m.User.PERMISSION.OWNER
+      m.User.PERMISSION.OWNER,
+      {}
     );
 
     await externalAppUser.insert(

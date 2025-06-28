@@ -11,10 +11,11 @@ import { m, u } from "@compose/ts";
 import { useCallback, useMemo, useState } from "react";
 import AppRow from "./AppRow";
 import { InlineLink } from "~/components/inline-link";
-import { useWSContext } from "~/utils/wsContext";
 import DropdownMenu from "~/components/dropdown-menu";
 import DeleteEnvironmentModal from "./DeleteEnvironmentModal";
 import RefreshApiKeyModal from "./RefreshApiKeyModal";
+import { TextBubble } from "~/components/text-bubble";
+import { ConnectionStatus } from "~/utils/wsContext";
 
 function EnvironmentTypeBadge({ type }: { type: m.Environment.Type }) {
   if (type === m.Environment.TYPE.dev) {
@@ -47,13 +48,14 @@ function EnvironmentTypeBadge({ type }: { type: m.Environment.Type }) {
 export default function Environment({
   environment,
   refetchEnvironment,
+  connectionStatus,
 }: {
   environment: FormattedEnvironment;
   refetchEnvironment: (environmentId: string) => void;
+  connectionStatus: Record<string, ConnectionStatus.Type>;
 }) {
   const { addToast } = toast.useStore();
   const { user } = useHomeStore();
-  const { connectionStatus } = useWSContext();
   const [showDeleteEnvironmentDialog, setShowDeleteEnvironmentDialog] =
     useState(false);
   const [showRefreshApiKeyDialog, setShowRefreshApiKeyDialog] = useState(false);
@@ -165,7 +167,10 @@ export default function Environment({
             <div className="flex flex-row items-center gap-x-2 md:gap-x-4">
               <EnvironmentTypeBadge type={environment.type} />
               <ConnectionStatusIndicator
-                connectionStatus={connectionStatus[environment.id]}
+                connectionStatus={
+                  connectionStatus[environment.id] ||
+                  ConnectionStatus.TYPE.BROWSER_CONNECTING
+                }
               />
             </div>
           </div>
@@ -244,7 +249,7 @@ export default function Environment({
         {sortedApps.length === 0 && (
           <p className="text-brand-neutral-2">
             No apps found. Get going with the{" "}
-            <InlineLink url="https://docs.composehq.com/quickstart">
+            <InlineLink url="https://docs.composehq.com">
               quickstart guide
             </InlineLink>
             .
@@ -263,6 +268,13 @@ export default function Environment({
           />
         )}
       </div>
+      {user &&
+        user.metadata["has-never-opened-app"] &&
+        sortedApps.length > 0 && (
+          <TextBubble caratDirection="up">
+            💡 Click on an app to run it
+          </TextBubble>
+        )}
     </div>
   );
 }

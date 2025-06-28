@@ -221,6 +221,43 @@ async function userRoutes(server: FastifyInstance) {
       reply.status(200).send(response);
     }
   );
+
+  server.post<{
+    Body: BrowserToServerEvent.UpdateUserMetadata.RequestBody;
+    Reply: {
+      200: BrowserToServerEvent.UpdateUserMetadata.SuccessResponseBody;
+      "4xx": BrowserToServerEvent.UpdateUserMetadata.ErrorResponseBody;
+    };
+  }>(
+    `/${BrowserToServerEvent.UpdateUserMetadata.route}`,
+    async (req, reply) => {
+      const user = req.user;
+
+      if (!user || user.isExternal) {
+        return reply.status(401).send({ message: "Unauthorized" });
+      }
+
+      const dbUser = await db.user.selectById(server.pg, user.id);
+
+      if (!dbUser) {
+        return reply.status(400).send({ message: "User not found" });
+      }
+
+      const newMetadata = {
+        ...dbUser.metadata,
+        ...req.body.metadata,
+      };
+
+      const updatedUser = await db.user.updateMetadata(
+        server.pg,
+        user.id,
+        user.companyId,
+        newMetadata
+      );
+
+      reply.status(200).send({ user: updatedUser });
+    }
+  );
 }
 
 export { userRoutes };

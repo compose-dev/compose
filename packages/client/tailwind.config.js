@@ -50,6 +50,8 @@ export default {
         "brand-primary": {
           DEFAULT: "var(--brand-primary)",
           heavy: "var(--brand-primary-heavy)",
+          light: "var(--brand-primary-light)",
+          subtle: "var(--brand-primary-subtle)",
         },
         "brand-error": {
           DEFAULT: "var(--brand-error)",
@@ -116,6 +118,16 @@ export default {
             display: "none",
           },
         },
+        "bounce-sm": {
+          "0%, 100%": {
+            transform: "translateY(-2.5%)",
+            animationTimingFunction: "cubic-bezier(0.8,0,1,1)",
+          },
+          "50%": {
+            transform: "none",
+            animationTimingFunction: "cubic-bezier(0,0,0.2,1)",
+          },
+        },
         "slide-fade-in-modal": {
           "0%": { transform: "translateY(1rem)", opacity: 0 },
           "100%": { transform: "translateY(0)", opacity: 1 },
@@ -146,6 +158,7 @@ export default {
         "grow-in": "grow-in 0.15s cubic-bezier(0.4, 0, 0.6, 1) forwards",
         "opacity-in": "opacity-in 0.1s cubic-bezier(0.4, 0, 0.6, 1) forwards",
         "tooltip-in": "tooltip-in 0.075s cubic-bezier(0.4, 0, 0.6, 1) forwards",
+        "bounce-sm": "bounce-sm 1s infinite",
       },
     },
   },

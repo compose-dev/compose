@@ -21,7 +21,7 @@ function InlineLink({
   return (
     <a
       className={classNames(
-        "cursor-pointer hover:underline inline-flex items-center gap-x-1",
+        "cursor-pointer hover:underline inline-flex items-center gap-x-0.5",
         {
           "text-brand-primary hover:text-brand-primary-heavy":
             appearance === "primary",
@@ -51,7 +51,7 @@ function InlineLink({
                   ? "brand-success"
                   : "brand-neutral"
           }
-          size="1"
+          size="0.875"
         />
       )}
     </a>

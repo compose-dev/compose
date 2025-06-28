@@ -14,3 +14,4 @@
 \i 14-add-user-permission.sql
 \i 15-add-environment-data.sql
 \i 16-logs.sql
+\i 17-add-user-metadata.sql

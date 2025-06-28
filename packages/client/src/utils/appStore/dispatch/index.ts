@@ -6,8 +6,6 @@ import { RestartAppEvent, restartApp } from "./eventHandlers/restartApp";
 import {
   AddRenderEvent,
   addRender,
-  UpdateRendersEvent,
-  updateRenders,
   UpdateRendersV2Event,
   updateRendersV2,
   CloseModalEvent,
@@ -89,7 +87,6 @@ import { APP_RUNNER_EVENT_TYPE } from "./types";
 type AppRunnerEvent =
   | RestartAppEvent
   | AddRenderEvent
-  | UpdateRendersEvent
   | UpdateTextInputValueEvent
   | UpdateNumberInputValueEvent
   | UpdateDateInputValueEvent
@@ -222,9 +219,6 @@ function appRunnerReducer(
       }
       case APP_RUNNER_EVENT_TYPE.UPDATE_LOADING: {
         return updateLoading(appState, event);
-      }
-      case APP_RUNNER_EVENT_TYPE.UPDATE_RENDERS: {
-        return updateRenders(appState, event);
       }
     }
   } catch (error) {

@@ -237,6 +237,12 @@ async function routes(server: FastifyInstance, wsGateway: WSGateway) {
         return reply.status(401).send({ message: "Unauthorized" });
       }
 
+      let dbUser: m.User.DB | null = null;
+
+      if (!user.isExternal) {
+        dbUser = await db.user.selectById(server.pg, user.id);
+      }
+
       const validationResponse = await server.session.validateAppUser(
         appRoute,
         environmentId,
@@ -319,9 +325,14 @@ async function routes(server: FastifyInstance, wsGateway: WSGateway) {
           navs: environment.data.navs || [],
         },
         app: app[0],
-        user: {
-          isExternal: user.isExternal,
-        },
+        user: dbUser
+          ? {
+              ...dbUser,
+              isExternal: false,
+            }
+          : {
+              isExternal: user.isExternal,
+            },
         companyName: company.name,
       });
     }

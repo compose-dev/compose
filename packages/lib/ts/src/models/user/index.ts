@@ -35,6 +35,23 @@ const PERMISSION_TO_SUMMARY = {
     "Access to use specific apps that've been shared with them.",
 } as const;
 
+interface UserMetadata {
+  // Whether to show the onboarding tab to the user.
+  "show-onboarding"?: boolean;
+  // Whether the user has ever opened an app. This is worded in the
+  // negative case so that the undefined case matches with the default
+  // value.
+  "has-never-opened-app"?: boolean;
+  // Whether to show the success callout on app open.
+  "show-success-callout-on-app-open"?: boolean;
+}
+
+const DEFAULT_USER_METADATA: Required<UserMetadata> = {
+  "show-onboarding": false,
+  "has-never-opened-app": false,
+  "show-success-callout-on-app-open": false,
+};
+
 interface UserDB {
   id: string;
   companyId: string;
@@ -45,6 +62,7 @@ interface UserDB {
   createdAt: Date;
   updatedAt: Date;
   permission: Permission;
+  metadata: UserMetadata;
 }
 
 const FAKE_USER_ID = "00000000-0000-0000-0000-000000000000";
@@ -58,4 +76,6 @@ export {
   type Permission,
   PERMISSION_TO_LABEL,
   PERMISSION_TO_SUMMARY,
+  DEFAULT_USER_METADATA as DEFAULT_METADATA,
+  type UserMetadata as Metadata,
 };

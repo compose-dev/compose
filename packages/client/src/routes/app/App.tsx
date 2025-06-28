@@ -19,6 +19,7 @@ import { ConnectionStatusIndicator } from "~/components/connection-status-indica
 import { useCallback, useEffect, useMemo } from "react";
 import LoadingOverlay from "./LoadingOverlay";
 import { Tooltip } from "react-tooltip";
+import { api } from "~/api";
 
 const routeApi = getRouteApi("/app/$environmentId/$appRoute");
 
@@ -51,11 +52,12 @@ function App() {
     environmentId,
     sendWSJsonMessage,
     connectionStatus,
-    isExternalUser,
+    user,
     browserSessionId,
     pageLoading,
     newTabLink,
     setNewTabLink,
+    setUser,
   } = useAppRunner();
 
   const hasNav = appStore.useNavigation((state) => {
@@ -163,7 +165,7 @@ function App() {
       },
     ];
 
-    if (!isExternalUser) {
+    if (user && !user.isExternal) {
       options.unshift({
         label: "Back to home",
         left: <Icon name="home" color="brand-neutral" />,
@@ -172,7 +174,7 @@ function App() {
     }
 
     return options;
-  }, [isExternalUser, navigate, restartApp]);
+  }, [user, navigate, restartApp]);
 
   if (loadingAuthorization) {
     return <CenteredSpinner />;
@@ -288,6 +290,68 @@ function App() {
           )}
         </div>
       </div>
+      {user &&
+        "metadata" in user &&
+        user.metadata["show-success-callout-on-app-open"] && (
+          <div className="fixed inset-0 flex items-end justify-center bottom-8 p-8 z-0 pointer-events-none">
+            <div className="animate-[opacity-in_2000ms_ease-in-out]">
+              <div className="blue-tag backdrop-blur border border-brand-primary rounded-lg p-3 text-sm animate-bounce-sm hover:animate-none max-w-xl flex flex-col gap-2 pointer-events-auto">
+                <div className="flex flex-row justify-between items-center">
+                  <h5>You've successfully run an app!</h5>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      api.routes.updateUserMetadata({
+                        metadata: {
+                          "show-success-callout-on-app-open": false,
+                        },
+                      });
+                      setUser({
+                        ...user,
+                        metadata: {
+                          ...user.metadata,
+                          "show-success-callout-on-app-open": false,
+                        },
+                      });
+                    }}
+                  >
+                    <Icon name="x" color="brand-neutral" size="0.75" />
+                  </Button>
+                </div>
+                <p>
+                  Feel free to click around, then click the button below to
+                  explore the core concepts of Compose that will help you get
+                  productive with the SDK fast.
+                </p>
+                <div className="flex w-full justify-end">
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      api.routes.updateUserMetadata({
+                        metadata: {
+                          "show-success-callout-on-app-open": false,
+                        },
+                      });
+                      setUser({
+                        ...user,
+                        metadata: {
+                          ...user.metadata,
+                          "show-success-callout-on-app-open": false,
+                        },
+                      });
+                      window.open(
+                        "https://docs.composehq.com/get-started/concepts",
+                        "_blank"
+                      );
+                    }}
+                  >
+                    Next steps
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       <div
         className={classNames("fixed bottom-4 right-4", {
           "lg:bottom-2 lg:right-2": hasNav,
@@ -319,7 +383,9 @@ function App() {
               window.open("https://composehq.com", "_blank");
             }}
           >
-            {isExternalUser && <p className="font-medium text-sm">Made with</p>}
+            {user && user.isExternal && (
+              <p className="font-medium text-sm">Made with</p>
+            )}
             <img
               src="/light-logo-with-text.svg"
               className="w-24 hidden dark:block"

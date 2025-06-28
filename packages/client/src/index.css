@@ -1,5 +1,25 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap");
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .animated-progress-bar {
+    background-size: 200% 100%;
+    animation: progress-animation 8s ease infinite;
+  }
+
+  @keyframes progress-animation {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+}
+
 :root {
   --color-scheme: light;
   color-scheme: var(--color-scheme);
@@ -51,6 +71,12 @@
 
   --LIGHT--brand-primary-heavy: #003c83; /* custom */
   --DARK--brand-primary-heavy: #bae6fd; /* sky 200 */
+
+  --LIGHT--brand-primary-light: #1d85ff; /* custom */
+  --DARK--brand-primary-light: #38bdf8; /* sky 400 */
+
+  --LIGHT--brand-primary-subtle: #eff6ff; /* custom */
+  --DARK--brand-primary-subtle: #164e63; /* sky 900 */
 
   --LIGHT--brand-primary-btn-bg: #0074fc; /* custom */
   --LIGHT--brand-primary-btn-bg-hover: var(--LIGHT--brand-primary);
@@ -124,6 +150,8 @@
   --brand-primary: var(--LIGHT--brand-primary);
   --primary-color: var(--brand-primary);
   --brand-primary-heavy: var(--LIGHT--brand-primary-heavy);
+  --brand-primary-light: var(--LIGHT--brand-primary-light);
+  --brand-primary-subtle: var(--LIGHT--brand-primary-subtle);
   --brand-primary-btn-bg: var(--LIGHT--brand-primary-btn-bg);
   --brand-primary-btn-bg-hover: var(--LIGHT--brand-primary-btn-bg-hover);
 
@@ -177,6 +205,8 @@
     --brand-primary: var(--DARK--brand-primary);
     --primary-color: var(--brand-primary);
     --brand-primary-heavy: var(--DARK--brand-primary-heavy);
+    --brand-primary-light: var(--DARK--brand-primary-light);
+    --brand-primary-subtle: var(--DARK--brand-primary-subtle);
     --brand-primary-btn-bg: var(--DARK--brand-primary-btn-bg);
     --brand-primary-btn-bg-hover: var(--DARK--brand-primary-btn-bg-hover);
 
@@ -201,10 +231,6 @@
     --brand-blue-tag-text: var(--DARK--brand-blue-tag-text);
   }
 }
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 @layer base {
   html {

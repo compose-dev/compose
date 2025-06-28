@@ -106,13 +106,18 @@ function NewUserFlow() {
         const isAuthenticated = await checkAuth();
 
         if (isAuthenticated) {
-          navigate({
-            to: "/home",
-            search: {
-              newUser: true,
-              newOrganization: false,
-            },
-          });
+          if (response.data.isFirstDeveloperInOrganization) {
+            navigate({
+              to: "/home/onboarding",
+            });
+          } else {
+            navigate({
+              to: "/home",
+              search: {
+                newUser: true,
+              },
+            });
+          }
         } else {
           addToast({
             title: "Authentication Error",
@@ -158,24 +163,9 @@ function NewUserFlow() {
       const isAuthenticated = await checkAuth();
 
       if (isAuthenticated) {
-        if (userType === m.User.ACCOUNT_TYPE.DEVELOPER) {
-          navigate({
-            to: "/start",
-            search: {
-              step: "lang-select",
-              lang: null,
-              projectType: null,
-            },
-          });
-        } else {
-          navigate({
-            to: "/home",
-            search: {
-              newUser: true,
-              newOrganization: true,
-            },
-          });
-        }
+        navigate({
+          to: "/home/onboarding",
+        });
       } else {
         addToast({
           title: "Authentication Error",

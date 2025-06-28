@@ -124,8 +124,8 @@ async function completeSignUpToOrg(
   body: BrowserToServerEvent.CompleteSignUpToOrg.RequestBody
 ) {
   return await request<
-    BrowserToServerEvent.CompleteSignUpToOrg.ResponseBody,
-    BrowserToServerEvent.CompleteSignUpToOrg.ErrorData
+    BrowserToServerEvent.CompleteSignUpToOrg.SuccessResponseBody,
+    BrowserToServerEvent.CompleteSignUpToOrg.ErrorResponseBody
   >({
     route: `/${BrowserToServerEvent.CompleteSignUpToOrg.route}`,
     method: "POST",
@@ -401,6 +401,20 @@ async function getPageOfLogs(
   });
 }
 
+async function updateUserMetadata(
+  body: BrowserToServerEvent.UpdateUserMetadata.RequestBody
+) {
+  return await request<
+    BrowserToServerEvent.UpdateUserMetadata.SuccessResponseBody,
+    BrowserToServerEvent.UpdateUserMetadata.ErrorResponseBody
+  >({
+    route: `/${BrowserToServerEvent.UpdateUserMetadata.route}`,
+    method: BrowserToServerEvent.UpdateUserMetadata.method,
+    forwardLog: log,
+    body,
+  });
+}
+
 export {
   initialize,
   initializeEnvironmentAndAuthorizeApp,
@@ -426,4 +440,5 @@ export {
   oauthLogin,
   logError,
   getPageOfLogs,
+  updateUserMetadata,
 };

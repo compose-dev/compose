@@ -231,7 +231,8 @@ describe("External App User Routes", () => {
         "User",
         otherEmail,
         null,
-        m.User.PERMISSION.MEMBER
+        m.User.PERMISSION.MEMBER,
+        {}
       );
 
       const response = await runner.makeApiRequest({
@@ -275,7 +276,8 @@ describe("External App User Routes", () => {
         "User",
         otherEmail,
         null,
-        m.User.PERMISSION.MEMBER
+        m.User.PERMISSION.MEMBER,
+        {}
       );
 
       const response = await runner.makeApiRequest({

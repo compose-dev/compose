@@ -122,6 +122,8 @@ async function routes(server: FastifyInstance) {
         }
       }
 
+      const isDeveloper = !!devEnvironmentId;
+
       const user = await d.user.insert(
         server,
         company.id,
@@ -131,7 +133,12 @@ async function routes(server: FastifyInstance) {
         devEnvironmentId,
         // This route creates a new organization, so we automatically make the
         // user the owner of the organization.
-        m.User.PERMISSION.OWNER
+        m.User.PERMISSION.OWNER,
+        {
+          "show-onboarding": true,
+          "has-never-opened-app": true,
+          "show-success-callout-on-app-open": isDeveloper,
+        }
       );
 
       const session = await server.session.createUserSession(
@@ -149,7 +156,13 @@ async function routes(server: FastifyInstance) {
   );
 
   // Create a new user in an existing organization.
-  server.post(
+  server.post<{
+    Body: BrowserToServerEvent.CompleteSignUpToOrg.RequestBody;
+    Reply: {
+      200: BrowserToServerEvent.CompleteSignUpToOrg.SuccessResponseBody;
+      "4xx": BrowserToServerEvent.CompleteSignUpToOrg.ErrorResponseBody;
+    };
+  }>(
     `/${BrowserToServerEvent.CompleteSignUpToOrg.route}`,
     async (req, reply) => {
       const accessToken = req.headers["x-compose-goog-oauth2-access-token"];
@@ -173,8 +186,8 @@ async function routes(server: FastifyInstance) {
         return reply.status(400).send({
           message:
             "Google authentication returned an invalid response. Please try again.",
-          code: BrowserToServerEvent.GoogleOauthCallback.ErrorCode
-            .UNKNOWN_ERROR,
+          internalCode:
+            BrowserToServerEvent.authUtils.SignUpErrorCode.UNKNOWN_ERROR,
         });
       }
 
@@ -186,28 +199,32 @@ async function routes(server: FastifyInstance) {
       if (!emailCode) {
         return reply.status(400).send({
           message: "Invalid invite code.",
-          code: BrowserToServerEvent.authUtils.SignUpErrorCode.UNKNOWN_ERROR,
+          internalCode:
+            BrowserToServerEvent.authUtils.SignUpErrorCode.UNKNOWN_ERROR,
         });
       }
 
       if (emailCode.metadata.purpose !== m.EmailCode.PURPOSE.JOIN_COMPANY) {
         return reply.status(400).send({
           message: "Invalid invite code.",
-          code: BrowserToServerEvent.authUtils.SignUpErrorCode.UNKNOWN_ERROR,
+          internalCode:
+            BrowserToServerEvent.authUtils.SignUpErrorCode.UNKNOWN_ERROR,
         });
       }
 
       if (!emailCode.companyId) {
         return reply.status(400).send({
           message: "Invalid invite code.",
-          code: BrowserToServerEvent.authUtils.SignUpErrorCode.UNKNOWN_ERROR,
+          internalCode:
+            BrowserToServerEvent.authUtils.SignUpErrorCode.UNKNOWN_ERROR,
         });
       }
 
       if (Date.now() > new Date(emailCode.expiresAt).getTime()) {
         return reply.status(400).send({
           message: "Invite code expired.",
-          code: BrowserToServerEvent.authUtils.SignUpErrorCode.UNKNOWN_ERROR,
+          internalCode:
+            BrowserToServerEvent.authUtils.SignUpErrorCode.UNKNOWN_ERROR,
         });
       }
 
@@ -215,7 +232,8 @@ async function routes(server: FastifyInstance) {
       if (email.toLowerCase() !== emailCode.email.toLowerCase()) {
         return reply.status(400).send({
           message: "Email mismatch.",
-          code: BrowserToServerEvent.authUtils.SignUpErrorCode.EMAIL_MISMATCH,
+          internalCode:
+            BrowserToServerEvent.authUtils.SignUpErrorCode.EMAIL_MISMATCH,
         });
       }
 
@@ -227,8 +245,8 @@ async function routes(server: FastifyInstance) {
       if (existingUser) {
         return reply.status(400).send({
           message: `User already exists. Found user with email ${existingUser.email}. Please reach out to support to resolve this issue: atul@composehq.com`,
-          code: BrowserToServerEvent.authUtils.SignUpErrorCode
-            .USER_ALREADY_EXISTS,
+          internalCode:
+            BrowserToServerEvent.authUtils.SignUpErrorCode.USER_ALREADY_EXISTS,
         });
       }
 
@@ -240,7 +258,8 @@ async function routes(server: FastifyInstance) {
       if (!company) {
         return reply.status(400).send({
           message: "Company not found.",
-          code: BrowserToServerEvent.authUtils.SignUpErrorCode.UNKNOWN_ERROR,
+          internalCode:
+            BrowserToServerEvent.authUtils.SignUpErrorCode.UNKNOWN_ERROR,
         });
       }
 
@@ -283,6 +302,20 @@ async function routes(server: FastifyInstance) {
         });
       }
 
+      const existingUsers = await db.user.selectByCompanyId(
+        server.pg,
+        emailCode.companyId
+      );
+
+      const organizationHasDevelopersAlready = existingUsers.some(
+        (user) => user.developmentEnvironmentId
+      );
+
+      const isDeveloper = !!devEnvironmentId;
+
+      const isFirstDeveloperInOrganization =
+        !organizationHasDevelopersAlready && isDeveloper;
+
       const user = await d.user.insert(
         server,
         emailCode.companyId,
@@ -290,7 +323,12 @@ async function routes(server: FastifyInstance) {
         body.lastName,
         email,
         devEnvironmentId,
-        permission || m.User.PERMISSION.MEMBER
+        permission || m.User.PERMISSION.MEMBER,
+        {
+          "show-onboarding": isFirstDeveloperInOrganization,
+          "has-never-opened-app": true,
+          "show-success-callout-on-app-open": isFirstDeveloperInOrganization,
+        }
       );
 
       const session = await server.session.createUserSession(
@@ -304,7 +342,7 @@ async function routes(server: FastifyInstance) {
       await db.emailCode.deleteById(server.pg, body.inviteCode);
 
       return reply.status(200).send({
-        success: true,
+        isFirstDeveloperInOrganization,
       });
     }
   );

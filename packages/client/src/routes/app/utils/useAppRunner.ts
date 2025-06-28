@@ -49,7 +49,9 @@ function useAppRunner() {
 
   const queryParams = routeApi.useSearch();
 
-  const [isExternalUser, setIsExternalUser] = useState(false);
+  const [user, setUser] = useState<
+    (m.User.DB & { isExternal: boolean }) | { isExternal: boolean } | null
+  >(null);
 
   const {
     addWSListener,
@@ -170,7 +172,7 @@ function useAppRunner() {
       setEnvironmentApps(response.data.environment.apps);
       isAuthorized.current = true;
       setLoadingAuthorization(false);
-      setIsExternalUser(response.data.user.isExternal);
+      setUser(response.data.user);
       setNavs(
         response.data.environment.navs,
         response.data.environment.apps,
@@ -383,21 +385,6 @@ function useAppRunner() {
             appearance: data["appearance"],
             modalHeader: data["modalHeader"],
             modalWidth: data["modalWidth"],
-          },
-        });
-
-        return;
-      }
-
-      if (data["type"] === ServerToBrowserEvent.TYPE.RERENDER_UI) {
-        if (data.executionId !== executionId) {
-          return;
-        }
-
-        dispatch({
-          type: appStore.EVENT_TYPE.UPDATE_RENDERS,
-          properties: {
-            diff: data["diff"],
           },
         });
 
@@ -747,7 +734,8 @@ function useAppRunner() {
     environmentId,
     sendWSJsonMessage,
     connectionStatus,
-    isExternalUser,
+    user,
+    setUser,
     browserSessionId: sessionId,
     pageLoading,
     newTabLink,

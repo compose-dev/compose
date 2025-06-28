@@ -4,7 +4,7 @@ export const method = "POST";
 
 export type RequestBody = {
   event: string;
-  data: Record<string, string | number | boolean>;
+  data: Record<string, any>;
 };
 
 export type Response = {

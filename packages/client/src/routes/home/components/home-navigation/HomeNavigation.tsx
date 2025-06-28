@@ -8,6 +8,7 @@ import { Navigation } from "~/components/navigation";
 
 import { classNames } from "~/utils/classNames";
 import { useAuthContext } from "~/utils/authContext";
+import { useHomeStore } from "../../utils/useHomeStore";
 
 function NavigationItem({
   icon,
@@ -79,12 +80,16 @@ export default function HomeNavigation({
   const location = useLocation();
   const navigate = useNavigate();
 
+  const { user } = useHomeStore();
+
   const activeTab = location.pathname.includes("/home/audit-log")
     ? "activity-logs"
     : location.pathname.includes("/home/settings") ||
         location.pathname.includes("/home/billing/details")
       ? "settings"
-      : "environments";
+      : location.pathname.includes("/home/onboarding")
+        ? "onboarding"
+        : "environments";
 
   return (
     <Navigation.Root>
@@ -102,6 +107,14 @@ export default function HomeNavigation({
           />
         </div>
         <div className="flex flex-col flex-1 gap-y-2">
+          {user && user.metadata["show-onboarding"] && (
+            <NavigationItem
+              icon="flag"
+              label="Onboarding"
+              isActive={activeTab === "onboarding"}
+              onClick={() => navigate({ to: "/home/onboarding" })}
+            />
+          )}
           <NavigationItem
             icon="server"
             label="Environments"
@@ -185,6 +198,14 @@ export default function HomeNavigation({
             />
           </div>
           <div className="flex flex-col gap-y-2 -mx-2">
+            {user && user.metadata["show-onboarding"] && (
+              <NavigationItem
+                icon="flag"
+                label="Onboarding"
+                isActive={activeTab === "onboarding"}
+                onClick={() => navigate({ to: "/home/onboarding" })}
+              />
+            )}
             <NavigationItem
               icon="server"
               label="Environments"

@@ -7,6 +7,7 @@ import ShareAppModal from "./share-app-modal";
 import { useState } from "react";
 import { classNames } from "~/utils/classNames";
 import Button from "~/components/button";
+import { api } from "~/api";
 
 function isPublic(
   environment: HomeStore["environments"][string],
@@ -60,8 +61,9 @@ function AppRow({
   hidden?: boolean;
 }) {
   const navigate = useNavigate();
-  const { environment } = useHomeStore((state) => ({
+  const { environment, user } = useHomeStore((state) => ({
     environment: state.environments[environmentId],
+    user: state.user,
   }));
 
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -71,6 +73,16 @@ function AppRow({
   );
 
   function onNavigate(environmentId: string, appRoute: string) {
+    if (user && user.metadata["has-never-opened-app"]) {
+      api.routes.updateUserMetadata({
+        metadata: {
+          "has-never-opened-app": false,
+          // Just in case, once the user has opened an app,
+          // we know to hide the onboarding tab.
+          "show-onboarding": false,
+        },
+      });
+    }
     navigate({
       to: "/app/$environmentId/$appRoute",
       params: { environmentId, appRoute },

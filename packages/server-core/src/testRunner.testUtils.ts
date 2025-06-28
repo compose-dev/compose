@@ -140,7 +140,8 @@ class TestRunner {
       "Jalan",
       "atul@composehq.com",
       developmentEnvironment.id,
-      userPermission
+      userPermission,
+      {}
     );
 
     const session = await this._server.session.createUserSession(
