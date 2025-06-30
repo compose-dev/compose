@@ -1,7 +1,34 @@
 from .ui import ComponentReturn, TYPE, INTERACTION_TYPE
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 UNIQUE_PRIMARY_KEY_ID = "i"
+
+
+def get_columns(table: ComponentReturn) -> Union[List[Any], Any]:
+    columnsProperty = table["model"]["properties"]["columns"]
+
+    if (
+        columnsProperty is None
+        and len(table["model"]["properties"]["data"]) > 0
+        # If the table is paged, do not optimize the columns unless
+        # the property is explicitly set by the user. Manually paged
+        # tables transmit the table model prior to loading any data,
+        # so it's too late to optimize the columns on future pages.
+        and table["model"]["properties"].get("paged", None) is not True
+    ):
+        num_rows = min(len(table["model"]["properties"]["data"]), 5)
+
+        keys: List[str] = []
+
+        for i in range(num_rows):
+            row = table["model"]["properties"]["data"][i]
+            for key in row.keys():
+                if key not in keys:
+                    keys.append(key)
+
+        return keys
+
+    return columnsProperty
 
 
 class Compress:
@@ -11,18 +38,7 @@ class Compress:
         Optimizes the table packet size by removing columns that are not needed
         by the client.
         """
-        columnsProperty = table["model"]["properties"]["columns"]
-
-        columns = (
-            list(table["model"]["properties"]["data"][0].keys())
-            if columnsProperty is None and len(table["model"]["properties"]["data"]) > 0
-            # If the table is paged, do not optimize the columns unless
-            # the property is explicitly set by the user. Manually paged
-            # tables transmit the table model prior to loading any data,
-            # so it's too late to optimize the columns on future pages.
-            and table["model"]["properties"].get("paged", None) is not True
-            else columnsProperty
-        )
+        columns = get_columns(table)
 
         if columns is None:
             return table

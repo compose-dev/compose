@@ -128,6 +128,13 @@ class WSSdk {
       return ConnectionError.generate("Invalid API key.", "srvr7");
     }
 
+    if (apiKey === "API_KEY_HERE") {
+      return ConnectionError.generate(
+        "Invalid API key. Did you forget to replace 'API_KEY_HERE' with your actual API key?",
+        "srvr10"
+      );
+    }
+
     const hashedKey = apiKeyService.generateOneWayHash(apiKey);
 
     const environment = await db.environment.selectByApiKey(

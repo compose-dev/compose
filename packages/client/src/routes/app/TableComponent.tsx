@@ -90,7 +90,18 @@ function guessColumns(
     return [];
   }
 
-  const keys = Object.keys(data[0]);
+  const numRows = Math.min(data.length, 5);
+
+  const keys: string[] = [];
+
+  for (let i = 0; i < numRows; i++) {
+    const row = data[i];
+    for (const key in row) {
+      if (!keys.includes(key)) {
+        keys.push(key);
+      }
+    }
+  }
 
   return keys.map((key) => ({
     id: key,

@@ -38,6 +38,9 @@ function InstallDependencies() {
   return (
     <FrameworkStep>
       <h4>3. Install dependencies</h4>
+      <p>
+        Note: The starter repo requires <strong>Python 3.9 or higher.</strong>
+      </p>
       <Code code={`pip install -r requirements.txt`} lang="bash" />
     </FrameworkStep>
   );
@@ -103,7 +106,10 @@ function PythonNew({ apiKey }: { apiKey: string | null }) {
           <CreateVirtualEnvironment />
           <FrameworkStep>
             <h4>3. Install dependencies</h4>
-            <p>Install the Compose SDK</p>
+            <p>
+              Install the Compose SDK. Note: the SDK requires{" "}
+              <strong>Python 3.9 or higher.</strong>
+            </p>
             <Code code={`pip install compose-sdk`} lang="bash" />
             <p>
               Optionally, install py-mon, a lightweight file watcher that will

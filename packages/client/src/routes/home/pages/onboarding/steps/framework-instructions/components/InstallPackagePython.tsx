@@ -11,7 +11,10 @@ function InstallPackagePython() {
   return (
     <FrameworkStep>
       <h4>1. Install the SDK</h4>
-      <p>Use your package manager to install the Compose SDK.</p>
+      <p>
+        Use your package manager to install the Compose SDK.{" "}
+        <strong>The SDK requires Python 3.9 or higher.</strong>
+      </p>
       <Code code={INSTALL_CODE} lang="bash" />
     </FrameworkStep>
   );

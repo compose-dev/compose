@@ -117,7 +117,7 @@ function AddStarterAppsNode({
   if (newProject) {
     return (
       <FrameworkStep>
-        <h4>2. Add starter code</h4>
+        <h4>3. Add starter code</h4>
         <p>
           Create a new file called <InlineCode>index.ts</InlineCode> (or{" "}
           <InlineCode>index.js</InlineCode>) and paste the following starter

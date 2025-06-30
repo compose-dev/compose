@@ -41,7 +41,7 @@ function TextBubble({
         <div className={caratBorderStyle} />
         {/* Carat fill */}
         <div className={caratFillStyle} />
-        <p className="text-sm text-blue-950 dark:text-white/80">{children}</p>
+        <p className="text-blue-950 dark:text-white/80">{children}</p>
       </div>
     </div>
   );

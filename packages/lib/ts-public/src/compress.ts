@@ -2,6 +2,41 @@ import * as UI from "./ui";
 
 const UNIQUE_PRIMARY_KEY_ID = "i";
 
+function getColumns<T extends UI.ComponentGenerators.InputTable>(table: T) {
+  const columnsProperty = table.model.properties.columns;
+
+  if (columnsProperty === null) {
+    if (
+      table.model.properties.data.length > 0 &&
+      // If the table is paged, do not optimize the columns unless
+      // the property is explicitly set by the user. Manually paged
+      // tables transmit the table model prior to loading any data,
+      // so it's too late to optimize the columns on future pages.
+      table.model.properties.paged !== true
+    ) {
+      const numRows = Math.min(table.model.properties.data.length, 5);
+
+      const keys: string[] = [];
+
+      for (let i = 0; i < numRows; i++) {
+        const row = table.model.properties.data[i];
+
+        for (const key in row) {
+          if (!keys.includes(key)) {
+            keys.push(key);
+          }
+        }
+      }
+
+      return keys;
+    }
+
+    return null;
+  }
+
+  return columnsProperty;
+}
+
 /**
  * Optimizes the table packet size by removing the columns that are not
  * needed by the client.
@@ -12,19 +47,7 @@ const UNIQUE_PRIMARY_KEY_ID = "i";
 function compressTableLayout<T extends UI.ComponentGenerators.InputTable>(
   table: T
 ): T {
-  const columnsProperty = table.model.properties.columns;
-
-  const columns =
-    columnsProperty === null
-      ? // If the table is paged, do not optimize the columns unless
-        // the property is explicitly set by the user. Manually paged
-        // tables transmit the table model prior to loading any data,
-        // so it's too late to optimize the columns on future pages.
-        table.model.properties.data.length > 0 &&
-        table.model.properties.paged !== true
-        ? Object.keys(table.model.properties.data[0])
-        : null
-      : columnsProperty;
+  const columns = getColumns(table);
 
   if (columns === null) {
     return table;

@@ -20,6 +20,9 @@ function InstallDependencies() {
   return (
     <FrameworkStep>
       <h4>2. Install dependencies</h4>
+      <p>
+        Note: The starter repo requires <strong>Node.js 16 or higher.</strong>
+      </p>
       <Code code={`npm install`} lang="bash" />
     </FrameworkStep>
   );
@@ -43,7 +46,7 @@ node --watch src/index.js`;
 function RunTheAppManualInstall() {
   return (
     <FrameworkStep>
-      <h4>3. Run the app</h4>
+      <h4>4. Run the app</h4>
       <p>Run your project's dev command, e.g:</p>
       <Code code={RUN_THE_APP_MANUAL_INSTALL_CODE} lang="bash" />
     </FrameworkStep>
@@ -117,6 +120,13 @@ function NodeNew({ apiKey }: { apiKey: string | null }) {
               during development.
             </p>
             <Code code="npm install --save-dev typescript tsx" lang="bash" />
+          </FrameworkStep>
+          <FrameworkStep>
+            <h4>2. Install the SDK</h4>
+            <p>
+              Note: the SDK requires <strong>Node.js 16 or higher.</strong>
+            </p>
+            <Code code="npm install @composehq/sdk" lang="bash" />
           </FrameworkStep>
           <AddStarterAppsNode apiKey={apiKey} newProject />
           <RunTheAppManualInstall />

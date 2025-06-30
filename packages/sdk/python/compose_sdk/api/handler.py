@@ -19,6 +19,9 @@ from .ws_message import (
 
 from .constants import WS_CLIENT
 
+YELLOW = "\033[93m"
+RESET = "\033[0m"
+
 
 class DisconnectionError(Exception):
     pass
@@ -26,6 +29,24 @@ class DisconnectionError(Exception):
 
 class ServerUpdateError(Exception):
     pass
+
+
+def get_error_reason_and_code(e: Exception) -> tuple[str, str]:
+    try:
+        response_headers = e.response.headers
+        error_reason = urllib.parse.unquote(
+            response_headers.get(WS_CLIENT["ERROR_RESPONSE_HEADERS"]["REASON"])
+        )
+        error_code = urllib.parse.unquote(
+            response_headers.get(WS_CLIENT["ERROR_RESPONSE_HEADERS"]["CODE"])
+        )
+        return error_reason, error_code
+    except Exception:
+        return None, None
+
+
+def print_warning(message: str) -> None:
+    print(f"⚠️ {YELLOW}{message}{RESET}")
 
 
 class APIHandler:
@@ -192,43 +213,29 @@ class APIHandler:
                 * self.reconnection_interval
             )
 
+            error_reason, error_code = get_error_reason_and_code(e)
+
             if is_server_update:
                 print(
                     f"🔄 Compose server update in progress. Attempting to reconnect after {reconnect_after} seconds...",
                 )
+            elif error_reason and error_code:
+                print_warning(f"{error_reason} Error Code: {error_code}")
+
+                # If we get a known error, we want to double the backoff rate
+                reconnect_after = self.reconnection_interval
+                self.reconnection_interval = math.ceil(
+                    WS_CLIENT["RECONNECTION_INTERVAL"]["BACKOFF_MULTIPLIER"]
+                    * self.reconnection_interval
+                )
+
+                print(f"Attempting to reconnect after {reconnect_after} seconds...")
             elif isinstance(e, DisconnectionError):
                 print(
                     f"🔄 Disconnected from Compose server. Attempting to reconnect after {reconnect_after} seconds...",
                 )
-
-            elif hasattr(e, "headers"):
-                try:
-                    error_reason = urllib.parse.unquote(
-                        e.headers.get(WS_CLIENT["ERROR_RESPONSE_HEADERS"]["REASON"])
-                    )
-                    error_code = urllib.parse.unquote(
-                        e.headers.get(WS_CLIENT["ERROR_RESPONSE_HEADERS"]["CODE"])
-                    )
-                    print(f"🔴 {error_reason} Error Code: {error_code}")
-
-                    # If we get a known error, we want to double the backoff rate
-                    reconnect_after = self.reconnection_interval
-                    self.reconnection_interval = math.ceil(
-                        WS_CLIENT["RECONNECTION_INTERVAL"]["BACKOFF_MULTIPLIER"]
-                        * self.reconnection_interval
-                    )
-
-                    print(f"Attempting to reconnect after {reconnect_after} seconds...")
-                except Exception as e:
-                    print(e)
-
-                    print(
-                        f"🔄 Failed to connect to Compose server. Attempting to reconnect after {reconnect_after} seconds...",
-                    )
-
             else:
-                if self.debug:
-                    print(e)
+                print(e)
                 print(
                     f"🔄 Failed to connect to Compose server. Attempting to reconnect after {reconnect_after} seconds...",
                 )
