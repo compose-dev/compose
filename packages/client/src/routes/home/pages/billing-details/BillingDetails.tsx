@@ -116,8 +116,8 @@ export default function BillingDetails() {
             </div>
             <p className="text-xs text-brand-neutral-2">
               Users that are not part of your organization, such as contractors
-              or clients. One credit allows you to share one app with one
-              external email address.
+              or clients. One credit allows you to share apps with one external
+              email.
             </p>
           </div>
         </div>

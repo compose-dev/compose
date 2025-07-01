@@ -45,7 +45,7 @@ export function useBilling(
   const [loadingCheckoutSession, setLoadingCheckoutSession] = useState(false);
 
   const standardSeatsCost = parseInt(standardSeats ?? "0") * 12;
-  const externalSeatsCost = parseInt(externalSeats ?? "0") * 7;
+  const externalSeatsCost = parseInt(externalSeats ?? "0") * 12;
   const totalCost = standardSeatsCost + externalSeatsCost;
 
   function clearForm() {

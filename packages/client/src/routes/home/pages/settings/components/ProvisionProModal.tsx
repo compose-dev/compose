@@ -54,8 +54,8 @@ export default function ProvisionProModal({
           <IOComponent.Label>External user credits</IOComponent.Label>
           <IOComponent.Description className="text-xs mb-2">
             Users that are not part of your organization, such as contractors or
-            clients. One credit allows you to share one app with one external
-            email address.
+            clients. One credit allows you to share apps with one external
+            email.
           </IOComponent.Description>
           <div className="flex flex-row justify-between items-center">
             <NumberInput
