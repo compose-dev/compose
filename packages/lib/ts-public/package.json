@@ -1,16 +1,24 @@
 {
   "name": "@composehq/ts-public",
   "description": "The open-source SDK for building custom internal tools.",
-  "version": "0.27.5",
+  "version": "0.27.6",
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
   "exports": {
-    ".": "./dist/index.js"
+    "require": "./dist/cjs/index.js",
+    "import": "./dist/esm/index.js",
+    "default": "./dist/esm/index.js",
+    "types": "./dist/esm/index.d.ts"
   },
   "scripts": {
-    "build": "rm -rf dist; tsc && tsc-alias",
-    "watch": "tsc --watch",
+    "build:cjs": "tsc -p tsconfig-cjs.json",
+    "build:esm": "tsc -p tsconfig.json",
+    "build:create-cjs-package-json": "chmod +x ./scripts/create-cjs-package-json.sh && ./scripts/create-cjs-package-json.sh",
+    "build:all": "pnpm run build:cjs && pnpm run build:esm && tsc-alias && pnpm run build:create-cjs-package-json",
+    "build": "rm -rf dist; pnpm run build:all",
+    "watch": "chokidar \"src/**/*.{ts,tsx}\" -c \"pnpm run build:all\"",
     "lint": "pnpm run type-check",
     "type-check": "tsc --noEmit",
     "bump-minor": "pnpm version minor --no-git-tag-version",
@@ -31,6 +39,7 @@
   "devDependencies": {
     "@composehq/faker": "^0.4.1",
     "@types/node": ">=16.0.0",
+    "chokidar-cli": "^3.0.0",
     "tsc-alias": "^1.8.10",
     "typescript": "5.7.3",
     "vitest": "^3.0.5"

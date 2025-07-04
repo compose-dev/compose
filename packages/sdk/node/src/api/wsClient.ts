@@ -188,7 +188,7 @@ class WSClient {
       ) as ServerToSdkEvent.Data;
     }
 
-    this.onMessageCallback(data);
+    this.onMessageCallback(data as ListenerEvent);
   }
 
   private onError(error: Error) {
@@ -272,7 +272,7 @@ class WSClient {
       WSUtils.Message.getBufferFromJson(data)
     );
 
-    this.sendRaw(buffer);
+    this.sendRaw(buffer as unknown as ArrayBuffer);
   }
 
   private flushSendQueue() {

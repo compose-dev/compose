@@ -567,7 +567,7 @@ class AppRunner {
       fileContentsBinary
     );
 
-    this.api.sendRaw(buffer);
+    this.api.sendRaw(buffer as unknown as ArrayBuffer);
   }
 
   private async link(

@@ -1,4 +1,4 @@
-import { UI } from "@composehq/ts-public";
+import { UI as UIModule } from "@composehq/ts-public";
 import { AppHandlerOptions } from "./app";
 
 type State = AppHandlerOptions["state"];
@@ -6,54 +6,60 @@ type UI = AppHandlerOptions["ui"];
 type Page = AppHandlerOptions["page"];
 
 // Table Column Types
-type TableColumn<TData extends UI.Table.DataRow[] = UI.Table.DataRow[]> =
-  UI.Table.ColumnGenerator<TData>;
-type TableColumns<TData extends UI.Table.DataRow[] = UI.Table.DataRow[]> =
-  UI.Table.ColumnGenerator<TData>[];
+type TableColumn<
+  TData extends UIModule.Table.DataRow[] = UIModule.Table.DataRow[],
+> = UIModule.Table.ColumnGenerator<TData>;
+type TableColumns<
+  TData extends UIModule.Table.DataRow[] = UIModule.Table.DataRow[],
+> = UIModule.Table.ColumnGenerator<TData>[];
 
 // Table Page Change Types
 type TablePageChangeParams<
-  TData extends UI.Table.DataRow[] = UI.Table.DataRow[],
-> = UI.Table.PageChangeParams<TData>;
+  TData extends UIModule.Table.DataRow[] = UIModule.Table.DataRow[],
+> = UIModule.Table.PageChangeParams<TData>;
 type TablePageChangeResponse<
-  TData extends UI.Table.DataRow[] = UI.Table.DataRow[],
-> = UI.Table.PageChangeResponse<TData>;
+  TData extends UIModule.Table.DataRow[] = UIModule.Table.DataRow[],
+> = UIModule.Table.PageChangeResponse<TData>;
 
 // Table Action Types
-type TableAction<TData extends UI.Table.DataRow[] = UI.Table.DataRow[]> =
-  UI.Table.Action<TData>;
-type TableActions<TData extends UI.Table.DataRow[] = UI.Table.DataRow[]> =
-  UI.Table.Action<TData>[];
+type TableAction<
+  TData extends UIModule.Table.DataRow[] = UIModule.Table.DataRow[],
+> = UIModule.Table.Action<TData>;
+type TableActions<
+  TData extends UIModule.Table.DataRow[] = UIModule.Table.DataRow[],
+> = UIModule.Table.Action<TData>[];
 
 // Table View Types
-type TableView<TData extends UI.Table.DataRow[] = UI.Table.DataRow[]> =
-  UI.Table.View<TData>;
-type TableViews<TData extends UI.Table.DataRow[] = UI.Table.DataRow[]> =
-  UI.Table.View<TData>[];
+type TableView<
+  TData extends UIModule.Table.DataRow[] = UIModule.Table.DataRow[],
+> = UIModule.Table.View<TData>;
+type TableViews<
+  TData extends UIModule.Table.DataRow[] = UIModule.Table.DataRow[],
+> = UIModule.Table.View<TData>[];
 
 // Table Column Filter Types
 type TableColumnFilterModel<
-  TData extends UI.Table.DataRow[] = UI.Table.DataRow[],
-> = UI.Table.ColumnFilterModel<TData>;
+  TData extends UIModule.Table.DataRow[] = UIModule.Table.DataRow[],
+> = UIModule.Table.ColumnFilterModel<TData>;
 type TableColumnFilterGroup<
-  TData extends UI.Table.DataRow[] = UI.Table.DataRow[],
-> = UI.Table.ColumnFilterGroup<TData>;
+  TData extends UIModule.Table.DataRow[] = UIModule.Table.DataRow[],
+> = UIModule.Table.ColumnFilterGroup<TData>;
 type TableColumnFilterRule<
-  TData extends UI.Table.DataRow[] = UI.Table.DataRow[],
-> = UI.Table.ColumnFilterRule<TData>;
+  TData extends UIModule.Table.DataRow[] = UIModule.Table.DataRow[],
+> = UIModule.Table.ColumnFilterRule<TData>;
 
 // Table Column Sort Types
 type TableColumnSortRule<
-  TData extends UI.Table.DataRow[] = UI.Table.DataRow[],
-> = UI.Table.ColumnSortRule<TData>;
+  TData extends UIModule.Table.DataRow[] = UIModule.Table.DataRow[],
+> = UIModule.Table.ColumnSortRule<TData>;
 type TableColumnSortModel<
-  TData extends UI.Table.DataRow[] = UI.Table.DataRow[],
-> = UI.Table.ColumnSortModel<TData>;
+  TData extends UIModule.Table.DataRow[] = UIModule.Table.DataRow[],
+> = UIModule.Table.ColumnSortModel<TData>;
 
-type ComposeFile = UI.ComposeFile.Type;
+type ComposeFile = UIModule.ComposeFile.Type;
 
-type SelectOption = UI.SelectOption.Type;
-type SelectOptions = UI.SelectOption.List;
+type SelectOption = UIModule.SelectOption.Type;
+type SelectOptions = UIModule.SelectOption.List;
 
 export * as Compose from "./module";
 export {

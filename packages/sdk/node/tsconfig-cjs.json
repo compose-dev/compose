@@ -1,14 +1,15 @@
 {
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
+    "module": "CommonJS",
     "rootDir": "./src",
-    "outDir": "./dist/esm",
+    "outDir": "./dist/cjs",
     "declaration": true,
     "declarationMap": true,
-    "types": ["node"]
+    "resolveJsonModule": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "src/**/*.test.ts", "src/**/*.bench.ts", "src/**/*.test-d.ts"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.testUtils.ts", "node_modules"],
   "tsc-alias": {
     "resolveFullPaths": true,
     "resolveFullExtension": ".js"
