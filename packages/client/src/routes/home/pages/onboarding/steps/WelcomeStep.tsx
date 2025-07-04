@@ -67,7 +67,7 @@ function WelcomeStep({
   shouldAnimate: boolean;
 }) {
   return (
-    <StepContainer className="min-h-[calc(100dvh-20rem)] justify-center items-center">
+    <StepContainer className="min-h-[calc(100dvh-20rem)] justify-center items-center mt-16">
       <div className="flex flex-col gap-y-8 max-w-xl">
         <motion.h2
           initial={{ opacity: 0, y: 10 }}

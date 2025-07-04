@@ -19,6 +19,7 @@ import PythonNew from "./frameworks/PythonNew";
 import NodeNew from "./frameworks/NodeNew";
 import NextjsExisting from "./frameworks/NextjsExisting";
 import HonoExisting from "./frameworks/HonoExisting";
+import NestjsExisting from "./frameworks/NestjsExisting";
 
 function FrameworkInstructions({
   framework,
@@ -64,6 +65,7 @@ function FrameworkInstructions({
       {framework === FRAMEWORK["nextjs"] && (
         <NextjsExisting setStep={setStep} />
       )}
+      {framework === FRAMEWORK["nestjs"] && <NestjsExisting apiKey={apiKey} />}
       {framework === FRAMEWORK["hono"] && <HonoExisting setStep={setStep} />}
       {!isUnsupportedFramework && (
         <div className="sticky bottom-8 left-0 right-0 w-full items-center justify-center flex flex-row">

@@ -91,7 +91,7 @@ export default function Onboarding() {
 
   return (
     <Page.Root width="sm">
-      <div className="flex flex-col gap-y-10 my-16 w-full">
+      <div className="flex flex-col gap-y-10 mb-16 w-full">
         {step !== STEP.welcome && (
           <div className="flex flex-row items-center gap-x-4 w-full">
             <BackButton onClick={goBack} />

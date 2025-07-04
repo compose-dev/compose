@@ -1,15 +1,21 @@
 import { Code } from "~/components/code";
 import FrameworkStep from "./FrameworkStep";
 
-function RunYourAppNode() {
+function RunYourAppNode({
+  command = "npm run dev",
+  sectionNumber = 4,
+}: {
+  command?: string;
+  sectionNumber?: number;
+}) {
   return (
     <FrameworkStep>
-      <h4>4. Run your app</h4>
+      <h4>{sectionNumber}. Run your app</h4>
       <p>
         Run your app's normal dev command. Compose will automatically connect in
         the background.
       </p>
-      <Code code={`npm run dev`} lang="bash" />
+      <Code code={command} lang="bash" />
     </FrameworkStep>
   );
 }

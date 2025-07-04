@@ -81,6 +81,13 @@ function InstallationMethodStep({
               }
             />
             <FrameworkCard
+              icon={<Icon name="hono" size="1.5" color="brand-warning" />}
+              name="Hono"
+              onClick={() =>
+                setStep(STEP["framework-instructions"], FRAMEWORK["hono"])
+              }
+            />
+            <FrameworkCard
               icon={<Icon name="koa" size="1.5" />}
               name="Koa"
               onClick={() =>
@@ -88,17 +95,17 @@ function InstallationMethodStep({
               }
             />
             <FrameworkCard
+              icon={<Icon name="nestjs-brand-color" size="1.5" />}
+              name="NestJS"
+              onClick={() =>
+                setStep(STEP["framework-instructions"], FRAMEWORK["nestjs"])
+              }
+            />
+            <FrameworkCard
               icon={<Icon name="nextjs" size="1.5" />}
               name="Next.js"
               onClick={() =>
                 setStep(STEP["framework-instructions"], FRAMEWORK["nextjs"])
-              }
-            />
-            <FrameworkCard
-              icon={<Icon name="hono" size="1.5" color="brand-warning" />}
-              name="Hono"
-              onClick={() =>
-                setStep(STEP["framework-instructions"], FRAMEWORK["hono"])
               }
             />
           </div>

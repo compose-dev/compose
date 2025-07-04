@@ -128,7 +128,7 @@ function NodeNew({ apiKey }: { apiKey: string | null }) {
             </p>
             <Code code="npm install @composehq/sdk" lang="bash" />
           </FrameworkStep>
-          <AddStarterAppsNode apiKey={apiKey} newProject />
+          <AddStarterAppsNode apiKey={apiKey} type="new-project" />
           <RunTheAppManualInstall />
         </>
       )}

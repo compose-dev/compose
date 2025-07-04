@@ -20,6 +20,7 @@ const FRAMEWORK_TO_PAGE_TITLE: Record<Framework, string> = {
   [FRAMEWORK["fastapi"]]: addToProject("FastAPI"),
   [FRAMEWORK["nextjs"]]: isNotSupportedFramework("Next.js"),
   [FRAMEWORK["hono"]]: isNotSupportedFramework("Hono"),
+  [FRAMEWORK["nestjs"]]: addToProject("NestJS"),
 };
 
 function PageTitle({ framework }: { framework: Framework | undefined }) {

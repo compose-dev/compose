@@ -47,6 +47,7 @@ const FRAMEWORK = {
   fastapi: "fastapi",
   nextjs: "nextjs",
   hono: "hono",
+  nestjs: "nestjs",
 } as const;
 
 type Framework = (typeof FRAMEWORK)[keyof typeof FRAMEWORK];
