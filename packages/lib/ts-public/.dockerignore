@@ -1,0 +1,2 @@
+# Instruct docker to always include the scripts folder for this directory
+!scripts
