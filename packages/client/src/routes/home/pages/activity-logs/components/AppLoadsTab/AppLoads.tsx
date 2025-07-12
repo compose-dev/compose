@@ -14,6 +14,7 @@ import { useAppLoadsByUser } from "./useAppLoadsByUser";
 import AppsPickerPopover from "../AppsPickerPopover";
 import useSelectedApps from "../../utils/useSelectedApps";
 import { m } from "@compose/ts";
+import { Alert } from "~/components/alert";
 
 function AppLoadsTab() {
   const {
@@ -92,6 +93,11 @@ function AppLoadsTab() {
       )}
       {status === "success" && environmentsStatus === "success" && (
         <>
+          <Alert appearance="neutral" iconName="info-circle" className="w-full">
+            An app run is counted every time a user loads an app. Navigating
+            between apps counts as a new run.
+          </Alert>
+
           <div className="flex flex-row w-full justify-between">
             <div className="flex flex-row gap-2">
               <DatePickerPopover
@@ -126,7 +132,7 @@ function AppLoadsTab() {
           <div className="flex flex-row gap-4 w-full">
             <div className="flex-1">
               <Statistic
-                label="Total App Loads"
+                label="Total App Runs"
                 value={data.groupedAppLoads.reduce(
                   (acc, curr) => acc + curr.count,
                   0
@@ -146,8 +152,8 @@ function AppLoadsTab() {
             {chartData.length > 0 && (
               <div className="w-full h-[48rem]">
                 <BarChart
-                  label="App Loads by User"
-                  description="Shows the number of times an app was loaded by a user. Each user's loads are subdivided by app."
+                  label="App Runs by User"
+                  description="Shows the number of times an app was run by a user"
                   data={chartData}
                   indexBy={UI.Chart.LABEL_SERIES_KEY}
                   keys={chartSeries}

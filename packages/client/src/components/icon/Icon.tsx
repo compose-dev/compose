@@ -50,6 +50,7 @@ import {
   IconFlag,
   IconBrandNextjs,
   IconCalendar,
+  IconInfoCircle,
 } from "@tabler/icons-react";
 
 const ICON_NAME = {
@@ -130,6 +131,7 @@ const ICON_NAME = {
   flag: "flag",
   nextjs: "nextjs",
   calendar: "calendar",
+  "info-circle": "info-circle",
 } as const;
 
 const SIZE = {
@@ -233,6 +235,16 @@ function Icon({
   if (name === ICON_NAME.flag) {
     return (
       <IconFlag
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME["info-circle"]) {
+    return (
+      <IconInfoCircle
         size={16 * SIZE_MULTIPLIER[size]}
         color={ICON_COLOR[color]}
         strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}

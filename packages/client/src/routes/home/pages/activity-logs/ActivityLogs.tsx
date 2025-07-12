@@ -36,7 +36,7 @@ export default function ActivityLogs() {
       />
       {isInvalidPlan && <InvalidPlanError />}
       {!isInvalidPlan && activeTab === TABS.ALL_EVENTS && <AllEventsTab />}
-      {!isInvalidPlan && activeTab === TABS.APP_LOADS && <AppLoadsTab />}
+      {!isInvalidPlan && activeTab === TABS.APP_RUNS && <AppLoadsTab />}
     </Page.Root>
   );
 }
