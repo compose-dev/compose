@@ -49,6 +49,10 @@ function AppLoadsTab() {
       };
     }
 
+    const environmentIdsInData = new Set(
+      data.groupedAppLoads.map((log) => log.environmentId)
+    );
+
     const formattedEnvironments: Record<
       string,
       {
@@ -65,18 +69,26 @@ function AppLoadsTab() {
         if (!formattedEnvironments[app.route]) {
           formattedEnvironments[app.route] = {
             name: app.name,
-            envs: [
-              {
-                id: environment.id,
-                name: environment.name,
-              },
-            ],
+            envs: [],
           };
+
+          // If the environment is in the data set, add it to the list.
+          // If not, exclude it since the point of the environments is
+          // to check for collisions in the data set.
+          if (environmentIdsInData.has(environment.id)) {
+            formattedEnvironments[app.route].envs.push({
+              id: environment.id,
+              name: environment.name,
+            });
+          }
         } else {
-          formattedEnvironments[app.route].envs.push({
-            id: environment.id,
-            name: environment.name,
-          });
+          // If the environment is in the data set, add it to the list.
+          if (environmentIdsInData.has(environment.id)) {
+            formattedEnvironments[app.route].envs.push({
+              id: environment.id,
+              name: environment.name,
+            });
+          }
         }
       }
     }

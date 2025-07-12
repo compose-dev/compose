@@ -56,8 +56,6 @@ async function auditLogRoutes(server: FastifyInstance) {
       });
     }
 
-    console.log(req.body);
-
     const logs = await db.log.selectPage(
       server.pg,
       dbUser.companyId,
@@ -71,8 +69,6 @@ async function auditLogRoutes(server: FastifyInstance) {
       req.body.message,
       req.body.type
     );
-
-    console.log(logs);
 
     const totalRecords =
       logs.length < req.body.limit ? logs.length + req.body.offset : Infinity;

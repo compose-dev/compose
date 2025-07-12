@@ -3,6 +3,10 @@
 # compatibility/reliability on AWS servers.
 FROM --platform=linux/amd64 node:20-alpine
 
+# Add bash because some scripts necessary to build the compose app
+# require bash.
+RUN apk add --no-cache bash
+
 ENV NODE_ENV=production
 
 # Install pnpm
