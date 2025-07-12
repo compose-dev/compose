@@ -15,3 +15,5 @@
 \i 15-add-environment-data.sql
 \i 16-logs.sql
 \i 17-add-user-metadata.sql
+\i 18-add-environment-type-to-logs.sql
+\i 19-drop-nullable-constraint-on-environment-type-in-logs.sql

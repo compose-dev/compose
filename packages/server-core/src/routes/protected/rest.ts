@@ -8,64 +8,71 @@ import { emailCodeService } from "../../services/emailCode";
 import { WSGateway } from "../ws";
 
 async function routes(server: FastifyInstance, wsGateway: WSGateway) {
-  server.get(
-    `/${BrowserToServerEvent.Initialize.route}`,
-    async (req, reply) => {
-      const user = req.user;
+  server.get<{
+    Reply: {
+      200: BrowserToServerEvent.Initialize.SuccessResponseBody;
+      "4xx": BrowserToServerEvent.Initialize.ErrorResponseBody;
+    };
+  }>(`/${BrowserToServerEvent.Initialize.route}`, async (req, reply) => {
+    const user = req.user;
 
-      if (!user || user.isExternal) {
-        return reply.status(401).send({ message: "Unauthorized" });
-      }
-
-      const dbUser = await db.user.selectById(server.pg, user.id);
-
-      if (!dbUser) {
-        return reply.status(400).send({ message: "User not found" });
-      }
-
-      const environments =
-        await db.environment.selectByCompanyIdWithDecryptableKeyAndExternalUsers(
-          server.pg,
-          dbUser.companyId
-        );
-
-      const filteredEnvironments = environments
-        .filter(
-          (environment) =>
-            environment.type !== m.Environment.TYPE.dev ||
-            environment.id === dbUser.developmentEnvironmentId
-        )
-        .map((environment) => {
-          const { decryptableKey, ...rest } = environment;
-
-          const shouldDecrypt =
-            decryptableKey !== null &&
-            environment.type === m.Environment.TYPE.dev;
-
-          const decrypted = shouldDecrypt
-            ? apiKeyService.decryptTwoWayHash(decryptableKey)
-            : null;
-
-          return {
-            ...rest,
-            key: decrypted,
-          };
-        });
-
-      const response: BrowserToServerEvent.Initialize.Response = {
-        environments: filteredEnvironments.map((environment) => ({
-          ...environment,
-          isOnline: false,
-        })),
-        user: {
-          ...dbUser,
-          isExternal: false,
-        },
-      };
-
-      reply.status(200).send(response);
+    if (!user || user.isExternal) {
+      return reply.status(401).send({ message: "Unauthorized" });
     }
-  );
+
+    const dbUser = await db.user.selectById(server.pg, user.id);
+
+    if (!dbUser) {
+      return reply.status(400).send({ message: "User not found" });
+    }
+
+    const company = await db.company.selectById(server.pg, dbUser.companyId);
+
+    if (!company) {
+      return reply.status(400).send({ message: "Company not found" });
+    }
+
+    const environments =
+      await db.environment.selectByCompanyIdWithDecryptableKeyAndExternalUsers(
+        server.pg,
+        dbUser.companyId
+      );
+
+    const filteredEnvironments = environments
+      .filter(
+        (environment) =>
+          environment.type !== m.Environment.TYPE.dev ||
+          environment.id === dbUser.developmentEnvironmentId
+      )
+      .map((environment) => {
+        const { decryptableKey, ...rest } = environment;
+
+        const shouldDecrypt =
+          decryptableKey !== null &&
+          environment.type === m.Environment.TYPE.dev;
+
+        const decrypted = shouldDecrypt
+          ? apiKeyService.decryptTwoWayHash(decryptableKey)
+          : null;
+
+        return {
+          ...rest,
+          key: decrypted,
+        };
+      });
+
+    reply.status(200).send({
+      environments: filteredEnvironments.map((environment) => ({
+        ...environment,
+        isOnline: false,
+      })),
+      company,
+      user: {
+        ...dbUser,
+        isExternal: false,
+      },
+    });
+  });
 
   server.get(
     `/${BrowserToServerEvent.GetSettings.route}`,
@@ -302,12 +309,13 @@ async function routes(server: FastifyInstance, wsGateway: WSGateway) {
           server.pg,
           company.id,
           environment.id,
+          environment.type,
           user.id === m.User.FAKE_ID ? null : user.id,
           user.email === m.ExternalAppUser.EMAIL_FIELD_VALUE_FOR_PUBLIC_APP
             ? null
             : user.email,
           appRoute,
-          "App initialized",
+          m.Log.APP_INITIALIZED_MESSAGE,
           null,
           uPublic.log.SEVERITY.INFO,
           uPublic.log.TYPE.SYSTEM

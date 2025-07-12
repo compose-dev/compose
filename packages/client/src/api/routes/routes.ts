@@ -9,8 +9,8 @@ async function initialize() {
   const body: BrowserToServerEvent.Initialize.RequestBody = null;
 
   return await request<
-    BrowserToServerEvent.Initialize.Response,
-    { message: string }
+    BrowserToServerEvent.Initialize.SuccessResponseBody,
+    BrowserToServerEvent.Initialize.ErrorResponseBody
   >({
     route: `/${BrowserToServerEvent.Initialize.route}`,
     forwardLog: log,
@@ -387,20 +387,6 @@ async function logError(body: BrowserToServerEvent.LogError.RequestBody) {
   });
 }
 
-async function getPageOfLogs(
-  body: BrowserToServerEvent.GetPageOfLogs.RequestBody
-) {
-  return await request<
-    BrowserToServerEvent.GetPageOfLogs.SuccessResponseBody,
-    BrowserToServerEvent.GetPageOfLogs.ErrorResponseBody
-  >({
-    route: `/${BrowserToServerEvent.GetPageOfLogs.route}`,
-    method: BrowserToServerEvent.GetPageOfLogs.method,
-    forwardLog: log,
-    body,
-  });
-}
-
 async function updateUserMetadata(
   body: BrowserToServerEvent.UpdateUserMetadata.RequestBody
 ) {
@@ -439,6 +425,5 @@ export {
   logEvent,
   oauthLogin,
   logError,
-  getPageOfLogs,
   updateUserMetadata,
 };

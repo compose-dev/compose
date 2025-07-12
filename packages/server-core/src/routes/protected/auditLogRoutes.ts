@@ -7,7 +7,10 @@ async function auditLogRoutes(server: FastifyInstance) {
   // Fetch a page of audit logs
   server.post<{
     Body: BrowserToServerEvent.GetPageOfLogs.RequestBody;
-    Reply: BrowserToServerEvent.GetPageOfLogs.ResponseBody;
+    Reply: {
+      200: BrowserToServerEvent.GetPageOfLogs.SuccessResponseBody;
+      "4xx": BrowserToServerEvent.GetPageOfLogs.ErrorResponseBody;
+    };
   }>(`/${BrowserToServerEvent.GetPageOfLogs.route}`, async (req, reply) => {
     const user = req.user;
 
@@ -48,10 +51,12 @@ async function auditLogRoutes(server: FastifyInstance) {
     ) {
       return reply.status(403).send({
         message:
-          "Only users with admin permissions can view audit logs. Please ask your administrator to enable this feature for you.",
+          "Only users with admin permissions can view activity logs. Please ask your administrator to enable this feature for you.",
         type: "invalid-user-permission",
       });
     }
+
+    console.log(req.body);
 
     const logs = await db.log.selectPage(
       server.pg,
@@ -67,12 +72,83 @@ async function auditLogRoutes(server: FastifyInstance) {
       req.body.type
     );
 
+    console.log(logs);
+
     const totalRecords =
       logs.length < req.body.limit ? logs.length + req.body.offset : Infinity;
 
     reply.status(200).send({
       logs: logs,
       totalRecords: totalRecords,
+    });
+  });
+
+  server.post<{
+    Body: BrowserToServerEvent.GetAppLoadsByUser.RequestBody;
+    Reply: {
+      200: BrowserToServerEvent.GetAppLoadsByUser.SuccessResponseBody;
+      "4xx": BrowserToServerEvent.GetAppLoadsByUser.ErrorResponseBody;
+    };
+  }>(`/${BrowserToServerEvent.GetAppLoadsByUser.route}`, async (req, reply) => {
+    const user = req.user;
+
+    if (!user || user.isExternal) {
+      return reply
+        .status(401)
+        .send({ message: "Unauthorized", type: "unknown-error" });
+    }
+
+    const company = await db.company.selectById(server.pg, user.companyId);
+
+    if (!company) {
+      return reply
+        .status(400)
+        .send({ message: "Company not found", type: "unknown-error" });
+    }
+
+    if (company.plan === m.Company.PLANS.HOBBY) {
+      return reply.status(400).send({
+        message: "Hobby plan does not support audit logs.",
+        type: "invalid-plan",
+      });
+    }
+
+    const dbUser = await db.user.selectById(server.pg, user.id);
+
+    if (!dbUser) {
+      return reply
+        .status(400)
+        .send({ message: "User not found", type: "unknown-error" });
+    }
+
+    if (
+      !u.permission.isAllowed(
+        u.permission.FEATURE.VIEW_AUDIT_LOGS,
+        dbUser.permission
+      )
+    ) {
+      return reply.status(403).send({
+        message:
+          "Only users with admin permissions can view activity logs. Please ask your administrator to enable this feature for you.",
+        type: "invalid-user-permission",
+      });
+    }
+
+    const environmentTypes = [
+      ...(req.body.includeDevelopmentLogs ? [m.Environment.TYPE.dev] : []),
+      ...(req.body.includeProductionLogs ? [m.Environment.TYPE.prod] : []),
+    ];
+
+    const logs = await db.log.selectGroupedAppLoadCounts(
+      server.pg,
+      dbUser.companyId,
+      req.body.datetimeStart,
+      req.body.datetimeEnd,
+      environmentTypes
+    );
+
+    reply.status(200).send({
+      groupedAppLoads: logs,
     });
   });
 }

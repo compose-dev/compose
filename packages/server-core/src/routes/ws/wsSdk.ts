@@ -441,6 +441,7 @@ class WSSdk {
         uPublic.log.TYPE.USER,
         client.company.id,
         client.environment.id,
+        client.environment.type,
         userId,
         userEmail,
         browserData.metadata.appRoute ?? "UNKNOWN_APP_ROUTE",

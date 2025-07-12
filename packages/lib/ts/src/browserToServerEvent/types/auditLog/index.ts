@@ -1,3 +1,4 @@
 import * as GetPageOfLogs from "./getPageOfLogs";
+import * as GetAppLoadsByUser from "./getAppLoadsByUser";
 
-export { GetPageOfLogs };
+export { GetPageOfLogs, GetAppLoadsByUser };

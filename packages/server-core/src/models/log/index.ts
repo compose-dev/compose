@@ -13,6 +13,7 @@ const ALL_FIELDS_EXCEPT_COMPANY_ID_AND_ID = [
   '"log"."data"',
   '"log"."severity"',
   '"log"."type"',
+  '"log"."environmentType"',
 ] as const;
 
 const ALL_FIELDS_EXCEPT_COMPANY_ID_AND_ID_STRING =
@@ -22,6 +23,7 @@ async function insert(
   pg: Postgres,
   companyId: string,
   environmentId: string,
+  environmentType: m.Environment.Type,
   userId: string | null,
   userEmail: string | null,
   appRoute: string,
@@ -35,6 +37,7 @@ async function insert(
         INSERT INTO "log" (
           "companyId", 
           "environmentId", 
+          "environmentType",
           "userId", 
           "userEmail", 
           "appRoute", 
@@ -43,12 +46,13 @@ async function insert(
           "severity",
           "type"
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING *
       `,
     [
       companyId,
       environmentId,
+      environmentType,
       userId,
       userEmail,
       appRoute,
@@ -140,4 +144,42 @@ async function selectPage(
   return result.rows;
 }
 
-export { insert, selectPage };
+async function selectGroupedAppLoadCounts(
+  pg: Postgres,
+  companyId: string,
+  datetimeStart: Date,
+  datetimeEnd: Date,
+  environmentTypes: m.Environment.Type[]
+) {
+  const result = await pg.query<{
+    userEmail: m.Log.DB["userEmail"];
+    environmentId: m.Log.DB["environmentId"];
+    appRoute: m.Log.DB["appRoute"];
+    count: number;
+  }>(
+    `
+      SELECT
+        "userEmail", "environmentId", "appRoute", COUNT(*)::integer as count
+      FROM "log"
+      WHERE "companyId" = $1
+        AND "createdAt" >= $2
+        AND "createdAt" <= $3
+        AND "type" = $4
+        AND "message" = $5
+        AND "environmentType" = ANY($6)
+      GROUP BY "userEmail", "environmentId", "appRoute"
+    `,
+    [
+      companyId,
+      datetimeStart,
+      datetimeEnd,
+      uPublic.log.TYPE.SYSTEM,
+      m.Log.APP_INITIALIZED_MESSAGE,
+      environmentTypes,
+    ]
+  );
+
+  return result.rows;
+}
+
+export { insert, selectPage, selectGroupedAppLoadCounts };

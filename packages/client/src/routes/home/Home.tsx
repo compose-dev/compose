@@ -37,8 +37,14 @@ function Home() {
   const { addWSListener, setEnvironmentsOnline, setEnvironmentOnline } =
     useWSContext();
 
-  const { setEnvironments, setUser, setDevelopmentApiKey, resetStore, user } =
-    useHomeStore();
+  const {
+    setEnvironments,
+    setUser,
+    setDevelopmentApiKey,
+    resetStore,
+    user,
+    setCompany,
+  } = useHomeStore();
 
   const isInitialized = useRef(false);
 
@@ -129,6 +135,7 @@ function Home() {
         }
       }
 
+      setCompany(response.data.company);
       setEnvironments(formattedEnvironments);
       setUser(response.data.user);
     }
@@ -138,6 +145,7 @@ function Home() {
       isInitialized.current = true;
     }
   }, [
+    setCompany,
     setEnvironments,
     setUser,
     setDevelopmentApiKey,

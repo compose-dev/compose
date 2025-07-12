@@ -210,6 +210,19 @@ async function updateApiKey(
   return result.rows[0];
 }
 
+async function selectByCompanyIdAndType(
+  pg: Postgres,
+  companyId: string,
+  type: m.Environment.DB["type"]
+) {
+  const result = await pg.query<m.Environment.ApiAndDecryptableKeyOmittedDB>(
+    `SELECT ${API_AND_DECRYPTABLE_KEY_OMITTED_SELECT_FIELDS} FROM "environment" WHERE "companyId" = $1 AND "type" = $2`,
+    [companyId, type]
+  );
+
+  return result.rows;
+}
+
 export {
   selectByApiKey,
   selectById,
@@ -224,4 +237,5 @@ export {
   deleteById,
   selectAllWithCompanyName,
   updateApiKey,
+  selectByCompanyIdAndType,
 };

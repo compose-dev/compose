@@ -53,6 +53,32 @@ async function routes(server: FastifyInstance) {
     }
   );
 
+  server.get<{
+    Reply: {
+      200: BrowserToServerEvent.FetchEnvironments.SuccessResponseBody;
+      "4xx": BrowserToServerEvent.FetchEnvironments.ErrorResponseBody;
+    };
+  }>(`/${BrowserToServerEvent.FetchEnvironments.route}`, async (req, reply) => {
+    const user = req.user;
+
+    if (!user || user.isExternal) {
+      return reply.status(401).send({ message: "Unauthorized" });
+    }
+
+    const dbUser = await db.user.selectById(server.pg, user.id);
+
+    if (!dbUser) {
+      return reply.status(400).send({ message: "User not found" });
+    }
+
+    const environments = await db.environment.selectByCompanyId(
+      server.pg,
+      dbUser.companyId
+    );
+
+    reply.status(200).send({ environments });
+  });
+
   server.post(
     `/${BrowserToServerEvent.CreateEnvironment.route}`,
     async (req, reply) => {

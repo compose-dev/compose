@@ -23,6 +23,7 @@ export default function BarChart({
   scale = UI.Chart.DEFAULT_SCALE,
   label,
   description,
+  enableTotals = false,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any[];
@@ -36,6 +37,7 @@ export default function BarChart({
   scale?: UI.Chart.Scale;
   label?: string;
   description?: string;
+  enableTotals?: boolean;
 }) {
   const chartRef = useRef<HTMLDivElement>(null);
   const {
@@ -45,7 +47,14 @@ export default function BarChart({
     chartWidthPx,
     chartHeightPx,
     bottomAxisTilt,
-  } = useSeriesChart(chartRef, data, indexBy, orientation, groupMode);
+  } = useSeriesChart(
+    chartRef,
+    data,
+    indexBy,
+    orientation,
+    groupMode,
+    enableTotals
+  );
 
   const isDarkMode = theme.useIsDarkMode();
 
@@ -159,6 +168,7 @@ export default function BarChart({
           labelSkipWidth={labelSkipWidth}
           labelSkipHeight={labelSkipHeight}
           layout={orientation}
+          enableTotals={enableTotals}
           // layers={[
           //   "grid",
           //   "axes",

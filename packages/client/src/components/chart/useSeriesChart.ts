@@ -55,7 +55,8 @@ export function useSeriesChart(
   data: UI.Chart.SeriesData,
   indexBy: string,
   orientation: UI.Chart.BarOrientation,
-  groupMode: UI.Chart.BarGroupMode
+  groupMode: UI.Chart.BarGroupMode,
+  enableTotals: boolean
 ) {
   const { width: chartWidthPx, height: chartHeightPx } =
     useElementDimensions(chartRef);
@@ -128,7 +129,7 @@ export function useSeriesChart(
   const margin = useMemo(() => {
     if (orientation === UI.Chart.BAR_ORIENTATION.HORIZONTAL) {
       return {
-        top: DEFAULT_MARGIN,
+        top: DEFAULT_MARGIN + (enableTotals ? 16 : 0),
         right: DEFAULT_MARGIN,
         bottom: DEFAULT_MARGIN + TEXT_HEIGHT,
         left: maxLabelLength + DEFAULT_MARGIN,
@@ -144,7 +145,7 @@ export function useSeriesChart(
 
     if (shouldTiltLabels) {
       return {
-        top: DEFAULT_MARGIN,
+        top: DEFAULT_MARGIN + (enableTotals ? 16 : 0),
         right: DEFAULT_MARGIN,
         bottom: maxTiltLabelLength + DEFAULT_MARGIN,
         left: Math.max(leftMarginFromDigits, leftMarginFromTiltedLabels),
@@ -152,7 +153,7 @@ export function useSeriesChart(
     }
 
     return {
-      top: DEFAULT_MARGIN,
+      top: DEFAULT_MARGIN + (enableTotals ? 16 : 0),
       right: DEFAULT_MARGIN,
       bottom: DEFAULT_MARGIN + TEXT_HEIGHT,
       left: leftMarginFromDigits,
@@ -165,6 +166,7 @@ export function useSeriesChart(
     maxTiltLabelLength,
     chartWidthPx,
     data.length,
+    enableTotals,
   ]);
 
   const maxNumOfLabels = useMemo(() => {

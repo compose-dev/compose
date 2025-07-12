@@ -1,4 +1,7 @@
 import { u as uPublic } from "@composehq/ts-public";
+import * as Environment from "../environment";
+
+const APP_INITIALIZED_MESSAGE = "App initialized";
 
 interface LogDB {
   id: number;
@@ -19,6 +22,12 @@ interface LogDB {
    * if the log was created by an external user (e.g. a public app).
    */
   userEmail: string | null;
+  /**
+   * A denormalized field that stores the type of the environment that the
+   * log was created in, and preserves the type even if the environment is
+   * deleted.
+   */
+  environmentType: Environment.Type;
   appRoute: string;
   message: string;
   data: Record<string, any> | null;
@@ -26,4 +35,4 @@ interface LogDB {
   type: uPublic.log.Type;
 }
 
-export { LogDB as DB };
+export { LogDB as DB, APP_INITIALIZED_MESSAGE };

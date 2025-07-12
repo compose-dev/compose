@@ -3,19 +3,26 @@ import { classNames } from "~/utils/classNames";
 function PageRoot({
   children,
   width = "md",
+  gap = "12",
 }: {
   children: React.ReactNode;
   width?: "sm" | "md" | "lg" | "full";
+  gap?: "8" | "10" | "12" | "16" | "24";
 }) {
   return (
     <div className="flex justify-center">
       <div
         className={classNames(
-          "flex flex-col justify-start items-start py-16 px-4 lg:px-8 gap-12 w-full",
+          "flex flex-col justify-start items-start py-16 px-4 lg:px-8 w-full",
           {
             "max-w-4xl": width === "sm",
             "max-w-5xl": width === "md",
             "max-w-7xl": width === "lg",
+            "gap-8": gap === "8",
+            "gap-10": gap === "10",
+            "gap-12": gap === "12",
+            "gap-16": gap === "16",
+            "gap-24": gap === "24",
           }
         )}
       >

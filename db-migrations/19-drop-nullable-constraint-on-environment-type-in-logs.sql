@@ -1,0 +1,5 @@
+BEGIN;
+
+    ALTER TABLE "log" ALTER COLUMN "environmentType" DROP DEFAULT;
+
+COMMIT;
