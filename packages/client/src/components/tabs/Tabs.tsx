@@ -35,15 +35,17 @@ export default function Tabs<T extends string | number>({
   activeTab,
   setActiveTab,
   options,
+  rightContent,
 }: {
   activeTab: T;
   setActiveTab: (tab: T) => void;
   options: { label: string; value: T }[];
+  rightContent?: React.ReactNode;
 }) {
   return (
     <div className="relative w-full">
       <div className="flex self-stretch h-px border-b border-brand-neutral absolute bottom-0 left-0 right-0 " />
-      <div className="flex flex-space justify-between items-start">
+      <div className="flex flex-space justify-between items-center">
         <div className="flex flex-row gap-x-4">
           {options.map((option) => (
             <Tab
@@ -54,6 +56,7 @@ export default function Tabs<T extends string | number>({
             />
           ))}
         </div>
+        {rightContent && rightContent}
       </div>
     </div>
   );

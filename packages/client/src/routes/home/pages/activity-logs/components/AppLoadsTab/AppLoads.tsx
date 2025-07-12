@@ -10,6 +10,10 @@ import { useMemo } from "react";
 import { useLogEnvironments } from "../../utils/useLogEnvironments";
 import LogEnvironmentsPopover from "../LogEnvironmentsPopover";
 import { Statistic } from "~/components/statistic";
+import { useAppLoadsByUser } from "./useAppLoadsByUser";
+import AppsPickerPopover from "../AppsPickerPopover";
+import useSelectedApps from "../../utils/useSelectedApps";
+import { m } from "@compose/ts";
 
 function AppLoadsTab() {
   const {
@@ -28,11 +32,14 @@ function AppLoadsTab() {
     setIncludeProdLogs,
   } = useLogEnvironments();
 
+  const { selectedApps, setSelectedApps } = useSelectedApps();
+
   const { data, status, fetchStatus, error } = useAppLoadsByUserQuery(
     datetimeStart,
     datetimeEnd,
     includeDevLogs,
-    includeProdLogs
+    includeProdLogs,
+    selectedApps
   );
 
   const {
@@ -41,141 +48,38 @@ function AppLoadsTab() {
     error: environmentsError,
   } = useEnvironmentsQuery();
 
-  const chartData = useMemo(() => {
-    if (!data || !environments) {
-      return {
-        data: [],
-        uniqueRoutes: [],
-      };
+  const environmentsById = useMemo(() => {
+    if (!environments) {
+      return {};
     }
 
-    const environmentIdsInData = new Set(
-      data.groupedAppLoads.map((log) => log.environmentId)
-    );
-
-    const formattedEnvironments: Record<
+    const environmentsById: Record<
       string,
-      {
-        name: string;
-        envs: {
-          id: string;
-          name: string;
-        }[];
+      m.Environment.ApiAndDecryptableKeyOmittedDB & {
+        appsByRoute: Record<
+          string,
+          m.Environment.ApiAndDecryptableKeyOmittedDB["apps"][number]
+        >;
       }
     > = {};
 
     for (const environment of environments.environments) {
+      environmentsById[environment.id] = {
+        ...environment,
+        appsByRoute: {},
+      };
       for (const app of environment.apps) {
-        if (!formattedEnvironments[app.route]) {
-          formattedEnvironments[app.route] = {
-            name: app.name,
-            envs: [],
-          };
-
-          // If the environment is in the data set, add it to the list.
-          // If not, exclude it since the point of the environments is
-          // to check for collisions in the data set.
-          if (environmentIdsInData.has(environment.id)) {
-            formattedEnvironments[app.route].envs.push({
-              id: environment.id,
-              name: environment.name,
-            });
-          }
-        } else {
-          // If the environment is in the data set, add it to the list.
-          if (environmentIdsInData.has(environment.id)) {
-            formattedEnvironments[app.route].envs.push({
-              id: environment.id,
-              name: environment.name,
-            });
-          }
-        }
+        environmentsById[environment.id].appsByRoute[app.route] = app;
       }
     }
 
-    const loadsByUserEmail: Record<string, Record<string, number>> = {};
+    return environmentsById;
+  }, [environments]);
 
-    for (const log of data.groupedAppLoads) {
-      const correctedEmail = log.userEmail || "Anonymous User";
-
-      if (!loadsByUserEmail[correctedEmail]) {
-        loadsByUserEmail[correctedEmail] = {};
-      }
-
-      if (!log.environmentId || !formattedEnvironments[log.appRoute]) {
-        // If there's no associated environment, assume the app is part
-        // of a deleted environment.
-        const appName = `${log.appRoute} (deleted)`;
-        if (!loadsByUserEmail[correctedEmail][appName]) {
-          loadsByUserEmail[correctedEmail][appName] = log.count;
-        } else {
-          loadsByUserEmail[correctedEmail][appName] += log.count;
-        }
-      } else {
-        const app = formattedEnvironments[log.appRoute];
-
-        if (!app) {
-          continue;
-        }
-
-        const envName = app.envs.find(
-          (env) => env.id === log.environmentId
-        )?.name;
-
-        if (!envName) {
-          continue;
-        }
-
-        // If there are multiple envs with the same app name, append the env
-        // name to differentiate them.
-        const appName =
-          app.envs.length > 1 ? `${app.name} (${envName})` : app.name;
-
-        loadsByUserEmail[correctedEmail][appName] = log.count;
-      }
-    }
-
-    const formatted = Object.entries(loadsByUserEmail)
-      .map(([userEmail, loads]) => {
-        return {
-          [UI.Chart.LABEL_SERIES_KEY]: userEmail,
-          ...loads,
-        };
-      })
-      // Sort so by loads ascending.
-      .sort((a, b) => {
-        const aCount = Object.values(a).reduce((acc, curr) => {
-          if (typeof curr === "number") {
-            return acc + curr;
-          }
-          return acc;
-        }, 0);
-        const bCount = Object.values(b).reduce((acc, curr) => {
-          if (typeof curr === "number") {
-            return acc + curr;
-          }
-          return acc;
-        }, 0);
-        return aCount - bCount;
-      });
-
-    const uniqueRoutes: string[] = [];
-
-    // Get the unique routes while preserving the order in which they
-    // appear in the data.
-    for (const user of formatted) {
-      for (const key of Object.keys(user)) {
-        if (!uniqueRoutes.includes(key) && key !== UI.Chart.LABEL_SERIES_KEY) {
-          uniqueRoutes.push(key);
-        }
-      }
-    }
-
-    return {
-      data: formatted,
-      uniqueRoutes,
-    };
-  }, [data, environments]);
+  const { data: chartData, series: chartSeries } = useAppLoadsByUser(
+    data,
+    environmentsById
+  );
 
   return (
     <>
@@ -206,6 +110,14 @@ function AppLoadsTab() {
                 setIncludeProdLogs={setIncludeProdLogs}
                 disabled={fetchStatus === "fetching"}
               />
+              <AppsPickerPopover
+                environments={environments}
+                includeDevLogs={includeDevLogs}
+                includeProdLogs={includeProdLogs}
+                selectedApps={selectedApps}
+                setSelectedApps={setSelectedApps}
+                disabled={fetchStatus === "fetching"}
+              />
             </div>
             {fetchStatus === "fetching" && (
               <Spinner text="Loading..." size="5" />
@@ -221,22 +133,30 @@ function AppLoadsTab() {
                 )}
               />
             </div>
+            <div className="flex-1">
+              <Statistic
+                label="Total Users"
+                value={
+                  new Set(data.groupedAppLoads.map((log) => log.userEmail)).size
+                }
+              />
+            </div>
           </div>
           <div className="flex flex-col w-full mb-16">
-            {chartData.data.length > 0 && (
+            {chartData.length > 0 && (
               <div className="w-full h-[48rem]">
                 <BarChart
                   label="App Loads by User"
                   description="Shows the number of times an app was loaded by a user. Each user's loads are subdivided by app."
-                  data={chartData.data}
+                  data={chartData}
                   indexBy={UI.Chart.LABEL_SERIES_KEY}
-                  keys={chartData.uniqueRoutes}
+                  keys={chartSeries}
                   groupMode={UI.Chart.BAR_GROUP_MODE.STACKED}
                   enableTotals={true}
                 />
               </div>
             )}
-            {chartData.data.length === 0 && (
+            {chartData.length === 0 && (
               <div className="w-full h-[32rem]">
                 <p className="text-brand-neutral-2 text-sm/6 mt-0.5">
                   No data available for the selected timeframe.

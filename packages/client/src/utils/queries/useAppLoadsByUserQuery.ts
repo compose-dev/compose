@@ -10,12 +10,14 @@ export function useAppLoadsByUserQuery(
   datetimeStart: Date,
   datetimeEnd: Date,
   includeDevLogs: boolean,
-  includeProdLogs: boolean
+  includeProdLogs: boolean,
+  selectedApps: { route: string; environmentId: string }[]
 ) {
   const prevDatetimeStart = useRef(datetimeStart);
   const prevDatetimeEnd = useRef(datetimeEnd);
   const prevIncludeDevLogs = useRef(includeDevLogs);
   const prevIncludeProdLogs = useRef(includeProdLogs);
+  const prevSelectedApps = useRef(selectedApps);
 
   const query = useQuery({
     queryKey: ["app-loads-by-user"],
@@ -31,6 +33,7 @@ export function useAppLoadsByUserQuery(
           datetimeEnd,
           includeDevelopmentLogs: includeDevLogs,
           includeProductionLogs: includeProdLogs,
+          apps: selectedApps,
         },
         forwardLog: log,
       });
@@ -49,16 +52,25 @@ export function useAppLoadsByUserQuery(
       datetimeStart !== prevDatetimeStart.current ||
       datetimeEnd !== prevDatetimeEnd.current ||
       includeDevLogs !== prevIncludeDevLogs.current ||
-      includeProdLogs !== prevIncludeProdLogs.current
+      includeProdLogs !== prevIncludeProdLogs.current ||
+      JSON.stringify(selectedApps) !== JSON.stringify(prevSelectedApps.current)
     ) {
       prevDatetimeStart.current = datetimeStart;
       prevDatetimeEnd.current = datetimeEnd;
       prevIncludeDevLogs.current = includeDevLogs;
       prevIncludeProdLogs.current = includeProdLogs;
+      prevSelectedApps.current = selectedApps;
 
       query.refetch();
     }
-  }, [datetimeStart, datetimeEnd, includeDevLogs, includeProdLogs, query]);
+  }, [
+    datetimeStart,
+    datetimeEnd,
+    includeDevLogs,
+    includeProdLogs,
+    query,
+    selectedApps,
+  ]);
 
   return query;
 }

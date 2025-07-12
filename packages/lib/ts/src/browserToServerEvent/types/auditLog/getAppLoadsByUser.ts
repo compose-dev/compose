@@ -5,6 +5,11 @@ export type RequestBody = {
   datetimeEnd: Date;
   includeDevelopmentLogs: boolean;
   includeProductionLogs: boolean;
+  // Filter by apps. If empty, all apps are included.
+  apps: {
+    route: string;
+    environmentId: string;
+  }[];
 };
 
 export interface SuccessResponseBody {

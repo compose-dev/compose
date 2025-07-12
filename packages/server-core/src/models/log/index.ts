@@ -149,15 +149,19 @@ async function selectGroupedAppLoadCounts(
   companyId: string,
   datetimeStart: Date,
   datetimeEnd: Date,
-  environmentTypes: m.Environment.Type[]
+  environmentTypes: m.Environment.Type[],
+  apps: { route: string; environmentId: string }[]
 ) {
-  const result = await pg.query<{
-    userEmail: m.Log.DB["userEmail"];
-    environmentId: m.Log.DB["environmentId"];
-    appRoute: m.Log.DB["appRoute"];
-    count: number;
-  }>(
-    `
+  const params: any[] = [
+    companyId,
+    datetimeStart,
+    datetimeEnd,
+    uPublic.log.TYPE.SYSTEM,
+    m.Log.APP_INITIALIZED_MESSAGE,
+    environmentTypes,
+  ];
+
+  let query = `
       SELECT
         "userEmail", "environmentId", "appRoute", COUNT(*)::integer as count
       FROM "log"
@@ -167,17 +171,32 @@ async function selectGroupedAppLoadCounts(
         AND "type" = $4
         AND "message" = $5
         AND "environmentType" = ANY($6)
+  `;
+
+  if (apps && apps.length > 0) {
+    const valuePlaceholders = apps
+      .map(
+        (_, i) =>
+          `($${params.length + 1 + i * 2}, $${params.length + 2 + i * 2})`
+      )
+      .join(", ");
+
+    for (const app of apps) {
+      params.push(app.route, app.environmentId);
+    }
+    query += ` AND ("appRoute", "environmentId") IN (${valuePlaceholders})`;
+  }
+
+  query += `
       GROUP BY "userEmail", "environmentId", "appRoute"
-    `,
-    [
-      companyId,
-      datetimeStart,
-      datetimeEnd,
-      uPublic.log.TYPE.SYSTEM,
-      m.Log.APP_INITIALIZED_MESSAGE,
-      environmentTypes,
-    ]
-  );
+    `;
+
+  const result = await pg.query<{
+    userEmail: m.Log.DB["userEmail"];
+    environmentId: m.Log.DB["environmentId"];
+    appRoute: m.Log.DB["appRoute"];
+    count: number;
+  }>(query, params);
 
   return result.rows;
 }

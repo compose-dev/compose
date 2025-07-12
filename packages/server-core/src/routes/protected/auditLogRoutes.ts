@@ -135,12 +135,19 @@ async function auditLogRoutes(server: FastifyInstance) {
       ...(req.body.includeProductionLogs ? [m.Environment.TYPE.prod] : []),
     ];
 
+    if (environmentTypes.length === 0) {
+      reply.status(200).send({
+        groupedAppLoads: [],
+      });
+    }
+
     const logs = await db.log.selectGroupedAppLoadCounts(
       server.pg,
       dbUser.companyId,
       req.body.datetimeStart,
       req.body.datetimeEnd,
-      environmentTypes
+      environmentTypes,
+      req.body.apps
     );
 
     reply.status(200).send({

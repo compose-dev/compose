@@ -6,6 +6,7 @@ import { Tabs } from "~/components/tabs";
 import { useActiveTab, TAB_OPTIONS, TABS } from "./utils/useActiveTab";
 import AllEventsTab from "./components/AllEventsTab";
 import AppLoadsTab from "./components/AppLoadsTab";
+import { InlineLink } from "~/components/inline-link";
 
 export default function ActivityLogs() {
   const { company } = useHomeStore();
@@ -21,6 +22,17 @@ export default function ActivityLogs() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         options={TAB_OPTIONS}
+        rightContent={
+          <InlineLink
+            url="https://docs.composehq.com/page-actions/log"
+            newTab
+            appearance="secondary"
+            alwaysUnderline={false}
+            showLinkIcon
+          >
+            <p className="text-sm">Start logging custom events</p>
+          </InlineLink>
+        }
       />
       {isInvalidPlan && <InvalidPlanError />}
       {!isInvalidPlan && activeTab === TABS.ALL_EVENTS && <AllEventsTab />}

@@ -51,9 +51,6 @@ function LogEnvironmentsPopover({
       <Popover.Panel anchor="bottom start">
         <div className="flex flex-col gap-4 w-full min-w-32 max-w-96">
           <h5>Log Environments</h5>
-          <p className="text-brand-neutral-2 text-sm/6">
-            Select the environments you want to include in the results.
-          </p>
           <Checkbox
             label="Include Production Logs"
             checked={includeProdLogs}
