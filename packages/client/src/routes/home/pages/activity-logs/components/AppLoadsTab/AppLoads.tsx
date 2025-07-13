@@ -153,7 +153,6 @@ function AppLoadsTab() {
               <div className="w-full h-[48rem]">
                 <BarChart
                   label="App Runs by User"
-                  description="Shows the number of times an app was run by a user"
                   data={chartData}
                   indexBy={UI.Chart.LABEL_SERIES_KEY}
                   keys={chartSeries}

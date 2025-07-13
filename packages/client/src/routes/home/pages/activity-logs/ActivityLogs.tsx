@@ -7,6 +7,7 @@ import { useActiveTab, TAB_OPTIONS, TABS } from "./utils/useActiveTab";
 import AllEventsTab from "./components/AllEventsTab";
 import AppLoadsTab from "./components/AppLoadsTab";
 import { InlineLink } from "~/components/inline-link";
+import CustomReportTab from "./components/CustomReportTab";
 
 export default function ActivityLogs() {
   const { company } = useHomeStore();
@@ -37,6 +38,9 @@ export default function ActivityLogs() {
       {isInvalidPlan && <InvalidPlanError />}
       {!isInvalidPlan && activeTab === TABS.ALL_EVENTS && <AllEventsTab />}
       {!isInvalidPlan && activeTab === TABS.APP_RUNS && <AppLoadsTab />}
+      {!isInvalidPlan && activeTab === TABS.CUSTOM_REPORT && (
+        <CustomReportTab />
+      )}
     </Page.Root>
   );
 }

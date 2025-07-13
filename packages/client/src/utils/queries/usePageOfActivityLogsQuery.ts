@@ -67,7 +67,17 @@ export function usePageOfActivityLogsQuery() {
         throw new Error(response.data.message);
       }
 
-      return response.data;
+      return {
+        ...response.data,
+        logs: response.data.logs.map((log) => ({
+          ...log,
+          createdAtUTC: u.date.toString(
+            u.date.fromISOString(log.createdAt as unknown as string),
+            u.date.SerializedFormat["LLL d, yyyy h:mm a"],
+            true
+          ),
+        })),
+      };
     },
     retry: false, // never auto-retry
   });
