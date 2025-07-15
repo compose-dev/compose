@@ -988,7 +988,7 @@ class AppRunner {
             this.download(file, filename);
           },
           log: (
-            message: string,
+            event: string,
             options?: Partial<{
               severity: uPublic.log.Severity;
               data: Record<string, any>;
@@ -998,7 +998,7 @@ class AppRunner {
               debug.log("Page", "write to audit log");
             }
 
-            this.writeAuditLog(message, options);
+            this.writeAuditLog(event, options);
           },
           link: (
             appRouteOrUrl: string,

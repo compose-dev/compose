@@ -50,18 +50,21 @@ interface PageHandler {
   /**
    * Log information to audit logs. Only available on Pro plans.
    *
+   * Compose automatically enriches each log entry with the triggering user's
+   * ID and email, and the app route where the log originated.
+   *
    * @example
    * ```ts
    * page.log("Deleted database record", { severity: "info", data: { recordId: 123 } });
    * ```
    *
-   * @param message The message to log. Max length is 1024 characters.
+   * @param event The event to log. Max length is 1024 characters.
    * @param options Optional properties for the log message.
    * @param options.severity The severity of the log message. Defaults to "info".
    * @param options.data Additional metadata to log. Should be a JSON serializable object. Max size is 4 kilobytes.
    */
   log: (
-    message: string,
+    event: string,
     options?: Partial<{
       severity: "trace" | "debug" | "info" | "warn" | "error" | "fatal";
       data: Record<string, any>;

@@ -4,6 +4,7 @@ from typing import (
     Any,
     Awaitable,
     Mapping,
+    overload,
     TypedDict,
     Union,
     Callable,
@@ -20,6 +21,7 @@ from ..core import (
     Debug,
 )
 from .state import State  # type: ignore[attr-defined]
+import warnings
 
 if TYPE_CHECKING:
     from .appRunner import AppRunner  # type: ignore[attr-defined]
@@ -336,6 +338,20 @@ class Page:
             self.__appRunner.link(appRouteOrUrl, new_tab or newTab, params)
         )
 
+    @overload
+    def log(
+        self,
+        event: str,
+        *,
+        severity: Union[
+            Literal["trace", "debug", "info", "warn", "error", "fatal"], None
+        ] = None,
+        data: Union[Mapping[str, Any], None] = None,
+    ) -> None: ...
+
+    # Keep this overload for backwards compatibility for callers who are using
+    # the `message` parameter.
+    @overload
     def log(
         self,
         message: str,
@@ -344,9 +360,23 @@ class Page:
             Literal["trace", "debug", "info", "warn", "error", "fatal"], None
         ] = None,
         data: Union[Mapping[str, Any], None] = None,
+    ) -> None: ...
+
+    def log(  # type: ignore[unused-ignore]
+        self,
+        *args: Any,
+        severity: Union[
+            Literal["trace", "debug", "info", "warn", "error", "fatal"], None
+        ] = None,
+        data: Union[Mapping[str, Any], None] = None,
+        message: Union[str, None] = None,
+        event: Union[str, None] = None,
     ) -> None:
         """
         Log an event to your team's audit logs.
+
+        Compose automatically enriches each log entry with the triggering user's
+        ID and email, and the app route where the log originated.
 
         >>> page.log(
         ...     "User deleted from users table",
@@ -360,8 +390,8 @@ class Page:
 
         Parameters
         ----------
-        message : `str`
-            The message to log.
+        event : `str`
+            The event to log.
 
         severity : `Literal["trace", "debug", "info", "warn", "error", "fatal"]`, optional
             The severity of the log. Defaults to "info".
@@ -369,11 +399,29 @@ class Page:
         data : `Mapping[str, Any]`, optional
             Additional data to log, in the form of a JSON object.
         """
+        user_provided_event = None
+
+        if event is not None:
+            user_provided_event = event
+        elif message is not None:
+            user_provided_event = message
+            warnings.warn(
+                "[Compose] `message` parameter is deprecated for page.log(). Use `event` instead.",
+                DeprecationWarning,
+            )
+        elif len(args) >= 1:
+            user_provided_event = args[0]
+
+        if user_provided_event is None:
+            raise ValueError(
+                "[Compose] Missing required `event` parameter for page.log()."
+            )
+
         if self.__debug:
             Debug.log("Page", "log")
 
         self.__appRunner.scheduler.run_async(
-            self.__appRunner.log(message, severity=severity, data=data)
+            self.__appRunner.log(user_provided_event, severity=severity, data=data)
         )
 
     def reload(self) -> None:
