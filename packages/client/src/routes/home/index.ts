@@ -2,7 +2,11 @@ export { default as Home } from "./Home";
 export { default as Settings } from "./pages/settings";
 export { default as Environments } from "./pages/environments";
 export { default as BillingDetails } from "./pages/billing-details";
-export { default as ActivityLogs } from "./pages/activity-logs";
+export {
+  default as ActivityLogs,
+  ACTIVITY_LOGS_DEFAULT_TAB,
+  type ActivityLogsTab,
+} from "./pages/activity-logs";
 export {
   default as Onboarding,
   type Step as OnboardingStep,

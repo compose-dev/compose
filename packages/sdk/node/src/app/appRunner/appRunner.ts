@@ -185,6 +185,7 @@ class AppRunner {
         message,
         severity: options?.severity || undefined,
         data: options?.data || undefined,
+        appRoute: this.appDefinition.route,
       },
       this.browserSessionId,
       this.executionId

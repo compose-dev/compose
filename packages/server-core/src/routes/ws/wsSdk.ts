@@ -444,7 +444,9 @@ class WSSdk {
         client.environment.type,
         userId,
         userEmail,
-        browserData.metadata.appRoute ?? "UNKNOWN_APP_ROUTE",
+        // Started tracking data.appRoute in 0.27.8 of Node SDK and 0.27.7 of Python SDK.
+        // Need fallback for older SDK versions.
+        data.appRoute ?? browserData.metadata.appRoute ?? "UNKNOWN_APP_ROUTE",
         client.company.plan
       );
     } catch (e) {

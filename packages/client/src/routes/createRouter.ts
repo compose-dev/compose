@@ -13,10 +13,12 @@ import {
   Environments,
   BillingDetails,
   ActivityLogs,
+  type ActivityLogsTab,
   Onboarding,
   type OnboardingStep,
   type OnboardingFramework,
   ONBOARDING_DEFAULT_STEP,
+  ACTIVITY_LOGS_DEFAULT_TAB,
 } from "./home";
 import { Root, RootIndexRoute } from "~/routes/root";
 
@@ -208,10 +210,21 @@ const settingsRoute = createRoute({
   component: Settings,
 });
 
+interface ActivityLogsRouteSearch {
+  tab: ActivityLogsTab;
+}
+
 const auditLogsRoute = createRoute({
   getParentRoute: () => homeRoute,
   path: "audit-log",
   component: ActivityLogs,
+  validateSearch: (
+    search: Record<string, unknown>
+  ): ActivityLogsRouteSearch => {
+    return {
+      tab: (search.tab as ActivityLogsTab) || ACTIVITY_LOGS_DEFAULT_TAB,
+    };
+  },
 });
 
 interface OnboardingRouteSearch {

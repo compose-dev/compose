@@ -125,7 +125,9 @@ export default function HomeNavigation({
             icon="clipboard-text"
             label="Activity Logs"
             isActive={activeTab === "activity-logs"}
-            onClick={() => navigate({ to: "/home/audit-log" })}
+            onClick={() =>
+              navigate({ to: "/home/audit-log", search: { tab: "app-runs" } })
+            }
           />
           <NavigationItem
             icon="settings"
@@ -220,7 +222,10 @@ export default function HomeNavigation({
               label="Activity Logs"
               isActive={activeTab === "activity-logs"}
               onClick={() => {
-                navigate({ to: "/home/audit-log" });
+                navigate({
+                  to: "/home/audit-log",
+                  search: { tab: "app-runs" },
+                });
                 setIsSidebarOpen(false);
               }}
             />

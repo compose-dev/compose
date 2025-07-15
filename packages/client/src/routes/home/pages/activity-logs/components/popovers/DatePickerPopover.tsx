@@ -4,7 +4,7 @@ import {
   TIMEFRAMES,
   TIMEFRAME_OPTIONS,
   Timeframe,
-} from "../utils/useTimeframe";
+} from "../../utils/useTimeframe";
 import { u } from "@compose/ts";
 import { Listbox } from "~/components/listbox";
 import { DateInput } from "~/components/input";

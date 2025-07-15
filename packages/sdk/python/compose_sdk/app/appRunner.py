@@ -627,6 +627,7 @@ class AppRunner:
         event_data = {
             "type": EventType.SdkToServer.WRITE_AUDIT_LOG,
             "message": message,
+            "appRoute": self.appDefinition.route,
         }
 
         if severity is not None:

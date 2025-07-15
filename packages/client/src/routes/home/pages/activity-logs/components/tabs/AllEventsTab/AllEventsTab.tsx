@@ -11,7 +11,7 @@ import Table from "~/components/table";
 import { Page } from "~/routes/home/components/page";
 import { useHomeStore } from "~/routes/home/utils/useHomeStore";
 import { classNames } from "~/utils/classNames";
-import UnknownError from "./UnknownError";
+import UnknownError from "../../errors/UnknownError";
 import { usePageOfActivityLogsQuery } from "~/utils/queries/usePageOfActivityLogsQuery";
 
 function KeyValuePair({
@@ -61,7 +61,7 @@ function AllEventsTab() {
       {status === "error" && <UnknownError errorMessage={error.message} />}
       {status === "success" && (
         <>
-          <div className="flex flex-col w-full gap-6">
+          <div className="flex flex-col gap-6 self-stretch">
             <Page.Subtitle>Filters</Page.Subtitle>
             <div className="flex flex-row gap-6">
               <div className="flex-1 max-w-md">
@@ -165,7 +165,7 @@ function AllEventsTab() {
               </Button>
             </div>
           </div>
-          <div className="flex flex-col gap-6 w-full">
+          <div className="flex flex-col gap-6 self-stretch">
             <Page.Subtitle>Data</Page.Subtitle>
             <Table.Root
               id="audit-logs"

@@ -1,4 +1,5 @@
 import * as GetPageOfLogs from "./getPageOfLogs";
-import * as GetAppLoadsByUser from "./getAppLoadsByUser";
+import * as GetDistinctLogMessages from "./getDistinctLogMessages";
+import * as GetCustomLogEvents from "./getCustomLogEvents";
 
-export { GetPageOfLogs, GetAppLoadsByUser };
+export { GetPageOfLogs, GetDistinctLogMessages, GetCustomLogEvents };

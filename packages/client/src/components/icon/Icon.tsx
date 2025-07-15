@@ -51,6 +51,7 @@ import {
   IconBrandNextjs,
   IconCalendar,
   IconInfoCircle,
+  IconPencil,
 } from "@tabler/icons-react";
 
 const ICON_NAME = {
@@ -132,6 +133,7 @@ const ICON_NAME = {
   nextjs: "nextjs",
   calendar: "calendar",
   "info-circle": "info-circle",
+  pencil: "pencil",
 } as const;
 
 const SIZE = {
@@ -225,6 +227,16 @@ function Icon({
   if (name === ICON_NAME.script) {
     return (
       <IconScript
+        size={16 * SIZE_MULTIPLIER[size]}
+        color={ICON_COLOR[color]}
+        strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}
+      />
+    );
+  }
+
+  if (name === ICON_NAME.pencil) {
+    return (
+      <IconPencil
         size={16 * SIZE_MULTIPLIER[size]}
         color={ICON_COLOR[color]}
         strokeWidth={STROKE_WIDTH_TO_VALUE[stroke]}

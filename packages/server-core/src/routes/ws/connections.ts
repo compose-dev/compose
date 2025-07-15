@@ -53,6 +53,16 @@ class Connections<TMessage, TMetadata> {
     }
   }
 
+  updateMetadata(connectionId: string, metadata: Partial<TMetadata>) {
+    const connection = this.map.get(connectionId);
+    if (connection) {
+      connection.metadata = {
+        ...connection.metadata,
+        ...metadata,
+      };
+    }
+  }
+
   remove(connectionId: string) {
     for (const subscriptionId of Object.keys(this.subscriptions)) {
       if (this.subscriptions[subscriptionId].includes(connectionId)) {

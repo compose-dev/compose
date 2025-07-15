@@ -6,4 +6,6 @@ export interface Data extends BaseData {
   message: string;
   severity?: log.Severity;
   data?: Record<string, any>;
+  // Added in 0.27.8 of Node SDK and 0.27.7 of Python SDK
+  appRoute?: string;
 }

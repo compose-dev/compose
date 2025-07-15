@@ -144,33 +144,30 @@ async function selectPage(
   return result.rows;
 }
 
-async function selectGroupedAppLoadCounts(
+async function selectGroupedLogCounts(
   pg: Postgres,
   companyId: string,
   datetimeStart: Date,
   datetimeEnd: Date,
   environmentTypes: m.Environment.Type[],
-  apps: { route: string; environmentId: string }[]
+  apps: { route: string; environmentId: string }[],
+  trackedEvents: { message: string; type: m.Log.DB["type"] }[]
 ) {
   const params: any[] = [
     companyId,
     datetimeStart,
     datetimeEnd,
-    uPublic.log.TYPE.SYSTEM,
-    m.Log.APP_INITIALIZED_MESSAGE,
     environmentTypes,
   ];
 
   let query = `
       SELECT
-        "userEmail", "environmentId", "appRoute", COUNT(*)::integer as count
+        "userEmail", "environmentId", "appRoute", "message", COUNT(*)::integer as count
       FROM "log"
       WHERE "companyId" = $1
         AND "createdAt" >= $2
         AND "createdAt" <= $3
-        AND "type" = $4
-        AND "message" = $5
-        AND "environmentType" = ANY($6)
+        AND "environmentType" = ANY($4)
   `;
 
   if (apps && apps.length > 0) {
@@ -187,18 +184,52 @@ async function selectGroupedAppLoadCounts(
     query += ` AND ("appRoute", "environmentId") IN (${valuePlaceholders})`;
   }
 
+  if (trackedEvents && trackedEvents.length > 0) {
+    const valuePlaceholders = trackedEvents
+      .map(
+        (_, i) =>
+          `($${params.length + 1 + i * 2}, $${params.length + 2 + i * 2})`
+      )
+      .join(", ");
+
+    for (const trackedEvent of trackedEvents) {
+      params.push(trackedEvent.message, trackedEvent.type);
+    }
+    query += ` AND ("message", "type") IN (${valuePlaceholders})`;
+  }
+
   query += `
-      GROUP BY "userEmail", "environmentId", "appRoute"
+      GROUP BY "userEmail", "environmentId", "appRoute", "message"
     `;
 
   const result = await pg.query<{
     userEmail: m.Log.DB["userEmail"];
     environmentId: m.Log.DB["environmentId"];
     appRoute: m.Log.DB["appRoute"];
+    message: m.Log.DB["message"];
     count: number;
   }>(query, params);
 
   return result.rows;
 }
 
-export { insert, selectPage, selectGroupedAppLoadCounts };
+async function selectDistinctLogMessages(pg: Postgres, companyId: string) {
+  const result = await pg.query<{
+    message: m.Log.DB["message"];
+    type: m.Log.DB["type"];
+  }>(
+    `
+    SELECT DISTINCT "message", "type" FROM "log" WHERE "companyId" = $1
+  `,
+    [companyId]
+  );
+
+  return result.rows;
+}
+
+export {
+  insert,
+  selectPage,
+  selectGroupedLogCounts,
+  selectDistinctLogMessages,
+};

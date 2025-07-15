@@ -245,6 +245,11 @@ class WSBrowser {
         ) {
           return;
         }
+
+        // Update the active app route in the browser connection metadata.
+        this.browserConnections.updateMetadata(environmentId, {
+          appRoute: data.appRoute,
+        });
       } else if (
         !this.authorizations.validateExistingExecution(
           executionId,
