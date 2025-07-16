@@ -8,6 +8,7 @@ BEGIN;
         "updatedByUserId" UUID NOT NULL REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE,
         "companyId" UUID NOT NULL REFERENCES "company"("id") ON DELETE CASCADE ON UPDATE CASCADE,
         "title" TEXT NOT NULL,
+        "description" TEXT,
         "data" JSONB NOT NULL
     );
 

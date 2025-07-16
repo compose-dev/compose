@@ -43,6 +43,7 @@ async function reportRoutes(server: FastifyInstance) {
       server.pg,
       dbUser.companyId,
       req.body.title,
+      req.body.description,
       req.body.data,
       user.id,
       user.id
@@ -236,6 +237,7 @@ async function reportRoutes(server: FastifyInstance) {
       reportId,
       dbUser.companyId,
       req.body.title,
+      req.body.description,
       req.body.data,
       user.id
     );

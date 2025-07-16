@@ -7,6 +7,7 @@ async function insert(
   pg: Postgres,
   companyId: string,
   title: string,
+  description: m.Report.DB["description"],
   data: m.Report.DB["data"],
   createdByUserId: string,
   updatedByUserId: string
@@ -17,11 +18,11 @@ async function insert(
 
   const result = await pg.query<m.Report.DB>(
     `
-    INSERT INTO "report" ("companyId", "title", "data", "createdByUserId", "updatedByUserId")
-    VALUES ($1, $2, $3, $4, $5)
+    INSERT INTO "report" ("companyId", "title", "description", "data", "createdByUserId", "updatedByUserId")
+    VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING *
     `,
-    [companyId, title, data, createdByUserId, updatedByUserId]
+    [companyId, title, description, data, createdByUserId, updatedByUserId]
   );
 
   if (result.rows.length === 0) {
@@ -36,6 +37,7 @@ async function update(
   reportId: m.Report.DB["id"],
   companyId: string,
   title: string,
+  description: m.Report.DB["description"],
   data: m.Report.DB["data"],
   updatedByUserId: string
 ) {
@@ -46,11 +48,11 @@ async function update(
   const result = await pg.query<m.Report.DB>(
     `
     UPDATE "report" 
-    SET "title" = $1, "data" = $2, "updatedByUserId" = $3, "updatedAt" = CURRENT_TIMESTAMP 
-    WHERE "id" = $4 AND "companyId" = $5 
+    SET "title" = $1, "description" = $2, "data" = $3, "updatedByUserId" = $4, "updatedAt" = CURRENT_TIMESTAMP 
+    WHERE "id" = $5 AND "companyId" = $6 
     RETURNING *
     `,
-    [title, data, updatedByUserId, reportId, companyId]
+    [title, description, data, updatedByUserId, reportId, companyId]
   );
 
   if (result.rowCount === 0) {

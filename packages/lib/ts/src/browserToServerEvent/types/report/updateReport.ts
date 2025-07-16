@@ -10,6 +10,7 @@ export interface RequestParams {
 
 export type RequestBody = {
   title: m.Report.DB["title"];
+  description: m.Report.DB["description"];
   data: m.Report.DB["data"];
 };
 

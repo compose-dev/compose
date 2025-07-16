@@ -12,6 +12,7 @@ function SaveReportModal({
   isOpen,
   onClose,
   title,
+  description,
   reportData,
   setReportData,
   reportId,
@@ -19,6 +20,7 @@ function SaveReportModal({
   isOpen: boolean;
   onClose: () => void;
   title: string;
+  description: string | null;
   reportData: ReturnType<typeof useReportData>["reportData"];
   setReportData: ReturnType<typeof useReportData>["setReportData"];
   reportId: string | undefined;
@@ -70,6 +72,7 @@ function SaveReportModal({
       updateReport({
         body: {
           title,
+          description,
           data: reportData,
         },
         params: {
@@ -79,6 +82,7 @@ function SaveReportModal({
     } else {
       createReport({
         title,
+        description,
         data: reportData,
       });
     }

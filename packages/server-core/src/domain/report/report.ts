@@ -172,6 +172,7 @@ function captureReportEventInAnalytics(
 ) {
   server.analytics.capture(analyticsEvent, dbUser.id, dbUser.companyId, {
     reportTitle: report.title,
+    reportDescription: report.description || "",
     reportId: report.id,
     reportTimeframe: report.data.timeFrame,
     reportTrackedEvents: m.Report.getTrackedEventRules(

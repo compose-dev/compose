@@ -109,6 +109,7 @@ interface ReportDB {
   createdByUserId: string;
   updatedByUserId: string;
   title: string;
+  description: string | null;
   data: ReportData;
 }
 

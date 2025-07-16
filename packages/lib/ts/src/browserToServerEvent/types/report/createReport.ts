@@ -5,7 +5,8 @@ export const route = "api/v1/report";
 export const method = "POST";
 
 export type RequestBody = {
-  title: string;
+  title: m.Report.DB["title"];
+  description: m.Report.DB["description"];
   data: m.Report.DB["data"];
 };
 

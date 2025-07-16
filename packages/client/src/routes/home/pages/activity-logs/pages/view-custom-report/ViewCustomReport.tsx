@@ -64,39 +64,48 @@ function ViewCustomReport() {
         report={reportData}
         viewOnly
         header={
-          <div className="flex flex-row items-center justify-between w-full">
-            <Page.Subtitle>{report.report.title}</Page.Subtitle>
-            <div className="flex flex-row items-center gap-2">
-              <DropdownMenu
-                label={
-                  <div className="flex flex-row items-center gap-x-2 border border-brand-neutral rounded-brand p-1 px-2 hover:bg-brand-overlay shadow-sm">
-                    <p>Actions</p>
-                    <Icon name="chevron-down" size="0.75" />
-                  </div>
-                }
-                labelVariant="ghost"
-                options={[
-                  {
-                    label: "Edit Report",
-                    onClick: () => {
-                      navigate({
-                        to: "/home/activity-logs/edit-custom-report",
-                        search: {
-                          reportId,
-                        },
-                      });
+          <div className="flex flex-col gap-3 w-full">
+            <div className="w-full flex flex-row items-center justify-between">
+              <Page.Subtitle>{report.report.title}</Page.Subtitle>
+              <div className="flex flex-row items-center gap-2">
+                <DropdownMenu
+                  label={
+                    <div className="flex flex-row items-center gap-x-2 border border-brand-neutral rounded-brand p-1 px-2 hover:bg-brand-overlay shadow-sm">
+                      <p>Actions</p>
+                      <Icon name="chevron-down" size="0.75" />
+                    </div>
+                  }
+                  labelVariant="ghost"
+                  options={[
+                    {
+                      label: "Edit Report",
+                      onClick: () => {
+                        navigate({
+                          to: "/home/activity-logs/edit-custom-report",
+                          search: {
+                            reportId,
+                          },
+                        });
+                      },
+                      left: <Icon name="pencil" />,
                     },
-                    left: <Icon name="pencil" />,
-                  },
-                  {
-                    label: "Delete Report",
-                    onClick: () => setShowConfirmDeletionDialog(true),
-                    left: <Icon name="trash" color="brand-error" />,
-                    variant: "error",
-                  },
-                ]}
-              />
+                    {
+                      label: "Delete Report",
+                      onClick: () => setShowConfirmDeletionDialog(true),
+                      left: <Icon name="trash" color="brand-error" />,
+                      variant: "error",
+                    },
+                  ]}
+                />
+              </div>
             </div>
+            {report.report.description && (
+              <div className="flex flex-row items-center gap-2">
+                <p className="text-brand-neutral-2 whitespace-pre-wrap">
+                  {report.report.description}
+                </p>
+              </div>
+            )}
           </div>
         }
       />
