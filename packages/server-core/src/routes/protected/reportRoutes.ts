@@ -1,6 +1,7 @@
 import { BrowserToServerEvent, u } from "@compose/ts";
 import { FastifyInstance } from "fastify";
 
+import { d } from "../../domain";
 import { db } from "../../models";
 
 async function reportRoutes(server: FastifyInstance) {
@@ -45,6 +46,13 @@ async function reportRoutes(server: FastifyInstance) {
       req.body.data,
       user.id,
       user.id
+    );
+
+    d.report.captureReportEventInAnalytics(
+      server,
+      dbUser,
+      server.analytics.event.REPORT_CREATED,
+      report
     );
 
     return reply.status(200).send({ reportId: report.id });
@@ -166,7 +174,24 @@ async function reportRoutes(server: FastifyInstance) {
       return reply.status(403).send({ message: "Forbidden" });
     }
 
+    const report = await db.report.selectById(
+      server.pg,
+      reportId,
+      dbUser.companyId
+    );
+
+    if (!report) {
+      return reply.status(404).send({ message: "Report not found" });
+    }
+
     await db.report.deleteById(server.pg, reportId, dbUser.companyId);
+
+    d.report.captureReportEventInAnalytics(
+      server,
+      dbUser,
+      server.analytics.event.REPORT_DELETED,
+      report
+    );
 
     return reply.status(200).send({ success: true });
   });
@@ -213,6 +238,13 @@ async function reportRoutes(server: FastifyInstance) {
       req.body.title,
       req.body.data,
       user.id
+    );
+
+    d.report.captureReportEventInAnalytics(
+      server,
+      dbUser,
+      server.analytics.event.REPORT_UPDATED,
+      report
     );
 
     return reply.status(200).send({ report });

@@ -89,13 +89,10 @@ export function useReportData(
 
   function toggleTrackedEventRule(rule: m.Report.TrackedEventRule) {
     setReportData((prev) => {
-      if ("operator" in prev.trackedEventModel) {
-        throw new Error("Tracked event model is not a group.");
-      }
+      const rules = m.Report.getTrackedEventRules(prev.trackedEventModel);
 
-      const index = prev.trackedEventModel.events.findIndex(
+      const index = rules.findIndex(
         (trackedEvent) =>
-          "operator" in trackedEvent &&
           trackedEvent.event === rule.event &&
           trackedEvent.type === rule.type &&
           trackedEvent.operator === rule.operator
@@ -106,7 +103,7 @@ export function useReportData(
           ...prev,
           trackedEventModel: {
             ...prev.trackedEventModel,
-            events: [...prev.trackedEventModel.events, rule],
+            events: [...rules, rule],
           },
         };
       } else {
@@ -114,7 +111,7 @@ export function useReportData(
           ...prev,
           trackedEventModel: {
             ...prev.trackedEventModel,
-            events: prev.trackedEventModel.events.filter((_, i) => i !== index),
+            events: rules.filter((_, i) => i !== index),
           },
         };
       }
@@ -122,11 +119,9 @@ export function useReportData(
   }
 
   function isEventRuleTracked(rule: m.Report.TrackedEventRule) {
-    if ("operator" in reportData.trackedEventModel) {
-      throw new Error("Tracked event model is not a group.");
-    }
+    const rules = m.Report.getTrackedEventRules(reportData.trackedEventModel);
 
-    return reportData.trackedEventModel.events.some(
+    return rules.some(
       (trackedEvent) =>
         "operator" in trackedEvent &&
         trackedEvent.event === rule.event &&

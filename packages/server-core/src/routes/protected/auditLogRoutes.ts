@@ -147,9 +147,9 @@ async function auditLogRoutes(server: FastifyInstance) {
       // Validate that the model follows the simplified structure.
       // If so, we can reliably extract the events.
       d.report.validateSimplifiedTrackedEventModel(req.body.trackedEventModel);
-      const trackedEvents = (
-        req.body.trackedEventModel as m.Report.TrackedEventGroup
-      ).events as m.Report.TrackedEventRule[];
+      const trackedEvents = m.Report.getTrackedEventRules(
+        req.body.trackedEventModel
+      );
 
       if (trackedEvents.length === 0) {
         reply.status(200).send({

@@ -6,6 +6,7 @@ import {
   TrackedEventRule,
   TrackedEventGroup,
   TrackedEventModel,
+  getTrackedEventRules,
 } from "./trackedEvents";
 
 const TIMEFRAMES = {
@@ -123,4 +124,5 @@ export {
   TrackedEventGroup,
   TrackedEventModel,
   SelectedApp,
+  getTrackedEventRules,
 };

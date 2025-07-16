@@ -15,25 +15,13 @@ const capitalizeWords = (str: string) => {
 function getDefaultReportName(
   trackedEventModel: m.Report.DB["data"]["trackedEventModel"]
 ) {
-  if ("operator" in trackedEventModel) {
-    return `${capitalizeWords(shortenEventName(trackedEventModel.event))} Report`;
+  const rules = m.Report.getTrackedEventRules(trackedEventModel);
+
+  if (rules.length === 0) {
+    return DEFAULT_REPORT_NAME;
   }
 
-  if ("logicOperator" in trackedEventModel) {
-    if (trackedEventModel.events.length === 0) {
-      return DEFAULT_REPORT_NAME;
-    }
-
-    const defaultEvent = trackedEventModel.events[0];
-
-    if ("logicOperator" in defaultEvent) {
-      return DEFAULT_REPORT_NAME;
-    }
-
-    return `${capitalizeWords(shortenEventName(defaultEvent.event))} Report`;
-  }
-
-  return DEFAULT_REPORT_NAME;
+  return `${capitalizeWords(shortenEventName(rules[0].event))} Report`;
 }
 
 const STEPS = {

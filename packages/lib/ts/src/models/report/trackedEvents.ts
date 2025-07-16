@@ -28,7 +28,28 @@ interface TrackedEventGroup {
 
 type TrackedEventModel = TrackedEventRule | TrackedEventGroup;
 
-export { TRACKED_EVENT_OPERATORS, TRACKED_EVENT_LOGIC_OPERATORS };
+function getTrackedEventRules(
+  model: TrackedEventModel,
+  depth: number = 0
+): TrackedEventRule[] {
+  if (depth > 10) {
+    throw new Error("Tracked event model is too deep. Max depth is 10.");
+  }
+
+  if ("logicOperator" in model) {
+    return model.events.flatMap((event) =>
+      getTrackedEventRules(event, depth + 1)
+    );
+  }
+
+  return [model];
+}
+
+export {
+  TRACKED_EVENT_OPERATORS,
+  TRACKED_EVENT_LOGIC_OPERATORS,
+  getTrackedEventRules,
+};
 
 export type {
   TrackedEventOperator,

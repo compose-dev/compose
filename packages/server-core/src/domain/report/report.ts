@@ -1,5 +1,8 @@
 import { m, u } from "@compose/ts";
 import { u as uPublic } from "@composehq/ts-public";
+import { FastifyInstance } from "fastify";
+
+import { AnalyticsEvent } from "../../services/analytics/eventType";
 
 const REQUIRED_REPORT_DATA_FIELDS = [
   // Core fields
@@ -151,8 +154,39 @@ function validateReportData(data: m.Report.DB["data"]) {
   return true;
 }
 
+/**
+ * Captures a reporting event in 3rd party analytics.
+ *
+ * @param server - The Fastify instance.
+ * @param dbUser - The user who performed the action.
+ * @param analyticsEvent - The analytics event to capture.
+ * @param reportId - The ID of the report.
+ * @param reportTitle - The title of the report.
+ * @param reportData - The data of the report.
+ */
+function captureReportEventInAnalytics(
+  server: FastifyInstance,
+  dbUser: m.User.DB,
+  analyticsEvent: AnalyticsEvent,
+  report: m.Report.DB
+) {
+  server.analytics.capture(analyticsEvent, dbUser.id, dbUser.companyId, {
+    reportTitle: report.title,
+    reportId: report.id,
+    reportTimeframe: report.data.timeFrame,
+    reportTrackedEvents: m.Report.getTrackedEventRules(
+      report.data.trackedEventModel
+    ).map((rule) => rule.event),
+    reportIncludeProductionLogs: report.data.includeProductionLogs,
+    reportIncludeDevelopmentLogs: report.data.includeDevelopmentLogs,
+    reportSelectedUserEmails: report.data.selectedUserEmails,
+    reportIncludeAnonymousUsers: report.data.includeAnonymousUsers,
+  });
+}
+
 export {
   validateReportData,
   validateTrackedEventModel,
   validateSimplifiedTrackedEventModel,
+  captureReportEventInAnalytics,
 };

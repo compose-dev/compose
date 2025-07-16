@@ -256,10 +256,10 @@ function AllEvents() {
                 },
                 {
                   id: "message",
-                  label: "Message",
+                  label: "Event",
                   accessorKey: "message",
-                  width: "1000px",
-                  pinnedWidth: 200,
+                  width: "300px",
+                  pinnedWidth: 300,
                   overflow: "ellipsis",
                 },
               ]}

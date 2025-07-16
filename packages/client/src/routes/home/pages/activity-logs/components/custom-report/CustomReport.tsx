@@ -49,9 +49,9 @@ function CustomReport({
 }) {
   const [groupBy, setGroupBy] = useState<GroupBy>(initialGroupBy);
 
-  const trackedEventRules = (
-    report.reportData.trackedEventModel as m.Report.TrackedEventGroup
-  ).events as m.Report.TrackedEventRule[];
+  const trackedEventRules = m.Report.getTrackedEventRules(
+    report.reportData.trackedEventModel
+  );
 
   const {
     data: environments,
