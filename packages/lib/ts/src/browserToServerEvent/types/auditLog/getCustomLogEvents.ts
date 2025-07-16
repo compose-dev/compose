@@ -1,4 +1,4 @@
-import { Log } from "../../../models";
+import { Log, Report } from "../../../models";
 
 export type RequestBody = {
   datetimeStart: Date;
@@ -10,10 +10,7 @@ export type RequestBody = {
     route: string;
     environmentId: string;
   }[];
-  trackedEvents: {
-    message: string;
-    type: Log.DB["type"];
-  }[];
+  trackedEventModel: Report.DB["data"]["trackedEventModel"];
 };
 
 export interface SuccessResponseBody {

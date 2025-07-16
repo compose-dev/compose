@@ -6,21 +6,29 @@ import {
   redirect,
 } from "@tanstack/react-router";
 
+import { Root, RootIndexRoute } from "~/routes/root";
+
 import App from "~/routes/app/App";
+
 import {
   Home,
   Settings,
   Environments,
   BillingDetails,
-  ActivityLogs,
-  type ActivityLogsTab,
   Onboarding,
   type OnboardingStep,
   type OnboardingFramework,
   ONBOARDING_DEFAULT_STEP,
-  ACTIVITY_LOGS_DEFAULT_TAB,
 } from "./home";
-import { Root, RootIndexRoute } from "~/routes/root";
+
+import {
+  ActivityLogs,
+  AllEvents,
+  AppRuns,
+  EditCustomReport,
+  ViewCustomReport,
+  type EditCustomReportStep,
+} from "./home/pages/activity-logs";
 
 import { Login } from "./auth/login";
 import { GoogleOauth2, GoogleOauth2Callback } from "./auth/googleOauth2";
@@ -210,21 +218,58 @@ const settingsRoute = createRoute({
   component: Settings,
 });
 
-interface ActivityLogsRouteSearch {
-  tab: ActivityLogsTab;
-}
+const activityLogsRoute = createRoute({
+  getParentRoute: () => homeRoute,
+  path: "activity-logs",
+  component: ActivityLogs,
+});
 
 const auditLogsRoute = createRoute({
   getParentRoute: () => homeRoute,
   path: "audit-log",
-  component: ActivityLogs,
+  beforeLoad: () => {
+    throw redirect({
+      to: "/home/activity-logs",
+    });
+  },
+});
+
+const activityLogsIndexRoute = createRoute({
+  getParentRoute: () => activityLogsRoute,
+  path: "/",
+  component: AppRuns,
+});
+
+const activityLogsAllEventsRoute = createRoute({
+  getParentRoute: () => activityLogsRoute,
+  path: "all-events",
+  component: AllEvents,
+});
+
+interface ActivityLogsEditCustomReportRouteSearch {
+  step?: EditCustomReportStep;
+  reportId?: string;
+}
+
+const activityLogsEditCustomReportRoute = createRoute({
+  getParentRoute: () => activityLogsRoute,
+  path: "edit-custom-report",
+  component: EditCustomReport,
   validateSearch: (
     search: Record<string, unknown>
-  ): ActivityLogsRouteSearch => {
+  ): ActivityLogsEditCustomReportRouteSearch => {
     return {
-      tab: (search.tab as ActivityLogsTab) || ACTIVITY_LOGS_DEFAULT_TAB,
+      step: search.step as ActivityLogsEditCustomReportRouteSearch["step"],
+      reportId:
+        search.reportId as ActivityLogsEditCustomReportRouteSearch["reportId"],
     };
   },
+});
+
+const activityLogsViewCustomReportRoute = createRoute({
+  getParentRoute: () => activityLogsRoute,
+  path: "view-custom-report/$reportId",
+  component: ViewCustomReport,
 });
 
 interface OnboardingRouteSearch {
@@ -291,6 +336,12 @@ const routeTree = rootRoute.addChildren([
     settingsRoute,
     billingDetailsRoute,
     auditLogsRoute,
+    activityLogsRoute.addChildren([
+      activityLogsIndexRoute,
+      activityLogsAllEventsRoute,
+      activityLogsEditCustomReportRoute,
+      activityLogsViewCustomReportRoute,
+    ]),
     onboardingRoute,
   ]),
   appWrapperRoute.addChildren([appRoute]),

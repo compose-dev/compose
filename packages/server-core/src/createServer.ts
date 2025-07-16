@@ -13,6 +13,7 @@ import {
   userRoutes,
   auditLogRoutes,
   environmentRoutes,
+  reportRoutes,
 } from "./routes/protected";
 import {
   googleOAuthRoutes,
@@ -54,6 +55,7 @@ async function createServer(plugins: [FastifyPluginCallback, any][]) {
     protectedServer.register(billingRoutes);
     protectedServer.register(auditLogRoutes);
     protectedServer.register(environmentRoutes);
+    protectedServer.register(reportRoutes);
   });
 
   // Register unprotected routes.

@@ -59,7 +59,7 @@ function EditReportTitleModal({
             <Button variant="subtle-secondary" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" onClick={handleSubmit}>
+            <Button type="submit" variant="primary" onClick={() => {}}>
               Save
             </Button>
           </div>

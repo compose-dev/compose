@@ -11,7 +11,7 @@ import Table from "~/components/table";
 import { Page } from "~/routes/home/components/page";
 import { useHomeStore } from "~/routes/home/utils/useHomeStore";
 import { classNames } from "~/utils/classNames";
-import UnknownError from "../../errors/UnknownError";
+import UnknownError from "../../components/errors/UnknownError";
 import { usePageOfActivityLogsQuery } from "~/utils/queries/usePageOfActivityLogsQuery";
 
 function KeyValuePair({
@@ -29,7 +29,7 @@ function KeyValuePair({
   );
 }
 
-function AllEventsTab() {
+function AllEvents() {
   const { environments } = useHomeStore();
 
   const [modalContent, setModalContent] = useState<Omit<
@@ -417,4 +417,4 @@ function AllEventsTab() {
   );
 }
 
-export default AllEventsTab;
+export default AllEvents;

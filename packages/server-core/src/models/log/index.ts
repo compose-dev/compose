@@ -151,7 +151,7 @@ async function selectGroupedLogCounts(
   datetimeEnd: Date,
   environmentTypes: m.Environment.Type[],
   apps: { route: string; environmentId: string }[],
-  trackedEvents: { message: string; type: m.Log.DB["type"] }[]
+  trackedEvents: m.Report.TrackedEventRule[]
 ) {
   const params: any[] = [
     companyId,
@@ -193,7 +193,7 @@ async function selectGroupedLogCounts(
       .join(", ");
 
     for (const trackedEvent of trackedEvents) {
-      params.push(trackedEvent.message, trackedEvent.type);
+      params.push(trackedEvent.event, trackedEvent.type);
     }
     query += ` AND ("message", "type") IN (${valuePlaceholders})`;
   }

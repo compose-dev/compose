@@ -3,24 +3,81 @@ import { useHomeStore } from "~/routes/home/utils/useHomeStore";
 import { Page } from "~/routes/home/components/page";
 import InvalidPlanError from "./components/errors/InvalidPlanError";
 import { Tabs } from "~/components/tabs";
-import { useActiveTab, TABS, TAB_TO_LABEL } from "./utils/useActiveTab";
-import AllEventsTab from "./components/tabs/AllEventsTab";
-import AppRunsTab from "./components/tabs/AppRunsTab";
 import { InlineLink } from "~/components/inline-link";
-import CreateCustomReportTab from "./components/tabs/CreateCustomReportTab";
 import Button from "~/components/button";
-import { useRef } from "react";
-import useTrackedEvents from "./utils/useTrackedEvents";
-import EditCustomReportTab from "./components/tabs/EditCustomReportTab";
+import {
+  Outlet,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "@tanstack/react-router";
+import { EDIT_CUSTOM_REPORT_STEPS } from "./pages/edit-custom-report";
+import { useFetchAllReportsQuery } from "~/utils/queries/useFetchAllReportsQuery";
+
+const TABS = {
+  APP_RUNS: "app-runs",
+  ALL_EVENTS: "all-events",
+  EDIT_CUSTOM_REPORT: "edit-custom-report",
+} as const;
+
+type Tab = (typeof TABS)[keyof typeof TABS];
+
+function useActiveTab() {
+  const navigate = useNavigate({
+    from: "/home/activity-logs",
+  });
+
+  const { reportId } = useParams({ strict: false });
+
+  const pathname = useLocation({
+    select: (location) => location.pathname,
+  });
+
+  const activeTab: Tab =
+    pathname.includes("/view-custom-report") && reportId
+      ? (`view-custom-report_${reportId}` as Tab)
+      : pathname.includes("/edit-custom-report")
+        ? "edit-custom-report"
+        : pathname.includes("/all-events")
+          ? "all-events"
+          : "app-runs";
+
+  const setActiveTab = (tab: Tab) => {
+    if (tab === "edit-custom-report") {
+      navigate({
+        to: "/home/activity-logs/edit-custom-report",
+      });
+    } else if (tab === "all-events") {
+      navigate({
+        to: "/home/activity-logs/all-events",
+      });
+    } else if (tab === "app-runs") {
+      navigate({
+        to: "/home/activity-logs",
+      });
+    } else if ((tab as string).startsWith("view-custom-report_")) {
+      navigate({
+        to: "/home/activity-logs/view-custom-report/$reportId",
+        params: {
+          reportId: (tab as string).split("_")[1],
+        },
+      });
+    }
+  };
+
+  return { activeTab, setActiveTab };
+}
 
 export default function ActivityLogs() {
+  const navigate = useNavigate({
+    from: "/home/activity-logs",
+  });
+
+  const { data: reports } = useFetchAllReportsQuery();
+
   const { company } = useHomeStore();
 
-  const now = useRef(new Date());
-
   const { activeTab, setActiveTab } = useActiveTab();
-  const { trackedEvents, toggleTrackedEvent, clearTrackedEvents } =
-    useTrackedEvents();
 
   const isInvalidPlan = !company || company.plan === m.Company.PLANS.HOBBY;
 
@@ -30,7 +87,14 @@ export default function ActivityLogs() {
         <Page.Title>Activity Logs</Page.Title>
         <Button
           variant="primary"
-          onClick={() => setActiveTab(TABS.CREATE_CUSTOM_REPORT)}
+          onClick={() =>
+            navigate({
+              to: "/home/activity-logs/edit-custom-report",
+              search: {
+                step: EDIT_CUSTOM_REPORT_STEPS.PICK_TRACKED_EVENTS,
+              },
+            })
+          }
         >
           Create Custom Report
         </Button>
@@ -40,11 +104,15 @@ export default function ActivityLogs() {
         setActiveTab={setActiveTab}
         options={[
           {
-            label: TAB_TO_LABEL[TABS.APP_RUNS],
+            label: "App Runs Report",
             value: TABS.APP_RUNS,
           },
+          ...reports.reports.map((report) => ({
+            label: report.title,
+            value: `view-custom-report_${report.id}` as Tab,
+          })),
           {
-            label: TAB_TO_LABEL[TABS.ALL_EVENTS],
+            label: "All Events",
             value: TABS.ALL_EVENTS,
           },
         ]}
@@ -61,24 +129,7 @@ export default function ActivityLogs() {
         }
       />
       {isInvalidPlan && <InvalidPlanError />}
-      {!isInvalidPlan && (
-        <>
-          {activeTab === TABS.ALL_EVENTS && <AllEventsTab />}
-          {activeTab === TABS.APP_RUNS && <AppRunsTab now={now} />}
-          {activeTab === TABS.CREATE_CUSTOM_REPORT && (
-            <CreateCustomReportTab
-              clearTrackedEvents={clearTrackedEvents}
-              toggleTrackedEvent={(message, type) => {
-                toggleTrackedEvent(message, type);
-                setActiveTab(TABS.EDIT_CUSTOM_REPORT);
-              }}
-            />
-          )}
-          {activeTab === TABS.EDIT_CUSTOM_REPORT && (
-            <EditCustomReportTab now={now} trackedEvents={trackedEvents} />
-          )}
-        </>
-      )}
+      {!isInvalidPlan && <Outlet />}
     </Page.Root>
   );
 }

@@ -16,7 +16,7 @@ export function useCustomLogEventsQuery(
   includeDevLogs: boolean,
   includeProdLogs: boolean,
   selectedApps: { route: string; environmentId: string }[],
-  trackedEvents: { message: string; type: m.Log.DB["type"] }[]
+  trackedEventModel: m.Report.DB["data"]["trackedEventModel"]
 ) {
   const query = useQuery({
     queryKey: [
@@ -24,7 +24,7 @@ export function useCustomLogEventsQuery(
       includeDevLogs,
       includeProdLogs,
       selectedApps,
-      trackedEvents,
+      trackedEventModel,
       datetimeStart,
       datetimeEnd,
     ],
@@ -41,7 +41,7 @@ export function useCustomLogEventsQuery(
           includeDevelopmentLogs: includeDevLogs,
           includeProductionLogs: includeProdLogs,
           apps: selectedApps,
-          trackedEvents,
+          trackedEventModel,
         },
         forwardLog: log,
       });

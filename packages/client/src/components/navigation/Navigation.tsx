@@ -94,9 +94,11 @@ function NavigationMobileTopBar({
 
 function NavigationContent({
   hideNavigation,
+  stableScrollbarGutter,
   children,
 }: {
   hideNavigation?: boolean;
+  stableScrollbarGutter?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -105,7 +107,10 @@ function NavigationContent({
         "bg-brand-page w-full lg:border border-brand-neutral rounded-brand overflow-x-auto pt-16 lg:pt-0 flex-1":
           !hideNavigation,
       })}
-      style={{ scrollbarWidth: "thin" }}
+      style={{
+        scrollbarWidth: "thin",
+        scrollbarGutter: stableScrollbarGutter ? "stable" : "auto",
+      }}
     >
       {children}
     </div>

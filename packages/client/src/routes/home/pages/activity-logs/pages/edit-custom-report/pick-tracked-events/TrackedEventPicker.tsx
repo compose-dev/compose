@@ -8,7 +8,7 @@ function EventsList({
   label,
   description,
   events,
-  toggleTrackedEvent,
+  toggleTrackedEventRule,
   noEventsMessage,
   labelClassName,
 }: {
@@ -16,7 +16,7 @@ function EventsList({
   labelClassName: string;
   description: string;
   events: { message: string; type: m.Log.DB["type"] }[];
-  toggleTrackedEvent: (message: string, type: m.Log.DB["type"]) => void;
+  toggleTrackedEventRule: (rule: m.Report.TrackedEventRule) => void;
   noEventsMessage: React.ReactNode;
 }) {
   return (
@@ -36,7 +36,11 @@ function EventsList({
             size="sm"
             className="flex-shrink-0"
             onClick={() => {
-              toggleTrackedEvent(message.message, message.type);
+              toggleTrackedEventRule({
+                event: message.message,
+                type: message.type,
+                operator: m.Report.TRACKED_EVENT_OPERATORS.EQUALS,
+              });
             }}
           >
             Track this event
@@ -54,12 +58,12 @@ function EventsList({
 
 function TrackedEventPicker({
   distinctLogMessages,
-  toggleTrackedEvent,
+  toggleTrackedEventRule,
 }: {
   distinctLogMessages: {
     distinctLogMessages: { message: string; type: m.Log.DB["type"] }[];
   };
-  toggleTrackedEvent: (message: string, type: m.Log.DB["type"]) => void;
+  toggleTrackedEventRule: (rule: m.Report.TrackedEventRule) => void;
 }) {
   const groupedLogMessages = useMemo(() => {
     if (!distinctLogMessages) {
@@ -98,17 +102,14 @@ function TrackedEventPicker({
           . Coming soon.
         </p>
       </div>
-      <div
-        // className="w-full flex flex-col gap-4 items-center justify-center mt-4"
-        className="hidden"
-      >
+      <div className="w-full flex flex-col gap-4 items-center justify-center mt-4">
         <div className="bg-brand-overlay rounded-brand p-8 flex flex-col gap-4 w-full max-w-2xl dark:border dark:border-brand-neutral">
           <EventsList
             label="System events"
             labelClassName="text-brand-success-heavy"
             description="Events that are automatically logged by Compose"
             events={groupedLogMessages.system}
-            toggleTrackedEvent={toggleTrackedEvent}
+            toggleTrackedEventRule={toggleTrackedEventRule}
             noEventsMessage="No system events found."
           />
           <Divider />
@@ -117,7 +118,7 @@ function TrackedEventPicker({
             labelClassName="text-brand-warning-heavy"
             description="Custom events that you've logged via the SDK"
             events={groupedLogMessages.user}
-            toggleTrackedEvent={toggleTrackedEvent}
+            toggleTrackedEventRule={toggleTrackedEventRule}
             noEventsMessage={
               <>
                 No user events found. Start logging custom events{" "}

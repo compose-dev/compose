@@ -1,6 +1,7 @@
 import { BrowserToServerEvent, m, u } from "@compose/ts";
 import { FastifyInstance } from "fastify";
 
+import { d } from "../../domain";
 import { db } from "../../models";
 
 async function auditLogRoutes(server: FastifyInstance) {
@@ -143,7 +144,14 @@ async function auditLogRoutes(server: FastifyInstance) {
         });
       }
 
-      if (req.body.trackedEvents.length === 0) {
+      // Validate that the model follows the simplified structure.
+      // If so, we can reliably extract the events.
+      d.report.validateSimplifiedTrackedEventModel(req.body.trackedEventModel);
+      const trackedEvents = (
+        req.body.trackedEventModel as m.Report.TrackedEventGroup
+      ).events as m.Report.TrackedEventRule[];
+
+      if (trackedEvents.length === 0) {
         reply.status(200).send({
           groupedLogs: [],
         });
@@ -156,7 +164,7 @@ async function auditLogRoutes(server: FastifyInstance) {
         req.body.datetimeEnd,
         environmentTypes,
         req.body.apps,
-        req.body.trackedEvents
+        trackedEvents
       );
 
       reply.status(200).send({

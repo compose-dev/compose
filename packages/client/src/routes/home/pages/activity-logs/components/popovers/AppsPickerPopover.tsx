@@ -10,6 +10,7 @@ import { classNames } from "~/utils/classNames";
 function PopoverTrigger({
   allApps,
   selectedApps,
+  viewOnly = false,
 }: {
   allApps: {
     route: string;
@@ -21,6 +22,7 @@ function PopoverTrigger({
     route: string;
     environmentId: string;
   }[];
+  viewOnly: boolean;
 }) {
   const label = useMemo(() => {
     if (selectedApps.length === allApps.length || selectedApps.length === 0) {
@@ -39,10 +41,19 @@ function PopoverTrigger({
 
   return (
     <Popover.Trigger>
-      <div className="border border-brand-neutral rounded-brand p-2 py-1 flex flex-row gap-2 items-center shadow-sm hover:bg-brand-overlay transition-colors">
+      <div
+        className={classNames(
+          "border border-brand-neutral rounded-brand p-2 py-1 flex flex-row gap-2 items-center shadow-sm hover:bg-brand-overlay transition-colors",
+          {
+            "bg-brand-overlay": !!viewOnly,
+          }
+        )}
+      >
         <Icon name="bolt" color="brand-neutral" />
         <p className="text-brand-neutral">{label}</p>
-        <Icon name="chevron-down" color="brand-neutral" size="0.75" />
+        {!viewOnly && (
+          <Icon name="chevron-down" color="brand-neutral" size="0.75" />
+        )}
       </div>
     </Popover.Trigger>
   );
@@ -53,6 +64,7 @@ function AppChip({
   selectedApps,
   onSelect,
   onDeselect,
+  viewOnly = false,
 }: {
   app: {
     route: string;
@@ -62,6 +74,7 @@ function AppChip({
   selectedApps: { route: string; environmentId: string }[];
   onSelect: (app: { route: string; environmentId: string }) => void;
   onDeselect: (app: { route: string; environmentId: string }) => void;
+  viewOnly: boolean;
 }) {
   const isSelected = selectedApps.some(
     (selectedApp) =>
@@ -87,6 +100,7 @@ function AppChip({
           onSelect(app);
         }
       }}
+      disabled={viewOnly}
     >
       {app.name}
     </Button>
@@ -100,6 +114,7 @@ function AppsPickerPopover({
   disabled,
   includeDevLogs,
   includeProdLogs,
+  viewOnly = false,
 }: {
   environments: ReturnType<typeof useEnvironmentsQuery>["data"];
   selectedApps: {
@@ -110,6 +125,7 @@ function AppsPickerPopover({
   disabled: boolean;
   includeDevLogs: boolean;
   includeProdLogs: boolean;
+  viewOnly: boolean;
 }) {
   const allApps = useMemo(() => {
     if (!environments) {
@@ -164,7 +180,11 @@ function AppsPickerPopover({
 
   return (
     <Popover.Root>
-      <PopoverTrigger allApps={allApps} selectedApps={selectedApps} />
+      <PopoverTrigger
+        allApps={allApps}
+        selectedApps={selectedApps}
+        viewOnly={viewOnly}
+      />
       <Popover.Panel anchor="bottom start">
         <div className="flex flex-col gap-4 w-full min-w-32 max-w-xl">
           <div className="flex flex-col gap-2">
@@ -173,7 +193,7 @@ function AppsPickerPopover({
               <Button
                 variant="subtle-secondary"
                 onClick={() => setSelectedApps([])}
-                disabled={disabled || selectedApps.length === 0}
+                disabled={disabled || selectedApps.length === 0 || viewOnly}
               >
                 <p className="text-brand-neutral-2 text-sm/6">
                   Reset to all apps
@@ -181,7 +201,7 @@ function AppsPickerPopover({
               </Button>
             </div>
             <p className="text-brand-neutral-2 text-sm/6">
-              Select the apps you want to include in the results.
+              Filter logs based on the apps from which they originated.
             </p>
           </div>
           <div className="flex flex-col gap-8">
@@ -215,6 +235,7 @@ function AppsPickerPopover({
                           )
                         );
                       }}
+                      viewOnly={viewOnly}
                     />
                   ))}
                   {environment.apps.length === 0 && (
