@@ -3,7 +3,7 @@ import Button from "~/components/button";
 import Icon from "~/components/icon";
 
 function InvalidPlanError() {
-  const navigate = useNavigate({ from: "/home/audit-log" });
+  const navigate = useNavigate({ from: "/home/activity-logs" });
 
   return (
     <div className="w-full flex justify-center mt-24">

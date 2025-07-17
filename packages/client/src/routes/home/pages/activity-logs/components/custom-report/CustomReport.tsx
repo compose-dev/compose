@@ -1,7 +1,4 @@
 import { useEnvironmentsQuery } from "~/utils/queries/useEnvironmentsQuery";
-import { useTimeframe } from "../../utils/useTimeframe";
-import useSelectedApps from "../../utils/useSelectedApps";
-import { useLogEnvironments } from "../../utils/useLogEnvironments";
 import { useCustomLogEventsQuery } from "~/utils/queries/useCustomLogEventsQuery";
 import { m } from "@compose/ts";
 import DatePickerPopover from "../popovers/DatePickerPopover";
@@ -15,43 +12,48 @@ import { useMemo, useState } from "react";
 import { BarChart } from "~/components/chart/bar-chart";
 import { UI } from "@composehq/ts-public";
 import { Listbox } from "~/components/listbox";
+import { useReportData } from "../../utils/useReportData";
 
 type GroupBy = "app" | "message";
 
 function CustomReport({
-  trackedEvents,
+  // state
+  report,
+  reportId,
   initialGroupBy = "message",
-  now,
+  viewOnly = false,
 
   // Labels for various report elements
-  getTotalOccurrencesStatLabel = () => `Total Event Occurrences`,
-  getTotalOccurrencesStatDescription = () =>
-    `Number of times the ${
-      trackedEvents.length > 1 ? "events" : "event"
-    } occurred within the selected timeframe`,
-  getTotalUsersStatLabel = () => `Total Users`,
-  getTotalUsersStatDescription = () =>
-    `Unique users who triggered the ${trackedEvents.length > 1 ? "events" : "event"} within the selected timeframe`,
-  chartLabel = "Event Occurrences by User",
+  totalOccurrencesStatLabel,
+  totalOccurrencesStatDescription,
+  totalUsersStatLabel,
+  totalUsersStatDescription,
+  chartLabel,
 
   // header
   header = null,
 }: {
-  trackedEvents: { message: string; type: m.Log.DB["type"] }[];
+  // state
+  report: ReturnType<typeof useReportData>;
+  reportId: string | undefined;
   initialGroupBy?: GroupBy;
-  now: React.MutableRefObject<Date>;
+  viewOnly?: boolean;
 
   // Labels for various report elements
-  getTotalOccurrencesStatLabel?: (count: number) => string;
-  getTotalOccurrencesStatDescription?: (count: number) => string;
-  getTotalUsersStatLabel?: (count: number) => string;
-  getTotalUsersStatDescription?: (count: number) => string;
+  totalOccurrencesStatLabel?: string;
+  totalOccurrencesStatDescription?: string;
+  totalUsersStatLabel?: string;
+  totalUsersStatDescription?: string;
   chartLabel?: string;
 
   // header
   header?: React.ReactNode;
 }) {
   const [groupBy, setGroupBy] = useState<GroupBy>(initialGroupBy);
+
+  const trackedEventRules = m.Report.getTrackedEventRules(
+    report.reportData.trackedEventModel
+  );
 
   const {
     data: environments,
@@ -60,35 +62,18 @@ function CustomReport({
   } = useEnvironmentsQuery();
 
   const {
-    selectedTimeframe,
-    datetimeStart,
-    datetimeEnd,
-    handleTimeframeChange,
-    setDatetimeStart,
-    setDatetimeEnd,
-  } = useTimeframe(now);
-
-  const {
-    includeDevLogs,
-    setIncludeDevLogs,
-    includeProdLogs,
-    setIncludeProdLogs,
-  } = useLogEnvironments();
-
-  const { selectedApps, setSelectedApps } = useSelectedApps();
-
-  const {
     data: logEvents,
     status: logEventsStatus,
     fetchStatus: logEventsFetchStatus,
     error: logEventsError,
   } = useCustomLogEventsQuery(
-    datetimeStart,
-    datetimeEnd,
-    includeDevLogs,
-    includeProdLogs,
-    selectedApps,
-    trackedEvents
+    report.reportData.timeFrame,
+    report.reportData.dateRange,
+    report.reportData.includeDevelopmentLogs,
+    report.reportData.includeProductionLogs,
+    report.reportData.selectedApps,
+    report.reportData.trackedEventModel,
+    reportId
   );
 
   const environmentsById = useMemo(() => {
@@ -151,28 +136,49 @@ function CustomReport({
       <div className="flex flex-row w-full justify-between">
         <div className="flex flex-row flex-wrap gap-2">
           <DatePickerPopover
-            selectedTimeframe={selectedTimeframe}
-            datetimeStart={datetimeStart}
-            datetimeEnd={datetimeEnd}
-            handleTimeframeChange={handleTimeframeChange}
-            setDatetimeStart={setDatetimeStart}
-            setDatetimeEnd={setDatetimeEnd}
+            selectedTimeframe={report.reportData.timeFrame}
+            datetimeStart={report.datetimeStart}
+            datetimeEnd={report.datetimeEnd}
+            handleTimeframeChange={report.updateTimeFrame}
             disabled={logEventsFetchStatus === "fetching"}
+            viewOnly={viewOnly && !report.reportData.timeFrameIsEditable}
           />
           <LogEnvironmentsPopover
-            includeDevLogs={includeDevLogs}
-            includeProdLogs={includeProdLogs}
-            setIncludeDevLogs={setIncludeDevLogs}
-            setIncludeProdLogs={setIncludeProdLogs}
+            includeDevLogs={report.reportData.includeDevelopmentLogs}
+            includeProdLogs={report.reportData.includeProductionLogs}
+            setIncludeDevLogs={(value) =>
+              report.setReportData((prev) => ({
+                ...prev,
+                includeDevelopmentLogs: value,
+              }))
+            }
+            setIncludeProdLogs={(value) =>
+              report.setReportData((prev) => ({
+                ...prev,
+                includeProductionLogs: value,
+              }))
+            }
             disabled={logEventsFetchStatus === "fetching"}
+            devLogsViewOnly={
+              viewOnly && !report.reportData.includeDevelopmentLogsIsEditable
+            }
+            prodLogsViewOnly={
+              viewOnly && !report.reportData.includeProductionLogsIsEditable
+            }
           />
           <AppsPickerPopover
             environments={environments}
-            includeDevLogs={includeDevLogs}
-            includeProdLogs={includeProdLogs}
-            selectedApps={selectedApps}
-            setSelectedApps={setSelectedApps}
+            includeDevLogs={report.reportData.includeDevelopmentLogs}
+            includeProdLogs={report.reportData.includeProductionLogs}
+            selectedApps={report.reportData.selectedApps}
+            setSelectedApps={(apps) =>
+              report.setReportData((prev) => ({
+                ...prev,
+                selectedApps: apps,
+              }))
+            }
             disabled={logEventsFetchStatus === "fetching"}
+            viewOnly={viewOnly && !report.reportData.selectedAppsIsEditable}
           />
         </div>
         {logEventsFetchStatus === "fetching" && (
@@ -182,16 +188,26 @@ function CustomReport({
       <div className="flex flex-col md:flex-row gap-4 w-full">
         <div className="flex-1">
           <Statistic
-            label={getTotalOccurrencesStatLabel(totalOccurrences)}
+            label={totalOccurrencesStatLabel || "Total Event Occurrences"}
             value={totalOccurrences}
-            description={getTotalOccurrencesStatDescription(totalOccurrences)}
+            description={
+              totalOccurrencesStatDescription ||
+              `Number of times the ${
+                trackedEventRules.length > 1 ? "events" : "event"
+              } occurred within the selected timeframe`
+            }
           />
         </div>
         <div className="flex-1">
           <Statistic
-            label={getTotalUsersStatLabel(totalUsers)}
+            label={totalUsersStatLabel || "Total Users"}
             value={totalUsers}
-            description={getTotalUsersStatDescription(totalUsers)}
+            description={
+              totalUsersStatDescription ||
+              `Unique users who triggered the ${
+                trackedEventRules.length > 1 ? "events" : "event"
+              } within the selected timeframe`
+            }
           />
         </div>
       </div>
@@ -199,7 +215,7 @@ function CustomReport({
         {chartDataByApp.length > 0 && chartDataByMessage.length > 0 && (
           <>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-1 mb-2">
-              <p>{chartLabel}</p>
+              <p>{chartLabel || "Event Occurrences by User"}</p>
               <Listbox.Single
                 rootClassName="max-w-72"
                 id="group-by"

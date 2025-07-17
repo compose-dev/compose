@@ -37,7 +37,7 @@ export default function Tabs<T extends string | number>({
   options,
   rightContent,
 }: {
-  activeTab: T;
+  activeTab: T | null;
   setActiveTab: (tab: T) => void;
   options: { label: string; value: T }[];
   rightContent?: React.ReactNode;

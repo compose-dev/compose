@@ -1,9 +1,10 @@
 import ActivityLogs from "./ActivityLogs";
-import {
-  Tab as ActivityLogsTab,
-  DEFAULT_TAB as ACTIVITY_LOGS_DEFAULT_TAB,
-} from "./utils/useActiveTab";
+import AllEvents from "./pages/all-events";
+import AppRuns from "./pages/app-runs";
+import EditCustomReport, {
+  EditCustomReportStep,
+} from "./pages/edit-custom-report";
+import ViewCustomReport from "./pages/view-custom-report";
 
-export default ActivityLogs;
-export { ACTIVITY_LOGS_DEFAULT_TAB };
-export type { ActivityLogsTab };
+export { ActivityLogs, AllEvents, AppRuns, EditCustomReport, ViewCustomReport };
+export type { EditCustomReportStep };

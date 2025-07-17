@@ -1,14 +1,18 @@
 import * as m from "../../models";
 
 const FEATURE = {
-  // OWNER ONLY
+  /********************
+   * OWNER ONLY
+   ********************/
   DELETE_ORGANIZATION: "delete-organization",
   CHANGE_BILLING: "change-billing",
   ADD_OWNER_PERMISSION: "add-owner-permission",
   REMOVE_OWNER_PERMISSION: "remove-owner-permission",
   DELETE_OWNER: "delete-owner",
 
-  // ADMIN+ ONLY
+  /********************
+   * ADMIN+ ONLY
+   ********************/
   VIEW_BILLING: "view-billing",
   ADD_USER: "add-user",
   DELETE_ADMIN: "delete-admin",
@@ -22,8 +26,22 @@ const FEATURE = {
   ADD_MEMBER_PERMISSION: "add-member-permission",
   REMOVE_MEMBER_PERMISSION: "remove-member-permission",
   VIEW_AUDIT_LOGS: "view-audit-logs",
+  CREATE_REPORT: "create-report",
+  UPDATE_REPORT: "update-report",
+  DELETE_REPORT: "delete-report",
+  VIEW_REPORT: "view-report",
+  VIEW_LIST_OF_REPORTS: "view-list-of-reports",
+  VIEW_REPORT_SHARED_WITH: "view-report-shared-with",
+  SHARE_REPORT_WITH_USER: "share-report-with-user",
+  SHARE_REPORT_WITH_EXTERNAL_USER: "share-report-with-external-user",
+  SHARE_REPORT_PUBLICLY: "share-report-publicly",
+  UNSHARE_REPORT_WITH_USER: "unshare-report-with-user",
+  UNSHARE_REPORT_WITH_EXTERNAL_USER: "unshare-report-with-external-user",
+  UNSHARE_REPORT_PUBLICLY: "unshare-report-publicly",
 
-  // APP MANAGER+ ONLY
+  /********************
+   * APP MANAGER+ ONLY
+   ********************/
   SHARE_APP_PUBLICLY: "share-app-publicly",
   UNSHARE_APP_PUBLICLY: "unshare-app-publicly",
   SHARE_APP_EXTERNAL_EMAIL: "share-app-external-email",
@@ -39,7 +57,9 @@ const FEATURE = {
   ADD_GUEST_PERMISSION: "add-guest-permission",
   REMOVE_GUEST_PERMISSION: "remove-guest-permission",
 
-  // MEMBER+ ONLY
+  /********************
+   * MEMBER+ ONLY
+   ********************/
   VIEW_ORGANIZATION_USERS: "view-organization-users",
   VIEW_EXTERNAL_USERS: "view-external-users",
   CREATE_DEVELOPMENT_ENVIRONMENT: "create-development-environment",
@@ -99,7 +119,19 @@ function isAllowed(
     feature === FEATURE.REMOVE_APP_MANAGER_PERMISSION ||
     feature === FEATURE.ADD_MEMBER_PERMISSION ||
     feature === FEATURE.REMOVE_MEMBER_PERMISSION ||
-    feature === FEATURE.VIEW_AUDIT_LOGS
+    feature === FEATURE.VIEW_AUDIT_LOGS ||
+    feature === FEATURE.CREATE_REPORT ||
+    feature === FEATURE.UPDATE_REPORT ||
+    feature === FEATURE.DELETE_REPORT ||
+    feature === FEATURE.VIEW_REPORT ||
+    feature === FEATURE.VIEW_LIST_OF_REPORTS ||
+    feature === FEATURE.SHARE_REPORT_WITH_USER ||
+    feature === FEATURE.SHARE_REPORT_WITH_EXTERNAL_USER ||
+    feature === FEATURE.SHARE_REPORT_PUBLICLY ||
+    feature === FEATURE.UNSHARE_REPORT_WITH_USER ||
+    feature === FEATURE.UNSHARE_REPORT_WITH_EXTERNAL_USER ||
+    feature === FEATURE.UNSHARE_REPORT_PUBLICLY ||
+    feature === FEATURE.VIEW_REPORT_SHARED_WITH
   ) {
     return isAdminOrAbove(permission);
   }

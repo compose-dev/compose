@@ -11,12 +11,13 @@ const isDev = getNodeEnvironment() === "development";
 const log = isDev ? logFunction : null;
 
 export function useCustomLogEventsQuery(
-  datetimeStart: Date,
-  datetimeEnd: Date,
+  timeFrame: m.Report.Timeframe,
+  dateRange: m.Report.DB["data"]["dateRange"],
   includeDevLogs: boolean,
   includeProdLogs: boolean,
-  selectedApps: { route: string; environmentId: string }[],
-  trackedEvents: { message: string; type: m.Log.DB["type"] }[]
+  selectedApps: m.Report.DB["data"]["selectedApps"],
+  trackedEventModel: m.Report.DB["data"]["trackedEventModel"],
+  reportId: string | undefined
 ) {
   const query = useQuery({
     queryKey: [
@@ -24,9 +25,10 @@ export function useCustomLogEventsQuery(
       includeDevLogs,
       includeProdLogs,
       selectedApps,
-      trackedEvents,
-      datetimeStart,
-      datetimeEnd,
+      trackedEventModel,
+      timeFrame,
+      dateRange,
+      reportId,
     ],
     queryFn: async () => {
       const response = await request<
@@ -36,12 +38,13 @@ export function useCustomLogEventsQuery(
         route: `/${BrowserToServerEvent.GetCustomLogEvents.route}`,
         method: BrowserToServerEvent.GetCustomLogEvents.method,
         body: {
-          datetimeStart,
-          datetimeEnd,
+          timeFrame,
+          dateRange,
           includeDevelopmentLogs: includeDevLogs,
           includeProductionLogs: includeProdLogs,
           apps: selectedApps,
-          trackedEvents,
+          trackedEventModel,
+          reportId,
         },
         forwardLog: log,
       });

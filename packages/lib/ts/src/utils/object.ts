@@ -80,10 +80,20 @@ function removeUndefined<T extends Record<string, unknown>>(
   ) as any;
 }
 
+function hasValue<T extends object>(obj: T, value: any): boolean {
+  return Object.values(obj).includes(value);
+}
+
+function hasKey<T extends object>(obj: T, value: any): boolean {
+  return Object.keys(obj).includes(value);
+}
+
 export {
   mapValues,
   filterValuesWithKnownKeys,
   filterValuesWithGenericKeys,
   removeNullAndUndefined,
   removeUndefined,
+  hasValue,
+  hasKey,
 };

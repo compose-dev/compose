@@ -1,6 +1,7 @@
 import { BrowserToServerEvent, m, u } from "@compose/ts";
 import { FastifyInstance } from "fastify";
 
+import { d } from "../../domain";
 import { db } from "../../models";
 
 async function auditLogRoutes(server: FastifyInstance) {
@@ -84,6 +85,7 @@ async function auditLogRoutes(server: FastifyInstance) {
     Reply: {
       200: BrowserToServerEvent.GetCustomLogEvents.SuccessResponseBody;
       "4xx": BrowserToServerEvent.GetCustomLogEvents.ErrorResponseBody;
+      "5xx": BrowserToServerEvent.GetCustomLogEvents.ErrorResponseBody;
     };
   }>(
     `/${BrowserToServerEvent.GetCustomLogEvents.route}`,
@@ -125,11 +127,60 @@ async function auditLogRoutes(server: FastifyInstance) {
           dbUser.permission
         )
       ) {
-        return reply.status(403).send({
-          message:
-            "Only users with admin permissions can view activity logs. Please ask your administrator to enable this feature for you.",
-          type: "invalid-user-permission",
-        });
+        if (!req.body.reportId) {
+          return reply.status(403).send({
+            message:
+              "You don't have permission to view this report. Please ask your administrator to grant you access.",
+            type: "invalid-user-permission",
+          });
+        }
+
+        const report = await db.report.selectById(
+          server.pg,
+          req.body.reportId,
+          dbUser.companyId
+        );
+
+        if (!report) {
+          return reply.status(404).send({
+            message: "Report not found.",
+            type: "unknown-error",
+          });
+        }
+
+        const reportUser = await db.reportUser.selectByUserIdAndReportId(
+          server.pg,
+          dbUser.id,
+          req.body.reportId,
+          dbUser.companyId
+        );
+
+        if (!reportUser || !reportUser.permission.canView) {
+          return reply.status(403).send({
+            message:
+              "You don't have permission to view this report. Please ask your administrator to grant you access.",
+            type: "invalid-user-permission",
+          });
+        }
+
+        try {
+          d.report.validateLogsRequestAgainstReportConfiguration(
+            report,
+            req.body.timeFrame,
+            req.body.dateRange,
+            req.body.includeProductionLogs,
+            req.body.includeDevelopmentLogs,
+            req.body.apps,
+            req.body.trackedEventModel,
+            [], // TODO: add selected user emails,
+            true // TODO: add include anonymous users,
+          );
+        } catch (error) {
+          return reply.status(400).send({
+            message: (error as Error).message,
+            type: "unknown-error",
+          });
+        }
       }
 
       const environmentTypes = [
@@ -143,20 +194,50 @@ async function auditLogRoutes(server: FastifyInstance) {
         });
       }
 
-      if (req.body.trackedEvents.length === 0) {
+      // Validate that the model follows the simplified structure.
+      // If so, we can reliably extract the events.
+      d.report.validateSimplifiedTrackedEventModel(req.body.trackedEventModel);
+      const trackedEvents = m.Report.getTrackedEventRules(
+        req.body.trackedEventModel
+      );
+
+      if (trackedEvents.length === 0) {
         reply.status(200).send({
           groupedLogs: [],
+        });
+      }
+
+      const now = new Date();
+
+      // Calculate datetime start and end on backend to ensure a
+      // user with view-only access to a report doesn't pass
+      // an accepted timeframe but then give a different date range.
+      const datetimeStart =
+        req.body.timeFrame === m.Report.TIMEFRAMES.CUSTOM
+          ? req.body.dateRange.start
+          : m.Report.TIMEFRAME_TO_START_DATE[req.body.timeFrame](now);
+
+      const datetimeEnd =
+        req.body.timeFrame === m.Report.TIMEFRAMES.CUSTOM
+          ? req.body.dateRange.end
+          : m.Report.TIMEFRAME_TO_END_DATE[req.body.timeFrame](now);
+
+      if (!datetimeStart || !datetimeEnd) {
+        return reply.status(500).send({
+          message:
+            "Internal server error. Expected a date but got null for datetimeStart or datetimeEnd.",
+          type: "unknown-error",
         });
       }
 
       const logs = await db.log.selectGroupedLogCounts(
         server.pg,
         dbUser.companyId,
-        req.body.datetimeStart,
-        req.body.datetimeEnd,
+        datetimeStart,
+        datetimeEnd,
         environmentTypes,
         req.body.apps,
-        req.body.trackedEvents
+        trackedEvents
       );
 
       reply.status(200).send({

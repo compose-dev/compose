@@ -1,57 +1,51 @@
 import Icon from "~/components/icon";
 import { Popover } from "~/components/popover";
 import {
-  TIMEFRAMES,
   TIMEFRAME_OPTIONS,
-  Timeframe,
-} from "../../utils/useTimeframe";
-import { u } from "@compose/ts";
+  getPrettifiedDateRange,
+} from "../../utils/timeFrame";
+import { m, u } from "@compose/ts";
 import { Listbox } from "~/components/listbox";
 import { DateInput } from "~/components/input";
 import { Divider } from "~/components/divider";
 import { useEffect, useMemo, useState } from "react";
 import Button from "~/components/button";
+import { classNames } from "~/utils/classNames";
 
 const MAX_CUSTOM_RANGE_DURATION_IN_DAYS = 100;
-
-function getPrettifiedDateRange(start: Date, end: Date) {
-  const startString = u.date.toString(
-    start,
-    u.date.SerializedFormat["LLL d, yyyy"]
-  );
-  const endString = u.date.toString(
-    end,
-    u.date.SerializedFormat["LLL d, yyyy"]
-  );
-
-  return `${startString} - ${endString}`;
-}
 
 function PopoverTrigger({
   selectedTimeframe,
   datetimeStart,
   datetimeEnd,
+  viewOnly,
 }: {
-  selectedTimeframe: Timeframe;
+  selectedTimeframe: m.Report.Timeframe;
   datetimeStart: Date;
   datetimeEnd: Date;
+  viewOnly?: boolean;
 }) {
   return (
     <Popover.Trigger>
-      <div className="border border-brand-neutral rounded-brand p-2 py-1 flex flex-row gap-2 items-center shadow-sm hover:bg-brand-overlay transition-colors">
+      <div
+        className={classNames(
+          "border border-brand-neutral rounded-brand p-2 py-1 flex flex-row gap-2 items-center shadow-sm hover:bg-brand-overlay transition-colors",
+          {
+            "bg-brand-overlay": !!viewOnly,
+          }
+        )}
+      >
         <Icon name="calendar" color="brand-neutral" />
         <p className="text-brand-neutral">
-          {selectedTimeframe === TIMEFRAMES.CUSTOM ? (
-            <p className="flex-shrink-0">
-              {getPrettifiedDateRange(datetimeStart, datetimeEnd)}
-            </p>
-          ) : (
-            TIMEFRAME_OPTIONS.find(
-              (option) => option.value === selectedTimeframe
-            )?.label
-          )}
+          {selectedTimeframe === m.Report.TIMEFRAMES.CUSTOM
+            ? getPrettifiedDateRange(datetimeStart, datetimeEnd)
+            : TIMEFRAME_OPTIONS.find(
+                (option) => option.value === selectedTimeframe
+              )?.label}
         </p>
-        <Icon name="chevron-down" color="brand-neutral" size="0.75" />
+        {!viewOnly && (
+          <Icon name="chevron-down" color="brand-neutral" size="0.75" />
+        )}
       </div>
     </Popover.Trigger>
   );
@@ -62,17 +56,18 @@ function DatePickerPopover({
   datetimeStart,
   datetimeEnd,
   handleTimeframeChange,
-  setDatetimeStart,
-  setDatetimeEnd,
   disabled,
+  viewOnly = false,
 }: {
-  selectedTimeframe: Timeframe;
+  selectedTimeframe: m.Report.Timeframe;
   datetimeStart: Date;
   datetimeEnd: Date;
-  handleTimeframeChange: (timeframe: Timeframe | null) => void;
-  setDatetimeStart: (datetime: Date) => void;
-  setDatetimeEnd: (datetime: Date) => void;
+  handleTimeframeChange: (
+    timeframe: m.Report.Timeframe,
+    dateRange: m.Report.DB["data"]["dateRange"]
+  ) => void;
   disabled: boolean;
+  viewOnly?: boolean;
 }) {
   const [startInput, setStartInput] = useState<u.date.DateOnlyModel | null>(
     u.date.toDateOnlyModel(datetimeStart)
@@ -118,10 +113,10 @@ function DatePickerPopover({
       return;
     }
 
-    setDatetimeStart(u.date.fromDateOnlyModel(startInput));
-    setDatetimeEnd(u.date.fromDateOnlyModel(endInput));
-
-    handleTimeframeChange(TIMEFRAMES.CUSTOM);
+    handleTimeframeChange(m.Report.TIMEFRAMES.CUSTOM, {
+      start: u.date.fromDateOnlyModel(startInput),
+      end: u.date.fromDateOnlyModel(endInput),
+    });
   }
 
   return (
@@ -130,6 +125,7 @@ function DatePickerPopover({
         selectedTimeframe={selectedTimeframe}
         datetimeStart={datetimeStart}
         datetimeEnd={datetimeEnd}
+        viewOnly={viewOnly}
       />
       <Popover.Panel anchor="bottom start">
         <div className="flex flex-col gap-4 w-full min-w-80 max-w-full">
@@ -138,12 +134,25 @@ function DatePickerPopover({
             <Listbox.Single
               options={TIMEFRAME_OPTIONS}
               value={selectedTimeframe}
-              setValue={handleTimeframeChange}
+              setValue={(value) => {
+                if (!value) {
+                  return;
+                }
+
+                if (value === m.Report.TIMEFRAMES.CUSTOM) {
+                  applyCustomDateRange();
+                } else {
+                  handleTimeframeChange(value, {
+                    start: null,
+                    end: null,
+                  });
+                }
+              }}
               id="timeframe"
               label={null}
-              disabled={disabled}
+              disabled={disabled || viewOnly}
             />
-            {selectedTimeframe !== TIMEFRAMES.CUSTOM && (
+            {selectedTimeframe !== m.Report.TIMEFRAMES.CUSTOM && (
               <p className="flex-shrink-0 text-brand-neutral-2 text-sm self-end mt">
                 {getPrettifiedDateRange(datetimeStart, datetimeEnd)}
               </p>
@@ -155,24 +164,28 @@ function DatePickerPopover({
               label="Start Date (UTC)"
               value={startInput}
               setValue={setStartInput}
+              disabled={viewOnly}
             />
             <DateInput
               label="End Date (UTC)"
               value={endInput}
               setValue={setEndInput}
+              disabled={viewOnly}
             />
-            <Button
-              variant="primary"
-              onClick={applyCustomDateRange}
-              disabled={
-                startInput === null ||
-                endInput === null ||
-                (!isCustomStartChanged && !isCustomEndChanged) ||
-                customRangeDurationInDays > MAX_CUSTOM_RANGE_DURATION_IN_DAYS
-              }
-            >
-              Apply Custom Date Range
-            </Button>
+            {!viewOnly && (
+              <Button
+                variant="primary"
+                onClick={applyCustomDateRange}
+                disabled={
+                  startInput === null ||
+                  endInput === null ||
+                  (!isCustomStartChanged && !isCustomEndChanged) ||
+                  customRangeDurationInDays > MAX_CUSTOM_RANGE_DURATION_IN_DAYS
+                }
+              >
+                Apply Custom Date Range
+              </Button>
+            )}
             {customRangeDurationInDays > MAX_CUSTOM_RANGE_DURATION_IN_DAYS && (
               <p className="text-brand-error text-sm">
                 Custom date range cannot exceed{" "}

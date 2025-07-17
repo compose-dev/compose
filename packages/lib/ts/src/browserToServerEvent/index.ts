@@ -6,6 +6,7 @@ export * from "./types/billing";
 export * from "./types/user";
 export * from "./types/environment";
 export * from "./types/auditLog";
+export * from "./types/report";
 
 import * as Initialize from "./types/initialize";
 import * as InitializeEnvironmentAndAuthorizeApp from "./types/initializeEnvironmentAndAuthorizeApp";

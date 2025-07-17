@@ -397,6 +397,31 @@ function isValidISODateString(
   return false;
 }
 
+/**
+ * Naively deserializes a date from a string.
+ * If not possible, it returns the original input.
+ *
+ * @param input The input to deserialize.
+ * @returns The deserialized input.
+ */
+function deserialize<T>(input: T): T | Date {
+  if (input instanceof Date || typeof input !== "string" || input === "") {
+    return input;
+  }
+
+  try {
+    const date = new Date(input as string);
+
+    if (isNaN(date.getTime())) {
+      return input;
+    }
+
+    return date;
+  } catch (error) {
+    return input;
+  }
+}
+
 export {
   isValidISODateString,
   toString,
@@ -413,4 +438,5 @@ export {
   toDateTimeModel,
   isEarlierThan,
   isLaterThan,
+  deserialize,
 };

@@ -82,7 +82,7 @@ export default function HomeNavigation({
 
   const { user } = useHomeStore();
 
-  const activeTab = location.pathname.includes("/home/audit-log")
+  const activeTab = location.pathname.includes("/home/activity-logs")
     ? "activity-logs"
     : location.pathname.includes("/home/settings") ||
         location.pathname.includes("/home/billing/details")
@@ -125,9 +125,7 @@ export default function HomeNavigation({
             icon="clipboard-text"
             label="Activity Logs"
             isActive={activeTab === "activity-logs"}
-            onClick={() =>
-              navigate({ to: "/home/audit-log", search: { tab: "app-runs" } })
-            }
+            onClick={() => navigate({ to: "/home/activity-logs" })}
           />
           <NavigationItem
             icon="settings"
@@ -223,8 +221,7 @@ export default function HomeNavigation({
               isActive={activeTab === "activity-logs"}
               onClick={() => {
                 navigate({
-                  to: "/home/audit-log",
-                  search: { tab: "app-runs" },
+                  to: "/home/activity-logs",
                 });
                 setIsSidebarOpen(false);
               }}
@@ -273,7 +270,9 @@ export default function HomeNavigation({
           />
         </div>
       </Navigation.MobileTopBar>
-      <Navigation.Content>{children}</Navigation.Content>
+      <Navigation.Content stableScrollbarGutter={activeTab === "activity-logs"}>
+        {children}
+      </Navigation.Content>
     </Navigation.Root>
   );
 }

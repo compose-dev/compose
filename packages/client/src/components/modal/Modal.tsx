@@ -136,7 +136,7 @@ function ModalBody({
   return (
     <div
       className={classNames(
-        "flex flex-col space-y-4 text-brand-neutral pt-2 modal-body",
+        "flex flex-col gap-y-4 text-brand-neutral pt-2 modal-body",
         className || ""
       )}
     >

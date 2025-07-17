@@ -9,6 +9,7 @@ function Checkbox({
   disabled = false,
   hasError = false,
   errorMessage,
+  descriptionAlignment = "left",
 }: {
   checked: boolean;
   setChecked: (checked: boolean) => void;
@@ -17,7 +18,10 @@ function Checkbox({
   disabled?: boolean;
   hasError?: boolean;
   errorMessage?: string | null;
+  descriptionAlignment?: "left" | "below";
 }) {
+  const useBelowAlignment = description && descriptionAlignment === "below";
+
   return (
     <div className="flex flex-col">
       <div className="flex items-start gap-2">
@@ -29,9 +33,17 @@ function Checkbox({
             hasError={hasError}
           />
         </div>
-        {label && <p>{label}</p>}
+        {useBelowAlignment && label && (
+          <div className="flex flex-col gap-1">
+            <p>{label}</p>
+            <IOComponent.Description className="mb-0">
+              {description}
+            </IOComponent.Description>
+          </div>
+        )}
+        {!useBelowAlignment && label && <p>{label}</p>}
       </div>
-      {description && (
+      {description && !useBelowAlignment && (
         <div className="mt-1">
           <IOComponent.Description className="mb-0">
             {description}

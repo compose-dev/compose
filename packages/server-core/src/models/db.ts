@@ -7,3 +7,5 @@ export * as externalAppUser from "./externalAppUser";
 export * as emailCode from "./emailCode";
 export * as errorLog from "./errorLog";
 export * as log from "./log";
+export * as report from "./report";
+export * as reportUser from "./reportUser";
