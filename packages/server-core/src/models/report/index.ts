@@ -84,6 +84,26 @@ async function selectByCompanyId(pg: Postgres, companyId: string) {
   return result.rows;
 }
 
+async function selectFilteredByReportUser(
+  pg: Postgres,
+  companyId: string,
+  userId: string
+) {
+  const result = await pg.query<m.Report.DB>(
+    `SELECT * FROM "report" 
+     WHERE "companyId" = $1 
+     AND "id" IN (
+       SELECT "reportId" 
+       FROM "reportUser" 
+       WHERE "userId" = $2
+       AND "permission"->>'canView' = 'true'
+     )`,
+    [companyId, userId]
+  );
+
+  return result.rows;
+}
+
 async function deleteById(
   pg: Postgres,
   reportId: m.Report.DB["id"],
@@ -97,4 +117,11 @@ async function deleteById(
   return result.rows;
 }
 
-export { insert, selectById, selectByCompanyId, deleteById, update };
+export {
+  insert,
+  selectById,
+  selectByCompanyId,
+  deleteById,
+  update,
+  selectFilteredByReportUser,
+};

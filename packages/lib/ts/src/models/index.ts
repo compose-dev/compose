@@ -8,4 +8,4 @@ export * as EmailCode from "./emailCode";
 export * as ErrorLog from "./errorLog";
 export * as Log from "./log";
 export * as Report from "./report";
-export * as UserReport from "./userReport";
+export * as ReportUser from "./reportUser";

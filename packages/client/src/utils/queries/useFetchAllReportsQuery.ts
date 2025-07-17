@@ -1,4 +1,9 @@
-import { BrowserToServerEvent, log as logFunction, request } from "@compose/ts";
+import {
+  BrowserToServerEvent,
+  log as logFunction,
+  request,
+  u,
+} from "@compose/ts";
 import { useQuery } from "@tanstack/react-query";
 import { getNodeEnvironment } from "~/utils/nodeEnvironment";
 
@@ -22,7 +27,14 @@ export function useFetchAllReportsQuery() {
         throw new Error(response.data.message);
       }
 
-      return response.data;
+      return {
+        ...response.data,
+        reports: response.data.reports.map((report) => ({
+          ...report,
+          createdAt: u.date.deserialize(report.createdAt),
+          updatedAt: u.date.deserialize(report.updatedAt),
+        })),
+      };
     },
     retry: false, // never auto-retry
     initialData: {

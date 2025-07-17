@@ -23,6 +23,14 @@ const PERMISSION_TO_LABEL = {
   [PERMISSION.GUEST]: "Guest",
 } as const;
 
+const PERMISSION_ORDER_DESCENDING = [
+  PERMISSION.OWNER,
+  PERMISSION.ADMIN,
+  PERMISSION.APP_MANAGER,
+  PERMISSION.MEMBER,
+  PERMISSION.GUEST,
+] as const;
+
 const PERMISSION_TO_SUMMARY = {
   [PERMISSION.OWNER]:
     "Full control over your team's account, including billing.",
@@ -76,6 +84,7 @@ export {
   type Permission,
   PERMISSION_TO_LABEL,
   PERMISSION_TO_SUMMARY,
+  PERMISSION_ORDER_DESCENDING,
   DEFAULT_USER_METADATA as DEFAULT_METADATA,
   type UserMetadata as Metadata,
 };

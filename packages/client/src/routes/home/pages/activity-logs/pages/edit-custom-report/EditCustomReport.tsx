@@ -30,15 +30,14 @@ function EditCustomReport() {
     error: distinctLogMessagesError,
   } = useDistinctLogMessagesQuery();
 
+  const report = useReportData();
+  const { setReportData } = report;
+
   const {
     data: existingReport,
     status: existingReportStatus,
     error: existingReportError,
   } = useFetchReportQuery(reportId);
-
-  const report = useReportData(
-    existingReport ? existingReport.report.data : undefined
-  );
 
   const [showEditReportNameModal, setShowEditReportNameModal] = useState(false);
   const [showEditReportDescriptionModal, setShowEditReportDescriptionModal] =
@@ -56,8 +55,9 @@ function EditCustomReport() {
     if (existingReport) {
       setReportName(existingReport.report.title);
       setReportDescription(existingReport.report.description);
+      setReportData(existingReport.report.data);
     }
-  }, [existingReport]);
+  }, [existingReport, setReportData]);
 
   if (
     distinctLogMessagesStatus === "pending" ||
@@ -101,6 +101,7 @@ function EditCustomReport() {
     <>
       <CustomReport
         report={report}
+        reportId={reportId}
         header={
           <div className="flex flex-col gap-3 w-full">
             <div className="w-full flex flex-row items-center justify-between">

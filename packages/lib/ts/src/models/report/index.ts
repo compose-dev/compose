@@ -8,19 +8,12 @@ import {
   TrackedEventModel,
   getTrackedEventRules,
 } from "./trackedEvents";
-
-const TIMEFRAMES = {
-  LAST_24_HOURS: "LAST_24_HOURS",
-  LAST_7_DAYS: "LAST_7_DAYS",
-  LAST_30_DAYS: "LAST_30_DAYS",
-  LAST_WEEK: "LAST_WEEK",
-  TWO_WEEKS_AGO: "TWO_WEEKS_AGO",
-  LAST_MONTH: "LAST_MONTH",
-  TWO_MONTHS_AGO: "TWO_MONTHS_AGO",
-  CUSTOM: "CUSTOM",
-} as const;
-
-type Timeframe = (typeof TIMEFRAMES)[keyof typeof TIMEFRAMES];
+import {
+  TIMEFRAMES,
+  Timeframe,
+  TIMEFRAME_TO_START_DATE,
+  TIMEFRAME_TO_END_DATE,
+} from "./timeFrame";
 
 interface SelectedApp {
   route: string;
@@ -105,6 +98,7 @@ interface ReportData {
 interface ReportDB {
   id: string;
   createdAt: Date;
+  updatedAt: Date;
   companyId: string;
   createdByUserId: string;
   updatedByUserId: string;
@@ -116,6 +110,8 @@ interface ReportDB {
 export {
   ReportDB as DB,
   TIMEFRAMES,
+  TIMEFRAME_TO_START_DATE,
+  TIMEFRAME_TO_END_DATE,
   TRACKED_EVENT_OPERATORS,
   TRACKED_EVENT_LOGIC_OPERATORS,
   Timeframe,

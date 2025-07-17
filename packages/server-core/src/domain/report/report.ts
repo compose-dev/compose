@@ -154,6 +154,31 @@ function validateReportData(data: m.Report.DB["data"]) {
   return true;
 }
 
+function getReportAnalyticsProperties(report: m.Report.DB) {
+  const dateRangeStart = u.date.deserialize(report.data.dateRange.start);
+  const dateRangeEnd = u.date.deserialize(report.data.dateRange.end);
+
+  return {
+    reportTitle: report.title,
+    reportDescription: report.description,
+    reportId: report.id,
+    reportTimeframe: report.data.timeFrame,
+    reportDateRangeStart: dateRangeStart
+      ? u.date.toString(dateRangeStart, u.date.SerializedFormat["L/d/yyyy"])
+      : null,
+    reportDateRangeEnd: dateRangeEnd
+      ? u.date.toString(dateRangeEnd, u.date.SerializedFormat["L/d/yyyy"])
+      : null,
+    reportTrackedEvents: m.Report.getTrackedEventRules(
+      report.data.trackedEventModel
+    ).map((rule) => rule.event),
+    reportIncludeProductionLogs: report.data.includeProductionLogs,
+    reportIncludeDevelopmentLogs: report.data.includeDevelopmentLogs,
+    reportSelectedUserEmails: report.data.selectedUserEmails,
+    reportIncludeAnonymousUsers: report.data.includeAnonymousUsers,
+  };
+}
+
 /**
  * Captures a reporting event in 3rd party analytics.
  *
@@ -170,19 +195,152 @@ function captureReportEventInAnalytics(
   analyticsEvent: AnalyticsEvent,
   report: m.Report.DB
 ) {
-  server.analytics.capture(analyticsEvent, dbUser.id, dbUser.companyId, {
-    reportTitle: report.title,
-    reportDescription: report.description || "",
-    reportId: report.id,
-    reportTimeframe: report.data.timeFrame,
-    reportTrackedEvents: m.Report.getTrackedEventRules(
-      report.data.trackedEventModel
-    ).map((rule) => rule.event),
-    reportIncludeProductionLogs: report.data.includeProductionLogs,
-    reportIncludeDevelopmentLogs: report.data.includeDevelopmentLogs,
-    reportSelectedUserEmails: report.data.selectedUserEmails,
-    reportIncludeAnonymousUsers: report.data.includeAnonymousUsers,
-  });
+  server.analytics.capture(
+    analyticsEvent,
+    dbUser.id,
+    dbUser.companyId,
+    getReportAnalyticsProperties(report)
+  );
+}
+
+function captureReportShareEventInAnalytics(
+  server: FastifyInstance,
+  sharedByDbUser: m.User.DB,
+  sharedWithDbUser: m.User.DB,
+  analyticsEvent: AnalyticsEvent,
+  report: m.Report.DB
+) {
+  server.analytics.capture(
+    analyticsEvent,
+    sharedByDbUser.id,
+    sharedByDbUser.companyId,
+    {
+      ...getReportAnalyticsProperties(report),
+      actingUserId: sharedByDbUser.id,
+      actingUserEmail: sharedByDbUser.email,
+      actedUponUserId: sharedWithDbUser.id,
+      actedUponUserEmail: sharedWithDbUser.email,
+    }
+  );
+}
+
+/**
+ * Validates that a request for logs is valid against a report's configuration.
+ *
+ * Throws an error if the request configuration is not allowed by the report
+ * configuration.
+ */
+function validateLogsRequestAgainstReportConfiguration(
+  report: m.Report.DB,
+  timeFrame: m.Report.Timeframe,
+  dateRange: m.Report.DB["data"]["dateRange"],
+  includeProductionLogs: boolean,
+  includeDevelopmentLogs: boolean,
+  selectedApps: m.Report.DB["data"]["selectedApps"],
+  trackedEventModel: m.Report.DB["data"]["trackedEventModel"],
+  selectedUserEmails: m.Report.DB["data"]["selectedUserEmails"],
+  includeAnonymousUsers: boolean
+) {
+  if (!report.data.timeFrameIsEditable) {
+    if (timeFrame !== report.data.timeFrame) {
+      throw new Error("Requested timeframe does not match report timeframe.");
+    }
+
+    if (timeFrame === m.Report.TIMEFRAMES.CUSTOM) {
+      if (
+        dateRange.start !== report.data.dateRange.start ||
+        dateRange.end !== report.data.dateRange.end
+      ) {
+        throw new Error(
+          "Requested date range does not match report date range."
+        );
+      }
+    }
+  }
+
+  if (!report.data.includeProductionLogsIsEditable) {
+    if (includeProductionLogs !== report.data.includeProductionLogs) {
+      throw new Error(
+        "Request to include production logs does not match report configuration."
+      );
+    }
+  }
+
+  if (!report.data.includeDevelopmentLogsIsEditable) {
+    if (includeDevelopmentLogs !== report.data.includeDevelopmentLogs) {
+      throw new Error(
+        "Request to include development logs does not match report configuration."
+      );
+    }
+  }
+
+  if (!report.data.selectedAppsIsEditable) {
+    if (selectedApps.length !== report.data.selectedApps.length) {
+      throw new Error(
+        "Request to filter logs by apps does not match report configuration."
+      );
+    }
+
+    for (const app of selectedApps) {
+      if (
+        !report.data.selectedApps.some(
+          (a) => a.route === app.route && a.environmentId === app.environmentId
+        )
+      ) {
+        throw new Error(
+          "Request to filter logs by apps does not match report configuration."
+        );
+      }
+    }
+  }
+
+  if (!report.data.selectedUserEmailsIsEditable) {
+    if (selectedUserEmails.length !== report.data.selectedUserEmails.length) {
+      throw new Error(
+        "Request to filter logs by user emails does not match report configuration."
+      );
+    }
+
+    for (let i = 0; i < selectedUserEmails.length; i++) {
+      if (selectedUserEmails[i] !== report.data.selectedUserEmails[i]) {
+        throw new Error(
+          "Request to filter logs by user emails does not match report configuration."
+        );
+      }
+    }
+
+    if (includeAnonymousUsers !== report.data.includeAnonymousUsers) {
+      throw new Error(
+        "Request to include anonymous users does not match report configuration."
+      );
+    }
+  }
+
+  const reportTrackedEvents = m.Report.getTrackedEventRules(
+    report.data.trackedEventModel
+  );
+  const requestedTrackedEvents =
+    m.Report.getTrackedEventRules(trackedEventModel);
+
+  if (reportTrackedEvents.length !== requestedTrackedEvents.length) {
+    throw new Error(
+      "Request to filter logs by tracked events does not match report configuration."
+    );
+  }
+
+  for (let i = 0; i < reportTrackedEvents.length; i++) {
+    if (
+      reportTrackedEvents[i].event !== requestedTrackedEvents[i].event ||
+      reportTrackedEvents[i].type !== requestedTrackedEvents[i].type ||
+      reportTrackedEvents[i].operator !== requestedTrackedEvents[i].operator
+    ) {
+      throw new Error(
+        "Request to filter logs by tracked events does not match report configuration."
+      );
+    }
+  }
+
+  return true;
 }
 
 export {
@@ -190,4 +348,6 @@ export {
   validateTrackedEventModel,
   validateSimplifiedTrackedEventModel,
   captureReportEventInAnalytics,
+  captureReportShareEventInAnalytics,
+  validateLogsRequestAgainstReportConfiguration,
 };

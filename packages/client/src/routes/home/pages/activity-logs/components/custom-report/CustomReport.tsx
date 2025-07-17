@@ -18,8 +18,9 @@ type GroupBy = "app" | "message";
 
 function CustomReport({
   // state
-  initialGroupBy = "message",
   report,
+  reportId,
+  initialGroupBy = "message",
   viewOnly = false,
 
   // Labels for various report elements
@@ -34,6 +35,7 @@ function CustomReport({
 }: {
   // state
   report: ReturnType<typeof useReportData>;
+  reportId: string | undefined;
   initialGroupBy?: GroupBy;
   viewOnly?: boolean;
 
@@ -65,12 +67,13 @@ function CustomReport({
     fetchStatus: logEventsFetchStatus,
     error: logEventsError,
   } = useCustomLogEventsQuery(
-    report.datetimeStart,
-    report.datetimeEnd,
+    report.reportData.timeFrame,
+    report.reportData.dateRange,
     report.reportData.includeDevelopmentLogs,
     report.reportData.includeProductionLogs,
     report.reportData.selectedApps,
-    report.reportData.trackedEventModel
+    report.reportData.trackedEventModel,
+    reportId
   );
 
   const environmentsById = useMemo(() => {

@@ -1,6 +1,5 @@
 import { m } from "@compose/ts";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { TIMEFRAME_TO_END_DATE, TIMEFRAME_TO_START_DATE } from "./timeFrame";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 export function useReportData(
   initialReportData?: Partial<m.Report.DB["data"]>
@@ -41,13 +40,6 @@ export function useReportData(
     ...initialReportData,
   });
 
-  useEffect(() => {
-    setReportData((prev) => ({
-      ...prev,
-      ...initialReportData,
-    }));
-  }, [initialReportData]);
-
   const datetimeStart = useMemo(() => {
     if (reportData.timeFrame === m.Report.TIMEFRAMES.CUSTOM) {
       if (!reportData.dateRange.start) {
@@ -59,7 +51,7 @@ export function useReportData(
       return reportData.dateRange.start;
     }
 
-    return TIMEFRAME_TO_START_DATE[reportData.timeFrame](now.current);
+    return m.Report.TIMEFRAME_TO_START_DATE[reportData.timeFrame](now.current);
   }, [reportData.timeFrame, now, reportData.dateRange.start]);
 
   const datetimeEnd = useMemo(() => {
@@ -73,7 +65,7 @@ export function useReportData(
       return reportData.dateRange.end;
     }
 
-    return TIMEFRAME_TO_END_DATE[reportData.timeFrame](now.current);
+    return m.Report.TIMEFRAME_TO_END_DATE[reportData.timeFrame](now.current);
   }, [reportData.timeFrame, now, reportData.dateRange.end]);
 
   function updateTimeFrame(

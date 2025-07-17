@@ -1,16 +1,14 @@
 import { Log, Report } from "../../../models";
 
 export type RequestBody = {
-  datetimeStart: Date;
-  datetimeEnd: Date;
+  timeFrame: Report.Timeframe;
+  dateRange: Report.DB["data"]["dateRange"];
   includeDevelopmentLogs: boolean;
   includeProductionLogs: boolean;
   // Filter by apps. If empty, all apps are included.
-  apps: {
-    route: string;
-    environmentId: string;
-  }[];
+  apps: Report.DB["data"]["selectedApps"];
   trackedEventModel: Report.DB["data"]["trackedEventModel"];
+  reportId: string | undefined;
 };
 
 export interface SuccessResponseBody {

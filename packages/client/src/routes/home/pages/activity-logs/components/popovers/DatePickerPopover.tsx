@@ -37,15 +37,11 @@ function PopoverTrigger({
       >
         <Icon name="calendar" color="brand-neutral" />
         <p className="text-brand-neutral">
-          {selectedTimeframe === m.Report.TIMEFRAMES.CUSTOM ? (
-            <p className="flex-shrink-0">
-              {getPrettifiedDateRange(datetimeStart, datetimeEnd)}
-            </p>
-          ) : (
-            TIMEFRAME_OPTIONS.find(
-              (option) => option.value === selectedTimeframe
-            )?.label
-          )}
+          {selectedTimeframe === m.Report.TIMEFRAMES.CUSTOM
+            ? getPrettifiedDateRange(datetimeStart, datetimeEnd)
+            : TIMEFRAME_OPTIONS.find(
+                (option) => option.value === selectedTimeframe
+              )?.label}
         </p>
         {!viewOnly && (
           <Icon name="chevron-down" color="brand-neutral" size="0.75" />

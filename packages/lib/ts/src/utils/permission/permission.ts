@@ -31,6 +31,13 @@ const FEATURE = {
   DELETE_REPORT: "delete-report",
   VIEW_REPORT: "view-report",
   VIEW_LIST_OF_REPORTS: "view-list-of-reports",
+  VIEW_REPORT_SHARED_WITH: "view-report-shared-with",
+  SHARE_REPORT_WITH_USER: "share-report-with-user",
+  SHARE_REPORT_WITH_EXTERNAL_USER: "share-report-with-external-user",
+  SHARE_REPORT_PUBLICLY: "share-report-publicly",
+  UNSHARE_REPORT_WITH_USER: "unshare-report-with-user",
+  UNSHARE_REPORT_WITH_EXTERNAL_USER: "unshare-report-with-external-user",
+  UNSHARE_REPORT_PUBLICLY: "unshare-report-publicly",
 
   /********************
    * APP MANAGER+ ONLY
@@ -117,7 +124,14 @@ function isAllowed(
     feature === FEATURE.UPDATE_REPORT ||
     feature === FEATURE.DELETE_REPORT ||
     feature === FEATURE.VIEW_REPORT ||
-    feature === FEATURE.VIEW_LIST_OF_REPORTS
+    feature === FEATURE.VIEW_LIST_OF_REPORTS ||
+    feature === FEATURE.SHARE_REPORT_WITH_USER ||
+    feature === FEATURE.SHARE_REPORT_WITH_EXTERNAL_USER ||
+    feature === FEATURE.SHARE_REPORT_PUBLICLY ||
+    feature === FEATURE.UNSHARE_REPORT_WITH_USER ||
+    feature === FEATURE.UNSHARE_REPORT_WITH_EXTERNAL_USER ||
+    feature === FEATURE.UNSHARE_REPORT_PUBLICLY ||
+    feature === FEATURE.VIEW_REPORT_SHARED_WITH
   ) {
     return isAdminOrAbove(permission);
   }

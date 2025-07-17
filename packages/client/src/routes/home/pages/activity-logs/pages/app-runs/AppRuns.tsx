@@ -32,6 +32,7 @@ function AppRuns() {
         }
         // state
         report={report}
+        reportId={undefined}
         // labels
         initialGroupBy="app"
         totalOccurrencesStatLabel="Total App Runs"

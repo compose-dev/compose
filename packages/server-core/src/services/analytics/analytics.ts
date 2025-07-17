@@ -17,7 +17,7 @@ abstract class AnalyticsService {
     companyId: string,
     properties: Record<
       string,
-      string | number | boolean | Array<string | number | boolean>
+      string | number | boolean | null | Array<string | number | boolean | null>
     >
   ): void;
 
@@ -47,7 +47,7 @@ class AnalyticsServiceStub extends AnalyticsService {
     _companyId: string,
     _properties: Record<
       string,
-      string | number | boolean | Array<string | number | boolean>
+      string | number | boolean | null | Array<string | number | boolean | null>
     >
   ) {
     return;
