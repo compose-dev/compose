@@ -1,14 +1,6 @@
-import {
-  BrowserToServerEvent,
-  log as logFunction,
-  m,
-  request,
-} from "@compose/ts";
+import { BrowserToServerEvent, m, request } from "@compose/ts";
 import { useQuery } from "@tanstack/react-query";
-import { getNodeEnvironment } from "../nodeEnvironment";
-
-const isDev = getNodeEnvironment() === "development";
-const log = isDev ? logFunction : null;
+import { logIfDevelopment } from "../nodeEnvironment";
 
 export function useCustomLogEventsQuery(
   timeFrame: m.Report.Timeframe,
@@ -46,7 +38,7 @@ export function useCustomLogEventsQuery(
           trackedEventModel,
           reportId,
         },
-        forwardLog: log,
+        forwardLog: logIfDevelopment,
       });
 
       if (response.didError) {

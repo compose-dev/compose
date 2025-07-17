@@ -1,9 +1,6 @@
-import { BrowserToServerEvent, log as logFunction, request } from "@compose/ts";
+import { BrowserToServerEvent, request } from "@compose/ts";
 import { useQuery } from "@tanstack/react-query";
-import { getNodeEnvironment } from "../nodeEnvironment";
-
-const isDev = getNodeEnvironment() === "development";
-const log = isDev ? logFunction : null;
+import { logIfDevelopment } from "../nodeEnvironment";
 
 export function useDistinctLogMessagesQuery() {
   const query = useQuery({
@@ -16,7 +13,7 @@ export function useDistinctLogMessagesQuery() {
         route: `/${BrowserToServerEvent.GetDistinctLogMessages.route}`,
         method: BrowserToServerEvent.GetDistinctLogMessages.method,
         body: {},
-        forwardLog: log,
+        forwardLog: logIfDevelopment,
       });
 
       if (response.didError) {

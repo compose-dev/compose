@@ -1,9 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
-import { BrowserToServerEvent, log as logFunction, request } from "@compose/ts";
-import { getNodeEnvironment } from "../nodeEnvironment";
-
-const isDev = getNodeEnvironment() === "development";
-const log = isDev ? logFunction : null;
+import { BrowserToServerEvent, request } from "@compose/ts";
+import { logIfDevelopment } from "../nodeEnvironment";
 
 function useDeleteReportMutation({
   onSuccess,
@@ -26,7 +23,7 @@ function useDeleteReportMutation({
         params: {
           reportId,
         },
-        forwardLog: log,
+        forwardLog: logIfDevelopment,
       });
 
       if (response.didError) {

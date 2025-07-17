@@ -1,9 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
-import { BrowserToServerEvent, log as logFunction, request } from "@compose/ts";
-import { getNodeEnvironment } from "../nodeEnvironment";
-
-const isDev = getNodeEnvironment() === "development";
-const log = isDev ? logFunction : null;
+import { BrowserToServerEvent, request } from "@compose/ts";
+import { logIfDevelopment } from "../nodeEnvironment";
 
 function useCreateReportMutation({
   onSuccess,
@@ -21,7 +18,7 @@ function useCreateReportMutation({
         route: `/${BrowserToServerEvent.CreateReport.route}`,
         method: BrowserToServerEvent.CreateReport.method,
         body,
-        forwardLog: log,
+        forwardLog: logIfDevelopment,
       });
 
       if (response.didError) {

@@ -1,9 +1,5 @@
-import { request, log as logFunction, BrowserToServerEvent } from "@compose/ts";
-import { getNodeEnvironment } from "~/utils/nodeEnvironment";
-
-const isDev = getNodeEnvironment() === "development";
-
-const log = isDev ? logFunction : null;
+import { request, BrowserToServerEvent } from "@compose/ts";
+import { logIfDevelopment } from "~/utils/nodeEnvironment";
 
 async function initialize() {
   const body: BrowserToServerEvent.Initialize.RequestBody = null;
@@ -13,7 +9,7 @@ async function initialize() {
     BrowserToServerEvent.Initialize.ErrorResponseBody
   >({
     route: `/${BrowserToServerEvent.Initialize.route}`,
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
     body,
   });
 }
@@ -26,7 +22,7 @@ async function getSettings() {
     BrowserToServerEvent.GetSettings.ErrorData
   >({
     route: `/${BrowserToServerEvent.GetSettings.route}`,
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
     body,
   });
 
@@ -71,7 +67,7 @@ async function initializeEnvironmentAndAuthorizeApp(
     BrowserToServerEvent.InitializeEnvironmentAndAuthorizeApp.ErrorResponseBody
   >({
     route: `/${BrowserToServerEvent.InitializeEnvironmentAndAuthorizeApp.route}`,
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
     body,
     method: BrowserToServerEvent.InitializeEnvironmentAndAuthorizeApp.method,
   });
@@ -89,7 +85,7 @@ async function googleOAuth2Callback(
   >({
     route: `/${BrowserToServerEvent.GoogleOauthCallback.route}`,
     method: "POST",
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
     headers: {
       "x-compose-goog-oauth2-access-token": accessToken,
     },
@@ -111,7 +107,7 @@ async function completeSignUp(
   >({
     route: `/${BrowserToServerEvent.CompleteSignUp.route}`,
     method: "POST",
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
     headers: {
       "x-compose-goog-oauth2-access-token": accessToken,
     },
@@ -129,7 +125,7 @@ async function completeSignUpToOrg(
   >({
     route: `/${BrowserToServerEvent.CompleteSignUpToOrg.route}`,
     method: "POST",
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
     headers: {
       "x-compose-goog-oauth2-access-token": accessToken,
     },
@@ -141,7 +137,7 @@ async function checkAuth() {
   return await request<null, { message: string }>({
     route: `/${BrowserToServerEvent.CheckAuth.route}`,
     method: "GET",
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
   });
 }
 
@@ -149,7 +145,7 @@ async function logout() {
   return await request<null, { message: string }>({
     route: `/${BrowserToServerEvent.Logout.route}`,
     method: "GET",
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
   });
 }
 
@@ -162,7 +158,7 @@ async function insertExternalAppUser(
   >({
     route: `/${BrowserToServerEvent.InsertExternalAppUser.route}`,
     method: BrowserToServerEvent.InsertExternalAppUser.method,
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
     body,
   });
 }
@@ -176,7 +172,7 @@ async function getExternalAppUsers(
   >({
     route: `/${BrowserToServerEvent.GetExternalAppUsers.route}`,
     method: BrowserToServerEvent.GetExternalAppUsers.method,
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
     body,
   });
 }
@@ -188,7 +184,7 @@ async function deleteExternalAppUser(id: string) {
   >({
     route: `/${BrowserToServerEvent.DeleteExternalAppUser.route}`,
     method: BrowserToServerEvent.DeleteExternalAppUser.method,
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
     params: {
       id,
     },
@@ -203,7 +199,7 @@ async function deleteUser(userId: string) {
   >({
     route: `/${BrowserToServerEvent.DeleteUser.route}`,
     method: BrowserToServerEvent.DeleteUser.method,
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
     params: {
       userId,
     },
@@ -221,7 +217,7 @@ async function changeUserPermission(
   >({
     route: `/${BrowserToServerEvent.ChangeUserPermission.route}`,
     method: BrowserToServerEvent.ChangeUserPermission.method,
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
     params: {
       userId,
     },
@@ -236,7 +232,7 @@ async function getUserDevEnvironment() {
   >({
     route: `/${BrowserToServerEvent.GetDevEnvironment.route}`,
     method: BrowserToServerEvent.GetDevEnvironment.method,
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
   });
 }
 
@@ -247,7 +243,7 @@ async function loginToApp(body: BrowserToServerEvent.LoginToApp.RequestBody) {
   >({
     route: `/${BrowserToServerEvent.LoginToApp.route}`,
     method: "POST",
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
     body,
   });
 }
@@ -261,7 +257,7 @@ async function getInviteCode(id: string) {
   >({
     route: `/${BrowserToServerEvent.GetInviteCode.route}`,
     method: BrowserToServerEvent.GetInviteCode.method,
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
     params: {
       id,
     },
@@ -291,7 +287,7 @@ async function generateInviteCode(
   >({
     route: `/${BrowserToServerEvent.GenerateInviteCode.route}`,
     method: BrowserToServerEvent.GenerateInviteCode.method,
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
     body,
   });
 
@@ -318,7 +314,7 @@ async function deleteInviteCode(id: string) {
   >({
     route: `/${BrowserToServerEvent.DeleteInviteCode.route}`,
     method: BrowserToServerEvent.DeleteInviteCode.method,
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
     params: {
       id,
     },
@@ -335,7 +331,7 @@ async function createCheckoutSession(
   >({
     route: `/${BrowserToServerEvent.CreateCheckoutSession.route}`,
     method: BrowserToServerEvent.CreateCheckoutSession.method,
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
     body,
   });
 
@@ -349,7 +345,7 @@ async function getBillingData() {
   >({
     route: `/${BrowserToServerEvent.BillingDetails.route}`,
     method: BrowserToServerEvent.BillingDetails.method,
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
     body: null,
   });
 }
@@ -358,7 +354,7 @@ async function logEvent(body: BrowserToServerEvent.Log.RequestBody) {
   return await request<BrowserToServerEvent.Log.Response, { message: string }>({
     route: `/${BrowserToServerEvent.Log.route}`,
     method: BrowserToServerEvent.Log.method,
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
     body,
   });
 }
@@ -370,7 +366,7 @@ async function oauthLogin(body: BrowserToServerEvent.OauthLogin.RequestBody) {
   >({
     route: `/${BrowserToServerEvent.OauthLogin.route}`,
     method: BrowserToServerEvent.OauthLogin.method,
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
     body,
   });
 }
@@ -382,7 +378,7 @@ async function logError(body: BrowserToServerEvent.LogError.RequestBody) {
   >({
     route: `/${BrowserToServerEvent.LogError.route}`,
     method: BrowserToServerEvent.LogError.method,
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
     body,
   });
 }
@@ -396,7 +392,7 @@ async function updateUserMetadata(
   >({
     route: `/${BrowserToServerEvent.UpdateUserMetadata.route}`,
     method: BrowserToServerEvent.UpdateUserMetadata.method,
-    forwardLog: log,
+    forwardLog: logIfDevelopment,
     body,
   });
 }

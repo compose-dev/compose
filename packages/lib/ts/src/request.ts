@@ -63,12 +63,6 @@ async function request<SuccessBody, ErrorBody>(
   }
 
   const start = Date.now();
-  if (options.forwardLog !== null) {
-    options.forwardLog(`Started request to: ${hydratedRoute}`, {
-      body: options.body,
-      timestamp: start,
-    });
-  }
 
   const body =
     options.body === null || options.body instanceof FormData
@@ -121,13 +115,17 @@ async function request<SuccessBody, ErrorBody>(
       logData = "OMITTED BLOB RESPONSE";
     }
 
-    options.forwardLog(`Finished request to: ${hydratedRoute}`, {
-      timestamp: end,
-      duration: `${end - start}ms`,
-      data: logData,
-      statusCode: fnResponse.statusCode,
-      didError: fnResponse.didError,
-    });
+    options.forwardLog(
+      `Finished request to: ${hydratedRoute} in ${end - start}ms`,
+      {
+        timestamp: end,
+        durationMs: end - start,
+        data: logData,
+        statusCode: fnResponse.statusCode,
+        didError: fnResponse.didError,
+        requestBody: options.body,
+      }
+    );
   }
 
   return fnResponse;
