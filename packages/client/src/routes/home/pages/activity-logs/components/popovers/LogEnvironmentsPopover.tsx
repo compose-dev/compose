@@ -1,45 +1,6 @@
-import Icon from "~/components/icon";
 import { Popover } from "~/components/popover";
 import { Checkbox } from "~/components/checkbox";
-import { classNames } from "~/utils/classNames";
-
-function PopoverTrigger({
-  includeDevLogs,
-  includeProdLogs,
-  viewOnly = false,
-}: {
-  includeDevLogs: boolean;
-  includeProdLogs: boolean;
-  viewOnly: boolean;
-}) {
-  const label =
-    includeDevLogs && includeProdLogs
-      ? "Development and Production Logs"
-      : includeDevLogs
-        ? "Development Logs"
-        : includeProdLogs
-          ? "Production Logs"
-          : "No Logs";
-
-  return (
-    <Popover.Trigger>
-      <div
-        className={classNames(
-          "border border-brand-neutral rounded-brand p-2 py-1 flex flex-row gap-2 items-center shadow-sm hover:bg-brand-overlay transition-colors",
-          {
-            "bg-brand-overlay": !!viewOnly,
-          }
-        )}
-      >
-        <Icon name="server" color="brand-neutral" />
-        <p className="text-brand-neutral">{label}</p>
-        {!viewOnly && (
-          <Icon name="chevron-down" color="brand-neutral" size="0.75" />
-        )}
-      </div>
-    </Popover.Trigger>
-  );
-}
+import PopoverTrigger from "./PopoverTrigger";
 
 function LogEnvironmentsPopover({
   includeDevLogs,
@@ -58,11 +19,20 @@ function LogEnvironmentsPopover({
   devLogsViewOnly: boolean;
   prodLogsViewOnly: boolean;
 }) {
+  const popoverTriggerLabel =
+    includeDevLogs && includeProdLogs
+      ? "Development and Production Logs"
+      : includeDevLogs
+        ? "Development Logs"
+        : includeProdLogs
+          ? "Production Logs"
+          : "No Logs";
+
   return (
     <Popover.Root>
       <PopoverTrigger
-        includeDevLogs={includeDevLogs}
-        includeProdLogs={includeProdLogs}
+        label={popoverTriggerLabel}
+        icon="server"
         viewOnly={devLogsViewOnly && prodLogsViewOnly}
       />
       <Popover.Panel anchor="bottom start">

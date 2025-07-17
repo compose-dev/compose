@@ -1,13 +1,14 @@
 import { Log, Report } from "../../../models";
 
 export type RequestBody = {
-  timeFrame: Report.Timeframe;
+  timeFrame: Report.DB["data"]["timeFrame"];
   dateRange: Report.DB["data"]["dateRange"];
-  includeDevelopmentLogs: boolean;
-  includeProductionLogs: boolean;
-  // Filter by apps. If empty, all apps are included.
+  includeDevelopmentLogs: Report.DB["data"]["includeDevelopmentLogs"];
+  includeProductionLogs: Report.DB["data"]["includeProductionLogs"];
   apps: Report.DB["data"]["selectedApps"];
   trackedEventModel: Report.DB["data"]["trackedEventModel"];
+  selectedUserEmails: Report.DB["data"]["selectedUserEmails"];
+  includeAnonymousUsers: Report.DB["data"]["includeAnonymousUsers"];
   reportId: string | undefined;
 };
 

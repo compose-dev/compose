@@ -1,4 +1,3 @@
-import Icon from "~/components/icon";
 import { Popover } from "~/components/popover";
 import { useMemo } from "react";
 import { m } from "@compose/ts";
@@ -6,58 +5,7 @@ import EnvironmentTypeBadge from "~/routes/home/components/environment-type-badg
 import { useEnvironmentsQuery } from "~/utils/queries/useEnvironmentsQuery";
 import Button from "~/components/button";
 import { classNames } from "~/utils/classNames";
-
-function PopoverTrigger({
-  allApps,
-  selectedApps,
-  viewOnly = false,
-}: {
-  allApps: {
-    route: string;
-    name: string;
-    environmentId: string;
-    environmentName: string;
-  }[];
-  selectedApps: {
-    route: string;
-    environmentId: string;
-  }[];
-  viewOnly: boolean;
-}) {
-  const label = useMemo(() => {
-    if (selectedApps.length === allApps.length || selectedApps.length === 0) {
-      return "All Apps";
-    }
-    if (selectedApps.length === 1) {
-      const app = allApps.find(
-        (app) =>
-          app.route === selectedApps[0].route &&
-          app.environmentId === selectedApps[0].environmentId
-      );
-      return app ? app.name : "Unknown App";
-    }
-    return `${selectedApps.length} Apps`;
-  }, [allApps, selectedApps]);
-
-  return (
-    <Popover.Trigger>
-      <div
-        className={classNames(
-          "border border-brand-neutral rounded-brand p-2 py-1 flex flex-row gap-2 items-center shadow-sm hover:bg-brand-overlay transition-colors",
-          {
-            "bg-brand-overlay": !!viewOnly,
-          }
-        )}
-      >
-        <Icon name="bolt" color="brand-neutral" />
-        <p className="text-brand-neutral">{label}</p>
-        {!viewOnly && (
-          <Icon name="chevron-down" color="brand-neutral" size="0.75" />
-        )}
-      </div>
-    </Popover.Trigger>
-  );
-}
+import PopoverTrigger from "./PopoverTrigger";
 
 function AppChip({
   app,
@@ -178,11 +126,26 @@ function AppsPickerPopover({
       });
   }, [environments, includeDevLogs, includeProdLogs]);
 
+  const popoverTriggerLabel = useMemo(() => {
+    if (selectedApps.length === allApps.length || selectedApps.length === 0) {
+      return "All Apps";
+    }
+    if (selectedApps.length === 1) {
+      const app = allApps.find(
+        (app) =>
+          app.route === selectedApps[0].route &&
+          app.environmentId === selectedApps[0].environmentId
+      );
+      return app ? app.name : "Unknown App";
+    }
+    return `${selectedApps.length} Apps`;
+  }, [allApps, selectedApps]);
+
   return (
     <Popover.Root>
       <PopoverTrigger
-        allApps={allApps}
-        selectedApps={selectedApps}
+        label={popoverTriggerLabel}
+        icon="bolt"
         viewOnly={viewOnly}
       />
       <Popover.Panel anchor="bottom start">
@@ -191,17 +154,22 @@ function AppsPickerPopover({
             <div className="flex flex-row gap-2 items-center justify-between">
               <h5>Apps</h5>
               <Button
-                variant="subtle-secondary"
+                variant="bare-secondary"
+                size="sm"
                 onClick={() => setSelectedApps([])}
                 disabled={disabled || selectedApps.length === 0 || viewOnly}
               >
-                <p className="text-brand-neutral-2 text-sm/6">
-                  Reset to all apps
-                </p>
+                Reset to all apps
               </Button>
             </div>
             <p className="text-brand-neutral-2 text-sm/6">
               Filter logs based on the apps from which they originated.
+              Currently showing logs from{" "}
+              {selectedApps.length === 0
+                ? "all apps"
+                : selectedApps.length === 1
+                  ? "1 app"
+                  : `${selectedApps.length} apps`}
             </p>
           </div>
           <div className="flex flex-col gap-8">

@@ -178,11 +178,7 @@ function PinAndHideColumnsPanel({
     >
       <div className="flex flex-row items-center justify-between">
         <h5>Column settings</h5>
-        <Button
-          variant="ghost"
-          className="text-sm text-brand-neutral-2 hover:text-brand-neutral"
-          onClick={resetAllSettings}
-        >
+        <Button variant="bare-secondary" size="sm" onClick={resetAllSettings}>
           Reset to default
         </Button>
       </div>

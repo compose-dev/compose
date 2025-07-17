@@ -89,7 +89,7 @@ function SaveReportModal({
   }
 
   return (
-    <Modal.Root isOpen={isOpen} onClose={onClose} width="md">
+    <Modal.Root isOpen={isOpen} onClose={onClose} width="lg">
       <Modal.CloseableHeader onClose={onClose}>
         {reportId ? "Update Report" : "Save Report"}
       </Modal.CloseableHeader>
@@ -116,6 +116,31 @@ function SaveReportModal({
               descriptionAlignment="below"
             />
             <Checkbox
+              label="Allow viewers to change included users"
+              checked={reportData.selectedUserEmailsIsEditable}
+              setChecked={() =>
+                setReportData((prev) => ({
+                  ...prev,
+                  selectedUserEmailsIsEditable:
+                    !prev.selectedUserEmailsIsEditable,
+                }))
+              }
+              description="Viewers can change which users' activity is included in the report while viewing. Your saved default stays the same."
+              descriptionAlignment="below"
+            />
+            <Checkbox
+              label="Allow viewers to change included apps"
+              checked={reportData.selectedAppsIsEditable}
+              setChecked={(isChecked) =>
+                setReportData((prev) => ({
+                  ...prev,
+                  selectedAppsIsEditable: isChecked,
+                }))
+              }
+              description="Viewers can change which apps' activity is included in the report while viewing. Your saved default stays the same."
+              descriptionAlignment="below"
+            />
+            <Checkbox
               label="Allow viewers to change included environments"
               checked={
                 reportData.includeDevelopmentLogsIsEditable ||
@@ -128,19 +153,7 @@ function SaveReportModal({
                   includeProductionLogsIsEditable: isChecked,
                 }))
               }
-              description="Viewers can toggle whether production logs, development logs, or both are included. Your saved default stays the same."
-              descriptionAlignment="below"
-            />
-            <Checkbox
-              label="Allow viewers to change included apps"
-              checked={reportData.selectedAppsIsEditable}
-              setChecked={(isChecked) =>
-                setReportData((prev) => ({
-                  ...prev,
-                  selectedAppsIsEditable: isChecked,
-                }))
-              }
-              description="Viewers can change which apps are included in the report. Your saved default stays the same."
+              description="Viewers can toggle whether production logs, development logs, or both are included while viewing. Your saved default stays the same."
               descriptionAlignment="below"
             />
           </div>

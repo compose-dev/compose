@@ -172,8 +172,8 @@ async function auditLogRoutes(server: FastifyInstance) {
             req.body.includeDevelopmentLogs,
             req.body.apps,
             req.body.trackedEventModel,
-            [], // TODO: add selected user emails,
-            true // TODO: add include anonymous users,
+            req.body.selectedUserEmails,
+            req.body.includeAnonymousUsers
           );
         } catch (error) {
           return reply.status(400).send({
@@ -230,6 +230,8 @@ async function auditLogRoutes(server: FastifyInstance) {
         });
       }
 
+      const queryStart = performance.now();
+
       const logs = await db.log.selectGroupedLogCounts(
         server.pg,
         dbUser.companyId,
@@ -237,7 +239,27 @@ async function auditLogRoutes(server: FastifyInstance) {
         datetimeEnd,
         environmentTypes,
         req.body.apps,
-        trackedEvents
+        trackedEvents,
+        req.body.selectedUserEmails,
+        req.body.includeAnonymousUsers
+      );
+
+      const queryEnd = performance.now();
+
+      server.analytics.capture(
+        server.analytics.event.REPORT_GROUPED_LOGS_DATABASE_QUERY_OCCURRED,
+        dbUser.id,
+        dbUser.companyId,
+        {
+          queryTimeMs: queryEnd - queryStart,
+          datetimeStart: datetimeStart,
+          datetimeEnd: datetimeEnd,
+          environmentTypes: environmentTypes,
+          apps: req.body.apps,
+          trackedEvents: trackedEvents,
+          selectedUserEmails: req.body.selectedUserEmails,
+          includeAnonymousUsers: req.body.includeAnonymousUsers,
+        }
       );
 
       reply.status(200).send({

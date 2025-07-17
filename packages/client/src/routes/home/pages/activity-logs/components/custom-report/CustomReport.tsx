@@ -13,6 +13,7 @@ import { BarChart } from "~/components/chart/bar-chart";
 import { UI } from "@composehq/ts-public";
 import { Listbox } from "~/components/listbox";
 import { useReportData } from "../../utils/useReportData";
+import UserPickerPopover from "../popovers/UserPickerPopover";
 
 type GroupBy = "app" | "message";
 
@@ -73,6 +74,8 @@ function CustomReport({
     report.reportData.includeProductionLogs,
     report.reportData.selectedApps,
     report.reportData.trackedEventModel,
+    report.reportData.selectedUserEmails,
+    report.reportData.includeAnonymousUsers,
     reportId
   );
 
@@ -143,6 +146,40 @@ function CustomReport({
             disabled={logEventsFetchStatus === "fetching"}
             viewOnly={viewOnly && !report.reportData.timeFrameIsEditable}
           />
+          <UserPickerPopover
+            selectedUserEmails={report.reportData.selectedUserEmails}
+            setSelectedUserEmails={(userEmails) =>
+              report.setReportData((prev) => ({
+                ...prev,
+                selectedUserEmails: userEmails,
+              }))
+            }
+            includeAnonymousUsers={report.reportData.includeAnonymousUsers}
+            setIncludeAnonymousUsers={(value) =>
+              report.setReportData((prev) => ({
+                ...prev,
+                includeAnonymousUsers: value,
+              }))
+            }
+            disabled={logEventsFetchStatus === "fetching"}
+            viewOnly={
+              viewOnly && !report.reportData.selectedUserEmailsIsEditable
+            }
+          />
+          <AppsPickerPopover
+            environments={environments}
+            includeDevLogs={report.reportData.includeDevelopmentLogs}
+            includeProdLogs={report.reportData.includeProductionLogs}
+            selectedApps={report.reportData.selectedApps}
+            setSelectedApps={(apps) =>
+              report.setReportData((prev) => ({
+                ...prev,
+                selectedApps: apps,
+              }))
+            }
+            disabled={logEventsFetchStatus === "fetching"}
+            viewOnly={viewOnly && !report.reportData.selectedAppsIsEditable}
+          />
           <LogEnvironmentsPopover
             includeDevLogs={report.reportData.includeDevelopmentLogs}
             includeProdLogs={report.reportData.includeProductionLogs}
@@ -165,20 +202,6 @@ function CustomReport({
             prodLogsViewOnly={
               viewOnly && !report.reportData.includeProductionLogsIsEditable
             }
-          />
-          <AppsPickerPopover
-            environments={environments}
-            includeDevLogs={report.reportData.includeDevelopmentLogs}
-            includeProdLogs={report.reportData.includeProductionLogs}
-            selectedApps={report.reportData.selectedApps}
-            setSelectedApps={(apps) =>
-              report.setReportData((prev) => ({
-                ...prev,
-                selectedApps: apps,
-              }))
-            }
-            disabled={logEventsFetchStatus === "fetching"}
-            viewOnly={viewOnly && !report.reportData.selectedAppsIsEditable}
           />
         </div>
         {logEventsFetchStatus === "fetching" && (

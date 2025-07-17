@@ -96,11 +96,12 @@ function SortColumnsPanel({
       <div className="flex flex-row items-center justify-between">
         <Toolbar.Header loading={loading}>Sort by</Toolbar.Header>
         <Button
-          variant="ghost"
+          variant="bare-secondary"
+          size="sm"
           onClick={resetSortingState}
           disabled={loading === UI.Stale.OPTION.UPDATE_DISABLED}
         >
-          <p className="text-sm text-brand-neutral-2">Reset to default</p>
+          Reset to default
         </Button>
       </div>
       {sortingState.length > 0 && (

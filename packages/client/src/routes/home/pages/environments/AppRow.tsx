@@ -151,15 +151,13 @@ function AppRow({
             )}
             <Button
               size="sm"
-              variant="ghost"
+              variant="bare-secondary"
               onClick={(e) => {
                 e.stopPropagation();
                 setShareModalOpen(true);
               }}
             >
-              <div className="text-sm text-brand-neutral-2 hover:text-brand-neutral">
-                Share
-              </div>
+              Share
             </Button>
           </div>
         </div>

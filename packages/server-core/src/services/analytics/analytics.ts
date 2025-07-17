@@ -15,10 +15,7 @@ abstract class AnalyticsService {
     event: AnalyticsEvent,
     distinctId: DistinctId,
     companyId: string,
-    properties: Record<
-      string,
-      string | number | boolean | null | Array<string | number | boolean | null>
-    >
+    properties: Record<string, any>
   ): void;
 
   abstract identifyUser(
@@ -45,10 +42,7 @@ class AnalyticsServiceStub extends AnalyticsService {
     _event: AnalyticsEvent,
     _distinctId: DistinctId,
     _companyId: string,
-    _properties: Record<
-      string,
-      string | number | boolean | null | Array<string | number | boolean | null>
-    >
+    _properties: Record<string, any>
   ) {
     return;
   }
