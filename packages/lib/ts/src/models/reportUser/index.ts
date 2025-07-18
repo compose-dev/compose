@@ -5,7 +5,7 @@ interface ReportUserPermission {
 interface ReportUserDB {
   id: string;
   createdAt: Date;
-  createdByUserId: string;
+  createdByUserId: string | null;
   userId: string;
   reportId: string;
   companyId: string;
