@@ -1,5 +1,5 @@
 import { u } from "@compose/ts";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 
 import Icon from "~/components/icon";
@@ -91,9 +91,8 @@ export default function Environments() {
         </div>
       )}
       {sortedEnvironments.map((environment, index) => (
-        <>
+        <Fragment key={environment.id}>
           <Environment
-            key={environment.id}
             environment={environment}
             refetchEnvironment={refetchEnvironment}
             connectionStatus={connectionStatus}
@@ -101,7 +100,7 @@ export default function Environments() {
           {index !== sortedEnvironments.length - 1 && (
             <Divider key={`divider-${environment.id}`} />
           )}
-        </>
+        </Fragment>
       ))}
       {isDeveloperRole &&
         hasAtLeastOneDevelopmentApp &&

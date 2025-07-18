@@ -1,14 +1,6 @@
-import {
-  BrowserToServerEvent,
-  log as logFunction,
-  request,
-  u,
-} from "@compose/ts";
+import { BrowserToServerEvent, request, u } from "@compose/ts";
 import { useQuery } from "@tanstack/react-query";
-import { getNodeEnvironment } from "~/utils/nodeEnvironment";
-
-const isDev = getNodeEnvironment() === "development";
-const log = isDev ? logFunction : null;
+import { logIfDevelopment } from "~/utils/nodeEnvironment";
 
 export function useFetchAllReportsQuery() {
   return useQuery({
@@ -20,7 +12,7 @@ export function useFetchAllReportsQuery() {
       >({
         route: `/${BrowserToServerEvent.GetReports.route}`,
         method: BrowserToServerEvent.GetReports.method,
-        forwardLog: log,
+        forwardLog: logIfDevelopment,
       });
 
       if (response.didError) {

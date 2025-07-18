@@ -151,7 +151,9 @@ async function selectGroupedLogCounts(
   datetimeEnd: Date,
   environmentTypes: m.Environment.Type[],
   apps: { route: string; environmentId: string }[],
-  trackedEvents: m.Report.TrackedEventRule[]
+  trackedEvents: m.Report.TrackedEventRule[],
+  userEmails: string[],
+  includeAnonymousUsers: boolean
 ) {
   const params: any[] = [
     companyId,
@@ -196,6 +198,24 @@ async function selectGroupedLogCounts(
       params.push(trackedEvent.event, trackedEvent.type);
     }
     query += ` AND ("message", "type") IN (${valuePlaceholders})`;
+  }
+
+  if (userEmails && userEmails.length > 0) {
+    const valuePlaceholders = userEmails
+      .map((_, i) => `$${params.length + 1 + i}`)
+      .join(", ");
+
+    params.push(...userEmails);
+
+    if (includeAnonymousUsers) {
+      query += ` AND ("userEmail" IN (${valuePlaceholders}) OR "userEmail" IS NULL)`;
+    } else {
+      query += ` AND "userEmail" IN (${valuePlaceholders})`;
+    }
+  } else if (!includeAnonymousUsers) {
+    // If no user emails are provided, we only need to account for the case where
+    // we want to EXCLUDE anonymous users.
+    query += ` AND "userEmail" IS NOT NULL`;
   }
 
   query += `

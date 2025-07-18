@@ -113,15 +113,17 @@ export default function ActivityLogs() {
         setActiveTab={setActivePath}
         options={getTabOptions()}
         rightContent={
-          <InlineLink
-            url="https://docs.composehq.com/page-actions/log"
-            newTab
-            appearance="secondary"
-            alwaysUnderline={false}
-            showLinkIcon
-          >
-            <p className="text-sm">Start logging custom events</p>
-          </InlineLink>
+          <p className="text-sm">
+            <InlineLink
+              url="https://docs.composehq.com/page-actions/log"
+              newTab
+              appearance="secondary"
+              alwaysUnderline={false}
+              showLinkIcon
+            >
+              Start logging custom events
+            </InlineLink>
+          </p>
         }
       />
       {isInvalidPlan && <InvalidPlanError />}

@@ -1,7 +1,7 @@
-import Icon from "~/components/icon";
 import { Popover } from "~/components/popover";
 import {
   TIMEFRAME_OPTIONS,
+  TIMEFRAME_TO_LABEL,
   getPrettifiedDateRange,
 } from "../../utils/timeFrame";
 import { m, u } from "@compose/ts";
@@ -10,46 +10,9 @@ import { DateInput } from "~/components/input";
 import { Divider } from "~/components/divider";
 import { useEffect, useMemo, useState } from "react";
 import Button from "~/components/button";
-import { classNames } from "~/utils/classNames";
+import PopoverTrigger from "./PopoverTrigger";
 
 const MAX_CUSTOM_RANGE_DURATION_IN_DAYS = 100;
-
-function PopoverTrigger({
-  selectedTimeframe,
-  datetimeStart,
-  datetimeEnd,
-  viewOnly,
-}: {
-  selectedTimeframe: m.Report.Timeframe;
-  datetimeStart: Date;
-  datetimeEnd: Date;
-  viewOnly?: boolean;
-}) {
-  return (
-    <Popover.Trigger>
-      <div
-        className={classNames(
-          "border border-brand-neutral rounded-brand p-2 py-1 flex flex-row gap-2 items-center shadow-sm hover:bg-brand-overlay transition-colors",
-          {
-            "bg-brand-overlay": !!viewOnly,
-          }
-        )}
-      >
-        <Icon name="calendar" color="brand-neutral" />
-        <p className="text-brand-neutral">
-          {selectedTimeframe === m.Report.TIMEFRAMES.CUSTOM
-            ? getPrettifiedDateRange(datetimeStart, datetimeEnd)
-            : TIMEFRAME_OPTIONS.find(
-                (option) => option.value === selectedTimeframe
-              )?.label}
-        </p>
-        {!viewOnly && (
-          <Icon name="chevron-down" color="brand-neutral" size="0.75" />
-        )}
-      </div>
-    </Popover.Trigger>
-  );
-}
 
 function DatePickerPopover({
   selectedTimeframe,
@@ -119,12 +82,16 @@ function DatePickerPopover({
     });
   }
 
+  const popoverTriggerLabel =
+    selectedTimeframe === m.Report.TIMEFRAMES.CUSTOM
+      ? getPrettifiedDateRange(datetimeStart, datetimeEnd)
+      : TIMEFRAME_TO_LABEL[selectedTimeframe];
+
   return (
     <Popover.Root>
       <PopoverTrigger
-        selectedTimeframe={selectedTimeframe}
-        datetimeStart={datetimeStart}
-        datetimeEnd={datetimeEnd}
+        label={popoverTriggerLabel}
+        icon="calendar"
         viewOnly={viewOnly}
       />
       <Popover.Panel anchor="bottom start">

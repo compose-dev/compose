@@ -75,6 +75,22 @@ async function selectById(
   return result.rows[0];
 }
 
+async function selectByIdWithCompanyName(
+  pg: Postgres,
+  reportId: m.Report.DB["id"],
+  companyId: string
+) {
+  const result = await pg.query<m.Report.DB & { companyName: string }>(
+    `SELECT "report".*, "company"."name" AS "companyName" 
+     FROM "report" 
+     JOIN "company" ON "report"."companyId" = "company"."id" 
+     WHERE "report"."id" = $1 AND "report"."companyId" = $2`,
+    [reportId, companyId]
+  );
+
+  return result.rows[0];
+}
+
 async function selectByCompanyId(pg: Postgres, companyId: string) {
   const result = await pg.query<m.Report.DB>(
     `SELECT * FROM "report" WHERE "companyId" = $1`,
@@ -117,6 +133,25 @@ async function deleteById(
   return result.rows;
 }
 
+async function selectAllWithCompanyNameAndReportUsers(pg: Postgres) {
+  const result = await pg.query<
+    m.Report.DB & { companyName: string; reportUsers: m.ReportUser.DB[] }
+  >(
+    `SELECT "report".*, 
+            "company"."name" AS "companyName",
+            COALESCE(
+              json_agg("reportUser") FILTER (WHERE "reportUser"."id" IS NOT NULL),
+              '[]'::json
+            ) AS "reportUsers"
+     FROM "report" 
+     JOIN "company" ON "report"."companyId" = "company"."id"
+     LEFT JOIN "reportUser" ON "report"."id" = "reportUser"."reportId"
+     GROUP BY "report"."id", "company"."name"`
+  );
+
+  return result.rows;
+}
+
 export {
   insert,
   selectById,
@@ -124,4 +159,6 @@ export {
   deleteById,
   update,
   selectFilteredByReportUser,
+  selectAllWithCompanyNameAndReportUsers,
+  selectByIdWithCompanyName,
 };

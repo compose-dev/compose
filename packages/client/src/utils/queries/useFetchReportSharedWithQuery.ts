@@ -1,14 +1,6 @@
-import {
-  BrowserToServerEvent,
-  log as logFunction,
-  request,
-  u,
-} from "@compose/ts";
+import { BrowserToServerEvent, request, u } from "@compose/ts";
 import { useQuery } from "@tanstack/react-query";
-import { getNodeEnvironment } from "~/utils/nodeEnvironment";
-
-const isDev = getNodeEnvironment() === "development";
-const log = isDev ? logFunction : null;
+import { logIfDevelopment } from "~/utils/nodeEnvironment";
 
 export function useFetchReportSharedWithQuery(reportId: string | undefined) {
   return useQuery({
@@ -27,7 +19,7 @@ export function useFetchReportSharedWithQuery(reportId: string | undefined) {
         params: {
           reportId,
         },
-        forwardLog: log,
+        forwardLog: logIfDevelopment,
       });
 
       if (response.didError) {

@@ -1,9 +1,6 @@
-import { BrowserToServerEvent, log as logFunction, request } from "@compose/ts";
+import { BrowserToServerEvent, request } from "@compose/ts";
 import { useQuery } from "@tanstack/react-query";
-import { getNodeEnvironment } from "../nodeEnvironment";
-
-const isDev = getNodeEnvironment() === "development";
-const log = isDev ? logFunction : null;
+import { logIfDevelopment } from "../nodeEnvironment";
 
 export function useEnvironmentsQuery() {
   const query = useQuery({
@@ -15,7 +12,7 @@ export function useEnvironmentsQuery() {
       >({
         route: `/${BrowserToServerEvent.FetchEnvironments.route}`,
         method: BrowserToServerEvent.FetchEnvironments.method,
-        forwardLog: log,
+        forwardLog: logIfDevelopment,
       });
 
       if (response.didError) {

@@ -11,7 +11,7 @@ function Tab({
   onClick: () => void;
 }) {
   return (
-    <Button variant="ghost" onClick={onClick}>
+    <Button variant="ghost" onClick={onClick} className="flex-shrink-0">
       <div className="flex flex-col space-y-2">
         <p
           className={classNames({
@@ -46,7 +46,13 @@ export default function Tabs<T extends string | number>({
     <div className="relative w-full">
       <div className="flex self-stretch h-px border-b border-brand-neutral absolute bottom-0 left-0 right-0 " />
       <div className="flex flex-space justify-between items-center">
-        <div className="flex flex-row gap-x-4">
+        <div
+          className="flex flex-row gap-x-4 overflow-x-auto"
+          style={{
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+          }}
+        >
           {options.map((option) => (
             <Tab
               key={option.value}
@@ -56,7 +62,9 @@ export default function Tabs<T extends string | number>({
             />
           ))}
         </div>
-        {rightContent && rightContent}
+        {rightContent && (
+          <div className="flex-shrink-0 pl-2">{rightContent}</div>
+        )}
       </div>
     </div>
   );

@@ -736,8 +736,8 @@ function FilterColumnsPanel({
         <Toolbar.Header loading={loading}>Filter by</Toolbar.Header>
         <div className="flex flex-row gap-x-2">
           <Button
-            variant="ghost"
-            className="text-sm text-brand-neutral-2 hover:text-brand-neutral"
+            variant="bare-secondary"
+            size="sm"
             onClick={() => {
               resetFilterModel();
               if (paginated) {

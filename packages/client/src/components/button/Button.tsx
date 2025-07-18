@@ -13,6 +13,7 @@ const VARIANT = {
   SUBTLE_SECONDARY: "subtle-secondary",
   GHOST: "ghost",
   SUBTLE_DANGER: "subtle-danger",
+  BARE_SECONDARY: "bare-secondary",
 } as const;
 
 type Variant = (typeof VARIANT)[keyof typeof VARIANT];
@@ -47,6 +48,8 @@ function Button({
   loading?: boolean;
   style?: React.CSSProperties;
 }) {
+  const isGhostVariant = variant === VARIANT.GHOST;
+
   const isColoredVariant =
     variant === VARIANT.PRIMARY ||
     variant === VARIANT.DANGER ||
@@ -56,24 +59,43 @@ function Button({
   const isSubtleVariant =
     variant === VARIANT.SUBTLE_SECONDARY || variant === VARIANT.SUBTLE_DANGER;
 
+  const isBareVariant = variant === VARIANT.BARE_SECONDARY;
+
   return (
     <HeadlessButton
       className={classNames(
         {
+          // ALL BUTTONS
           "pointer-events-none": disabled || loading,
           "opacity-50": disabled,
+
+          // BASIC STYLING + OUTLINE + ANIMATION
           "rounded-brand transition duration-100 text-base/6 space-x-2 flex items-center justify-center focus:outline-none focus:ring-2":
-            variant !== VARIANT.GHOST,
-          "shadow-sm": variant !== VARIANT.GHOST && !isSubtleVariant,
-          "px-[6px] py-0 min-w-12 text-xs/5":
-            variant !== VARIANT.GHOST && size === SIZE.xs,
-          "px-[8px] py-0 min-w-16 text-sm/6":
-            variant !== VARIANT.GHOST && size === SIZE.sm,
-          "px-[17px] py-[5px] min-w-24 text-base/6":
-            variant !== VARIANT.GHOST && size === SIZE.md,
-          "px-[17px] py-[11px] min-w-24 text-base/6":
-            variant !== VARIANT.GHOST && size === SIZE.lg,
+            !isGhostVariant,
+
+          // SHADOW (only base buttons)
+          "shadow-sm": !isGhostVariant && !isSubtleVariant && !isBareVariant,
+
+          // BUTTON SIZING
+          "text-xs/5": !isGhostVariant && size === SIZE.xs,
+          "text-sm/6": !isGhostVariant && size === SIZE.sm,
+          "text-base/6":
+            !isGhostVariant && (size === SIZE.md || size === SIZE.lg),
+
+          // PADDING + MIN WIDTH
+          "px-[6px] py-0 min-w-12":
+            !isGhostVariant && !isBareVariant && size === SIZE.xs,
+          "px-[8px] py-0 min-w-16":
+            !isGhostVariant && !isBareVariant && size === SIZE.sm,
+          "px-[17px] py-[5px] min-w-24":
+            !isGhostVariant && !isBareVariant && size === SIZE.md,
+          "px-[17px] py-[11px] min-w-24":
+            !isGhostVariant && !isBareVariant && size === SIZE.lg,
+
+          // TEXT
           "text-white/95 font-medium": isColoredVariant,
+
+          // STYLING
           "bg-brand-btn-primary hover:bg-brand-btn-primary-hover focus:ring-brand-primary-heavy":
             variant === VARIANT.PRIMARY,
           "bg-orange-500 hover:bg-orange-600 focus:ring-orange-700 dark:bg-orange-600 dark:hover:bg-orange-500 dark:focus:ring-orange-400":
@@ -88,6 +110,8 @@ function Button({
             variant === VARIANT.SUBTLE_SECONDARY,
           "bg-transparent hover:bg-brand-page-inverted-5 text-brand-error":
             variant === VARIANT.SUBTLE_DANGER,
+          "bg-transparent text-brand-neutral-2 hover:text-brand-neutral":
+            variant === VARIANT.BARE_SECONDARY,
         },
         className
       )}

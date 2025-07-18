@@ -1,16 +1,7 @@
-import {
-  BrowserToServerEvent,
-  log as logFunction,
-  m,
-  request,
-  u,
-} from "@compose/ts";
+import { BrowserToServerEvent, m, request, u } from "@compose/ts";
 import { useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { getNodeEnvironment } from "~/utils/nodeEnvironment";
-
-const isDev = getNodeEnvironment() === "development";
-const log = isDev ? logFunction : null;
+import { logIfDevelopment } from "~/utils/nodeEnvironment";
 
 type Filters = {
   limit: number;
@@ -51,7 +42,7 @@ export function usePageOfActivityLogsQuery() {
       >({
         route: `/${BrowserToServerEvent.GetPageOfLogs.route}`,
         method: BrowserToServerEvent.GetPageOfLogs.method,
-        forwardLog: log,
+        forwardLog: logIfDevelopment,
         body: {
           ...filtersRef.current,
           datetimeStart: filtersRef.current.datetimeStart
