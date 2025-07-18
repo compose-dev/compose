@@ -40,13 +40,20 @@ function DisplayInteractionComponent({
   );
 
   if (component.type === UI.TYPE.DISPLAY_TEXT) {
+    const { whiteSpace } = component.model.style || {};
+
+    // apply the whitespace style at the root of the text tree.
+    const styles = {
+      ...(whiteSpace ? { whiteSpace } : { whiteSpace: "pre-wrap" }),
+    };
+
     return (
       <p>
         <RenderText
           text={component.model.properties.text}
           color={component.model.properties.color}
           size={component.model.properties.size}
-          style={null}
+          style={styles}
         />
       </p>
     );
@@ -55,7 +62,7 @@ function DisplayInteractionComponent({
   if (component.type === UI.TYPE.DISPLAY_HEADER) {
     const size = component.model.properties.size;
 
-    const className = classNames({
+    const className = classNames("whitespace-pre-wrap", {
       "text-brand-neutral":
         component.model.properties.color === UI.Appearance.TEXT.TEXT,
       "text-brand-neutral-2":
@@ -74,11 +81,14 @@ function DisplayInteractionComponent({
 
     // Apply these three styles directly to the header element so that they
     // override the default values for these properties.
-    const { fontSize, fontWeight, lineHeight } = component.model.style || {};
+    const { fontSize, fontWeight, lineHeight, whiteSpace } =
+      component.model.style || {};
+
     const styles = {
       ...(fontSize && { fontSize }),
       ...(fontWeight && { fontWeight }),
       ...(lineHeight && { lineHeight }),
+      ...(whiteSpace && { whiteSpace }),
     };
 
     if (size && size === UI.Size.HEADER.xs) {

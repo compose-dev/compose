@@ -62,9 +62,10 @@ function RowCell({
       ref={ref}
       className={classNames(
         // table-row-cell class is used to target the tooltip.
-        "px-2 flex break-all text-brand-neutral table-row-cell",
+        "px-2 text-brand-neutral table-row-cell",
         {
           "first:rounded-bl-brand last:rounded-br-brand": isLastRow,
+          "break-words": overflow === "dynamic",
           "truncate !block": overflow === "ellipsis",
           "overflow-hidden whitespace-nowrap text-clip !block":
             overflow === "clip",
