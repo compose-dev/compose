@@ -27,6 +27,8 @@ import {
   useColumnVisibility,
   Sorting,
   ServerView,
+  useTableOverflow,
+  useTableDensity,
 } from "./utils";
 import { ColumnHeaderRow, FooterRow, ToolbarRow } from "./components";
 import { log } from "@compose/ts";
@@ -59,7 +61,7 @@ function Table({
   height,
   sortable = UI.Table.SORT_OPTION.MULTI,
   density = UI.Table.DENSITY.STANDARD,
-  overflow = "ellipsis",
+  overflow = UI.Table.OVERFLOW_BEHAVIOR.ELLIPSIS,
   filterable = true,
   primaryKey = undefined,
   views = [],
@@ -120,21 +122,15 @@ function Table({
     paginated,
   });
 
-  const tableOverflow = useMemo(() => {
-    if (viewsHook.applied.overflow) {
-      return viewsHook.applied.overflow;
-    }
+  const tableOverflowHook = useTableOverflow({
+    overflow,
+    appliedView: viewsHook.applied,
+  });
 
-    return overflow;
-  }, [viewsHook.applied, overflow]);
-
-  const tableDensity = useMemo(() => {
-    if (viewsHook.applied.density) {
-      return viewsHook.applied.density;
-    }
-
-    return density;
-  }, [viewsHook.applied, density]);
+  const tableDensityHook = useTableDensity({
+    density,
+    appliedView: viewsHook.applied,
+  });
 
   const sortingHook = Sorting.use({
     columns,
@@ -234,8 +230,8 @@ function Table({
     disableRowSelection,
     actions,
     onTableRowActionHook,
-    tableDensity,
-    tableOverflow,
+    tableDensityHook.applied,
+    tableOverflowHook.applied,
     toggleRowSelection
   );
 
@@ -431,6 +427,14 @@ function Table({
                 )
               );
 
+              if (viewsHook.appliedRef.current.density) {
+                tableDensityHook.set(viewsHook.appliedRef.current.density);
+              }
+
+              if (viewsHook.appliedRef.current.overflow) {
+                tableOverflowHook.set(viewsHook.appliedRef.current.overflow);
+              }
+
               // If paginated, request a new page of data from server
               if (paginated && handleRequestServerDataRef.current) {
                 handleRequestServerDataRef.current();
@@ -447,6 +451,14 @@ function Table({
               searchQueryHook.reset();
               advancedFilteringHook.reset();
 
+              if (viewsHook.appliedRef.current.density) {
+                tableDensityHook.set(viewsHook.appliedRef.current.density);
+              }
+
+              if (viewsHook.appliedRef.current.overflow) {
+                tableOverflowHook.set(viewsHook.appliedRef.current.overflow);
+              }
+
               // If paginated, request a new page of data from server
               if (paginated && handleRequestServerDataRef.current) {
                 handleRequestServerDataRef.current();
@@ -455,12 +467,14 @@ function Table({
               }
             }}
             isViewDirty={isViewDirty}
+            tableOverflowHook={tableOverflowHook}
+            tableDensityHook={tableDensityHook}
           />
           <TableBody
             table={table}
-            density={tableDensity}
+            density={tableDensityHook.applied}
             loading={loading}
-            overflow={tableOverflow}
+            overflow={tableOverflowHook.applied}
             setScrollToTopHandler={setScrollToTopHandler}
           />
           <FooterRow
