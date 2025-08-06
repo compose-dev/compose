@@ -1,15 +1,40 @@
 import { UI } from "@composehq/ts-public";
 import { AppError } from "../error";
+import { AppStore } from "../types";
 
+/**
+ * Flattens a component into a record of component IDs to components. Useful
+ * for nested component trees.
+ *
+ * Accepts an optional "flattenedRenderModel" parameter. When passed, it
+ * "hydrates" the children of the component using the flattened render model.
+ * This is necessary in cases where we we only store the child IDs instead of
+ * the entire child component within the "children" field of layout components.
+ * This can occur when layout components are updated, since the rerender message
+ * only sends the child IDs alongside the layout component instead of nesting
+ * the entire child component.
+ */
 function flattenComponent(
-  component: UI.ComponentGenerators.All
+  component: UI.ComponentGenerators.All,
+  flattenedRenderModel?: AppStore["flattenedModel"][string]
 ): Record<string, UI.ComponentGenerators.All> {
   if (component.interactionType === UI.INTERACTION_TYPE.LAYOUT) {
-    const children = Array.isArray(component.model.children)
+    let children: UI.ComponentGenerators.All[] = Array.isArray(
+      component.model.children
+    )
       ? component.model.children
       : [component.model.children];
 
-    const mapped = children.map(flattenComponent);
+    if (flattenedRenderModel) {
+      children = children.map((child) => {
+        const childId = child.model.id;
+        return flattenedRenderModel[childId];
+      });
+    }
+
+    const mapped = children.map((child) =>
+      flattenComponent(child, flattenedRenderModel)
+    );
 
     return mapped.reduce(
       (acc, item) => {

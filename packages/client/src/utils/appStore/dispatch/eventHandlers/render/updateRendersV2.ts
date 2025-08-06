@@ -71,7 +71,8 @@ function updateRendersV2(
       // Flatten the component so that we can also delete all the children,
       // in addition to the branch head component itself.
       const flattened = flattenComponent(
-        flattenedModel[renderId][deletedComponentId]
+        flattenedModel[renderId][deletedComponentId],
+        flattenedModel[renderId]
       );
       const ids = Object.keys(flattened);
 
