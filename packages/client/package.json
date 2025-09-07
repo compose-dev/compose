@@ -18,7 +18,7 @@
     "@composehq/faker": "^0.4.1",
     "@composehq/ts-public": "workspace:*",
     "@fontsource-variable/inter": "5.0.18",
-    "@headlessui/react": "2.2.2",
+    "@headlessui/react": "2.2.7",
     "@nivo/bar": "^0.88.0",
     "@nivo/core": "^0.88.0",
     "@nivo/line": "^0.88.0",
