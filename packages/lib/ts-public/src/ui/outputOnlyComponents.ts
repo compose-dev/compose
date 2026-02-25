@@ -41,6 +41,8 @@ export type InputJson = Pick<Components.InputJson, PickKeys>;
 
 export type InputCheckbox = Pick<Components.InputCheckbox, PickKeys>;
 
+export type InputAutocomplete = Pick<Components.InputAutocomplete, PickKeys>;
+
 export type ButtonDefault = Pick<Components.ButtonDefault, PickKeys>;
 
 export type ButtonFormSubmit = Pick<Components.ButtonFormSubmit, PickKeys>;

@@ -160,6 +160,21 @@ function generatorToFrontendModel(
           label: guessLabel(component.model.id, component.model.label),
         },
       };
+    case UI.TYPE.INPUT_AUTOCOMPLETE:
+      return {
+        ...component,
+        formId: metadata[component.model.id].formId,
+        model: {
+          ...component.model,
+          label: guessLabel(component.model.id, component.model.label),
+          properties: {
+            ...component.model.properties,
+            suggestions: formatSelectOptions(
+              component.model.properties.suggestions,
+            ),
+          },
+        },
+      };
     case UI.TYPE.INPUT_SELECT_DROPDOWN_MULTI:
       return {
         ...component,

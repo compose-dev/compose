@@ -661,3 +661,56 @@ def input_json(
         "type": TYPE.INPUT_JSON,
         "interactionType": INTERACTION_TYPE.INPUT,
     }
+
+
+def input_autocomplete(
+    id: str,
+    *,
+    label: Union[str, None] = None,
+    required: bool = True,
+    description: Union[str, None] = None,
+    placeholder: Union[str, None] = None,
+    initial_value: Union[str, None] = None,
+    initial_display_value: Union[str, None] = None,
+    suggestions: Union[SelectOptions, None] = None,
+    free_form: bool = True,
+    validate: Union[
+        Callable[[], ValidatorResponse],
+        Callable[[Union[str, None]], ValidatorResponse],
+    ] = None,
+    on_enter: Union[
+        Callable[[], VoidResponse],
+        Callable[[Union[str, None]], VoidResponse],
+    ] = None,
+    on_change: Union[
+        Callable[[], Union[SelectOptions, None]],
+        Callable[[Union[str, None]], Union[SelectOptions, None]],
+    ] = None,
+    style: Union[ComponentStyle, None] = None,
+) -> ComponentReturn:
+    return {
+        "model": {
+            "id": id,
+            "label": label,
+            "description": description,
+            "required": required,
+            "hasValidateHook": validate is not None,
+            "style": style,
+            "placeholder": placeholder,
+            "properties": {
+                "initialValue": initial_value,
+                "initialDisplayValue": initial_display_value,
+                "suggestions": suggestions if suggestions is not None else [],
+                "hasOnChangeHook": on_change is not None,
+                "hasOnEnterHook": on_enter is not None,
+                "freeForm": free_form,
+            },
+        },
+        "hooks": {
+            "validate": validate,
+            "onEnter": on_enter,
+            "onChange": on_change,
+        },
+        "type": TYPE.INPUT_AUTOCOMPLETE,
+        "interactionType": INTERACTION_TYPE.INPUT,
+    }

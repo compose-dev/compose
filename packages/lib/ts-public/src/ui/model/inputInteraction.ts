@@ -249,3 +249,18 @@ export interface Checkbox<
     hasOnSelectHook: boolean;
   };
 }
+
+export interface Autocomplete<
+  TId extends BaseGeneric.Id,
+  TRequired extends BaseGeneric.Required,
+> extends BaseWithInputInteraction<TId, TRequired> {
+  placeholder: string | null;
+  properties: {
+    initialValue: Components.InputAutocomplete["output"]["customerReturnedValue"];
+    initialDisplayValue: string | null;
+    suggestions: SelectOption.List;
+    hasOnChangeHook: boolean;
+    hasOnEnterHook: boolean;
+    freeForm: boolean;
+  };
+}

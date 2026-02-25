@@ -220,6 +220,17 @@ export interface InputCheckbox<
   interactionType: typeof INTERACTION_TYPE.INPUT;
 }
 
+export interface InputAutocomplete<
+  TId extends BaseGeneric.Id = BaseGeneric.Id,
+  TRequired extends BaseGeneric.Required = BaseGeneric.Required,
+> extends Base {
+  model: Model.InputInteraction.Autocomplete<TId, TRequired>;
+  output: Output.InputAutocomplete;
+  hooks: Hooks.InputAutocomplete<TRequired>;
+  type: typeof TYPE.INPUT_AUTOCOMPLETE;
+  interactionType: typeof INTERACTION_TYPE.INPUT;
+}
+
 export interface ButtonBarChart<TId extends BaseGeneric.Id = BaseGeneric.Id>
   extends Base {
   model: Model.ButtonInteraction.BarChart<TId>;
@@ -408,6 +419,7 @@ export type All<
   | InputTextArea<TId, TRequired>
   | InputJson<TId, TRequired>
   | InputCheckbox<TId, TRequired>
+  | InputAutocomplete<TId, TRequired>
   | ButtonBarChart<TId>
   | ButtonLineChart<TId>
   | ButtonDefault<TId>

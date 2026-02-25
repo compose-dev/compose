@@ -109,13 +109,33 @@ export interface InputCheckbox extends BaseWithInputInteraction {
   >;
 }
 
+export interface InputAutocomplete<TRequired extends BaseGeneric.Required>
+  extends BaseWithInputInteraction {
+  validate: Factory.Nullable<
+    Factory.NullableValidatorCallback<string, TRequired>
+  >;
+  onEnter: Factory.Nullable<
+    Factory.NullableInputValueCallback<string, TRequired>
+  >;
+  /**
+   * Called on each debounced keystroke. The return value is a list of
+   * suggestions to display in the dropdown. Return null or an empty list to
+   * clear the suggestions.
+   */
+  onChange: Factory.Nullable<
+    (
+      value: string | null,
+    ) => SelectOption.List | null | Promise<SelectOption.List | null>
+  >;
+}
+
 export interface InputTable extends BaseWithInputInteraction {
   validate: Factory.Nullable<Factory.ValidatorCallback<BaseInputValue.Table>>;
   onSelect: Factory.Nullable<Factory.InputValueCallback<BaseInputValue.Table>>;
   onRowActions:
     | ((
         value: Components.InputTable["output"]["customerReturnedValue"][number],
-        index: number
+        index: number,
       ) => void)[]
     | null;
   onPageChange:
@@ -206,6 +226,7 @@ export type All<
   | InputTable
   | InputFileDrop
   | InputCheckbox
+  | InputAutocomplete<TRequired>
   | ButtonDefault
   | ButtonFormSubmit
   | ButtonBarChart

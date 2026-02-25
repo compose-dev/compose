@@ -37,3 +37,4 @@ export * as UpdateLoadingV2 from "./updateLoadingV2";
 export * as TablePageChangeResponseV2 from "./tablePageChangeResponseV2";
 export * as StaleStateUpdateV2 from "./staleStateUpdateV2";
 export * as FileTransferV2 from "./fileTransferV2";
+export * as OnTextChangeSuggestions from "./onTextChangeSuggestions";

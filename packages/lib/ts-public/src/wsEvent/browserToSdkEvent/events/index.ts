@@ -10,3 +10,4 @@ export * as OnConfirmResponseHook from "./onConfirmResponseHook";
 export * as BrowserSessionEnded from "./browserSessionEnded";
 export * as OnCloseModal from "./onCloseModal";
 export * as OnTablePageChangeHook from "./onTablePageChangeHook";
+export * as OnTextChangeHook from "./onTextChangeHook";

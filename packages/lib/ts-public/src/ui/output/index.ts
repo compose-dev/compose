@@ -127,6 +127,12 @@ export interface InputCheckbox extends Base {
   customerReturnedValue: BaseInputValue.Checkbox;
 }
 
+export interface InputAutocomplete extends Base {
+  internalValue: Factory.Nullable<string>;
+  networkTransferValue: Factory.Nullable<string>;
+  customerReturnedValue: Factory.Nullable<string>;
+}
+
 export type ButtonBarChart = null;
 
 export type ButtonLineChart = null;
@@ -180,6 +186,7 @@ export type All =
   | InputTextArea
   | InputJson
   | InputCheckbox
+  | InputAutocomplete
   | ButtonBarChart
   | ButtonLineChart
   | ButtonDefault

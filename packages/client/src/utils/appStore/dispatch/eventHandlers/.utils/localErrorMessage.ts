@@ -21,7 +21,8 @@ function getComponentLocalErrorMessage(
     component.type === UI.TYPE.INPUT_TIME ||
     component.type === UI.TYPE.INPUT_DATE_TIME ||
     component.type === UI.TYPE.INPUT_TEXT_AREA ||
-    component.type === UI.TYPE.INPUT_JSON;
+    component.type === UI.TYPE.INPUT_JSON ||
+    component.type === UI.TYPE.INPUT_AUTOCOMPLETE;
 
   if (emptyValueIsNull && component.model.required === true && value === null) {
     return makeError("This field is required.");

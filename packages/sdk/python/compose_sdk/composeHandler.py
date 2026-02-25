@@ -286,6 +286,17 @@ class ComposeClient:
                 event["type"], event["componentId"], event["renderId"], event["value"]
             )
 
+        elif event["type"] == EventType.ServerToSdk.ON_TEXT_CHANGE_HOOK:
+            if self.debug:
+                Debug.log(
+                    "Browser",
+                    f"text change event (component: {event['componentId']})",
+                )
+
+            await runner.on_text_change_hook(
+                event["componentId"], event["renderId"], event["value"]
+            )
+
         elif event["type"] == EventType.ServerToSdk.ON_TABLE_ROW_ACTION_HOOK:
             if self.debug:
                 Debug.log(

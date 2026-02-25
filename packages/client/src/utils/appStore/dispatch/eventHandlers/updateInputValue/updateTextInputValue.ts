@@ -14,7 +14,8 @@ interface UpdateTextInputValueEvent extends UpdateInputValueEvent {
       | UI.Components.InputEmail["output"]["internalValue"]
       | UI.Components.InputUrl["output"]["internalValue"]
       | UI.Components.InputPassword["output"]["internalValue"]
-      | UI.Components.InputTextArea["output"]["internalValue"];
+      | UI.Components.InputTextArea["output"]["internalValue"]
+      | UI.Components.InputAutocomplete["output"]["internalValue"];
   };
 }
 
@@ -37,7 +38,8 @@ function updateTextInputValue(
     componentOutput.type === UI.TYPE.INPUT_EMAIL ||
     componentOutput.type === UI.TYPE.INPUT_URL ||
     componentOutput.type === UI.TYPE.INPUT_PASSWORD ||
-    componentOutput.type === UI.TYPE.INPUT_TEXT_AREA
+    componentOutput.type === UI.TYPE.INPUT_TEXT_AREA ||
+    componentOutput.type === UI.TYPE.INPUT_AUTOCOMPLETE
   ) {
     const localErrorMessage = getComponentLocalErrorMessage(
       componentModel,

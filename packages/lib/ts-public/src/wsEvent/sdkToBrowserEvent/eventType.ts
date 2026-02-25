@@ -47,6 +47,7 @@ export const TYPE = {
   TABLE_PAGE_CHANGE_RESPONSE_V2: "bj",
   STALE_STATE_UPDATE_V2: "bk",
   FILE_TRANSFER_V2: "bl",
+  ON_TEXT_CHANGE_SUGGESTIONS: "bm",
 } as const;
 
 export type Type = (typeof TYPE)[keyof typeof TYPE];

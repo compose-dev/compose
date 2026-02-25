@@ -19,6 +19,7 @@ class TYPE(str, Enum):
     INPUT_TEXT_AREA = "input-text-area"
     INPUT_CHECKBOX = "input-checkbox"
     INPUT_JSON = "ij"
+    INPUT_AUTOCOMPLETE = "input-autocomplete"
 
     # BUTTON TYPES
     BUTTON_DEFAULT = "button-default"

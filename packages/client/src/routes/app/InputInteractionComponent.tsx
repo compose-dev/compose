@@ -22,6 +22,7 @@ import { useTransferFiles } from "./utils";
 import { BrowserToServerEvent } from "@compose/ts";
 import { Checkbox } from "~/components/checkbox";
 import { JsonEditor } from "~/components/code-editor";
+import { AutocompleteInput } from "~/components/autocomplete";
 
 function textAreaInputStyle(
   style: UI.Components.InputTextArea["model"]["style"]
@@ -625,6 +626,44 @@ function InputInteractionComponent({
         acceptedFileTypes={component.model.properties.acceptedFileTypes}
         label={component.model.label}
         description={component.model.description}
+        hasError={errorMessage !== null}
+        errorMessage={errorMessage}
+      />
+    );
+  }
+
+  if (
+    component.type === UI.TYPE.INPUT_AUTOCOMPLETE &&
+    componentOutput.type === UI.TYPE.INPUT_AUTOCOMPLETE
+  ) {
+    return (
+      <AutocompleteInput
+        id={component.model.id}
+        componentId={component.model.id}
+        renderId={renderId}
+        executionId={executionId}
+        environmentId={environmentId}
+        label={component.model.label}
+        description={component.model.description}
+        placeholder={component.model.placeholder}
+        disabled={false}
+        value={componentOutput.output.internalValue}
+        setValue={(internalValue) =>
+          dispatch({
+            type: appStore.EVENT_TYPE.UPDATE_TEXT_INPUT_VALUE,
+            properties: {
+              componentId: component.model.id,
+              internalValue,
+              renderId,
+            },
+          })
+        }
+        initialSuggestions={component.model.properties.suggestions as any}
+        initialDisplayValue={component.model.properties.initialDisplayValue as string | null ?? null}
+        freeForm={component.model.properties.freeForm}
+        hasOnChangeHook={component.model.properties.hasOnChangeHook}
+        hasOnEnterHook={component.model.properties.hasOnEnterHook}
+        onEnter={onInputHook}
         hasError={errorMessage !== null}
         errorMessage={errorMessage}
       />

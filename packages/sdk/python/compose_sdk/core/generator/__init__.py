@@ -39,6 +39,7 @@ from .inputInteraction import (
     input_text_area,
     checkbox,
     input_json,
+    input_autocomplete,
 )
 from .dynamicInteraction import dynamic_cond, dynamic_for_each
 from .pageInteraction import page_confirm
@@ -105,6 +106,10 @@ class Component:
     @property
     def select_box(self):
         return select_dropdown_single
+
+    @property
+    def autocomplete(self):
+        return input_autocomplete
 
     @property
     def table(self):

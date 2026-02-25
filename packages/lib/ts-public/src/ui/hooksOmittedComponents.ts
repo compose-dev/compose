@@ -41,6 +41,8 @@ export type InputJson = Omit<Components.InputJson, OmitKeys>;
 
 export type InputCheckbox = Omit<Components.InputCheckbox, OmitKeys>;
 
+export type InputAutocomplete = Omit<Components.InputAutocomplete, OmitKeys>;
+
 export type ButtonBarChart = Omit<Components.ButtonBarChart, OmitKeys>;
 
 export type ButtonLineChart = Omit<Components.ButtonLineChart, OmitKeys>;

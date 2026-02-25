@@ -16,6 +16,7 @@ const TYPE = {
   INPUT_TEXT_AREA: "input-text-area",
   INPUT_CHECKBOX: "input-checkbox",
   INPUT_JSON: "ij",
+  INPUT_AUTOCOMPLETE: "input-autocomplete",
 
   // CHART TYPES
   BUTTON_BAR_CHART: "btn-bar-chart",

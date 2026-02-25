@@ -969,6 +969,48 @@ class AppRunner:
                     f"An error occurred while executing input component callback function:\n\n{str(error)}\n\n{''.join(traceback.format_tb(error.__traceback__))}"
                 )
 
+    async def on_text_change_hook(
+        self, component_id: str, render_id: str, value: Any
+    ):
+        if render_id not in self.renders_by_id:
+            return
+
+        render = self.renders_by_id[render_id]
+
+        if render == DELETED_RENDER:
+            return
+
+        static_layout = render["static_layout"]
+        component = StaticTree.find_component.by_id(static_layout, component_id)
+
+        if component is None or component["interactionType"] != INTERACTION_TYPE.INPUT:
+            return
+
+        hookFunc = component["hooks"].get("onChange")
+
+        if hookFunc is None:
+            return
+
+        try:
+            suggestions = await self.run_hook_function.execute(hookFunc, value)
+        except Exception as error:
+            await self.__send_error(
+                f"An error occurred while executing autocomplete on_change callback:\n\n{str(error)}\n\n{''.join(traceback.format_tb(error.__traceback__))}"
+            )
+            return
+
+        # Send suggestions back to the browser
+        await self.api.send(
+            {
+                "type": EventType.SdkToServer.ON_TEXT_CHANGE_SUGGESTIONS,
+                "componentId": component_id,
+                "renderId": render_id,
+                "suggestions": suggestions if suggestions is not None else [],
+            },
+            self.browserSessionId,
+            self.executionId,
+        )
+
     async def on_table_row_action_hook(
         self, component_id: str, render_id: str, action_idx: int, value: Any
     ):
