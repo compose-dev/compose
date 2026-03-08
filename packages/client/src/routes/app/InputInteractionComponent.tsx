@@ -561,6 +561,24 @@ function InputInteractionComponent({
         errorMessage={errorMessage}
         disabled={false}
         id={component.model.id}
+        onSearch={
+          component.model.properties.hasOnSearchHook &&
+          executionId &&
+          environmentId
+            ? (value) => {
+                sendWSJsonMessage(
+                  {
+                    type: BrowserToServerEvent.WS.TYPE.ON_SEARCH_HOOK,
+                    componentId,
+                    renderId,
+                    executionId,
+                    value,
+                  },
+                  environmentId,
+                );
+              }
+            : null
+        }
       />
     );
   }
@@ -589,6 +607,24 @@ function InputInteractionComponent({
         errorMessage={errorMessage}
         disabled={false}
         id={component.model.id}
+        onSearch={
+          component.model.properties.hasOnSearchHook &&
+          executionId &&
+          environmentId
+            ? (value) => {
+                sendWSJsonMessage(
+                  {
+                    type: BrowserToServerEvent.WS.TYPE.ON_SEARCH_HOOK,
+                    componentId,
+                    renderId,
+                    executionId,
+                    value,
+                  },
+                  environmentId,
+                );
+              }
+            : null
+        }
       />
     );
   }

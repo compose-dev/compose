@@ -474,4 +474,8 @@ function generatorToFrontendOutput(
   };
 }
 
-export { generatorToFrontendModel, generatorToFrontendOutput };
+export {
+  generatorToFrontendModel,
+  generatorToFrontendOutput,
+  formatSelectOptions,
+};

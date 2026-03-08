@@ -2,7 +2,7 @@
 
 import datetime
 
-from typing import Union, Callable, List
+from typing import Union, Callable, List, Any, Awaitable
 from ...ui import (
     INTERACTION_TYPE,
     TYPE,
@@ -457,6 +457,12 @@ def select_dropdown_single(
         Callable[[], VoidResponse],
         Callable[[Union[SelectOptionValue, None]], VoidResponse],
     ] = None,
+    on_search: Union[
+        Callable[[], Awaitable[List[Any]]],
+        Callable[[Union[str, None]], Awaitable[List[Any]]],
+        Callable[[], List[Any]],
+        Callable[[Union[str, None]], List[Any]],
+    ] = None,
     style: Union[ComponentStyle, None] = None,
 ) -> ComponentReturn:
     if not isinstance(options, list):
@@ -474,6 +480,7 @@ def select_dropdown_single(
             "style": style,
             "properties": {
                 "hasOnSelectHook": on_change is not None,
+                "hasOnSearchHook": on_search is not None,
                 "options": options,
                 "initialValue": initial_value,
             },
@@ -481,6 +488,7 @@ def select_dropdown_single(
         "hooks": {
             "validate": validate,
             "onSelect": on_change,
+            "onSearch": on_search,
         },
         "type": TYPE.INPUT_SELECT_DROPDOWN_SINGLE,
         "interactionType": INTERACTION_TYPE.INPUT,
@@ -502,6 +510,12 @@ def select_dropdown_multi(
     on_change: Union[
         Callable[[], VoidResponse],
         Callable[[List[SelectOptionValue]], VoidResponse],
+    ] = None,
+    on_search: Union[
+        Callable[[], Awaitable[List[Any]]],
+        Callable[[Union[str, None]], Awaitable[List[Any]]],
+        Callable[[], List[Any]],
+        Callable[[Union[str, None]], List[Any]],
     ] = None,
     style: Union[ComponentStyle, None] = None,
     min_selections: int = MULTI_SELECTION_MIN_DEFAULT,
@@ -528,6 +542,7 @@ def select_dropdown_multi(
             "properties": {
                 "initialValue": initial_value,
                 "hasOnSelectHook": on_change is not None,
+                "hasOnSearchHook": on_search is not None,
                 "options": options,
                 "minSelections": min_selections,
                 "maxSelections": max_selections,
@@ -536,6 +551,7 @@ def select_dropdown_multi(
         "hooks": {
             "validate": validate,
             "onSelect": on_change,
+            "onSearch": on_search,
         },
         "type": TYPE.INPUT_SELECT_DROPDOWN_MULTI,
         "interactionType": INTERACTION_TYPE.INPUT,

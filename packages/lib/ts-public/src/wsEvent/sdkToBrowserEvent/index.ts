@@ -39,6 +39,7 @@ import {
   TablePageChangeResponseV2,
   StaleStateUpdateV2,
   FileTransferV2,
+  SearchResponse,
 } from "./events";
 
 type Data =
@@ -78,7 +79,8 @@ type Data =
   | UpdateLoadingV2.Data
   | TablePageChangeResponseV2.Data
   | StaleStateUpdateV2.Data
-  | FileTransferV2.Data;
+  | FileTransferV2.Data
+  | SearchResponse.Data;
 
 export {
   TYPE,
@@ -119,6 +121,7 @@ export {
   TablePageChangeResponseV2,
   StaleStateUpdateV2,
   FileTransferV2,
+  SearchResponse,
   type Type,
   type Data,
 };

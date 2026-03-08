@@ -335,6 +335,19 @@ class ComposeClient:
                 },
             )
 
+        elif event["type"] == EventType.ServerToSdk.ON_SEARCH_HOOK:
+            if self.debug:
+                Debug.log(
+                    "Browser",
+                    f"search hook (component: {event['componentId']})",
+                )
+
+            await runner.on_search_hook(
+                event["componentId"],
+                event["renderId"],
+                event.get("value", None),
+            )
+
     async def execute_app(
         self,
         app_route: str,

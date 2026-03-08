@@ -182,7 +182,8 @@ class WSClient {
         eventType === ServerToBrowserEvent.TYPE.CLOSE_MODAL_V2 ||
         eventType === ServerToBrowserEvent.TYPE.UPDATE_LOADING_V2 ||
         eventType === ServerToBrowserEvent.TYPE.TABLE_PAGE_CHANGE_RESPONSE_V2 ||
-        eventType === ServerToBrowserEvent.TYPE.STALE_STATE_UPDATE_V2
+        eventType === ServerToBrowserEvent.TYPE.STALE_STATE_UPDATE_V2 ||
+        eventType === ServerToBrowserEvent.TYPE.SEARCH_RESPONSE
       ) {
         const executionId = await blobData.slice(38, 74).text();
 

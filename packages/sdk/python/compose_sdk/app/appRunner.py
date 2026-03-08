@@ -1287,6 +1287,49 @@ class AppRunner:
                 f"An error occurred while executing table page change callback function:\n\n{str(error)}\n\n{''.join(traceback.format_tb(error.__traceback__))}"
             )
 
+    async def on_search_hook(
+        self, component_id: str, render_id: str, value: Any
+    ):
+        if render_id not in self.renders_by_id:
+            return
+
+        render = self.renders_by_id[render_id]
+
+        if render == DELETED_RENDER:
+            return
+
+        static_layout = render["static_layout"]
+        component = StaticTree.find_component.by_id(static_layout, component_id)
+
+        if component is None or component["interactionType"] != INTERACTION_TYPE.INPUT:
+            return
+
+        hookFunc = component["hooks"].get("onSearch")
+
+        if hookFunc is None:
+            return
+
+        try:
+            options = await self.run_hook_function.execute(hookFunc, value)
+
+            if not isinstance(options, list):
+                options = []
+
+            await self.api.send(
+                {
+                    "type": EventType.SdkToServer.SEARCH_RESPONSE,
+                    "renderId": render_id,
+                    "componentId": component_id,
+                    "options": options,
+                },
+                self.browserSessionId,
+                self.executionId,
+            )
+        except Exception as error:
+            await self.__send_error(
+                f"An error occurred while executing on_search callback:\n\n{str(error)}\n\n{''.join(traceback.format_tb(error.__traceback__))}"
+            )
+
     def cleanup(self):
         try:
             for render in self.renders_by_id.values():

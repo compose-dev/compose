@@ -140,6 +140,7 @@ class AppRunner {
     this.onCloseModal = this.onCloseModal.bind(this);
     this.onFileTransfer = this.onFileTransfer.bind(this);
     this.onTablePageChangeHook = this.onTablePageChangeHook.bind(this);
+    this.onSearchHook = this.onSearchHook.bind(this);
     this.hookErrorHandler = this.hookErrorHandler.bind(this);
     this.sendError = this.sendError.bind(this);
 
@@ -188,7 +189,7 @@ class AppRunner {
         appRoute: this.appDefinition.route,
       },
       this.browserSessionId,
-      this.executionId
+      this.executionId,
     );
   }
 
@@ -1172,7 +1173,7 @@ class AppRunner {
     eventType: ServerToSdkEvent.Type,
     componentId: string,
     renderId: string,
-    value: any
+    value: any,
   ) {
     if (renderId in this.rendersById === false) {
       this.sendError(
@@ -1583,7 +1584,55 @@ class AppRunner {
         "stack" in error
           ? `An error occurred while trying to execute a table page change hook:\n\n${error.stack}`
           : `An error occurred while trying to execute a table page change hook:\n\n${"message" in error ? error.message : "Unknown error"}`,
-        "warning"
+        "warning",
+      );
+    }
+  }
+
+  async onSearchHook(componentId: string, renderId: string, value: any) {
+    if (renderId in this.rendersById === false) {
+      return;
+    }
+
+    if (this.rendersById[renderId] === DELETED_RENDER) {
+      return;
+    }
+
+    const { staticLayout } = this.rendersById[renderId];
+    const component = ComponentTree.findById(staticLayout, componentId);
+
+    if (
+      component === null ||
+      component.interactionType !== UI.INTERACTION_TYPE.INPUT
+    ) {
+      return;
+    }
+
+    const hookFunc = (component.hooks as any).onSearch;
+
+    if (!hookFunc) {
+      return;
+    }
+
+    try {
+      const options = await hookFunc(value);
+
+      this.api.send(
+        {
+          type: SdkToServerEvent.TYPE.SEARCH_RESPONSE,
+          renderId,
+          componentId,
+          options: Array.isArray(options) ? options : [],
+        },
+        this.browserSessionId,
+        this.executionId,
+      );
+    } catch (error: any) {
+      this.sendError(
+        "stack" in error
+          ? `An error occurred while executing on_search callback:\n\n${error.stack}`
+          : `An error occurred while executing on_search callback:\n\n${"message" in error ? error.message : "Unknown error"}`,
+        "warning",
       );
     }
   }

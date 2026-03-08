@@ -3,7 +3,7 @@ import { SelectValue, useSelectMulti } from "~/components/.utils/selectUtils";
 import Icon from "~/components/icon";
 
 import * as Combobox from "./ComboboxBase";
-import useComboboxQuery from "./hooks";
+import useComboboxQuery, { useDebouncedSearch } from "./hooks";
 import Button from "~/components/button";
 import { classNames } from "~/utils/classNames";
 import { VIRTUALIZATION_THERSHOLD } from "./constants";
@@ -11,20 +11,27 @@ import { VIRTUALIZATION_THERSHOLD } from "./constants";
 interface ComboboxMultiProps<T extends SelectValue> extends Combobox.Props<T> {
   value: NonNullable<T>[];
   setValue: (value: NonNullable<T>[]) => void;
+  onSearch?: ((value: string | null) => void) | null;
 }
 
 function ComboboxMulti<T extends SelectValue>({
   value,
   setValue,
   options,
+  onSearch,
   ...props
 }: ComboboxMultiProps<T>) {
   const { selectedOptions, onSelectOptions, onRemoveOption } = useSelectMulti(
     value,
     setValue,
-    options
+    options,
   );
-  const { setQuery, filteredOptions } = useComboboxQuery(options);
+  const { query, setQuery, filteredOptions } = useComboboxQuery(
+    options,
+    onSearch != null,
+  );
+
+  useDebouncedSearch(query, onSearch);
 
   return (
     <Combobox.Root

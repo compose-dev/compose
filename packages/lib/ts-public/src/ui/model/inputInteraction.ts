@@ -79,6 +79,7 @@ export interface SelectDropdown<
     initialValue: Components.InputSelectDropdown["output"]["customerReturnedValue"];
     options: TOptions;
     hasOnSelectHook: boolean;
+    hasOnSearchHook: boolean;
   };
 }
 
@@ -93,6 +94,7 @@ export interface MultiSelectDropdown<
     minSelections: number;
     maxSelections: number;
     hasOnSelectHook: boolean;
+    hasOnSearchHook: boolean;
   };
 }
 

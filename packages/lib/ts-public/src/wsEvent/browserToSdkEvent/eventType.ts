@@ -21,6 +21,7 @@ export const TYPE = {
   BROWSER_SESSION_ENDED: "ak",
   ON_CLOSE_MODAL: "al",
   ON_TABLE_PAGE_CHANGE_HOOK: "am",
+  ON_SEARCH_HOOK: "an",
 } as const;
 
 export type Type = (typeof TYPE)[keyof typeof TYPE];
