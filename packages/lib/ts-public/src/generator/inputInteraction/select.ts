@@ -97,12 +97,16 @@ interface RadioGroupProperties<
 interface SelectDropdownSingleProperties<
   TRequired extends UI.BaseGeneric.Required,
   TOptions extends UI.SelectOption.List,
-> extends BaseSelectProperties<TRequired, TOptions> {}
+> extends BaseSelectProperties<TRequired, TOptions> {
+  onSearch: UI.Factory.Nullable<(value: string | null) => void>;
+}
 
 interface SelectDropdownMultiProperties<
   TRequired extends UI.BaseGeneric.Required,
   TOptions extends UI.SelectOption.List,
-> extends BaseMultiSelectProperties<TRequired, TOptions> {}
+> extends BaseMultiSelectProperties<TRequired, TOptions> {
+  onSearch: UI.Factory.Nullable<(value: string | null) => void>;
+}
 
 type OptionalRadioGroupProperties<
   TRequired extends UI.BaseGeneric.Required,
@@ -138,6 +142,14 @@ const defaultSelectProperties: OptionalRadioGroupProperties<
   initialValue: null,
 };
 
+const defaultSelectDropdownSingleProperties: OptionalSelectDropdownSingleProperties<
+  UI.BaseGeneric.Required,
+  UI.SelectOption.List
+> = {
+  ...defaultSelectProperties,
+  onSearch: null,
+};
+
 const defaultMultiSelectProperties: OptionalSelectDropdownMultiProperties<
   UI.BaseGeneric.Required,
   UI.SelectOption.List
@@ -148,6 +160,7 @@ const defaultMultiSelectProperties: OptionalSelectDropdownMultiProperties<
   validate: null,
   style: null,
   onChange: null,
+  onSearch: null,
   initialValue: [],
   minSelections: MULTI_SELECTION_MIN_DEFAULT,
   maxSelections: MULTI_SELECTION_MAX_DEFAULT,
@@ -432,7 +445,7 @@ function selectDropdownSingle<
   }
 
   const mergedProperties = {
-    ...defaultSelectProperties,
+    ...defaultSelectDropdownSingleProperties,
     ...properties,
   };
 
@@ -447,6 +460,7 @@ function selectDropdownSingle<
         options,
         initialValue: mergedProperties.initialValue,
         hasOnSelectHook: mergedProperties.onChange !== null,
+        hasOnSearchHook: mergedProperties.onSearch !== null,
       },
       style: mergedProperties.style,
     },
@@ -463,6 +477,7 @@ function selectDropdownSingle<
           TRequired,
           TOptions
         >["hooks"]["onSelect"],
+      onSearch: mergedProperties.onSearch,
     },
     type: UI.TYPE.INPUT_SELECT_DROPDOWN_SINGLE,
     interactionType: UI.INTERACTION_TYPE.INPUT,
@@ -630,6 +645,7 @@ function selectDropdownMulti<
         minSelections: mergedProperties.minSelections,
         maxSelections: mergedProperties.maxSelections,
         hasOnSelectHook: mergedProperties.onChange !== null,
+        hasOnSearchHook: mergedProperties.onSearch !== null,
       },
       style: mergedProperties.style,
     },
@@ -646,6 +662,7 @@ function selectDropdownMulti<
           TRequired,
           TOptions
         >["hooks"]["onSelect"],
+      onSearch: mergedProperties.onSearch,
     },
     type: UI.TYPE.INPUT_SELECT_DROPDOWN_MULTI,
     interactionType: UI.INTERACTION_TYPE.INPUT,

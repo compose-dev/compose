@@ -460,6 +460,15 @@ class ComposeClient<TApps extends readonly app.Definition[]> {
       );
       return;
     }
+
+    if (event.type === ServerToSdkEvent.TYPE.ON_SEARCH_HOOK) {
+      if (this.debug) {
+        debug.log("Browser", `search hook (component: ${event.componentId})`);
+      }
+
+      runner.onSearchHook(event.componentId, event.renderId, event.value);
+      return;
+    }
   }
 
   private async executeApp(

@@ -14,6 +14,8 @@ import {
   TablePageChangeResponseEvent,
   updateComponentStaleState,
   UpdateComponentStaleStateEvent,
+  searchResponse,
+  SearchResponseEvent,
 } from "./eventHandlers/render";
 import {
   UpdateFileUploadInputValueEvent,
@@ -87,6 +89,7 @@ import { APP_RUNNER_EVENT_TYPE } from "./types";
 type AppRunnerEvent =
   | RestartAppEvent
   | AddRenderEvent
+  | SearchResponseEvent
   | UpdateTextInputValueEvent
   | UpdateNumberInputValueEvent
   | UpdateDateInputValueEvent
@@ -219,6 +222,9 @@ function appRunnerReducer(
       }
       case APP_RUNNER_EVENT_TYPE.UPDATE_LOADING: {
         return updateLoading(appState, event);
+      }
+      case APP_RUNNER_EVENT_TYPE.SEARCH_RESPONSE: {
+        return searchResponse(appState, event);
       }
     }
   } catch (error) {

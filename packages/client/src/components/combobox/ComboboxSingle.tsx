@@ -2,28 +2,35 @@ import { Combobox as HeadlessCombobox } from "@headlessui/react";
 import { SelectValue, useSelect } from "~/components/.utils/selectUtils";
 
 import * as Combobox from "./ComboboxBase";
-import useComboboxQuery from "./hooks";
+import useComboboxQuery, { useDebouncedSearch } from "./hooks";
 
 import { VIRTUALIZATION_THERSHOLD } from "./constants";
 
 interface ComboboxSingleProps<T extends SelectValue> extends Combobox.Props<T> {
   value: T | null;
   setValue: (value: T | null) => void;
+  onSearch?: ((value: string | null) => void) | null;
 }
 
 function ComboboxSingle<T extends SelectValue>({
   value,
   setValue,
   options,
+  onSearch,
   ...props
 }: ComboboxSingleProps<T>) {
   const { selectedOption, onSelectOption } = useSelect(
     value,
     setValue,
-    options
+    options,
   );
 
-  const { setQuery, filteredOptions } = useComboboxQuery(options);
+  const { query, setQuery, filteredOptions } = useComboboxQuery(
+    options,
+    onSearch != null,
+  );
+
+  useDebouncedSearch(query, onSearch);
 
   return (
     <Combobox.Root

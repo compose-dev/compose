@@ -467,6 +467,19 @@ function useAppRunner() {
         return;
       }
 
+      if (data.type === ServerToBrowserEvent.TYPE.SEARCH_RESPONSE) {
+        if (args.executionId !== executionId) {
+          return;
+        }
+
+        dispatch({
+          type: appStore.EVENT_TYPE.SEARCH_RESPONSE,
+          properties: data,
+        });
+
+        return;
+      }
+
       if (
         data.type === ServerToBrowserEvent.TYPE.STALE_STATE_UPDATE ||
         data.type === ServerToBrowserEvent.TYPE.STALE_STATE_UPDATE_V2

@@ -12,6 +12,7 @@ import {
   BrowserSessionEnded,
   OnCloseModal,
   OnTablePageChangeHook,
+  OnSearchHook,
 } from "./events";
 
 type Data =
@@ -26,7 +27,8 @@ type Data =
   | OnConfirmResponseHook.Data
   | BrowserSessionEnded.Data
   | OnCloseModal.Data
-  | OnTablePageChangeHook.Data;
+  | OnTablePageChangeHook.Data
+  | OnSearchHook.Data;
 
 export {
   TYPE,
@@ -42,6 +44,7 @@ export {
   BrowserSessionEnded,
   OnCloseModal,
   OnTablePageChangeHook,
+  OnSearchHook,
   type Type,
   type Data,
 };

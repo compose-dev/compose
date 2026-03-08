@@ -95,10 +95,14 @@ export interface InputRadioGroup<
 export interface InputSelectDropdown<
   TRequired extends BaseGeneric.Required,
   TOptions extends SelectOption.List,
-> extends BaseWithInputSelectInteraction<TRequired, TOptions> {}
+> extends BaseWithInputSelectInteraction<TRequired, TOptions> {
+  onSearch: Factory.Nullable<(value: string | null) => void>;
+}
 
 export interface InputMultiSelectDropdown<TOptions extends SelectOption.List>
-  extends BaseWithInputMultiSelectInteraction<TOptions> {}
+  extends BaseWithInputMultiSelectInteraction<TOptions> {
+  onSearch: Factory.Nullable<(value: string | null) => void>;
+}
 
 export interface InputCheckbox extends BaseWithInputInteraction {
   validate: Factory.Nullable<

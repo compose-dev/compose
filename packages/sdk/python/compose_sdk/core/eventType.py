@@ -39,6 +39,7 @@ class SDK_TO_SERVER_EVENT_TYPE:
     TABLE_PAGE_CHANGE_RESPONSE_V2 = "bj"
     STALE_STATE_UPDATE_V2 = "bk"
     FILE_TRANSFER_V2 = "bl"
+    SEARCH_RESPONSE = "bm"
 
     # sdk to server ONLY events
     WRITE_AUDIT_LOG = "50"
@@ -83,6 +84,7 @@ SDK_TO_SERVER_EVENT_TYPE_TO_PRETTY = {
     "bj": "Table Page Change Response V2",
     "bk": "Stale State Update V2",
     "bl": "File Transfer V2",
+    "bm": "Search Response",
     "50": "Write Audit Log",
 }
 
@@ -101,6 +103,7 @@ class SERVER_TO_SDK_EVENT_TYPE:
     BROWSER_SESSION_ENDED = "ak"
     ON_CLOSE_MODAL = "al"
     ON_TABLE_PAGE_CHANGE_HOOK = "am"
+    ON_SEARCH_HOOK = "an"
 
 
 class EventType:
